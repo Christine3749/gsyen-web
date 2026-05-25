@@ -1,0 +1,6 @@
+{
+  "name": "Minimal ChatGPT UI",
+  "description": "A minimal, clean chat interface inspired by early ChatGPT, featuring full-width message blocks, language support, and a dark mode toggle.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
