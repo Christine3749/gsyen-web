@@ -93,7 +93,7 @@ const SIDEBAR_PROJECTS: ProjectItem[] = [
 const LOCALES = {
   zh: {
     modelGemini: "Gemini 3.5 Flash",
-    modelKimi: "Kimi K2",
+    modelKimi: "Kimi 2.6",
     newChat: "新建会话",
     userLabel: "用户",
     agentLabel: "疆域智能",
@@ -116,7 +116,7 @@ const LOCALES = {
   },
   en: {
     modelGemini: "Gemini 3.5 Flash",
-    modelKimi: "Kimi K2",
+    modelKimi: "Kimi 2.6",
     newChat: "New Chat",
     userLabel: "User",
     agentLabel: "gsyen AI",
