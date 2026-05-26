@@ -17,6 +17,7 @@ import {
   Terminal,
   Cpu,
   Zap,
+  MessageSquare,
   User,
   Compass,
   Bookmark,
@@ -366,8 +367,8 @@ export default function ChatModule({ lang }: ChatModuleProps) {
             <span>NEW</span>
           </button>
           <div className="flex items-center gap-2">
-            <VintageCar size={14} strokeWidth={1.5} className="text-[#1A1A1A] shrink-0" />
-            <span>{lang === 'zh' ? '星瀚矢量工作坊' : 'SIRIUS VECTOR ATELIER'}</span>
+            <MessageSquare className="w-3.5 h-3.5 text-[#1A1A1A]" />
+            <span>{lang === 'zh' ? '疆域灵阁创意阁度' : 'GSYEN Muse Creative Workspace'}</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
