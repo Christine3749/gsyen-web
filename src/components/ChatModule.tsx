@@ -6,6 +6,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import VintageCar from './VintageCar';
 import {
   Sparkles,
   Send,
@@ -482,23 +483,24 @@ export default function ChatModule({ lang }: ChatModuleProps) {
               >
                 <div className="flex flex-col items-center gap-6 max-w-lg w-full px-4 text-center">
 
-                  {/* Icon */}
-                  <div className="w-14 h-14 flex items-center justify-center border border-[#1A1A1A]/15 bg-white shadow-[1px_1px_0px_rgba(26,26,26,0.06)]">
-                    <Sparkles className="w-6 h-6 text-amber-500" />
+                  {/* Logo + Brand heading 横排 */}
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 border border-[#1A1A1A]/15 bg-white shadow-[1px_1px_0px_rgba(26,26,26,0.06)] shrink-0">
+                      <VintageCar size={40} strokeWidth={1.5} className="text-[#1A1A1A]/90" />
+                    </div>
+                    <div className="text-left space-y-1.5">
+                      <h2 className="font-serif-sc text-2xl font-black tracking-[0.12em] text-[#111111] leading-none">
+                        {lang === 'zh' ? '疆域灵阁' : 'GSYEN Muse'}
+                      </h2>
+                      <p className="font-cinzel text-[11px] tracking-[0.22em] text-[#1A1A1A]/50 uppercase">
+                        ATELIER INTELLIGENCE STUDIO
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Brand heading */}
-                  <div className="space-y-1.5">
-                    <h2 className="font-serif-sc text-2xl font-black tracking-[0.12em] text-[#111111] leading-none">
-                      {lang === 'zh' ? '疆域灵阁' : 'GSYEN Muse'}
-                    </h2>
-                    <p className="font-cinzel text-[11px] tracking-[0.22em] text-[#1A1A1A]/50 uppercase">
-                      ATELIER INTELLIGENCE STUDIO
-                    </p>
-                    <p className="font-mono text-[9px] tracking-widest uppercase text-[#1A1A1A]/35 mt-2">
-                      {lang === 'zh' ? '向我询问品牌策划、视觉创意、日程安排...' : 'Ask anything about brand, design, or schedule...'}
-                    </p>
-                  </div>
+                  <p className="font-mono text-[9px] tracking-widest uppercase text-[#1A1A1A]/35">
+                    {lang === 'zh' ? '向我询问品牌策划、视觉创意、日程安排...' : 'Ask anything about brand, design, or schedule...'}
+                  </p>
 
                   {/* Preset chips 2×2 */}
                   <div className="grid grid-cols-2 gap-2.5 w-full mt-2">
