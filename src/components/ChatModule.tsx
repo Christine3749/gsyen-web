@@ -368,7 +368,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
           </button>
           <div className="flex items-center gap-2">
             <MessageSquare className="w-3.5 h-3.5 text-[#1A1A1A]" />
-            <span>{lang === 'zh' ? '疆域灵阁创意阁度' : 'GSYEN Muse Creative Workspace'}</span>
+            <span>{lang === 'zh' ? '疆域灵感创意国度' : 'GSYEN Muse Creative Workspace'}</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
