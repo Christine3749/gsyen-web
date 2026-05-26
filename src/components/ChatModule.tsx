@@ -71,6 +71,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
   const [selectedModel, setSelectedModel] = useState<'kimi' | 'deepseek'>('kimi');
   const [sessions, setSessions] = useState<StoredSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [recentsOpen, setRecentsOpen] = useState(true);
   const modelScrollRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const dragStartX = useRef(0);
@@ -465,21 +466,26 @@ export default function ChatModule({ lang }: ChatModuleProps) {
         >
           <div className="flex flex-col h-full min-w-[272px] gap-4">
 
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* Header — collapsible */}
+            <button
+              onClick={() => setRecentsOpen(o => !o)}
+              className="flex items-center justify-between w-full group"
+            >
               <div className="flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-[#1A1A1A]/60" />
-                <h2 className="text-[10px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">
-                  {lang === 'zh' ? '历史记录' : 'HISTORY'}
+                <h2 className="text-[11px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 group-hover:text-[#1A1A1A] transition-colors">
+                  {lang === 'zh' ? '往来' : 'Recents'}
                 </h2>
               </div>
-              <span className="text-[8px] font-mono text-[#1A1A1A]/30 uppercase tracking-wider">
-                {sessions.length} {lang === 'zh' ? '条' : 'sessions'}
-              </span>
-            </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[8px] font-mono text-[#1A1A1A]/25 uppercase tracking-wider">
+                  {sessions.length}
+                </span>
+                <span className={`text-[#1A1A1A]/30 transition-transform duration-200 text-[10px] ${recentsOpen ? 'rotate-90' : ''}`}>›</span>
+              </div>
+            </button>
 
             {/* Session list */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
+            <div className={`overflow-y-auto space-y-1.5 pr-0.5 transition-all duration-200 ${recentsOpen ? 'flex-1' : 'hidden'}`}>
               {sessions.length === 0 ? (
                 <div className="py-10 text-center space-y-2">
                   <MessageSquare className="w-6 h-6 text-[#1A1A1A]/15 mx-auto" />
