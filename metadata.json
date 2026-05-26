@@ -1,6 +1,8 @@
 {
-  "name": "Minimal ChatGPT UI",
-  "description": "A minimal, clean chat interface inspired by early ChatGPT, featuring full-width message blocks, language support, and a dark mode toggle.",
+  "name": "GSYEN Frontier: Astral Vector Workspace",
+  "description": "An exquisite multi-workspace luxury suite combining a premium dynamic vector logo studio, elegant timeline scheduler, double-entry ledger tracker, and military-grade offline dynamic key vault.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
