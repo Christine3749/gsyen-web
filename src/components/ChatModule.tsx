@@ -472,52 +472,84 @@ export default function ChatModule({ lang }: ChatModuleProps) {
           {/* Messages Flow Area */}
           <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
 
-            {/* ── Empty state: centered new-chat welcome screen ── */}
+            {/* ── Empty state: centered hero input ── */}
             {messages.length === 0 && !isLoading && (
               <motion.div
                 key="empty-state"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="h-full flex items-center justify-center"
+                className="h-full flex items-center justify-center px-6"
               >
-                <div className="flex flex-col items-center gap-6 max-w-lg w-full px-4 text-center">
+                <div className="flex flex-col items-center gap-7 w-full max-w-2xl">
 
-                  {/* Logo + Brand heading 横排 */}
+                  {/* Logo + Brand */}
                   <div className="flex items-center gap-4">
-                    <div className="p-3 border border-[#1A1A1A]/15 bg-white shadow-[1px_1px_0px_rgba(26,26,26,0.06)] shrink-0">
-                      <VintageCar size={40} strokeWidth={1.5} className="text-[#1A1A1A]/90" />
+                    <div className="p-2.5 border border-[#1A1A1A]/15 bg-white shadow-[1px_1px_0px_rgba(26,26,26,0.06)] shrink-0">
+                      <VintageCar size={36} strokeWidth={1.5} className="text-[#1A1A1A]/90" />
                     </div>
-                    <div className="text-left space-y-1.5">
+                    <div className="text-left space-y-1">
                       <h2 className="font-serif-sc text-2xl font-black tracking-[0.12em] text-[#111111] leading-none">
                         {lang === 'zh' ? '疆域灵阁' : 'GSYEN Muse'}
                       </h2>
-                      <p className="font-cinzel text-[11px] tracking-[0.22em] text-[#1A1A1A]/50 uppercase">
+                      <p className="font-cinzel text-[10px] tracking-[0.22em] text-[#1A1A1A]/45 uppercase">
                         ATELIER INTELLIGENCE STUDIO
                       </p>
                     </div>
                   </div>
 
-                  <p className="font-mono text-[9px] tracking-widest uppercase text-[#1A1A1A]/35">
-                    {lang === 'zh' ? '向我询问品牌策划、视觉创意、日程安排...' : 'Ask anything about brand, design, or schedule...'}
-                  </p>
+                  {/* Hero input box */}
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputVal); }}
+                    className="w-full border border-[#1A1A1A]/20 bg-white shadow-[1px_1px_0px_rgba(26,26,26,0.04)] focus-within:border-[#1A1A1A]/50 transition-colors"
+                  >
+                    <textarea
+                      autoFocus
+                      rows={4}
+                      value={inputVal}
+                      onChange={(e) => setInputVal(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage(inputVal);
+                        }
+                      }}
+                      placeholder={lang === 'zh'
+                        ? '向 Atelier AI 咨询任何品牌策划、视觉创意、符号设计...'
+                        : 'Ask Atelier AI anything about brand, design, or strategy...'}
+                      className="w-full px-5 pt-5 pb-3 bg-transparent resize-none outline-none font-sans text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/30 leading-relaxed"
+                    />
+                    <div className="px-4 pb-3 flex items-center justify-between">
+                      <span className="font-mono text-[8px] tracking-widest uppercase text-[#1A1A1A]/25">
+                        {lang === 'zh' ? 'ENTER 发送 · SHIFT+ENTER 换行' : 'ENTER TO SEND · SHIFT+ENTER FOR NEW LINE'}
+                      </span>
+                      <button
+                        type="submit"
+                        disabled={!inputVal.trim()}
+                        className="p-2 bg-[#1A1A1A] text-[#F9F8F6] disabled:bg-[#1A1A1A]/10 disabled:text-[#1A1A1A]/30 transition-colors rounded-none border border-[#1A1A1A] disabled:border-[#1A1A1A]/10"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </form>
 
-                  {/* Preset chips 2×2 */}
-                  <div className="grid grid-cols-2 gap-2.5 w-full mt-2">
+                  {/* Preset chips — horizontal row */}
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {PRESET_QUERIES.map((q, idx) => {
                       const text = lang === 'zh' ? q.zh : q.en;
+                      const shortLabel = lang === 'zh'
+                        ? ['品牌命名', '日程规划', '符号设计', '财务记账'][idx]
+                        : ['Brand Name', 'Schedule', 'Symbol', 'Finance'][idx];
                       return (
                         <button
                           key={idx}
                           onClick={() => handleSendMessage(text)}
-                          className="text-left p-3.5 border border-[#1A1A1A]/10 bg-white/60 hover:bg-white hover:border-[#1A1A1A]/25 hover:shadow-sm transition-all rounded-none group"
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-[#1A1A1A]/12 bg-white/70 hover:bg-white hover:border-[#1A1A1A]/25 transition-all rounded-none group"
                         >
-                          <div className="flex gap-2 items-start">
-                            <Sparkles className="w-3 h-3 text-amber-500/70 shrink-0 mt-0.5 group-hover:text-amber-500 transition-colors" />
-                            <span className="font-sans text-[10px] text-[#1A1A1A]/65 group-hover:text-[#1A1A1A] leading-snug transition-colors line-clamp-2">
-                              {text}
-                            </span>
-                          </div>
+                          <Sparkles className="w-2.5 h-2.5 text-amber-500/60 group-hover:text-amber-500 transition-colors shrink-0" />
+                          <span className="font-mono text-[9px] tracking-widest uppercase text-[#1A1A1A]/55 group-hover:text-[#1A1A1A] transition-colors">
+                            {shortLabel}
+                          </span>
                         </button>
                       );
                     })}
@@ -623,8 +655,8 @@ export default function ChatModule({ lang }: ChatModuleProps) {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Interactive input bar form */}
-          <div className="p-4 border-t border-[#1A1A1A]/10 bg-white">
+          {/* Interactive input bar — hidden on empty state */}
+          <div className={`p-4 border-t border-[#1A1A1A]/10 bg-white ${messages.length === 0 ? 'hidden' : ''}`}>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
