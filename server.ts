@@ -27,6 +27,21 @@ const MODEL_ROUTES: Record<string, { url: string; envKey: string; modelId: strin
     envKey:  'DEEPSEEK_API_KEY',
     modelId: 'deepseek-chat',
   },
+  claude: {
+    url:     'https://api.anthropic.com/v1/messages',
+    envKey:  'ANTHROPIC_API_KEY',
+    modelId: 'claude-sonnet-4-6',
+  },
+  chatgpt: {
+    url:     'https://api.openai.com/v1/chat/completions',
+    envKey:  'OPENAI_API_KEY',
+    modelId: 'gpt-4o',
+  },
+  gemini: {
+    url:     'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+    envKey:  'GEMINI_API_KEY',
+    modelId: 'gemini-2.0-flash',
+  },
 };
 // ────────────────────────────────────────────────────────────────────────
 
