@@ -69,6 +69,7 @@ import MailModule from './components/MailModule';
 import ChatModule from './components/ChatModule';
 import VintageCar from './components/VintageCar';
 import LandingHero from './components/LandingHero';
+import MobilePicker from './components/MobilePicker';
 
 // Map symbol ids to Lucide components
 const iconMap: Record<string, ComponentType<any>> = {
@@ -358,6 +359,7 @@ const trackingClassMap: Record<TrackingType, string> = {
 export default function App() {
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
   const [showLanding, setShowLanding] = useState(true);
+  const [showMobilePicker, setShowMobilePicker] = useState(false);
   const t = translations[lang];
 
   // App primary state
@@ -578,23 +580,41 @@ export default function App() {
           </div>
         </div>
 
-        {/* Mobile: native picker — shows one tab, tap to spin */}
-        <div className="flex md:hidden items-center border border-[#1A1A1A]/15 bg-[#F4F2EE] relative">
-          <select
-            value={activeSpace}
-            onChange={e => setActiveSpace(e.target.value as typeof activeSpace)}
-            className="appearance-none bg-transparent pl-3.5 pr-8 py-2 text-[11px] font-bold tracking-widest uppercase text-[#1A1A1A] font-mono outline-none cursor-pointer w-full"
-          >
-            <option value="chat">{lang === 'zh' ? '疆域灵阁' : 'GSYEN MUSE'}</option>
-            <option value="mail">{lang === 'zh' ? '工作邮件' : 'MAILBOX'}</option>
-            <option value="schedule">{lang === 'zh' ? '项目看板' : 'KANBAN'}</option>
-            <option value="calendar">{lang === 'zh' ? '日程日历' : 'CALENDAR'}</option>
-            <option value="finance">{lang === 'zh' ? '复式财务账簿' : 'LEDGER'}</option>
-            <option value="password">{lang === 'zh' ? '军事级密钥库' : 'CITADEL KEY'}</option>
-            <option value="brand">{lang === 'zh' ? '品牌实验室' : 'BRAND LAB'}</option>
-          </select>
-          <span className="pointer-events-none absolute right-2.5 text-[#1A1A1A]/40 text-[10px]">▾</span>
-        </div>
+        {/* Mobile: custom wheel picker trigger */}
+        {(() => {
+          const NAV_OPTIONS = [
+            { value: 'chat',     label: lang === 'zh' ? '疆域灵阁' : 'GSYEN MUSE' },
+            { value: 'mail',     label: lang === 'zh' ? '工作邮件' : 'MAILBOX' },
+            { value: 'schedule', label: lang === 'zh' ? '项目看板' : 'KANBAN' },
+            { value: 'calendar', label: lang === 'zh' ? '日程日历' : 'CALENDAR' },
+            { value: 'finance',  label: lang === 'zh' ? '复式财务账簿' : 'LEDGER' },
+            { value: 'password', label: lang === 'zh' ? '军事级密钥库' : 'CITADEL KEY' },
+            { value: 'brand',    label: lang === 'zh' ? '品牌实验室' : 'BRAND LAB' },
+          ];
+          const currentLabel = NAV_OPTIONS.find(o => o.value === activeSpace)?.label || '';
+          return (
+            <>
+              <button
+                onClick={() => setShowMobilePicker(true)}
+                className="flex md:hidden items-center gap-2 border border-[#1A1A1A]/15 bg-[#F4F2EE] px-4 py-2 hover:bg-[#1A1A1A]/5 transition-colors"
+              >
+                <span className="font-mono text-[11px] font-bold tracking-widest uppercase text-[#1A1A1A]">
+                  {currentLabel}
+                </span>
+                <span className="text-[#1A1A1A]/35 text-[10px]">▾</span>
+              </button>
+              {showMobilePicker && (
+                <MobilePicker
+                  options={NAV_OPTIONS}
+                  value={activeSpace}
+                  onChange={v => setActiveSpace(v as typeof activeSpace)}
+                  onClose={() => setShowMobilePicker(false)}
+                  lang={lang}
+                />
+              )}
+            </>
+          );
+        })()}
 
         {/* Desktop: full tab bar */}
         <div className="hidden md:flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1">
