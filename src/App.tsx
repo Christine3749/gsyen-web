@@ -580,41 +580,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Mobile: custom wheel picker trigger */}
-        {(() => {
-          const NAV_OPTIONS = [
-            { value: 'chat',     label: lang === 'zh' ? '疆域灵阁' : 'GSYEN MUSE' },
-            { value: 'mail',     label: lang === 'zh' ? '工作邮件' : 'MAILBOX' },
-            { value: 'schedule', label: lang === 'zh' ? '项目看板' : 'KANBAN' },
-            { value: 'calendar', label: lang === 'zh' ? '日程日历' : 'CALENDAR' },
-            { value: 'finance',  label: lang === 'zh' ? '复式财务账簿' : 'LEDGER' },
-            { value: 'password', label: lang === 'zh' ? '军事级密钥库' : 'CITADEL KEY' },
-            { value: 'brand',    label: lang === 'zh' ? '品牌实验室' : 'BRAND LAB' },
-          ];
-          const currentLabel = NAV_OPTIONS.find(o => o.value === activeSpace)?.label || '';
-          return (
-            <>
-              <button
-                onClick={() => setShowMobilePicker(true)}
-                className="flex md:hidden items-center gap-2 border border-[#1A1A1A]/15 bg-[#F4F2EE] px-4 py-2 hover:bg-[#1A1A1A]/5 transition-colors"
-              >
-                <span className="font-mono text-[11px] font-bold tracking-widest uppercase text-[#1A1A1A]">
-                  {currentLabel}
-                </span>
-                <span className="text-[#1A1A1A]/35 text-[10px]">▾</span>
-              </button>
-              {showMobilePicker && (
-                <MobilePicker
-                  options={NAV_OPTIONS}
-                  value={activeSpace}
-                  onChange={v => setActiveSpace(v as typeof activeSpace)}
-                  onClose={() => setShowMobilePicker(false)}
-                  lang={lang}
-                />
-              )}
-            </>
-          );
-        })()}
 
         {/* Desktop: full tab bar */}
         <div className="hidden md:flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1">
@@ -733,6 +698,31 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {/* Mobile nav row 2 — horizontal scroll-snap strip */}
+      <div className="md:hidden sticky top-[73px] z-30 bg-[#F4F2EE] border-b border-[#1A1A1A]/10 flex overflow-x-auto [scroll-snap-type:x_mandatory] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {([
+          { value: 'chat',     zh: '疆域灵阁', en: 'MUSE' },
+          { value: 'mail',     zh: '工作邮件', en: 'MAIL' },
+          { value: 'schedule', zh: '项目看板', en: 'KANBAN' },
+          { value: 'calendar', zh: '日程日历', en: 'CALENDAR' },
+          { value: 'finance',  zh: '复式财务', en: 'LEDGER' },
+          { value: 'password', zh: '密钥库',   en: 'KEYS' },
+          { value: 'brand',    zh: '品牌实验室', en: 'BRAND' },
+        ] as const).map(item => (
+          <button
+            key={item.value}
+            onClick={() => setActiveSpace(item.value as typeof activeSpace)}
+            className={`[scroll-snap-align:start] shrink-0 px-5 py-3 font-mono text-[10px] font-bold tracking-widest uppercase whitespace-nowrap transition-all border-b-2 ${
+              activeSpace === item.value
+                ? 'text-[#1A1A1A] border-[#1A1A1A]'
+                : 'text-[#1A1A1A]/40 border-transparent hover:text-[#1A1A1A]/70'
+            }`}
+          >
+            {lang === 'zh' ? item.zh : item.en}
+          </button>
+        ))}
+      </div>
 
       {/* Secondary Ribbon for Brand Lab sub-tabs */}
       {activeSpace === 'brand' && (
