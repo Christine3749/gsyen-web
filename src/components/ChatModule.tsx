@@ -235,18 +235,8 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     setIsLoading(true);
 
     try {
-      // —— 调度员:预测类问题(备货/流失)先问本地模型,命中就直接回答 ——
-      const expertReply = await askPredictionExpert(textToSend);
-      if (expertReply) {
-        const aiMsg: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          role: 'model',
-          content: expertReply,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        saveChat([...updatedMsgs, aiMsg]);
-        return; // finally 里会把 isLoading 关掉
-      }
+      // 调度员暂时关闭，等 laochen-demo 联调完再开
+      // const expertReply = await askPredictionExpert(textToSend);
 
       const response = await fetch('/api/chat', {
         method: 'POST',
