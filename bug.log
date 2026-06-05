@@ -1,0 +1,15 @@
+# GSYEN Bug Log
+
+---
+
+## [BUG-001] Vercel streaming 导致通讯失败
+- **日期**：2026-06-06
+- **症状**：gsyen.com（Vercel 部署）发消息返回"通讯失败"，本地开发正常
+- **根因**：`api/chat.ts` 改用 `res.write()` SSE 流式传输，但 Vercel Node.js serverless function 不支持此方式流式响应
+- **修复**：`api/chat.ts` 回退为普通 JSON 响应；`server.ts`（本地 Express）保留 SSE streaming
+- **结果**：
+  - 本地开发（server.ts）：打字机 streaming 效果 ✅
+  - Vercel 生产（api/chat.ts）：正常 JSON 响应，无 streaming ✅
+- **待优化**：Vercel 可用 Edge Runtime + `ReadableStream` 实现真正的 streaming，下次迭代处理
+
+---

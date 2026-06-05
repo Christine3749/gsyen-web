@@ -72,10 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })),
     ];
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('X-Accel-Buffering', 'no');
-
+    // Vercel serverless 不支持 res.write() streaming，走普通 JSON
     const upstream = await fetch(route.url, {
       method: 'POST',
       headers: {
@@ -85,24 +82,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: JSON.stringify({
         model: route.modelId,
         messages: payload,
-        stream: true,
         ...(['ethan', 'fast'].includes(model) ? { think: false } : {}),
       }),
     });
 
     if (!upstream.ok) {
       const err = await upstream.text().catch(() => upstream.statusText);
-      res.end(`data: ${JSON.stringify({ error: `${model} API error: ${err}` })}\n\n`);
-      return;
+      throw new Error(`${model} API error: ${err}`);
     }
 
-    const reader = (upstream.body as any).getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      res.write(value);
-    }
-    return res.end();
+    const data: any = await upstream.json();
+    return res.json({ text: data.choices?.[0]?.message?.content || '' });
   } catch (err: any) {
     console.error('Chat API error:', err);
     return res.status(500).json({ error: err.message || 'Gateway error' });
