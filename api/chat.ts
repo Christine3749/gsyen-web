@@ -73,7 +73,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ model: route.modelId, messages: payload }),
+      body: JSON.stringify({
+        model: route.modelId,
+        messages: payload,
+        ...(model === 'ethan' ? { think: false } : {}),
+      }),
     });
 
     if (!upstream.ok) {
