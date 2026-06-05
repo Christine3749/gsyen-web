@@ -549,7 +549,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F8F6] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#1A1A1A] selection:text-[#F9F8F6] overflow-x-hidden" id="logo-designer-root">
+    <div className="h-screen overflow-hidden bg-[#F9F8F6] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#1A1A1A] selection:text-[#F9F8F6]" id="logo-designer-root">
       <AnimatePresence>
         {showLanding && (
           <LandingHero lang={lang} onEnter={() => setShowLanding(false)} />
@@ -1459,13 +1459,13 @@ export default function App() {
       </div>
       ) : (
         <main className="flex-grow flex flex-col justify-between bg-[#F9F8F6] min-h-0">
-          <div className="flex-grow flex flex-col min-h-0">
+          <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
             {activeSpace === 'chat' && <ChatModule lang={lang} />}
-            {activeSpace === 'mail' && <div className="px-8 pb-10 pt-0"><MailModule lang={lang} /></div>}
-            {activeSpace === 'schedule' && <div className="px-8 pb-10 pt-0"><ScheduleModule lang={lang} defaultView="kanban" /></div>}
-            {activeSpace === 'calendar' && <div className="px-8 pb-10 pt-0"><ScheduleModule lang={lang} defaultView="calendar" /></div>}
-            {activeSpace === 'finance' && <div className="px-8 pb-10 pt-0"><FinanceModule lang={lang} /></div>}
-            {activeSpace === 'password' && <div className="px-8 pb-10 pt-0"><PasswordModule lang={lang} /></div>}
+            {activeSpace === 'mail' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><MailModule lang={lang} /></div>}
+            {activeSpace === 'schedule' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><ScheduleModule lang={lang} defaultView="kanban" /></div>}
+            {activeSpace === 'calendar' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><ScheduleModule lang={lang} defaultView="calendar" /></div>}
+            {activeSpace === 'finance' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><FinanceModule lang={lang} /></div>}
+            {activeSpace === 'password' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><PasswordModule lang={lang} /></div>}
           </div>
 
           <footer className="mt-auto pt-6 border-t border-[#1A1A1A]/10 text-[9px] text-[#1A1A1A]/40 font-mono uppercase tracking-widest flex flex-col sm:flex-row items-center justify-between gap-4" id="app-footer-other">
