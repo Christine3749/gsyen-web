@@ -774,7 +774,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
           </div>
 
           {/* Interactive input bar — hidden on empty state */}
-          <div className={`p-4 border-t border-[#1A1A1A]/10 bg-white ${messages.length === 0 ? 'hidden' : ''}`}>
+          <div className={`sticky bottom-0 p-4 border-t border-[#1A1A1A]/10 bg-white z-10 ${messages.length === 0 ? 'hidden' : ''}`}>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
