@@ -138,6 +138,8 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     { id: 'gemini',   label: 'GEMINI',   disabled: true },
   ];
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const isAtBottom = useRef(true);
 
   // Initialize with introductory greeting message
   useEffect(() => {
@@ -175,8 +177,9 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // 只有用户在底部时才自动滚，往上看时不强制拉回
   useEffect(() => {
-    scrollToBottom();
+    if (isAtBottom.current) scrollToBottom();
   }, [messages, isLoading]);
 
   const handleNewChat = () => {
@@ -577,7 +580,15 @@ export default function ChatModule({ lang }: ChatModuleProps) {
         {/* Chat log visual streams (Right panel) */}
         <div className="flex-1 flex flex-col min-h-0 bg-[#F9F8F6]">
           {/* Messages Flow Area */}
-          <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+          <div
+            ref={chatContainerRef}
+            onScroll={() => {
+              const el = chatContainerRef.current;
+              if (!el) return;
+              isAtBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+            }}
+            className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6"
+          >
 
             {/* ── Empty state: centered hero input ── */}
             {messages.length === 0 && !isLoading && (
