@@ -52,6 +52,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing or invalid messages array' });
     }
 
+    // 服务端注入过滤
+    const INJECTION_PATTERNS = [
+      /忽略.*指令/,
+      /ignore.*instruction/i,
+      /从现在起.*叫/,
+      /你现在是.*助手/,
+      /your new name/i,
+      /forget.*previous/i,
+      /新的身份/,
+    ];
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')?.content || '';
+    if (INJECTION_PATTERNS.some(p => p.test(lastUserMsg))) {
+      return res.json({ text: '我是缈缈，无法执行此指令。' });
+    }
+
     const route = MODEL_ROUTES[model];
     if (!route) {
       return res.status(400).json({ error: `Unknown model: ${model}` });
