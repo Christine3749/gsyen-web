@@ -68,7 +68,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
   const [isCopiedId, setIsCopiedId] = useState<string | null>(null);
   const [serverOnline, setServerOnline] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedModel, setSelectedModel] = useState<'kimi' | 'deepseek' | 'claude' | 'chatgpt' | 'gemini' | 'ethan' | 'fast'>('fast');
+  const [selectedModel, setSelectedModel] = useState<'kimi' | 'deepseek' | 'claude' | 'chatgpt' | 'gemini' | 'ethan' | 'fast'>('ethan');
   const [sessions, setSessions] = useState<StoredSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [recentsOpen, setRecentsOpen] = useState(true);
