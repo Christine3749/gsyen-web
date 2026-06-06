@@ -301,8 +301,8 @@ export default function ChatModule({ lang }: ChatModuleProps) {
         id: `err-${Date.now()}`,
         role: 'model',
         content: lang === 'zh'
-          ? '⚠️ **通讯失败**：无法访问后端的智脑网关。请确保运行在 full-stack Express 环境下且存在有效的 `MOONSHOT_API_KEY` 密钥。'
-          : '⚠️ **Intel Network Failure**: Could not synchronize variables with the server-side proxy. Confirm full-stack Express is responsive and your `MOONSHOT_API_KEY` is loaded.',
+          ? '⚠️ **通讯失败**：模型响应超时或连接中断，请稍后重试。'
+          : '⚠️ **Connection Failed**: Model timed out or connection was interrupted. Please try again.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       saveChat([...updatedMsgs, errorMsg]);
