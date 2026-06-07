@@ -336,9 +336,12 @@ async function startServer() {
         const rawContent = ollamaData.message?.content ?? '{}';
         try {
           const parsed = JSON.parse(rawContent);
+          // 向后兼容：模型可能输出旧格式 shouldCreateEvent
+          const action = parsed.action
+            ?? (parsed.shouldCreateEvent ? 'create' : 'none');
           return res.json({
             text:   parsed.reply  ?? rawContent,
-            action: parsed.action ?? 'none',
+            action,
             event:  parsed.event?.title ? parsed.event : null,
           });
         } catch {

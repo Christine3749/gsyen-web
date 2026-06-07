@@ -334,9 +334,12 @@ export default async function handler(req: Request): Promise<Response> {
       const rawContent = ollamaData.message?.content ?? '{}';
       try {
         const parsed = JSON.parse(rawContent);
+        // 向后兼容：模型可能输出旧格式 shouldCreateEvent
+        const action = parsed.action
+          ?? (parsed.shouldCreateEvent ? 'create' : 'none');
         return new Response(JSON.stringify({
           text:   parsed.reply  ?? rawContent,
-          action: parsed.action ?? 'none',
+          action,
           event:  parsed.event?.title ? parsed.event : null,
         }), { headers: { 'Content-Type': 'application/json' } });
       } catch {
