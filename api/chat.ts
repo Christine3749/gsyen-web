@@ -1,27 +1,36 @@
 export const config = { runtime: 'edge' };
 
-// ── Structured-output helpers ────────────────────────────────────────────
+// ── 神机百炼 · Chronos 模块 ────────────────────────────────────────────────
 function todayDateStr(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function scheduleSystemSuffix(today: string): string {
-  return `
-
-【日程通道 — 必须输出 JSON】
-每次回复必须是严格 JSON 对象（不加任何 markdown 代码块包裹），格式如下：
-{"reply":"正常回复内容","shouldCreateEvent":false,"event":null}
-当用户有任何安排、计划、提醒、任务意图（"今天要做""帮我安排""明天会议"等），shouldCreateEvent 置为 true，event 填写：
-{"title":"事件名称","date":"${today}","time":"09:00","category":"creative|finance|secure|strategy","location":"地点或空字符串","subtitle":"一句话说明"}
-今天日期：${today}。日期未指定默认今天，时间未指定默认 09:00。`;
-}
+const CHRONOS_SCHEMA = {
+  type: 'object',
+  properties: {
+    reply:  { type: 'string' },
+    action: { type: 'string', enum: ['none', 'create', 'update', 'delete', 'query'] },
+    event: {
+      type: 'object',
+      properties: {
+        title:    { type: 'string' },
+        date:     { type: 'string' },
+        time:     { type: 'string' },
+        category: { type: 'string' },
+        location: { type: 'string' },
+        subtitle: { type: 'string' },
+      },
+    },
+  },
+  required: ['reply', 'action'],
+};
 
 const GEMINI_RESPONSE_SCHEMA = {
   type: 'OBJECT',
   properties: {
-    reply:             { type: 'STRING' },
-    shouldCreateEvent: { type: 'BOOLEAN' },
+    reply:  { type: 'STRING' },
+    action: { type: 'STRING', enum: ['none', 'create', 'update', 'delete', 'query'] },
     event: {
       type: 'OBJECT',
       nullable: true,
@@ -33,11 +42,33 @@ const GEMINI_RESPONSE_SCHEMA = {
         location: { type: 'STRING' },
         subtitle: { type: 'STRING' },
       },
-      required: ['title', 'date', 'time'],
     },
   },
-  required: ['reply', 'shouldCreateEvent'],
+  required: ['reply', 'action'],
 };
+
+function scheduleSystemSuffix(
+  today: string,
+  events: Array<{ id: string; title: string; date: string; time: string }> = []
+): string {
+  const eventsCtx = events.length > 0
+    ? `\n当前已有日程（update/delete 时按 title 匹配）：\n${events.map(e => `  [${e.date} ${e.time}] ${e.title}`).join('\n')}`
+    : '';
+  return `
+
+【神机百炼 · Chronos — 必须输出 JSON】
+每次回复必须是严格 JSON，格式：
+{"reply":"回复内容","action":"none","event":{"title":"","date":"","time":"","category":"","location":"","subtitle":""}}
+
+action 枚举：
+- "none"   → 普通对话
+- "create" → 用户提到任何安排/会议/活动/今天有/下午有/明天有/要去/要参加 → 新建日程
+- "update" → 修改已有日程，event.title 填原标题
+- "delete" → 删除/取消日程，event.title 填要删除的标题
+- "query"  → 查询安排，reply 里直接列出
+
+create 时 event 填完整字段：date 默认 ${today}，time 默认 09:00，category 默认 strategy。${eventsCtx}`
+}
 // ─────────────────────────────────────────────────────────────────────────
 
 const SYSTEM_PROMPT = `你的名字是「缈缈」，这是专有名字，不是「缥缈」，不是任何其他词。无论何时被问到名字，你只回答：我是缈缈。绝对不能写成缥缈、渺渺或任何变体。
@@ -192,7 +223,7 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     const body = await req.json();
-    const { messages, model = 'kimi' } = body;
+    const { messages, model = 'kimi', events = [] } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'Missing or invalid messages array' }), {
@@ -240,7 +271,7 @@ export default async function handler(req: Request): Promise<Response> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: geminiMessages,
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT + scheduleSystemSuffix(today) }] },
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT + scheduleSystemSuffix(today, events) }] },
           generationConfig: {
             responseMimeType: 'application/json',
             responseSchema: GEMINI_RESPONSE_SCHEMA,
@@ -258,8 +289,9 @@ export default async function handler(req: Request): Promise<Response> {
       try {
         const parsed = JSON.parse(rawText);
         return new Response(JSON.stringify({
-          text:  parsed.reply  ?? rawText,
-          event: parsed.shouldCreateEvent && parsed.event?.title ? parsed.event : null,
+          text:   parsed.reply  ?? rawText,
+          action: parsed.action ?? 'none',
+          event:  parsed.event?.title ? parsed.event : null,
         }), { headers: { 'Content-Type': 'application/json' } });
       } catch {
         return new Response(JSON.stringify({ text: rawText, event: null }), {
@@ -274,7 +306,7 @@ export default async function handler(req: Request): Promise<Response> {
       const today = todayDateStr();
       const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
       const ollamaPayload = [
-        { role: 'system', content: SYSTEM_PROMPT + scheduleSystemSuffix(today) },
+        { role: 'system', content: SYSTEM_PROMPT + scheduleSystemSuffix(today, events) },
         ...messages.map((m: any) => ({
           role: m.role === 'model' ? 'assistant' : 'user',
           content: m.content,
@@ -287,7 +319,7 @@ export default async function handler(req: Request): Promise<Response> {
           model: route.modelId,
           messages: ollamaPayload,
           stream: false,
-          format: 'json',
+          format: CHRONOS_SCHEMA,
         }),
       });
       if (!ollamaRes.ok) {
@@ -302,8 +334,9 @@ export default async function handler(req: Request): Promise<Response> {
       try {
         const parsed = JSON.parse(rawContent);
         return new Response(JSON.stringify({
-          text:  parsed.reply  ?? rawContent,
-          event: parsed.shouldCreateEvent && parsed.event?.title ? parsed.event : null,
+          text:   parsed.reply  ?? rawContent,
+          action: parsed.action ?? 'none',
+          event:  parsed.event?.title ? parsed.event : null,
         }), { headers: { 'Content-Type': 'application/json' } });
       } catch {
         return new Response(JSON.stringify({ text: rawContent, event: null }), {

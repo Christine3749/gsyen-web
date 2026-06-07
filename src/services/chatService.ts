@@ -3,7 +3,8 @@ import { ChatMessage } from '../types/chat';
 /** POST to the AI gateway, returns the raw Response */
 export async function sendToGateway(
   model: string,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
+  events?: Array<{ id: string; title: string; date: string; time: string }>
 ): Promise<Response> {
   const res = await fetch('/api/chat', {
     method: 'POST',
@@ -11,6 +12,7 @@ export async function sendToGateway(
     body: JSON.stringify({
       model,
       messages: messages.map(m => ({ role: m.role, content: m.content })),
+      events: events ?? [],
     }),
   });
   if (!res.ok) throw new Error(`Gateway error: ${res.status}`);

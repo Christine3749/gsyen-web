@@ -107,8 +107,20 @@ export default function ChatModule({ lang }: ChatModuleProps) {
       onError: (errMsg) => {
         saveChat([...history, { id: `err-${Date.now()}`, role: 'model', content: errMsg, timestamp: aiTime }], selectedModel);
       },
-      onScheduleAdded: (title) => {
-        showToast(lang === 'zh' ? `✅ 日程已添加：${title}` : `✅ Event added: ${title}`);
+      onScheduleAction: (action, title) => {
+        const zh: Record<string, string> = {
+          create: `✅ 日程已创建：${title}`,
+          update: `✏️ 日程已更新：${title}`,
+          delete: `🗑️ 日程已删除：${title}`,
+          query:  `📅 已查询今日日程`,
+        };
+        const en: Record<string, string> = {
+          create: `✅ Event created: ${title}`,
+          update: `✏️ Event updated: ${title}`,
+          delete: `🗑️ Event deleted: ${title}`,
+          query:  `📅 Today's schedule retrieved`,
+        };
+        showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
       },
     });
   }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send]);

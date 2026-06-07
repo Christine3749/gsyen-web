@@ -10,16 +10,17 @@ import {
   enrichMessageForSchedule,
 } from '../stores/scheduleStore';
 
-// Models that return application/json with {text, event} instead of SSE.
-// These use native structured output (Gemini responseSchema / Ollama json_object).
+// Models that return application/json with {text, action, event} instead of SSE.
 const STRUCTURED_MODELS = new Set<ModelId>(['gemini', 'ethan', 'fast'] as ModelId[]);
+
+export type ScheduleActionType = 'create' | 'update' | 'delete' | 'query';
 
 /** Build a ready-to-save EventItem from raw AI structured data. */
 function buildEventItem(data: any): EventItem {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   return {
-    id: `ai-${Date.now()}`,
+    id:       `ai-${Date.now()}`,
     title:    data.title,
     subtitle: data.subtitle  || '',
     time:     data.time      || '09:00',
@@ -32,12 +33,12 @@ function buildEventItem(data: any): EventItem {
   };
 }
 
-// Typewriter delays (ms) — gives the "mechanical typewriter" feel
+// Typewriter delays (ms)
 const DELAY = {
   sentenceEnd: () => 300 + Math.random() * 250,
   comma:       () => 120 + Math.random() * 100,
   newline:     () => 200 + Math.random() * 200,
-  rare:        () => 100 + Math.random() * 150,  // 5% chance
+  rare:        () => 100 + Math.random() * 150,
   normal:      () => 30  + Math.random() * 25,
 };
 
@@ -51,16 +52,15 @@ function charDelay(char: string): number {
 
 interface UseChatStreamReturn {
   isLoading: boolean;
-  /** onScheduleAdded fires when the AI response contains a ```schedule``` block */
   send: (opts: {
     text: string;
     model: ModelId;
     history: ChatMessage[];
     lang: 'zh' | 'en';
-    onToken:          (fullText: string) => void;
-    onDone:           (fullText: string) => void;
-    onError:          (errMsg: string)   => void;
-    onScheduleAdded?: (title: string)    => void;
+    onToken:           (fullText: string) => void;
+    onDone:            (fullText: string) => void;
+    onError:           (errMsg: string)   => void;
+    onScheduleAction?: (action: ScheduleActionType, title: string) => void;
   }) => Promise<void>;
 }
 
@@ -69,7 +69,7 @@ export function useChatStream(): UseChatStreamReturn {
 
   const send = useCallback(async ({
     text, model, history, lang,
-    onToken, onDone, onError, onScheduleAdded,
+    onToken, onDone, onError, onScheduleAction,
   }: Parameters<UseChatStreamReturn['send']>[0]) => {
     setIsLoading(true);
 
@@ -82,38 +82,36 @@ export function useChatStream(): UseChatStreamReturn {
         return;
       }
 
-      // 2. Detect schedule intent and enrich message.
-      //    SSE models: full enrichment (schedule block instructions).
-      //    Structured models (gemini/ethan/fast): still detect intent; if 'add',
-      //    append a short hint so the model reliably sets shouldCreateEvent:true.
       const isStructured = STRUCTURED_MODELS.has(model);
-      const intent = detectScheduleIntent(text);
-      let enrichedText: string;
-      if (isStructured && intent === 'add') {
-        enrichedText = text + '\n[系统提示：上面这句话包含日程安排意图，请务必将 shouldCreateEvent 置为 true 并填写 event 字段。]';
-      } else if (!isStructured && intent) {
-        enrichedText = enrichMessageForSchedule(text, intent, lang);
-      } else {
-        enrichedText = text;
+
+      // 2. SSE 模型走关键词检测+消息增强；结构化模型由神机百炼 schema 处理意图
+      let enrichedText = text;
+      if (!isStructured) {
+        const intent = detectScheduleIntent(text);
+        if (intent) enrichedText = enrichMessageForSchedule(text, intent, lang);
       }
 
-      // 3. Build message history for API
+      // 3. Build message history
       const userMsg: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: text,          // store original, not enriched
+        id:        `user-${Date.now()}`,
+        role:      'user',
+        content:   text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       const apiMessages = [...history, { ...userMsg, content: enrichedText }];
 
-      // 4. Call gateway
-      const response = await sendToGateway(model, apiMessages);
+      // 4. 结构化模型带上当前日程上下文（供 update/delete 匹配）
+      const eventsCtx = isStructured
+        ? scheduleStore.getAll().map(e => ({ id: e.id, title: e.title, date: e.date, time: e.time }))
+        : undefined;
+
+      const response = await sendToGateway(model, apiMessages, eventsCtx);
       setIsLoading(false);
 
       const contentType = response.headers.get('content-type') ?? '';
 
       if (contentType.includes('text/event-stream')) {
-        // ── Streaming path ──────────────────────────────────────
+        // ── SSE 流式路径 ─────────────────────────────────────────
         let fullText = '';
         for await (const delta of readSSEStream(response)) {
           for (const char of delta) {
@@ -122,38 +120,64 @@ export function useChatStream(): UseChatStreamReturn {
             await new Promise(r => setTimeout(r, charDelay(char)));
           }
         }
-        // Check for schedule block in final response
+        // SSE 模型的日程创建（```schedule``` 块解析）
+        const intent = detectScheduleIntent(text);
         if (intent === 'add') {
           const event = scheduleStore.parseFromAIResponse(fullText);
           if (event) {
             scheduleStore.add(event);
             window.dispatchEvent(new CustomEvent('schedule-updated'));
-            onScheduleAdded?.(event.title);
+            onScheduleAction?.('create', event.title);
           }
         }
         onDone(fullText || '…');
-      } else {
-        // ── Non-streaming / structured-output path ───────────────
-        const data = await response.json();
-        const reply = data.text ?? (lang === 'zh' ? '抱歉，未返回有效回复。' : 'Empty response.');
 
-        // Structured-output models (gemini/ethan/fast): server returns {text, event}
-        if (data.event?.title) {
-          const eventItem = buildEventItem(data.event);
-          scheduleStore.add(eventItem);
+      } else {
+        // ── 神机百炼结构化路径（ethan / fast / gemini）──────────
+        const data = await response.json();
+        const reply  = data.text   ?? (lang === 'zh' ? '抱歉，未返回有效回复。' : 'Empty response.');
+        const action = data.action ?? 'none';
+        const ev     = data.event;
+
+        // ── 执行 Chronos CRUD ────────────────────────────────────
+        if (action === 'create' && ev?.title) {
+          const item = buildEventItem(ev);
+          scheduleStore.add(item);
           window.dispatchEvent(new CustomEvent('schedule-updated'));
-          onScheduleAdded?.(eventItem.title);
-        } else if (intent === 'add') {
-          // Fallback for SSE models that returned JSON for some reason
-          const event = scheduleStore.parseFromAIResponse(reply);
-          if (event) {
-            scheduleStore.add(event);
+          onScheduleAction?.('create', item.title);
+
+        } else if (action === 'delete' && ev?.title) {
+          const all    = scheduleStore.getAll();
+          const target = all.find(e =>
+            e.title.includes(ev.title) || ev.title.includes(e.title)
+          );
+          if (target) {
+            scheduleStore.remove(target.id);
             window.dispatchEvent(new CustomEvent('schedule-updated'));
-            onScheduleAdded?.(event.title);
+            onScheduleAction?.('delete', target.title);
           }
+
+        } else if (action === 'update' && ev?.title) {
+          const all    = scheduleStore.getAll();
+          const target = all.find(e =>
+            e.title.includes(ev.title) || ev.title.includes(e.title)
+          );
+          if (target) {
+            scheduleStore.update(target.id, {
+              ...(ev.date     && { date:     ev.date }),
+              ...(ev.time     && { time:     ev.time }),
+              ...(ev.location && { location: ev.location }),
+              ...(ev.subtitle && { subtitle: ev.subtitle }),
+            });
+            window.dispatchEvent(new CustomEvent('schedule-updated'));
+            onScheduleAction?.('update', target.title);
+          }
+
+        } else if (action === 'query') {
+          onScheduleAction?.('query', '');
         }
 
-        // Simulate typewriter effect on the reply text
+        // ── Typewriter 效果 ──────────────────────────────────────
         let displayed = '';
         for (const char of reply) {
           displayed += char;
@@ -162,6 +186,7 @@ export function useChatStream(): UseChatStreamReturn {
         }
         onDone(reply);
       }
+
     } catch (err) {
       setIsLoading(false);
       onError(
