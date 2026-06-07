@@ -146,7 +146,10 @@ export default function ChatModule({ lang }: ChatModuleProps) {
       text, model: selectedModel, history: messages, lang,
       // onToken: display only — no session write to avoid hundreds of upsert calls
       onToken: (partial) => {
-        setMessages([...history, { id: aiId, role: 'model', content: partial, timestamp: aiTime }]);
+        setMessages([...history, {
+          id: aiId, role: 'model', content: partial, timestamp: aiTime,
+          card: pendingCard.current ?? undefined,   // 卡片挂载后不被覆盖
+        }]);
       },
       // onDone: single session write at end of stream
       onActionCard: (card) => {
