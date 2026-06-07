@@ -18,13 +18,60 @@ import {
   PanelLeft, Plus, X,
 } from 'lucide-react';
 
-import { ChatMessage } from '../types/chat';
+import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId, MODELS } from '../config/models';
 import { PRESET_QUERIES, PRESET_SHORT_LABELS } from '../config/presets';
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
 import { renderMessageContent } from '../utils/renderMessage';
 import { exportQuoteCard } from '../utils/exportCard';
+
+// ── 神机百炼 · 操作卡片 ────────────────────────────────────────────────────────
+const MODULE_COLOR: Record<string, string> = {
+  CHRONOS: 'text-amber-700',
+  MAIL:    'text-blue-700',
+  VAULT:   'text-red-700',
+  CANVAS:  'text-emerald-700',
+};
+const ACTION_LABEL_ZH: Record<string, string> = {
+  create: '已建立', update: '已更新', delete: '已删除', query: '今日日程',
+};
+const ACTION_LABEL_EN: Record<string, string> = {
+  create: 'CREATED', update: 'UPDATED', delete: 'DELETED', query: 'TODAY',
+};
+
+function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 'en' }) {
+  const isDeleted = card.action === 'delete';
+  const statusLabel = lang === 'zh'
+    ? ACTION_LABEL_ZH[card.action] ?? ''
+    : ACTION_LABEL_EN[card.action] ?? '';
+
+  return (
+    <div className="mt-3 border border-[#1A1A1A]/12 overflow-hidden select-none">
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#F4F2EE] border-b border-[#1A1A1A]/10">
+        <span className={`font-mono text-[8px] tracking-[0.22em] font-bold ${MODULE_COLOR[card.module] ?? 'text-neutral-600'}`}>
+          {card.module}
+        </span>
+        <span className="font-mono text-[8px] tracking-widest text-[#1A1A1A]/40 uppercase">
+          {statusLabel}
+        </span>
+      </div>
+      {/* Body */}
+      <div className="px-3 py-2.5 bg-white space-y-1">
+        <p className={`font-sans text-[13px] font-semibold text-[#1A1A1A] leading-snug tracking-tight ${isDeleted ? 'line-through opacity-30' : ''}`}>
+          {card.title}
+        </p>
+        {card.meta.filter(Boolean).map((m, i) => (
+          <p key={i} className="font-mono text-[10px] text-[#1A1A1A]/45 tracking-wide leading-relaxed">
+            {m}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 interface ChatModuleProps { lang: 'zh' | 'en' }
 
@@ -39,6 +86,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
   const { messages, sessions, currentSessionId, setMessages, saveChat, loadSession, deleteSession, newChat } =
     useChatSession(lang);
   const { isLoading, send } = useChatStream();
+  const pendingCard = useRef<ActionCard | null>(null);
 
   // ── scroll management ──────────────────────────────────────────────────────
   const chatEndRef       = useRef<HTMLDivElement>(null);
@@ -101,10 +149,20 @@ export default function ChatModule({ lang }: ChatModuleProps) {
         setMessages([...history, { id: aiId, role: 'model', content: partial, timestamp: aiTime }]);
       },
       // onDone: single session write at end of stream
+      onActionCard: (card) => {
+        pendingCard.current = card;
+        // 实时更新聊天气泡（卡片挂载到当前 AI 消息）
+        setMessages(prev => prev.map(m =>
+          m.id === aiId ? { ...m, card } : m
+        ));
+      },
       onDone: (full) => {
-        saveChat([...history, { id: aiId, role: 'model', content: full, timestamp: aiTime }], selectedModel);
+        const card = pendingCard.current ?? undefined;
+        pendingCard.current = null;
+        saveChat([...history, { id: aiId, role: 'model', content: full, timestamp: aiTime, card }], selectedModel);
       },
       onError: (errMsg) => {
+        pendingCard.current = null;
         saveChat([...history, { id: `err-${Date.now()}`, role: 'model', content: errMsg, timestamp: aiTime }], selectedModel);
       },
       onScheduleAction: (action, title) => {
@@ -300,6 +358,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
                       </div>
                       <div className={`p-4 border text-left leading-relaxed shadow-xs ${isAI ? 'bg-white border-[#1A1A1A]/10 text-[#2F2F2F]' : 'bg-[#1A1A1A] text-white border-[#1A1A1A] font-medium'}`}>
                         <div className="space-y-1">{renderMessageContent(msg.content, isAI)}</div>
+                        {isAI && msg.card && <ActionCardView card={msg.card} lang={lang} />}
                         {isAI && (
                           <div className="mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
                             <button onClick={() => handleCopy(msg.id, msg.content)} className="text-[9px] font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
