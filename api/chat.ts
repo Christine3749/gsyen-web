@@ -10,7 +10,7 @@ const CHRONOS_SCHEMA = {
   type: 'object',
   properties: {
     reply:  { type: 'string' },
-    action: { type: 'string', enum: ['none', 'create', 'update', 'delete', 'query'] },
+    action: { type: 'string', enum: ['none', 'create', 'confirm', 'update', 'delete', 'query'] },
     event: {
       type: 'object',
       properties: {
@@ -61,13 +61,14 @@ function scheduleSystemSuffix(
 {"reply":"回复内容","action":"none","event":{"title":"","date":"","time":"","category":"","location":"","subtitle":""}}
 
 action 枚举：
-- "none"   → 普通对话
-- "create" → 用户提到任何安排/会议/活动/今天有/下午有/明天有/要去/要参加 → 新建日程
-- "update" → 修改已有日程，event.title 填原标题
-- "delete" → 删除/取消日程，event.title 填要删除的标题
-- "query"  → 查询安排，reply 里直接列出
+- "none"    → 普通对话
+- "create"  → 意图明确的安排 → 直接新建
+- "confirm" → 意图模糊或不确定 → reply 问"请问是否要建立行程？"，event 预填信息
+- "update"  → 修改已有日程，event.title 填原标题
+- "delete"  → 删除/取消日程，event.title 填要删除的标题
+- "query"   → 查询安排，reply 里直接列出
 
-create 时 event 填完整字段：date 默认 ${today}，time 默认 09:00，category 默认 strategy。${eventsCtx}`
+create/confirm 时 event 填完整字段：date 默认 ${today}，time 默认 09:00，category 默认 strategy。${eventsCtx}`
 }
 // ─────────────────────────────────────────────────────────────────────────
 

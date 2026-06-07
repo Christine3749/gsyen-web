@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ChatMessage } from '../types/chat';
 import { ModelId } from '../config/models';
 import { EventItem } from '../types/schedule';
@@ -33,6 +33,19 @@ function buildEventItem(data: any): EventItem {
   };
 }
 
+// 用户确认/否认短语
+const CONFIRM_WORDS = ['是', '好', '建', '确认', '对', '要', '行', '加', 'yes', 'ok', 'sure', 'yeah', 'yep'];
+const DENY_WORDS    = ['不', '算', '取消', '否', '不要', '不用', 'no', 'nope', 'cancel'];
+
+function isConfirmation(text: string): boolean {
+  const t = text.trim().toLowerCase();
+  return CONFIRM_WORDS.some(w => t === w || (t.startsWith(w) && t.length <= 5));
+}
+function isDenial(text: string): boolean {
+  const t = text.trim().toLowerCase();
+  return DENY_WORDS.some(w => t.startsWith(w));
+}
+
 // Typewriter delays (ms)
 const DELAY = {
   sentenceEnd: () => 300 + Math.random() * 250,
@@ -48,6 +61,15 @@ function charDelay(char: string): number {
   if (char === '\n')             return DELAY.newline();
   if (Math.random() < 0.05)     return DELAY.rare();
   return DELAY.normal();
+}
+
+async function typewrite(text: string, onToken: (t: string) => void): Promise<void> {
+  let displayed = '';
+  for (const char of text) {
+    displayed += char;
+    onToken(displayed + '▍');
+    await new Promise(r => setTimeout(r, charDelay(char)));
+  }
 }
 
 interface UseChatStreamReturn {
@@ -66,6 +88,8 @@ interface UseChatStreamReturn {
 
 export function useChatStream(): UseChatStreamReturn {
   const [isLoading, setIsLoading] = useState(false);
+  // 待确认的预填日程（confirm action 时暂存）
+  const pendingEvent = useRef<any>(null);
 
   const send = useCallback(async ({
     text, model, history, lang,
@@ -82,16 +106,38 @@ export function useChatStream(): UseChatStreamReturn {
         return;
       }
 
+      // 2. 检查是否在等待用户确认建立行程
+      if (pendingEvent.current) {
+        if (isConfirmation(text)) {
+          // 用户确认 → 直接建立，不再请求 AI
+          const item = buildEventItem(pendingEvent.current);
+          scheduleStore.add(item);
+          window.dispatchEvent(new CustomEvent('schedule-updated'));
+          onScheduleAction?.('create', item.title);
+          pendingEvent.current = null;
+          const reply = lang === 'zh' ? `已建立。` : `Done.`;
+          await typewrite(reply, onToken);
+          setIsLoading(false);
+          onDone(reply);
+          return;
+        } else if (isDenial(text)) {
+          // 用户否认 → 清除，正常对话
+          pendingEvent.current = null;
+        }
+        // 其他情况：清除待确认，继续正常处理
+        pendingEvent.current = null;
+      }
+
       const isStructured = STRUCTURED_MODELS.has(model);
 
-      // 2. SSE 模型走关键词检测+消息增强；结构化模型由神机百炼 schema 处理意图
+      // 3. SSE 模型走关键词检测+消息增强
       let enrichedText = text;
       if (!isStructured) {
         const intent = detectScheduleIntent(text);
         if (intent) enrichedText = enrichMessageForSchedule(text, intent, lang);
       }
 
-      // 3. Build message history
+      // 4. Build message history
       const userMsg: ChatMessage = {
         id:        `user-${Date.now()}`,
         role:      'user',
@@ -100,7 +146,7 @@ export function useChatStream(): UseChatStreamReturn {
       };
       const apiMessages = [...history, { ...userMsg, content: enrichedText }];
 
-      // 4. 结构化模型带上当前日程上下文（供 update/delete 匹配）
+      // 5. 结构化模型带上当前日程上下文
       const eventsCtx = isStructured
         ? scheduleStore.getAll().map(e => ({ id: e.id, title: e.title, date: e.date, time: e.time }))
         : undefined;
@@ -120,7 +166,6 @@ export function useChatStream(): UseChatStreamReturn {
             await new Promise(r => setTimeout(r, charDelay(char)));
           }
         }
-        // SSE 模型的日程创建（```schedule``` 块解析）
         const intent = detectScheduleIntent(text);
         if (intent === 'add') {
           const event = scheduleStore.parseFromAIResponse(fullText);
@@ -133,22 +178,25 @@ export function useChatStream(): UseChatStreamReturn {
         onDone(fullText || '…');
 
       } else {
-        // ── 神机百炼结构化路径（ethan / fast / gemini）──────────
-        const data = await response.json();
+        // ── 神机百炼结构化路径 ───────────────────────────────────
+        const data   = await response.json();
         const reply  = data.text   ?? (lang === 'zh' ? '抱歉，未返回有效回复。' : 'Empty response.');
         const action = data.action ?? 'none';
         const ev     = data.event;
 
-        // ── 执行 Chronos CRUD ────────────────────────────────────
         if (action === 'create' && ev?.title) {
+          // 意图明确 → 直接建立
           const item = buildEventItem(ev);
           scheduleStore.add(item);
           window.dispatchEvent(new CustomEvent('schedule-updated'));
           onScheduleAction?.('create', item.title);
 
+        } else if (action === 'confirm' && ev?.title) {
+          // 意图模糊 → 暂存，等待确认
+          pendingEvent.current = ev;
+
         } else if (action === 'delete' && ev?.title) {
-          const all    = scheduleStore.getAll();
-          const target = all.find(e =>
+          const target = scheduleStore.getAll().find(e =>
             e.title.includes(ev.title) || ev.title.includes(e.title)
           );
           if (target) {
@@ -158,8 +206,7 @@ export function useChatStream(): UseChatStreamReturn {
           }
 
         } else if (action === 'update' && ev?.title) {
-          const all    = scheduleStore.getAll();
-          const target = all.find(e =>
+          const target = scheduleStore.getAll().find(e =>
             e.title.includes(ev.title) || ev.title.includes(e.title)
           );
           if (target) {
@@ -177,13 +224,7 @@ export function useChatStream(): UseChatStreamReturn {
           onScheduleAction?.('query', '');
         }
 
-        // ── Typewriter 效果 ──────────────────────────────────────
-        let displayed = '';
-        for (const char of reply) {
-          displayed += char;
-          onToken(displayed + '▍');
-          await new Promise(r => setTimeout(r, charDelay(char)));
-        }
+        await typewrite(reply, onToken);
         onDone(reply);
       }
 
