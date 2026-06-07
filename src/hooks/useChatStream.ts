@@ -115,10 +115,13 @@ export function useChatStream(): UseChatStreamReturn {
           window.dispatchEvent(new CustomEvent('schedule-updated'));
           onScheduleAction?.('create', item.title);
           pendingEvent.current = null;
-          const reply = lang === 'zh' ? `已建立。` : `Done.`;
-          await typewrite(reply, onToken);
+          const confirmReply = (lang === 'zh' ? '已建立。' : 'Done.')
+            + `\n\n▎ **${item.title}**`
+            + `\n▎ ${item.date}  ${item.time}`
+            + (item.location ? `\n▎ ${item.location}` : '');
+          await typewrite(confirmReply, onToken);
           setIsLoading(false);
-          onDone(reply);
+          onDone(confirmReply);
           return;
         } else if (isDenial(text)) {
           // 用户否认 → 清除，正常对话
@@ -184,12 +187,20 @@ export function useChatStream(): UseChatStreamReturn {
         const action = data.action ?? 'none';
         const ev     = data.event;
 
+        let finalReply = reply;
+
         if (action === 'create' && ev?.title) {
           // 意图明确 → 直接建立
           const item = buildEventItem(ev);
           scheduleStore.add(item);
           window.dispatchEvent(new CustomEvent('schedule-updated'));
           onScheduleAction?.('create', item.title);
+          // 在聊天气泡里附上行程卡片
+          finalReply = reply
+            + `\n\n▎ **${item.title}**`
+            + `\n▎ ${item.date}  ${item.time}`
+            + (item.location ? `\n▎ ${item.location}` : '')
+            + (item.subtitle ? `\n▎ ${item.subtitle}` : '');
 
         } else if (action === 'confirm' && ev?.title) {
           // 意图模糊 → 暂存，等待确认
@@ -203,6 +214,7 @@ export function useChatStream(): UseChatStreamReturn {
             scheduleStore.remove(target.id);
             window.dispatchEvent(new CustomEvent('schedule-updated'));
             onScheduleAction?.('delete', target.title);
+            finalReply = reply + `\n\n▎ ~~${target.title}~~ 已删除`;
           }
 
         } else if (action === 'update' && ev?.title) {
@@ -210,22 +222,35 @@ export function useChatStream(): UseChatStreamReturn {
             e.title.includes(ev.title) || ev.title.includes(e.title)
           );
           if (target) {
-            scheduleStore.update(target.id, {
+            const changes = {
               ...(ev.date     && { date:     ev.date }),
               ...(ev.time     && { time:     ev.time }),
               ...(ev.location && { location: ev.location }),
               ...(ev.subtitle && { subtitle: ev.subtitle }),
-            });
+            };
+            scheduleStore.update(target.id, changes);
             window.dispatchEvent(new CustomEvent('schedule-updated'));
             onScheduleAction?.('update', target.title);
+            const updated = { ...target, ...changes };
+            finalReply = reply
+              + `\n\n▎ **${updated.title}**`
+              + `\n▎ ${updated.date}  ${updated.time}`
+              + (updated.location ? `\n▎ ${updated.location}` : '');
           }
 
         } else if (action === 'query') {
+          const todayEvents = scheduleStore.getToday();
+          if (todayEvents.length > 0) {
+            finalReply = reply + '\n\n'
+              + todayEvents.map(e =>
+                  `▎ **${e.title}**  ${e.time}` + (e.location ? `  · ${e.location}` : '')
+                ).join('\n');
+          }
           onScheduleAction?.('query', '');
         }
 
-        await typewrite(reply, onToken);
-        onDone(reply);
+        await typewrite(finalReply, onToken);
+        onDone(finalReply);
       }
 
     } catch (err) {
