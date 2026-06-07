@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChatMessage, StoredSession } from '../types/chat';
 import { chatSessionStore } from '../stores/chatSessionStore';
 import { ModelId } from '../config/models';
@@ -18,6 +18,10 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
   const [messages, setMessagesState] = useState<ChatMessage[]>([]);
   const [sessions, setSessions] = useState<StoredSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Ref keeps the session ID readable synchronously inside async callbacks,
+  // avoiding stale closure bugs during streaming (onToken fires hundreds of times).
+  const sessionIdRef = useRef<string | null>(null);
 
   // Boot: load persisted chat + session list
   useEffect(() => {
@@ -39,14 +43,20 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     setMessagesState(msgs);
     chatSessionStore.saveCurrentChat(msgs);
     if (msgs.some(m => m.role === 'user')) {
-      const sid = currentSessionId ?? `session-${Date.now()}`;
-      if (!currentSessionId) setCurrentSessionId(sid);
-      const updated = chatSessionStore.upsert(sid, msgs, model);
+      // Use ref for synchronous read — state would be stale inside async loops
+      if (!sessionIdRef.current) {
+        sessionIdRef.current = `session-${Date.now()}`;
+        setCurrentSessionId(sessionIdRef.current);
+      }
+      const updated = chatSessionStore.upsert(sessionIdRef.current, msgs, model);
       setSessions(updated);
     }
-  }, [currentSessionId]);
+  // Empty deps intentional: all reads go through ref or stable store
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadSession = useCallback((session: StoredSession) => {
+    sessionIdRef.current = session.id;
     setCurrentSessionId(session.id);
     setMessagesState(session.messages);
     chatSessionStore.saveCurrentChat(session.messages);
@@ -55,14 +65,16 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
   const deleteSession = useCallback((id: string) => {
     const updated = chatSessionStore.delete(id);
     setSessions(updated);
-    if (currentSessionId === id) {
+    if (sessionIdRef.current === id) {
+      sessionIdRef.current = null;
       setCurrentSessionId(null);
       setMessagesState([defaultGreeting(lang)]);
       chatSessionStore.clearCurrentChat();
     }
-  }, [currentSessionId, lang]);
+  }, [lang]);
 
   const newChat = useCallback(() => {
+    sessionIdRef.current = null;
     setCurrentSessionId(null);
     setMessagesState([]);
     chatSessionStore.clearCurrentChat();

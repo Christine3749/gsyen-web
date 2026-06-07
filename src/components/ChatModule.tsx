@@ -83,17 +83,24 @@ export default function ChatModule({ lang }: ChatModuleProps) {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     const history = [...messages, userMsg];
+
+    // 1. Save user message to session immediately
     saveChat(history, selectedModel);
     setInputVal('');
 
     const aiId   = `ai-${Date.now()}`;
     const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    // 2. Show AI placeholder bubble right away
+    setMessages([...history, { id: aiId, role: 'model', content: '▍', timestamp: aiTime }]);
+
     await send({
       text, model: selectedModel, history: messages, lang,
+      // onToken: display only — no session write to avoid hundreds of upsert calls
       onToken: (partial) => {
-        saveChat([...history, { id: aiId, role: 'model', content: partial, timestamp: aiTime }], selectedModel);
+        setMessages([...history, { id: aiId, role: 'model', content: partial, timestamp: aiTime }]);
       },
+      // onDone: single session write at end of stream
       onDone: (full) => {
         saveChat([...history, { id: aiId, role: 'model', content: full, timestamp: aiTime }], selectedModel);
       },
@@ -104,7 +111,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
         showToast(lang === 'zh' ? `✅ 日程已添加：${title}` : `✅ Event added: ${title}`);
       },
     });
-  }, [isLoading, messages, selectedModel, lang, saveChat, send]);
+  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send]);
 
   const showToast = (msg: string) => {
     setToast(msg);
