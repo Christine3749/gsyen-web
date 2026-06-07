@@ -342,19 +342,25 @@ async function startServer() {
           const action = (modelAction === 'none' && parsed.event?.title)
             ? 'create'
             : modelAction;
-          // 日期兜底：小模型容易乱猜日期，若偏离 clientDate 超过 3 天则强制修正
+          // 司辰：校验模型日期，偏离 clientDate 超过 3 天则修正并记录
           const ev = parsed.event?.title ? parsed.event : null;
+          let dateFixed = false;
+          let dateOriginal: string | undefined;
           if (ev && clientDate) {
             const evMs = new Date(ev.date || '').getTime();
             const refMs = new Date(clientDate).getTime();
             if (!evMs || Math.abs(refMs - evMs) > 3 * 86400_000) {
+              dateOriginal = ev.date || '';
               ev.date = clientDate;
+              dateFixed = true;
             }
           }
           return res.json({
-            text:   parsed.reply  ?? rawContent,
+            text:        parsed.reply ?? rawContent,
             action,
-            event:  ev,
+            event:       ev,
+            dateFixed,
+            dateOriginal,
           });
         } catch {
           return res.json({ text: rawContent, action: 'none', event: null });
