@@ -1,5 +1,45 @@
 export const config = { runtime: 'edge' };
 
+// ── Structured-output helpers ────────────────────────────────────────────
+function todayDateStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function scheduleSystemSuffix(today: string): string {
+  return `
+
+【日程通道 — 必须输出 JSON】
+每次回复必须是严格 JSON 对象（不加任何 markdown 代码块包裹），格式如下：
+{"reply":"正常回复内容","shouldCreateEvent":false,"event":null}
+当用户有任何安排、计划、提醒、任务意图（"今天要做""帮我安排""明天会议"等），shouldCreateEvent 置为 true，event 填写：
+{"title":"事件名称","date":"${today}","time":"09:00","category":"creative|finance|secure|strategy","location":"地点或空字符串","subtitle":"一句话说明"}
+今天日期：${today}。日期未指定默认今天，时间未指定默认 09:00。`;
+}
+
+const GEMINI_RESPONSE_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    reply:             { type: 'STRING' },
+    shouldCreateEvent: { type: 'BOOLEAN' },
+    event: {
+      type: 'OBJECT',
+      nullable: true,
+      properties: {
+        title:    { type: 'STRING' },
+        date:     { type: 'STRING' },
+        time:     { type: 'STRING' },
+        category: { type: 'STRING' },
+        location: { type: 'STRING' },
+        subtitle: { type: 'STRING' },
+      },
+      required: ['title', 'date', 'time'],
+    },
+  },
+  required: ['reply', 'shouldCreateEvent'],
+};
+// ─────────────────────────────────────────────────────────────────────────
+
 const SYSTEM_PROMPT = `你的名字是「缈缈」，这是专有名字，不是「缥缈」，不是任何其他词。无论何时被问到名字，你只回答：我是缈缈。绝对不能写成缥缈、渺渺或任何变体。
 
 你是 GSYEN 疆域的总管家，也是 PRISM 的总操盘手，英文名 Miǎo Miǎo。
@@ -170,6 +210,92 @@ export default async function handler(req: Request): Promise<Response> {
       );
     }
 
+    // ── Gemini native API (JSON mode, structured output) ──────────────
+    if (model === 'gemini') {
+      const today = todayDateStr();
+      const geminiMessages = messages.map((m: any) => ({
+        role: m.role === 'model' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      const geminiRes = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: geminiMessages,
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT + scheduleSystemSuffix(today) }] },
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: GEMINI_RESPONSE_SCHEMA,
+          },
+        }),
+      });
+      if (!geminiRes.ok) {
+        const err = await geminiRes.text().catch(() => geminiRes.statusText);
+        return new Response(JSON.stringify({ error: `Gemini API error: ${err}` }), {
+          status: 502, headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const geminiData = await geminiRes.json();
+      const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+      try {
+        const parsed = JSON.parse(rawText);
+        return new Response(JSON.stringify({
+          text:  parsed.reply  ?? rawText,
+          event: parsed.shouldCreateEvent && parsed.event?.title ? parsed.event : null,
+        }), { headers: { 'Content-Type': 'application/json' } });
+      } catch {
+        return new Response(JSON.stringify({ text: rawText, event: null }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // ── Ollama JSON mode (ethan / fast, structured output) ────────────
+    if (model === 'ethan' || model === 'fast') {
+      const today = todayDateStr();
+      const ollamaPayload = [
+        { role: 'system', content: SYSTEM_PROMPT + scheduleSystemSuffix(today) },
+        ...messages.map((m: any) => ({
+          role: m.role === 'model' ? 'assistant' : 'user',
+          content: m.content,
+        })),
+      ];
+      const ollamaRes = await fetch(route.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: route.modelId,
+          messages: ollamaPayload,
+          stream: false,
+          response_format: { type: 'json_object' },
+        }),
+      });
+      if (!ollamaRes.ok) {
+        const err = await ollamaRes.text().catch(() => ollamaRes.statusText);
+        return new Response(JSON.stringify({ error: `${model} API error: ${err}` }), {
+          status: 502, headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const ollamaData = await ollamaRes.json();
+      const rawContent = ollamaData.choices?.[0]?.message?.content ?? '{}';
+      try {
+        const parsed = JSON.parse(rawContent);
+        return new Response(JSON.stringify({
+          text:  parsed.reply  ?? rawContent,
+          event: parsed.shouldCreateEvent && parsed.event?.title ? parsed.event : null,
+        }), { headers: { 'Content-Type': 'application/json' } });
+      } catch {
+        return new Response(JSON.stringify({ text: rawContent, event: null }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // ── All other models: SSE streaming ───────────────────────────────
     const payload = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...messages.map((m: any) => ({

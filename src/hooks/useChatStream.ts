@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ChatMessage } from '../types/chat';
 import { ModelId } from '../config/models';
+import { EventItem } from '../types/schedule';
 import { sendToGateway, readSSEStream } from '../services/chatService';
 import { askPredictionExpert } from '../services/predictService';
 import {
@@ -8,6 +9,28 @@ import {
   detectScheduleIntent,
   enrichMessageForSchedule,
 } from '../stores/scheduleStore';
+
+// Models that return application/json with {text, event} instead of SSE.
+// These use native structured output (Gemini responseSchema / Ollama json_object).
+const STRUCTURED_MODELS = new Set<ModelId>(['gemini', 'ethan', 'fast'] as ModelId[]);
+
+/** Build a ready-to-save EventItem from raw AI structured data. */
+function buildEventItem(data: any): EventItem {
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  return {
+    id: `ai-${Date.now()}`,
+    title:    data.title,
+    subtitle: data.subtitle  || '',
+    time:     data.time      || '09:00',
+    date:     data.date      || todayStr,
+    endDate:  data.endDate   || data.date || todayStr,
+    category: data.category  || 'strategy',
+    location: data.location  || '',
+    completed: false,
+    status:   'todo',
+  };
+}
 
 // Typewriter delays (ms) — gives the "mechanical typewriter" feel
 const DELAY = {
@@ -59,9 +82,12 @@ export function useChatStream(): UseChatStreamReturn {
         return;
       }
 
-      // 2. Detect schedule intent and enrich message
-      const intent = detectScheduleIntent(text);
-      const enrichedText = enrichMessageForSchedule(text, intent, lang);
+      // 2. Detect schedule intent and enrich message.
+      //    Structured-output models (gemini/ethan/fast) handle everything via
+      //    responseSchema + system-prompt suffix — no keyword detection needed.
+      const isStructured = STRUCTURED_MODELS.has(model);
+      const intent = isStructured ? null : detectScheduleIntent(text);
+      const enrichedText = intent ? enrichMessageForSchedule(text, intent, lang) : text;
 
       // 3. Build message history for API
       const userMsg: ChatMessage = {
@@ -99,16 +125,32 @@ export function useChatStream(): UseChatStreamReturn {
         }
         onDone(fullText || '…');
       } else {
-        // ── Non-streaming fallback ───────────────────────────────
+        // ── Non-streaming / structured-output path ───────────────
         const data = await response.json();
         const reply = data.text ?? (lang === 'zh' ? '抱歉，未返回有效回复。' : 'Empty response.');
-        if (intent === 'add') {
+
+        // Structured-output models (gemini/ethan/fast): server returns {text, event}
+        if (data.event?.title) {
+          const eventItem = buildEventItem(data.event);
+          scheduleStore.add(eventItem);
+          window.dispatchEvent(new CustomEvent('schedule-updated'));
+          onScheduleAdded?.(eventItem.title);
+        } else if (intent === 'add') {
+          // Fallback for SSE models that returned JSON for some reason
           const event = scheduleStore.parseFromAIResponse(reply);
           if (event) {
             scheduleStore.add(event);
             window.dispatchEvent(new CustomEvent('schedule-updated'));
             onScheduleAdded?.(event.title);
           }
+        }
+
+        // Simulate typewriter effect on the reply text
+        let displayed = '';
+        for (const char of reply) {
+          displayed += char;
+          onToken(displayed + '▍');
+          await new Promise(r => setTimeout(r, charDelay(char)));
         }
         onDone(reply);
       }
