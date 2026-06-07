@@ -36,7 +36,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
   const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
   const [toast, setToast]             = useState<string | null>(null);
 
-  const { messages, sessions, currentSessionId, saveChat, loadSession, deleteSession, newChat } =
+  const { messages, sessions, currentSessionId, setMessages, saveChat, loadSession, deleteSession, newChat } =
     useChatSession(lang);
   const { isLoading, send } = useChatStream();
 

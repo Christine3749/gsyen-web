@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Plus, 
-  Trash2, 
-  Search, 
-  Sparkles, 
-  MapPin, 
-  ArrowLeft, 
-  ArrowRight, 
-  Check, 
+import React, { useState, useEffect } from 'react';
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Plus,
+  Trash2,
+  Search,
+  Sparkles,
+  MapPin,
+  ArrowLeft,
+  ArrowRight,
+  Check,
   Move,
   CheckCircle2,
   ListFilter,
@@ -25,19 +25,93 @@ import {
   CalendarDays,
   PanelLeft
 } from 'lucide-react';
+import { EventItem, ColumnId, EventCategory } from '../types/schedule';
+import { useScheduleEvents } from '../hooks/useScheduleEvents';
+import { useDragDrop } from '../hooks/useDragDrop';
+import { useMiniCalendarDays, useMainCalendarDays, useWeekDays, isEventOnDate } from '../hooks/useCalendarDays';
 
-interface EventItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  time: string;
-  date: string; // "YYYY-MM-DD" Start Date
-  endDate?: string; // "YYYY-MM-DD" End Date
-  category: 'creative' | 'finance' | 'secure' | 'strategy';
-  location: string;
-  completed: boolean;
-  status: 'todo' | 'progress' | 'review' | 'done';
-}
+// ─── Constants (stable, defined outside component) ───────────────────────────
+
+const categoryMap = {
+  creative: {
+    zhLabel: '创意设计', enLabel: 'Creative & Graphics',
+    color: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+    textAccent: 'text-emerald-700', dot: 'bg-emerald-500',
+    accentBg: 'bg-emerald-500',
+    pastelBg: 'bg-emerald-50/95 text-emerald-800 border-emerald-500/10',
+    solidBg: 'bg-emerald-600 text-[#F9F8F6] border-emerald-700/20 font-bold',
+    borderColor: 'border-l-emerald-500'
+  },
+  finance: {
+    zhLabel: '资产流转', enLabel: 'Capital & Flows',
+    color: 'bg-amber-50 text-amber-800 border-amber-200/80',
+    textAccent: 'text-amber-700', dot: 'bg-amber-500',
+    accentBg: 'bg-amber-500',
+    pastelBg: 'bg-amber-50/95 text-amber-800 border-amber-500/10',
+    solidBg: 'bg-amber-600 text-[#F9F8F6] border-amber-700/20 font-bold',
+    borderColor: 'border-l-amber-500'
+  },
+  secure: {
+    zhLabel: '保密机制', enLabel: 'Citadel Sec Ops',
+    color: 'bg-indigo-50 text-indigo-800 border-indigo-200/80',
+    textAccent: 'text-indigo-700', dot: 'bg-indigo-500',
+    accentBg: 'bg-indigo-500',
+    pastelBg: 'bg-indigo-50/95 text-indigo-800 border-indigo-500/10',
+    solidBg: 'bg-indigo-600 text-[#F9F8F6] border-indigo-700/20 font-bold',
+    borderColor: 'border-l-indigo-500'
+  },
+  strategy: {
+    zhLabel: '路线决策', enLabel: 'Strategic Blueprints',
+    color: 'bg-teal-50 text-teal-800 border-teal-200/80',
+    textAccent: 'text-teal-700', dot: 'bg-teal-500',
+    accentBg: 'bg-teal-500',
+    pastelBg: 'bg-teal-50/95 text-teal-800 border-teal-500/10',
+    solidBg: 'bg-teal-600 text-[#F9F8F6] border-teal-700/20 font-bold',
+    borderColor: 'border-l-teal-500'
+  }
+};
+
+const columns: { id: ColumnId; zhTitle: string; enTitle: string; colorClass: string; borderFocus: string }[] = [
+  { id: 'todo',     zhTitle: '预约待编', enTitle: 'Backlog Tasks',  colorClass: 'bg-[#F9F8F6]/40 border-zinc-200',        borderFocus: 'border-[#1A1A1A] bg-zinc-200/40' },
+  { id: 'progress', zhTitle: '执行中柜', enTitle: 'In Progress',    colorClass: 'bg-[#F9F8F6]/20 border-[#1A1A1A]/5',     borderFocus: 'border-amber-500 bg-amber-50/10' },
+  { id: 'review',   zhTitle: '评审阶段', enTitle: 'Under Review',   colorClass: 'bg-[#F9F8F6]/20 border-[#1A1A1A]/5',     borderFocus: 'border-indigo-500 bg-indigo-50/10' },
+  { id: 'done',     zhTitle: '极速已成', enTitle: 'Completed',      colorClass: 'bg-emerald-50/10 border-emerald-200/30', borderFocus: 'border-emerald-500 bg-emerald-50/20' },
+];
+
+const DEFAULT_EVENTS: EventItem[] = [
+  {
+    id: '1', title: '雅致品牌推介会与设计评审',
+    subtitle: '首席设计师审核矢量徽志第一阶段草图比例',
+    time: '10:00', date: '2026-05-26', endDate: '2026-05-28',
+    category: 'creative', location: 'Atelier Room III', completed: false, status: 'todo'
+  },
+  {
+    id: '2', title: '中世纪美学季度财务审计',
+    subtitle: '整理资产负债表与原浆纸浆采购耗料发票',
+    time: '14:30', date: '2026-05-26', endDate: '2026-05-26',
+    category: 'finance', location: 'Boardroom Annex', completed: false, status: 'progress'
+  },
+  {
+    id: '3', title: '机密系统服务器 PGP 与 SSL 轮转',
+    subtitle: '更新本地多端数据库独立高强度访问密钥对',
+    time: '17:00', date: '2026-05-27', endDate: '2026-05-27',
+    category: 'secure', location: 'Citadel Operations Vault', completed: true, status: 'done'
+  },
+  {
+    id: '4', title: '品牌定位战略圆桌会议',
+    subtitle: '制定下半年奢侈印刷工艺推广纲领',
+    time: '09:00', date: '2026-05-24', endDate: '2026-05-25',
+    category: 'strategy', location: 'Studio Loft A', completed: false, status: 'todo'
+  },
+  {
+    id: '5', title: '设计方案交付与客户签收确认',
+    subtitle: '提交全部高分辨率向量化资产及版权契约说明',
+    time: '15:30', date: '2026-05-30', endDate: '2026-05-30',
+    category: 'creative', location: 'Client Agency Office', completed: false, status: 'review'
+  },
+];
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ScheduleModuleProps {
   lang: 'zh' | 'en';
@@ -45,188 +119,95 @@ interface ScheduleModuleProps {
 }
 
 type ViewMode = 'month' | 'week' | 'day' | 'kanban';
-type ColumnId = 'todo' | 'progress' | 'review' | 'done';
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ScheduleModule({ lang, defaultView = 'kanban' }: ScheduleModuleProps) {
-  const LOCAL_STORAGE_KEY = 'identity_lab_schedule';
-
-  // Compute today's date string once (YYYY-MM-DD) — never hardcode a date
-  const todayDate = new Date();
+  // ── Static today reference ────────────────────────────────────────────────
+  const todayDate   = new Date();
   const todayString = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
 
-  // Master State
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>(defaultView === 'calendar' ? 'month' : 'kanban');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [searchText, setSearchText] = useState<string>('');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  // Primary calendar selected date focus
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  
-  // Category toggles in Google Calendar style sidebar (My Calendars)
-  const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({
-    creative: true,
-    finance: true,
-    secure: true,
-    strategy: true
+  // ── UI State ──────────────────────────────────────────────────────────────
+  const [viewMode,           setViewMode]           = useState<ViewMode>(defaultView === 'calendar' ? 'month' : 'kanban');
+  const [filterCategory,     setFilterCategory]     = useState<string>('all');
+  const [searchText,         setSearchText]         = useState<string>('');
+  const [isSidebarOpen,      setIsSidebarOpen]      = useState(true);
+  const [selectedDate,       setSelectedDate]       = useState<Date>(new Date());
+  const [visibleCategories,  setVisibleCategories]  = useState<Record<string, boolean>>({
+    creative: true, finance: true, secure: true, strategy: true
   });
 
-  // Drag-and-Drop States
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<ColumnId | null>(null);
-  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
-
-  // Form input states
-  const [newTitle, setNewTitle] = useState('');
+  // Add-form state
+  const [newTitle,    setNewTitle]    = useState('');
   const [newSubtitle, setNewSubtitle] = useState('');
-  const [newTime, setNewTime] = useState('10:00');
-  const [newDate, setNewDate] = useState(todayString);
-  const [newEndDate, setNewEndDate] = useState(todayString);
-  const [newCategory, setNewCategory] = useState<'creative' | 'finance' | 'secure' | 'strategy'>('creative');
+  const [newTime,     setNewTime]     = useState('10:00');
+  const [newDate,     setNewDate]     = useState(todayString);
+  const [newEndDate,  setNewEndDate]  = useState(todayString);
+  const [newCategory, setNewCategory] = useState<EventCategory>('creative');
   const [newLocation, setNewLocation] = useState('');
-  const [newStatus, setNewStatus] = useState<ColumnId>('todo');
+  const [newStatus,   setNewStatus]   = useState<ColumnId>('todo');
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Detail Modal / Edit Event
+  // Modal-edit state
   const [selectedEventForView, setSelectedEventForView] = useState<EventItem | null>(null);
-  const [isEditingInModal, setIsEditingInModal] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
+  const [isEditingInModal,     setIsEditingInModal]     = useState(false);
+  const [editTitle,    setEditTitle]    = useState('');
   const [editSubtitle, setEditSubtitle] = useState('');
-  const [editTime, setEditTime] = useState('');
-  const [editDate, setEditDate] = useState('');
-  const [editEndDate, setEditEndDate] = useState('');
-  const [editCategory, setEditCategory] = useState<'creative' | 'finance' | 'secure' | 'strategy'>('creative');
+  const [editTime,     setEditTime]     = useState('');
+  const [editDate,     setEditDate]     = useState('');
+  const [editEndDate,  setEditEndDate]  = useState('');
+  const [editCategory, setEditCategory] = useState<EventCategory>('creative');
   const [editLocation, setEditLocation] = useState('');
-  const [editStatus, setEditStatus] = useState<ColumnId>('todo');
+  const [editStatus,   setEditStatus]   = useState<ColumnId>('todo');
 
-  // Quick Inline Add Popover on Month Grid Cells
-  const [quickAddDate, setQuickAddDate] = useState<string | null>(null);
+  // Quick-add & notification
+  const [quickAddDate,  setQuickAddDate]  = useState<string | null>(null);
   const [quickAddTitle, setQuickAddTitle] = useState('');
+  const [notification,  setNotification]  = useState<string | null>(null);
 
-  // Toast / System Notification
-  const [notification, setNotification] = useState<string | null>(null);
+  // ── Data & Calendar Hooks ─────────────────────────────────────────────────
+  const { events, addEvent, updateEvent, removeEvent, moveEvent, changeStatus } = useScheduleEvents(DEFAULT_EVENTS);
+  const { draggingId, dragOverColumn, dragOverDate,
+          onDragStart, onDragEnd,
+          onDragOverColumn, onDragOverDate,
+          onDropColumn, onDropDate } = useDragDrop();
 
-  // Auto sync start and end date for user convenience
-  useEffect(() => {
-    if (newDate) {
-      setNewEndDate(newDate);
-    }
-  }, [newDate]);
+  const miniCalendarDays    = useMiniCalendarDays(selectedDate);
+  const mainCalendarGridDays = useMainCalendarDays(selectedDate, events);
+  const currentWeekDaysList  = useWeekDays(selectedDate, lang);
 
-  // Helper check if event spans a date
-  const isEventOnDate = (event: EventItem, dateString: string) => {
-    const start = event.date;
-    const end = event.endDate || event.date;
-    return dateString >= start && dateString <= end;
-  };
+  // ── Effects ───────────────────────────────────────────────────────────────
+  useEffect(() => { if (newDate) setNewEndDate(newDate); }, [newDate]);
+  useEffect(() => { setViewMode(defaultView === 'calendar' ? 'month' : 'kanban'); }, [defaultView]);
 
-  // Load state from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const sanitized: EventItem[] = parsed.map((item: any) => ({
-          ...item,
-          status: item.status || (item.completed ? 'done' : 'todo')
-        }));
-        setEvents(sanitized);
-      } catch (e) {
-        console.error("Failed to parse schedule:", e);
-      }
-    } else {
-      const defaultEvents: EventItem[] = [
-        {
-          id: '1',
-          title: lang === 'zh' ? '雅致品牌推介会与设计评审' : 'Atelier Brand Pitch & Design Review',
-          subtitle: lang === 'zh' ? '首席设计师审核矢量徽志第一阶段草图比例' : 'Review Phase 1 layout proportion & vector metrics',
-          time: '10:00',
-          date: '2026-05-26',
-          endDate: '2026-05-28',
-          category: 'creative',
-          location: 'Atelier Room III',
-          completed: false,
-          status: 'todo'
-        },
-        {
-          id: '2',
-          title: lang === 'zh' ? '中世纪美学季度财务审计' : 'Mid-century Atelier Financial Audit',
-          subtitle: lang === 'zh' ? '整理资产负债表与原浆纸浆采购耗料发票' : 'Consolidate double-entry asset ledger lists & stock invoices',
-          time: '14:30',
-          date: '2026-05-26',
-          endDate: '2026-05-26',
-          category: 'finance',
-          location: 'Boardroom Annex',
-          completed: false,
-          status: 'progress'
-        },
-        {
-          id: '3',
-          title: lang === 'zh' ? '机密系统服务器 PGP 与 SSL 轮转' : 'PGP Key Rotation & Server SSL Audit',
-          subtitle: lang === 'zh' ? '更新本地多端数据库独立高强度访问密钥对' : 'Refresh database high-strength cryptographic key matrices',
-          time: '17:00',
-          date: '2026-05-27',
-          endDate: '2026-05-27',
-          category: 'secure',
-          location: 'Citadel Operations Vault',
-          completed: true,
-          status: 'done'
-        },
-        {
-          id: '4',
-          title: lang === 'zh' ? '品牌定位战略圆桌会议' : 'Brand Positioning Master Workshop',
-          subtitle: lang === 'zh' ? '制定下半年奢侈印刷工艺推广纲领' : 'Establish luxury letterpress printing promotion strategy',
-          time: '09:00',
-          date: '2026-05-24',
-          endDate: '2026-05-25',
-          category: 'strategy',
-          location: 'Studio Loft A',
-          completed: false,
-          status: 'todo'
-        },
-        {
-          id: '5',
-          title: lang === 'zh' ? '设计方案交付与客户签收确认' : 'Creative Mockups Handover & Receipt',
-          subtitle: lang === 'zh' ? '提交全部高分辨率向量化资产及版权契约说明' : 'Deliver all vector resources and physical copyright certificates',
-          time: '15:30',
-          date: '2026-05-30',
-          endDate: '2026-05-30',
-          category: 'creative',
-          location: 'Client Agency Office',
-          completed: false,
-          status: 'review'
-        }
-      ];
-      setEvents(defaultEvents);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultEvents));
-    }
-  }, [lang]);
-
-  // Handle external defaultView changes
-  useEffect(() => {
-    setViewMode(defaultView === 'calendar' ? 'month' : 'kanban');
-  }, [defaultView]);
-
-  // Save events helper
-  const saveEvents = (updated: EventItem[]) => {
-    setEvents(updated);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-  };
-
+  // ── Derived ───────────────────────────────────────────────────────────────
   const triggerNotification = (text: string) => {
     setNotification(text);
-    setTimeout(() => {
-      setNotification(null);
-    }, 3500);
+    setTimeout(() => setNotification(null), 3500);
   };
 
-  // Add event handler
+  const activeFilteredList = events.filter(item => {
+    const matchesSearch         = item.title.toLowerCase().includes(searchText.toLowerCase()) ||
+                                  item.subtitle.toLowerCase().includes(searchText.toLowerCase());
+    const matchesCategoryDropdown = filterCategory === 'all' || item.category === filterCategory;
+    const categoryIsChecked     = visibleCategories[item.category] !== false;
+    return matchesSearch && matchesCategoryDropdown && categoryIsChecked;
+  });
+
+  const getKanbanEventsForColumn = (colId: ColumnId) =>
+    activeFilteredList.filter(e => (e.status || (e.completed ? 'done' : 'todo')) === colId);
+
+  // ── Aliases for drag hooks (same signature → direct alias) ────────────────
+  const handleDragStart     = onDragStart;
+  const handleDragEnd       = onDragEnd;
+  const handleDragOverColumn = onDragOverColumn;
+  const handleDragOverDate   = onDragOverDate;
+
+  // ── Event Handlers ────────────────────────────────────────────────────────
   const handleAddEvent = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-
-    const event: EventItem = {
+    addEvent({
       id: Date.now().toString(),
       title: newTitle,
       subtitle: newSubtitle || (lang === 'zh' ? '自主拟定日程项目' : 'Self-defined agenda block'),
@@ -236,31 +217,17 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
       category: newCategory,
       location: newLocation || (lang === 'zh' ? '总部工作坊' : 'Atelier Headquarters'),
       status: newStatus,
-      completed: newStatus === 'done'
-    };
-
-    const updated = [...events, event].sort((a, b) => {
-      const datetimeA = `${a.date}T${a.time}`;
-      const datetimeB = `${b.date}T${b.time}`;
-      return datetimeA.localeCompare(datetimeB);
+      completed: newStatus === 'done',
     });
-
-    saveEvents(updated);
     triggerNotification(lang === 'zh' ? `信条安排 Deploy 成功: ${newTitle}` : `Card successfully deployed: ${newTitle}`);
-
-    // Reset inputs
-    setNewTitle('');
-    setNewSubtitle('');
-    setNewLocation('');
+    setNewTitle(''); setNewSubtitle(''); setNewLocation('');
     setShowAddForm(false);
   };
 
-  // Quick creation popover for day click
   const handleQuickAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickAddTitle.trim() || !quickAddDate) return;
-
-    const event: EventItem = {
+    addEvent({
       id: Date.now().toString(),
       title: quickAddTitle,
       subtitle: lang === 'zh' ? '快速记点日程' : 'Quick grid-created item',
@@ -269,165 +236,61 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
       category: 'creative',
       location: lang === 'zh' ? '主设计工坊' : 'Atelier HQ Loft B',
       status: 'todo',
-      completed: false
-    };
-
-    const updated = [...events, event].sort((a, b) => {
-      const datetimeA = `${a.date}T${a.time}`;
-      const datetimeB = `${b.date}T${b.time}`;
-      return datetimeA.localeCompare(datetimeB);
+      completed: false,
     });
-
-    saveEvents(updated);
     triggerNotification(lang === 'zh' ? `快速建立: ${quickAddTitle}` : `Quick added: ${quickAddTitle}`);
-    setQuickAddTitle('');
-    setQuickAddDate(null);
+    setQuickAddTitle(''); setQuickAddDate(null);
   };
 
-  // Delete event
   const handleDeleteEvent = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    const currentItem = events.find(item => item.id === id);
-    const updated = events.filter(item => item.id !== id);
-    saveEvents(updated);
-    if (selectedEventForView?.id === id) {
-      setSelectedEventForView(null);
-      setIsEditingInModal(false);
-    }
-    triggerNotification(lang === 'zh' ? `丢弃卡片: ${currentItem?.title}` : `Incident card purged from database`);
+    const item = events.find(ev => ev.id === id);
+    removeEvent(id);
+    if (selectedEventForView?.id === id) { setSelectedEventForView(null); setIsEditingInModal(false); }
+    triggerNotification(lang === 'zh' ? `丢弃卡片: ${item?.title}` : `Incident card purged from database`);
   };
 
-  // Open view/edit modal
   const handleOpenEventModal = (item: EventItem, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSelectedEventForView(item);
     setIsEditingInModal(false);
-    
-    // Copy item details for editing state
-    setEditTitle(item.title);
-    setEditSubtitle(item.subtitle);
-    setEditTime(item.time);
-    setEditDate(item.date);
+    setEditTitle(item.title); setEditSubtitle(item.subtitle);
+    setEditTime(item.time);   setEditDate(item.date);
     setEditEndDate(item.endDate || item.date);
     setEditCategory(item.category);
     setEditLocation(item.location);
     setEditStatus(item.status);
   };
 
-  // Save edits made in details modal
   const handleSaveModalEdits = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEventForView || !editTitle.trim()) return;
-
-    const updated = events.map(item => {
-      if (item.id === selectedEventForView.id) {
-        return {
-          ...item,
-          title: editTitle,
-          subtitle: editSubtitle,
-          time: editTime,
-          date: editDate,
-          endDate: editEndDate || editDate,
-          category: editCategory,
-          location: editLocation,
-          status: editStatus,
-          completed: editStatus === 'done'
-        };
-      }
-      return item;
+    updateEvent(selectedEventForView.id, {
+      title: editTitle, subtitle: editSubtitle,
+      time: editTime,   date: editDate,
+      endDate: editEndDate || editDate,
+      category: editCategory, location: editLocation,
+      status: editStatus, completed: editStatus === 'done',
     });
-
-    saveEvents(updated);
-    setSelectedEventForView(null);
-    setIsEditingInModal(false);
+    setSelectedEventForView(null); setIsEditingInModal(false);
     triggerNotification(lang === 'zh' ? '信条变动调整已同步保存' : 'Manuscript revisions deployed & updated successfully');
   };
 
-  // HTML5 Drag handlers for columns (Kanban)
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    setDraggingId(id);
-    e.dataTransfer.setData('text/plain', id);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragEnd = () => {
-    setDraggingId(null);
-    setDragOverColumn(null);
-    setDragOverDate(null);
-  };
-
-  const handleDragOverColumn = (e: React.DragEvent, status: ColumnId) => {
-    e.preventDefault();
-    if (dragOverColumn !== status) {
-      setDragOverColumn(status);
-    }
-  };
-
   const handleDropColumn = (e: React.DragEvent, targetStatus: ColumnId) => {
-    e.preventDefault();
-    const id = e.dataTransfer.getData('text/plain') || draggingId;
+    const id = onDropColumn(e);
     if (id) {
-      const updated = events.map(event => {
-        if (event.id === id) {
-          return {
-            ...event,
-            status: targetStatus,
-            completed: targetStatus === 'done'
-          };
-        }
-        return event;
-      });
-      saveEvents(updated);
+      changeStatus(id, targetStatus);
       triggerNotification(lang === 'zh' ? `阶段迁移至 ${targetStatus.toUpperCase()}` : `Stage updated to ${targetStatus.toUpperCase()}`);
-    }
-    setDraggingId(null);
-    setDragOverColumn(null);
-  };
-
-  // HTML5 Drag handlers for dates (Calendar view dynamic rescheduling!)
-  const handleDragOverDate = (e: React.DragEvent, dateStr: string) => {
-    e.preventDefault();
-    if (dragOverDate !== dateStr) {
-      setDragOverDate(dateStr);
     }
   };
 
   const handleDropDate = (e: React.DragEvent, dateStr: string) => {
-    e.preventDefault();
-    const id = e.dataTransfer.getData('text/plain') || draggingId;
+    const id = onDropDate(e);
     if (id) {
-      const updated = events.map(event => {
-        if (event.id === id) {
-          if (event.endDate && event.endDate !== event.date) {
-            try {
-              const prevStart = new Date(event.date);
-              const prevEnd = new Date(event.endDate);
-              const durationMs = prevEnd.getTime() - prevStart.getTime();
-              
-              const newStart = new Date(dateStr);
-              const newEnd = new Date(newStart.getTime() + durationMs);
-              
-              const formatYMD = (d: Date) => d.toISOString().split('T')[0];
-              
-              return { 
-                ...event, 
-                date: dateStr, 
-                endDate: formatYMD(newEnd) 
-              };
-            } catch (err) {
-              return { ...event, date: dateStr, endDate: dateStr };
-            }
-          }
-          return { ...event, date: dateStr, endDate: dateStr };
-        }
-        return event;
-      });
-      saveEvents(updated);
       const movedItem = events.find(item => item.id === id);
+      moveEvent(id, dateStr);
       triggerNotification(lang === 'zh' ? `日程已拖拽至: ${dateStr}` : `Event "${movedItem?.title}" rescheduled to ${dateStr}`);
     }
-    setDraggingId(null);
-    setDragOverDate(null);
   };
 
   const handleShiftCard = (id: string, direction: 'back' | 'forward', e: React.MouseEvent) => {
@@ -435,321 +298,36 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
     const statusCycle: ColumnId[] = ['todo', 'progress', 'review', 'done'];
     const event = events.find(item => item.id === id);
     if (!event) return;
-
-    const currentStatus = event.status || (event.completed ? 'done' : 'todo');
-    const currentIndex = statusCycle.indexOf(currentStatus);
-    let targetIndex = currentIndex;
-
-    if (direction === 'forward' && currentIndex < statusCycle.length - 1) {
-      targetIndex = currentIndex + 1;
-    } else if (direction === 'back' && currentIndex > 0) {
-      targetIndex = currentIndex - 1;
-    }
-
-    if (targetIndex !== currentIndex) {
-      const updated = events.map(item => {
-        if (item.id === id) {
-          return {
-            ...item,
-            status: statusCycle[targetIndex],
-            completed: statusCycle[targetIndex] === 'done'
-          };
-        }
-        return item;
-      });
-      saveEvents(updated);
-    }
+    const cur = statusCycle.indexOf(event.status || (event.completed ? 'done' : 'todo'));
+    const next = direction === 'forward' ? Math.min(cur + 1, 3) : Math.max(cur - 1, 0);
+    if (next !== cur) changeStatus(id, statusCycle[next]);
   };
 
-  // Category parameters
-  const categoryMap = {
-    creative: {
-      zhLabel: '创意设计',
-      enLabel: 'Creative & Graphics',
-      color: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
-      textAccent: 'text-emerald-700',
-      dot: 'bg-emerald-500',
-      // Dynamic color segments for Google Calendar look
-      accentBg: 'bg-emerald-500',
-      pastelBg: 'bg-emerald-50/95 text-emerald-800 border-emerald-500/10',
-      solidBg: 'bg-emerald-600 text-[#F9F8F6] border-emerald-700/20 font-bold',
-      borderColor: 'border-l-emerald-500'
-    },
-    finance: {
-      zhLabel: '资产流转',
-      enLabel: 'Capital & Flows',
-      color: 'bg-amber-50 text-amber-800 border-amber-200/80',
-      textAccent: 'text-amber-700',
-      dot: 'bg-amber-500',
-      accentBg: 'bg-amber-500',
-      pastelBg: 'bg-amber-50/95 text-amber-800 border-amber-500/10',
-      solidBg: 'bg-amber-600 text-[#F9F8F6] border-amber-700/20 font-bold',
-      borderColor: 'border-l-amber-500'
-    },
-    secure: {
-      zhLabel: '保密机制',
-      enLabel: 'Citadel Sec Ops',
-      color: 'bg-indigo-50 text-indigo-800 border-indigo-200/80',
-      textAccent: 'text-indigo-700',
-      dot: 'bg-indigo-500',
-      accentBg: 'bg-indigo-500',
-      pastelBg: 'bg-indigo-50/95 text-indigo-800 border-indigo-500/10',
-      solidBg: 'bg-indigo-600 text-[#F9F8F6] border-indigo-700/20 font-bold',
-      borderColor: 'border-l-indigo-500'
-    },
-    strategy: {
-      zhLabel: '路线决策',
-      enLabel: 'Strategic Blueprints',
-      color: 'bg-teal-50 text-teal-800 border-teal-200/80',
-      textAccent: 'text-teal-700',
-      dot: 'bg-teal-500',
-      accentBg: 'bg-teal-500',
-      pastelBg: 'bg-teal-50/95 text-teal-800 border-teal-500/10',
-      solidBg: 'bg-teal-600 text-[#F9F8F6] border-teal-700/20 font-bold',
-      borderColor: 'border-l-teal-500'
-    }
-  };
-
-  const columns: { id: ColumnId; zhTitle: string; enTitle: string; colorClass: string; borderFocus: string }[] = [
-    { 
-      id: 'todo', 
-      zhTitle: '预约待编', 
-      enTitle: 'Backlog Tasks', 
-      colorClass: 'bg-[#F9F8F6]/40 border-zinc-200',
-      borderFocus: 'border-[#1A1A1A] bg-zinc-200/40'
-    },
-    { 
-      id: 'progress', 
-      zhTitle: '执行中柜', 
-      enTitle: 'In Progress', 
-      colorClass: 'bg-[#F9F8F6]/20 border-[#1A1A1A]/5',
-      borderFocus: 'border-amber-500 bg-amber-50/10'
-    },
-    { 
-      id: 'review', 
-      zhTitle: '评审阶段', 
-      enTitle: 'Under Review', 
-      colorClass: 'bg-[#F9F8F6]/20 border-[#1A1A1A]/5',
-      borderFocus: 'border-indigo-500 bg-indigo-50/10'
-    },
-    { 
-      id: 'done', 
-      zhTitle: '极速已成', 
-      enTitle: 'Completed', 
-      colorClass: 'bg-emerald-50/10 border-emerald-200/30',
-      borderFocus: 'border-emerald-500 bg-emerald-50/20'
-    }
-  ];
-
-  // Primary filtering query
-  const getFilteredEvents = () => {
-    return events.filter(item => {
-      // General filters: Search term & Category drop-down
-      const matchesSearch = item.title.toLowerCase().includes(searchText.toLowerCase()) || 
-                            item.subtitle.toLowerCase().includes(searchText.toLowerCase());
-      const matchesCategoryDropdown = filterCategory === 'all' || item.category === filterCategory;
-      
-      // Sidebar "My Calendars" category visibility toggle
-      const categoryIsChecked = visibleCategories[item.category] !== false;
-
-      return matchesSearch && matchesCategoryDropdown && categoryIsChecked;
-    });
-  };
-
-  const activeFilteredList = getFilteredEvents();
-
-  // Kanban view items per column
-  const getKanbanEventsForColumn = (colId: ColumnId) => {
-    return activeFilteredList.filter(e => {
-      const currentStatus = e.status || (e.completed ? 'done' : 'todo');
-      return currentStatus === colId;
-    });
-  };
-
-  // Navigation Logic
   const handleNavigateToday = () => {
     setSelectedDate(new Date());
     triggerNotification(lang === 'zh' ? `已转跳回今天 ${todayString}` : `Centered calendar back to today ${todayString}`);
   };
 
   const handleNavigateDiff = (amount: number) => {
-    const nextDate = new Date(selectedDate);
-    if (viewMode === 'month') {
-      nextDate.setMonth(nextDate.getMonth() + amount);
-    } else if (viewMode === 'week') {
-      nextDate.setDate(nextDate.getDate() + (amount * 7));
-    } else if (viewMode === 'day') {
-      nextDate.setDate(nextDate.getDate() + amount);
-    }
-    setSelectedDate(nextDate);
+    const next = new Date(selectedDate);
+    if (viewMode === 'month')      next.setMonth(next.getMonth() + amount);
+    else if (viewMode === 'week')  next.setDate(next.getDate() + amount * 7);
+    else if (viewMode === 'day')   next.setDate(next.getDate() + amount);
+    setSelectedDate(next);
   };
 
-  // Mini side-calendar date generation logic (Month layout grid picker)
-  const miniCalendarDays = useMemo(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    
-    // First day of current month (0-Sunday, 6-Saturday)
-    const firstDayIndex = new Date(year, month, 1).getDay();
-    // Number of days in previous month
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
-    // Number of days in current month
-    const daysInCurrMonth = new Date(year, month + 1, 0).getDate();
-
-    const daysArray: { dayNum: number; dateString: string; isCurrentMonth: boolean; isToday: boolean }[] = [];
-
-    // Prior month overflow days
-    for (let i = firstDayIndex - 1; i >= 0; i--) {
-      const dayVal = daysInPrevMonth - i;
-      const prevMonthObj = new Date(year, month - 1, dayVal);
-      const prY = prevMonthObj.getFullYear();
-      const prM = String(prevMonthObj.getMonth() + 1).padStart(2, '0');
-      const prD = String(dayVal).padStart(2, '0');
-      daysArray.push({
-        dayNum: dayVal,
-        dateString: `${prY}-${prM}-${prD}`,
-        isCurrentMonth: false,
-        isToday: `${prY}-${prM}-${prD}` === todayString
-      });
-    }
-
-    // Current month days
-    const curMIndex = String(month + 1).padStart(2, '0');
-    for (let i = 1; i <= daysInCurrMonth; i++) {
-      const curDIndex = String(i).padStart(2, '0');
-      daysArray.push({
-        dayNum: i,
-        dateString: `${year}-${curMIndex}-${curDIndex}`,
-        isCurrentMonth: true,
-        isToday: `${year}-${curMIndex}-${curDIndex}` === todayString
-      });
-    }
-
-    // Next month overflow days
-    const totalSlots = 35; // Standard grid size
-    const remaining = totalSlots - daysArray.length;
-    const paddingCount = remaining > 0 ? remaining : (remaining + 7) % 7; // Handle variable length month
-    
-    for (let i = 1; i <= paddingCount; i++) {
-      const nextMonthObj = new Date(year, month + 1, i);
-      const nxtY = nextMonthObj.getFullYear();
-      const nxtM = String(nextMonthObj.getMonth() + 1).padStart(2, '0');
-      const nxtD = String(i).padStart(2, '0');
-      daysArray.push({
-        dayNum: i,
-        dateString: `${nxtY}-${nxtM}-${nxtD}`,
-        isCurrentMonth: false,
-        isToday: `${nxtY}-${nxtM}-${nxtD}` === todayString
-      });
-    }
-
-    return daysArray;
-  }, [selectedDate]);
-
-  // Main interactive grid dates calculation (returns exactly 42 days grid blocks)
-  const mainCalendarGridDays = useMemo(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    
-    const startDayIndex = new Date(year, month, 1).getDay();
-    const prevMonthDaysCount = new Date(year, month, 0).getDate();
-    const curMonthDaysCount = new Date(year, month + 1, 0).getDate();
-
-    const daysList: { dayNum: number; dateString: string; isCurrentMonth: boolean; isToday: boolean; hasEvents: boolean }[] = [];
-
-    // Previous Month padding days
-    for (let i = startDayIndex - 1; i >= 0; i--) {
-      const day = prevMonthDaysCount - i;
-      const prevMonth = month - 1 < 0 ? 11 : month - 1;
-      const prevYear = month - 1 < 0 ? year - 1 : year;
-      const dateStringStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      
-      daysList.push({
-        dayNum: day,
-        dateString: dateStringStr,
-        isCurrentMonth: false,
-        isToday: dateStringStr === todayString,
-        hasEvents: events.some(e => isEventOnDate(e, dateStringStr))
-      });
-    }
-
-    // Current Month days
-    const curMonthPad = String(month + 1).padStart(2, '0');
-    for (let i = 1; i <= curMonthDaysCount; i++) {
-      const dateStringStr = `${year}-${curMonthPad}-${String(i).padStart(2, '0')}`;
-      daysList.push({
-        dayNum: i,
-        dateString: dateStringStr,
-        isCurrentMonth: true,
-        isToday: dateStringStr === todayString,
-        hasEvents: events.some(e => isEventOnDate(e, dateStringStr))
-      });
-    }
-
-    // Next Month padding days to complete exactly 42 slots (6 weeks grid layout)
-    const paddingRequired = 42 - daysList.length;
-    for (let i = 1; i <= paddingRequired; i++) {
-      const nextMonth = month + 1 > 11 ? 0 : month + 1;
-      const nextYear = month + 1 > 11 ? year + 1 : year;
-      const dateStringStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-
-      daysList.push({
-        dayNum: i,
-        dateString: dateStringStr,
-        isCurrentMonth: false,
-        isToday: dateStringStr === todayString,
-        hasEvents: events.some(e => isEventOnDate(e, dateStringStr))
-      });
-    }
-
-    return daysList;
-  }, [selectedDate, events]);
-
-  // Week View dates helper (Sunday to Saturday around selectedDate focus)
-  const currentWeekDaysList = useMemo(() => {
-    const sundayOffset = selectedDate.getDay();
-    const result = [];
-    const base = new Date(selectedDate);
-    base.setDate(base.getDate() - sundayOffset); // rewinds to Sunday
-
-    for (let i = 0; i < 7; i++) {
-      const loopDate = new Date(base);
-      loopDate.setDate(base.getDate() + i);
-      const y = loopDate.getFullYear();
-      const m = String(loopDate.getMonth() + 1).padStart(2, '0');
-      const d = String(loopDate.getDate()).padStart(2, '0');
-      const dateStr = `${y}-${m}-${d}`;
-
-      result.push({
-        label: loopDate.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'short' }),
-        dayNum: loopDate.getDate(),
-        dateString: dateStr,
-        isToday: dateStr === todayString
-      });
-    }
-    return result;
-  }, [selectedDate, lang]);
-
-  // Sidebar toggler for all visibility categories
   const handleToggleVisibleCategory = (category: string) => {
-    setVisibleCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
+    setVisibleCategories(prev => ({ ...prev, [category]: !prev[category] }));
   };
 
   const handleSelectAllCategories = (status: boolean) => {
-    setVisibleCategories({
-      creative: status,
-      finance: status,
-      secure: status,
-      strategy: status
-    });
+    setVisibleCategories({ creative: status, finance: status, secure: status, strategy: status });
   };
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 text-[#1A1A1A] font-sans animate-fadeIn">
-      
+
       {/* Toast Notification Container */}
       {notification && (
         <div className="fixed bottom-6 right-6 bg-[#1A1A1A] text-[#F9F8F6] px-5 py-3 border border-amber-900/40 text-xs font-mono uppercase tracking-widest z-50 flex items-center gap-3">
@@ -786,7 +364,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
       {/* Search and Global Command Toolbar strip */}
       <div className="bg-white border border-[#1A1A1A]/10 p-3.5 flex flex-col xl:flex-row items-center justify-between gap-4">
-        
+
         {/* Search controls */}
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           {viewMode !== 'kanban' && (
@@ -811,7 +389,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
           </div>
 
           {/* Quick category select dropdown */}
-          <select 
+          <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
             className="p-1 px-3 border border-[#1A1A1A]/10 rounded-none text-xs font-mono uppercase tracking-wider bg-transparent text-[#1A1A1A] cursor-pointer"
@@ -876,8 +454,8 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
       {/* Sealed Event Manuscript Writer form drawer */}
       {showAddForm && (
-        <form 
-          onSubmit={handleAddEvent} 
+        <form
+          onSubmit={handleAddEvent}
           className="bg-white border border-[#1A1A1A] p-6 space-y-4 max-w-4xl mx-auto shadow-sm animate-fadeIn"
         >
           <div className="pb-3 border-b border-[#1A1A1A]/10 flex items-center justify-between">
@@ -969,7 +547,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                 </label>
                 <select
                   value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value as any)}
+                  onChange={(e) => setNewCategory(e.target.value as EventCategory)}
                   className="w-full px-2 py-1.5 text-xs border border-[#1A1A1A]/15 bg-white rounded-none text-neutral-800"
                 >
                   <option value="creative">{lang === 'zh' ? '创意与排版' : 'Creative & Design'}</option>
@@ -1031,21 +609,21 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
       {/* TWO-COLUMN GRID IMPLEMENTING GOOGLE CALENDAR SPLIT INTERFACE OR DRIFTING KANBAN BOARD */}
       <div className="flex flex-col lg:flex-row gap-6 items-start" id="main-calendar-layout-engine">
-        
+
         {/* LEFT COLUMN: Google Calendar Style sidebar widgets only visible in month / week / day view modes */}
         {viewMode !== 'kanban' && (
-          <aside 
+          <aside
             className={`bg-white border-[#1A1A1A]/10 rounded-none shadow-sm flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-              isSidebarOpen 
-                ? 'w-full lg:w-[280px] p-4 border opacity-100' 
+              isSidebarOpen
+                ? 'w-full lg:w-[280px] p-4 border opacity-100'
                 : 'w-0 lg:w-0 p-0 border-transparent opacity-0 pointer-events-none'
-            }`} 
+            }`}
             id="calendar-left-widgetry"
           >
             <div className="space-y-6 flex flex-col min-w-[246px]">
-            
+
             {/* A. Speed Dial "+ Create Event" Mini button inside sidebar */}
-            <button 
+            <button
               onClick={() => {
                 setNewDate(selectedDate.toISOString().split('T')[0]);
                 setShowAddForm(true);
@@ -1092,12 +670,12 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                         setNewDate(cell.dateString);
                       }}
                       className={`py-1 text-[9px] font-mono transition-all text-center rounded-none relative ${
-                        isCurrentSelection 
-                          ? 'bg-[#1A1A1A] text-white font-bold' 
-                          : cell.isToday 
-                            ? 'border border-[#1A1A1A] text-[#1A1A1A] font-bold bg-[#1A1A1A]/5' 
-                            : cell.isCurrentMonth 
-                              ? 'text-neutral-800 hover:bg-[#1A1A1A]/5' 
+                        isCurrentSelection
+                          ? 'bg-[#1A1A1A] text-white font-bold'
+                          : cell.isToday
+                            ? 'border border-[#1A1A1A] text-[#1A1A1A] font-bold bg-[#1A1A1A]/5'
+                            : cell.isCurrentMonth
+                              ? 'text-neutral-800 hover:bg-[#1A1A1A]/5'
                               : 'text-neutral-400/60 hover:bg-[#1A1A1A]/5'
                       }`}
                     >
@@ -1117,14 +695,14 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
               <div className="flex items-center justify-between text-[9px] font-mono text-[#1A1A1A]/40 uppercase tracking-widest">
                 <span>{lang === 'zh' ? '书案分类目录' : 'MY CALENDARS'}</span>
                 <div className="flex gap-2">
-                  <button 
-                    onClick={() => handleSelectAllCategories(true)} 
+                  <button
+                    onClick={() => handleSelectAllCategories(true)}
                     className="hover:text-[#1A1A1A] font-bold text-[8px]"
                   >
                     {lang === 'zh' ? '全选' : 'ALL'}
                   </button>
-                  <button 
-                    onClick={() => handleSelectAllCategories(false)} 
+                  <button
+                    onClick={() => handleSelectAllCategories(false)}
                     className="hover:text-red-800 font-bold text-[8px]"
                   >
                     {lang === 'zh' ? '清除' : 'CLEAR'}
@@ -1137,11 +715,11 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                 {Object.entries(categoryMap).map(([key, info]) => {
                   const isChecked = visibleCategories[key] !== false;
                   return (
-                    <label 
-                      key={key} 
+                    <label
+                      key={key}
                       className="flex items-center gap-2.5 cursor-pointer hover:bg-[#1A1A1A]/5 p-1 px-1.5 transition select-none rounded-none text-[#1A1A1A]"
                     >
-                      <input 
+                      <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => handleToggleVisibleCategory(key)}
@@ -1166,7 +744,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                 {lang === 'zh' ? '保密沙箱保障' : 'SANDBOX ISOLATION SECURE'}
               </div>
               <p className="text-[9px] leading-relaxed text-[#1A1A1A]/60">
-                {lang === 'zh' 
+                {lang === 'zh'
                   ? '此排字月历运行于高可靠的客户端状态，所有日记录直接注入 indexDB，支持敏捷拖拽和无损离线。'
                   : 'All calendars run strictly in a sandboxed runtime. Draggable elements automatically re-write dates in compliance.'}
               </p>
@@ -1177,15 +755,15 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
         {/* RIGHT COLUMN: The primary dynamic rendering views (Month grid, Week grid, Day list or classic Kanban) */}
         <section className="flex-grow flex-1 min-w-0 w-full">
-          
+
           {/* Main workspace dynamic wrapper based on viewMode switch */}
           {viewMode === 'month' && (
             <div className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden" id="month-grid-wrapper">
-              
+
               {/* Google Calendar Style Month view header */}
               <div className="p-3 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={handleNavigateToday}
                     className="px-3.5 py-1 bg-white border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition text-[10px] font-bold tracking-widest uppercase rounded-none"
                   >
@@ -1219,7 +797,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                 {mainCalendarGridDays.map((cell, index) => {
                   // Filter events falling on this date and verified active filter query
                   const dayEvents = activeFilteredList.filter(e => isEventOnDate(e, cell.dateString));
-                  
+
                   return (
                     <div
                       key={index}
@@ -1242,7 +820,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                           <Plus className="w-2.5 h-2.5" />
                           <span>ADD</span>
                         </button>
-                        
+
                         <span className={`text-xs font-mono font-bold p-1 px-2 ${
                           cell.isToday
                             ? 'bg-[#1A1A1A] text-[#F9F8F6] font-extrabold'
@@ -1259,7 +837,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                         {dayEvents.map(item => {
                           const catInfo = categoryMap[item.category] || categoryMap.creative;
                           const isCrossDay = item.endDate && item.endDate !== item.date;
-                          
+
                           let spanClass = "";
                           let roundedClass = "rounded-none";
                           if (isCrossDay) {
@@ -1304,7 +882,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                       {quickAddDate === cell.dateString && (
                         <div className="mt-2 p-1.5 border border-amber-900/40 bg-amber-50/5 text-left z-10 animate-scaleUp">
                           <form onSubmit={handleQuickAddSubmit} className="space-y-1.5">
-                            <input 
+                            <input
                               type="text"
                               required
                               autoFocus
@@ -1315,8 +893,8 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                             />
                             <div className="flex justify-between items-center text-[7.5px] font-mono uppercase tracking-widest text-neutral-400">
                               <span>PRESET: CREATIVE</span>
-                              <button 
-                                type="button" 
+                              <button
+                                type="button"
                                 onClick={() => setQuickAddDate(null)}
                                 className="text-red-700 hover:underline"
                               >
@@ -1336,10 +914,10 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
           {/* VIEW: Weekly timeline list view resembling calendar metrics */}
           {viewMode === 'week' && (
             <div className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden" id="week-timeline-wrapper">
-              
+
               <div className="p-3.5 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
                 <div className="flex items-center gap-2">
-                  <button 
+                  <button
                     onClick={handleNavigateToday}
                     className="px-3 py-1 bg-white border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition text-[9px] font-bold tracking-widest uppercase rounded-none"
                   >
@@ -1363,10 +941,10 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
               <div className="grid grid-cols-1 md:grid-cols-7 border-b border-[#1A1A1A]/10">
                 {currentWeekDaysList.map((day, idx) => {
                   const dayEventsList = activeFilteredList.filter(e => isEventOnDate(e, day.dateString));
-                  
+
                   return (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       onDragOver={(e) => handleDragOverDate(e, day.dateString)}
                       onDrop={(e) => handleDropDate(e, day.dateString)}
                       className={`border-r last:border-r-0 border-[#1A1A1A]/10 min-h-[450px] flex flex-col p-3 bg-white ${
@@ -1432,10 +1010,10 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
           {/* VIEW: Hour timelines for a single selected date focus option */}
           {viewMode === 'day' && (
             <div className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden" id="day-timeline-wrapper">
-              
+
               <div className="p-4 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={handleNavigateToday}
                     className="px-3 py-1 bg-white border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition text-[9px] font-bold tracking-widest uppercase rounded-none"
                   >
@@ -1457,7 +1035,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
               {/* Day focus rendering list */}
               <div className="p-6 max-w-3xl mx-auto space-y-6">
-                
+
                 <div className="pb-3 border-b border-[#1A1A1A]/10 flex items-center justify-between">
                   <div className="space-y-0.5">
                     <h2 className="text-xl font-serif text-[#1A1A1A] font-bold italic uppercase tracking-tight">
@@ -1493,7 +1071,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                         const catInfo = categoryMap[item.category] || categoryMap.creative;
                         const isRange = item.endDate && item.endDate !== item.date;
                         return (
-                          <div 
+                          <div
                             key={idx}
                             onClick={() => handleOpenEventModal(item)}
                             className={`p-4 border hover:border-[#1A1A1A]/30 transition bg-white shadow-sm flex items-start gap-4 cursor-pointer`}
@@ -1553,7 +1131,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
               {columns.map((col) => {
                 const columnEvents = getKanbanEventsForColumn(col.id);
                 const isOver = dragOverColumn === col.id;
-                
+
                 return (
                   <div
                     key={col.id}
@@ -1591,7 +1169,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                           <p className="text-[10px] font-serif italic text-neutral-400">
                             {lang === 'zh' ? '暂无处于该阶段安排' : 'No active manuscripts'}
                           </p>
-                          <button 
+                          <button
                             type="button"
                             onClick={() => {
                               setNewStatus(col.id);
@@ -1606,7 +1184,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                         columnEvents.map((item) => {
                           const info = categoryMap[item.category] || categoryMap.creative;
                           const isCardDragging = draggingId === item.id;
-                          
+
                           return (
                             <div
                               key={item.id}
@@ -1698,14 +1276,14 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
       {selectedEventForView && (
         <div className="fixed inset-0 bg-[#1A1A1A]/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-white border-2 border-[#1A1A1A] max-w-lg w-full p-6 space-y-4 shadow-xl relative animate-scaleUp">
-            
+
             {/* Modal header actions */}
             <div className="flex justify-between items-center pb-2 border-b border-neutral-100">
               <span className="text-[9px] font-mono text-neutral-400 uppercase tracking-widest flex items-center gap-1">
                 <Info className="w-3 h-3" />
                 <span>CHRONOS MANUSCRIPT RECORD : {selectedEventForView.id}</span>
               </span>
-              <button 
+              <button
                 onClick={() => {
                   setSelectedEventForView(null);
                   setIsEditingInModal(false);
@@ -1787,7 +1365,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
               <form onSubmit={handleSaveModalEdits} className="space-y-3.5">
                 <div>
                   <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '标题' : 'TITLE'}</label>
-                  <input 
+                  <input
                     type="text"
                     required
                     value={editTitle}
@@ -1798,7 +1376,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
                 <div>
                   <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '内容' : 'SUBTITLE'}</label>
-                  <textarea 
+                  <textarea
                     value={editSubtitle}
                     onChange={(e) => setEditSubtitle(e.target.value)}
                     className="w-full text-xs p-2 border border-[#1A1A1A]/15 rounded-none outline-none focus:border-[#1A1A1A] h-16"
@@ -1808,7 +1386,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <div>
                     <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '起始日期' : 'START DATE'}</label>
-                    <input 
+                    <input
                       type="date"
                       required
                       value={editDate}
@@ -1818,7 +1396,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                   </div>
                   <div>
                     <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '结束日期' : 'END DATE'}</label>
-                    <input 
+                    <input
                       type="date"
                       required
                       value={editEndDate}
@@ -1829,7 +1407,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                   </div>
                   <div>
                     <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '时间' : 'TIME'}</label>
-                    <input 
+                    <input
                       type="time"
                       required
                       value={editTime}
@@ -1844,7 +1422,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                     <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '分类' : 'CATEGORY'}</label>
                     <select
                       value={editCategory}
-                      onChange={(e) => setEditCategory(e.target.value as any)}
+                      onChange={(e) => setEditCategory(e.target.value as EventCategory)}
                       className="w-full text-xs p-1.5 border border-[#1A1A1A]/15 rounded-none"
                     >
                       <option value="creative">{lang === 'zh' ? '创意与排版' : 'Creative & Design'}</option>
@@ -1857,7 +1435,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
                     <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '执行阶段' : 'STAGE'}</label>
                     <select
                       value={editStatus}
-                      onChange={(e) => setEditStatus(e.target.value as any)}
+                      onChange={(e) => setEditStatus(e.target.value as ColumnId)}
                       className="w-full text-xs p-1.5 border border-[#1A1A1A]/15 rounded-none"
                     >
                       <option value="todo">TODO</option>
@@ -1870,7 +1448,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
 
                 <div>
                   <label className="block text-[8px] font-mono uppercase text-neutral-400 mb-1">{lang === 'zh' ? '会场场所' : 'LOCATION'}</label>
-                  <input 
+                  <input
                     type="text"
                     value={editLocation}
                     onChange={(e) => setEditLocation(e.target.value)}
