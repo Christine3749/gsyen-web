@@ -6,6 +6,10 @@ export async function sendToGateway(
   messages: ChatMessage[],
   events?: Array<{ id: string; title: string; date: string; time: string }>
 ): Promise<Response> {
+  // 传客户端本地日期，避免 Vercel UTC 和中国时区差8小时
+  const d = new Date();
+  const clientDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -13,6 +17,7 @@ export async function sendToGateway(
       model,
       messages: messages.map(m => ({ role: m.role, content: m.content })),
       events: events ?? [],
+      clientDate,
     }),
   });
   if (!res.ok) throw new Error(`Gateway error: ${res.status}`);

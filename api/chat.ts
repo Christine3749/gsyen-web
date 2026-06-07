@@ -224,7 +224,7 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     const body = await req.json();
-    const { messages, model = 'kimi', events = [] } = body;
+    const { messages, model = 'kimi', events = [], clientDate } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'Missing or invalid messages array' }), {
@@ -304,7 +304,7 @@ export default async function handler(req: Request): Promise<Response> {
     // ── Ollama JSON mode (ethan / fast) — 原生 /api/chat 接口 ──────────
     // OpenAI兼容层不可靠，原生接口的 format:"json" 强制返回合法 JSON
     if (model === 'ethan' || model === 'fast') {
-      const today = todayDateStr();
+      const today = clientDate || todayDateStr();
       const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
       const ollamaPayload = [
         { role: 'system', content: SYSTEM_PROMPT + scheduleSystemSuffix(today, events) },
@@ -334,9 +334,12 @@ export default async function handler(req: Request): Promise<Response> {
       const rawContent = ollamaData.message?.content ?? '{}';
       try {
         const parsed = JSON.parse(rawContent);
-        // 向后兼容：模型可能输出旧格式 shouldCreateEvent
-        const action = parsed.action
+        // 兼容层：模型可能输出旧格式或 action:none 但 ev 有数据
+        const modelAction = parsed.action
           ?? (parsed.shouldCreateEvent ? 'create' : 'none');
+        const action = (modelAction === 'none' && parsed.event?.title)
+          ? 'create'   // ev 有数据但 action 填错了 → 推断为 create
+          : modelAction;
         return new Response(JSON.stringify({
           text:   parsed.reply  ?? rawContent,
           action,
