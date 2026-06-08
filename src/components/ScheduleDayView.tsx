@@ -21,7 +21,7 @@ export default function ScheduleDayView({
   lang, selectedDate, todayString, activeFilteredList,
   onOpenEvent, onNavigateToday, onNavigate,
 }: Props) {
-  const dateKey = selectedDate.toISOString().split('T')[0];
+  const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
   const todayEvents = activeFilteredList
     .filter(e => isEventOnDate(e, dateKey))
     .sort((a, b) => a.time.localeCompare(b.time));

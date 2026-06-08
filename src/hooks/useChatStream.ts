@@ -175,7 +175,11 @@ export function useChatStream(): UseChatStreamReturn {
         const action = data.action ?? 'none';
         const ev     = data.event;
 
-        if (action !== 'none') {
+        // 司辰 · 防幻觉守卫：结构化模型(尤其本地小模型)即便判定 action!=='none'，
+        // 也可能对寒暄等无关消息幻觉出 event。只有用户原话本身命中某个领域的
+        // 意图关键词时，才信任模型给出的 action，否则一律按 'none' 处理。
+        const userIntentDetected = domainHandlers.some(h => h.detectIntent(text));
+        if (action !== 'none' && userIntentDetected) {
           for (const handler of domainHandlers) {
             const result = handler.handleAction(action, ev, lang);
             if (result) {
