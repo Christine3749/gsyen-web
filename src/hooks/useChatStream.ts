@@ -177,25 +177,25 @@ export function useChatStream(): UseChatStreamReturn {
         // 司辰 · 防幻觉守卫：结构化模型(尤其本地小模型)即便判定 action!=='none'，
         // 也可能对寒暄等无关消息幻觉出 event。只有用户原话本身命中某个领域的
         // 意图关键词时，才信任模型给出的 action，否则一律按 'none' 处理。
-        if (action !== 'none' && streamIntent) {
-          for (const handler of domainHandlers) {
-            const result = handler.handleAction(action, ev, lang);
-            if (result) {
-              if (result.pending) {
-                pendingConfirmation.current = { handler, pending: result.pending };
-                // 模型自己写的 reply 可能和"待确认"状态对不上(比如声称"已安排"
-                // 但其实还没建)，用一句和系统状态一致的确定性提问覆盖显示，
-                // 避免用户误以为日程已经创建而漏掉确认步骤。
-                if (ev?.title) {
-                  reply = lang === 'zh'
-                    ? `是否要建立「${ev.title}」（${ev.date ?? ''} ${ev.time ?? ''}）的日程？回复"是"即可创建。`
-                    : `Create "${ev.title}" (${ev.date ?? ''} ${ev.time ?? ''})? Reply "yes" to confirm.`;
-                }
-              } else {
-                if (result.card) onActionCard?.(result.card);
-                if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
+        //
+        // 注意：只调用 streamHandler（意图识别阶段命中的 handler），不遍历所有
+        // handler，避免 CHRONOS 抢先处理 LEDGER 的 event 等跨域误匹配。
+        if (action !== 'none' && streamIntent && streamHandler) {
+          const result = streamHandler.handleAction(action, ev, lang);
+          if (result) {
+            if (result.pending) {
+              pendingConfirmation.current = { handler: streamHandler, pending: result.pending };
+              // 模型自己写的 reply 可能和"待确认"状态对不上(比如声称"已安排"
+              // 但其实还没建)，用一句和系统状态一致的确定性提问覆盖显示，
+              // 避免用户误以为日程已经创建而漏掉确认步骤。
+              if (ev?.title) {
+                reply = lang === 'zh'
+                  ? `是否要建立「${ev.title}」（${ev.date ?? ''} ${ev.time ?? ''}）的日程？回复"是"即可创建。`
+                  : `Create "${ev.title}" (${ev.date ?? ''} ${ev.time ?? ''})? Reply "yes" to confirm.`;
               }
-              break;
+            } else {
+              if (result.card) onActionCard?.(result.card);
+              if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
             }
           }
         }
