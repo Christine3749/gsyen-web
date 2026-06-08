@@ -170,9 +170,9 @@ export function useChatStream(): UseChatStreamReturn {
       } else {
         // ── 神机百炼结构化路径 ───────────────────────────────────
         const data   = await response.json();
-        const reply  = data.text   ?? (lang === 'zh' ? '抱歉，未返回有效回复。' : 'Empty response.');
         const action = data.action ?? 'none';
         const ev     = data.event;
+        let   reply  = data.text ?? (lang === 'zh' ? '抱歉，未返回有效回复。' : 'Empty response.');
 
         // 司辰 · 防幻觉守卫：结构化模型(尤其本地小模型)即便判定 action!=='none'，
         // 也可能对寒暄等无关消息幻觉出 event。只有用户原话本身命中某个领域的
@@ -183,6 +183,14 @@ export function useChatStream(): UseChatStreamReturn {
             if (result) {
               if (result.pending) {
                 pendingConfirmation.current = { handler, pending: result.pending };
+                // 模型自己写的 reply 可能和"待确认"状态对不上(比如声称"已安排"
+                // 但其实还没建)，用一句和系统状态一致的确定性提问覆盖显示，
+                // 避免用户误以为日程已经创建而漏掉确认步骤。
+                if (ev?.title) {
+                  reply = lang === 'zh'
+                    ? `是否要建立「${ev.title}」（${ev.date ?? ''} ${ev.time ?? ''}）的日程？回复"是"即可创建。`
+                    : `Create "${ev.title}" (${ev.date ?? ''} ${ev.time ?? ''})? Reply "yes" to confirm.`;
+                }
               } else {
                 if (result.card) onActionCard?.(result.card);
                 if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
