@@ -75,11 +75,31 @@ function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 'en' })
   }
 
   // scope 由内容语义判定（含团队/客户/对方等"涉及他人"关键词 → shared，否则 self）
-  // 全局仅用两色，不分类目：仅自己=暗橄榄绿 #4C5236，涉及他人=暗紫灰 #6B5673
+  // 对内(self)  = PANTONE 10101 C 浅冷灰，文字翻深色
+  // 对外(shared)= 暗紫灰 #6B5673，文字保持白色
   const isShared = /团队|客户|经理|对方|共享|协作|分成|开会|对外/.test(card.title + meta.join(''));
   const COLOR = isShared
-    ? { focus: 'bg-[#6B5673]', body: 'bg-[#564459]' }
-    : { focus: 'bg-[#4C5236]', body: 'bg-[#3A3F29]' };
+    ? {
+        focus:      'bg-[#6B5673]',
+        body:       'bg-[#564459]',
+        border:     'border-white/[0.05]',
+        focusSub:   'text-white/30',
+        label:      'text-white/30',
+        title:      'text-white/90',
+        titleDel:   'text-white/40',
+        tag:        'text-white/35 bg-white/[0.04]',
+      }
+    : {
+        // PANTONE 10101 C ≈ #C8C9C7（对内·冷灰）
+        focus:      'bg-[#B8B9B7]',
+        body:       'bg-[#C8C9C7]',
+        border:     'border-[#1A1A1A]/[0.08]',
+        focusSub:   'text-[#1A1A1A]/40',
+        label:      'text-[#1A1A1A]/35',
+        title:      'text-[#1A1A1A]/85',
+        titleDel:   'text-[#1A1A1A]/30',
+        tag:        'text-[#1A1A1A]/50 bg-[#1A1A1A]/[0.07]',
+      };
 
   const isMail = card.module === 'MAIL';
   const [mailOpen, setMailOpen] = useState(false);
@@ -88,26 +108,26 @@ function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 'en' })
     <div className="mt-3 select-none">
       <div
         onClick={() => isMail && setMailOpen(o => !o)}
-        className={`rounded-xl border border-white/[0.05] ${COLOR.body} overflow-hidden flex transition ${isMail ? 'cursor-pointer hover:brightness-110' : ''}`}
+        className={`rounded-xl border ${COLOR.border} ${COLOR.body} overflow-hidden flex transition ${isMail ? 'cursor-pointer hover:brightness-110' : ''}`}
       >
         <div className={`flex flex-col items-center justify-center ${COLOR.focus} shrink-0 overflow-hidden px-3 py-3 w-[148px]`}>
           <span className={`font-mono font-bold leading-none tracking-tight truncate text-center w-full text-[14px] ${
             isLedger
-              ? focusText.startsWith('+') ? 'text-teal-400' : 'text-rose-400'
-              : 'text-amber-400/90'
+              ? focusText.startsWith('+') ? 'text-teal-500' : 'text-rose-500'
+              : isShared ? 'text-amber-400/90' : 'text-[#1A1A1A]/70'
           }`}>{focusText}</span>
-          {focusSub && <span className="font-mono text-[8px] text-white/30 mt-1.5 tracking-wide truncate text-center w-full">{focusSub}</span>}
+          {focusSub && <span className={`font-mono text-[8px] mt-1.5 tracking-wide truncate text-center w-full ${COLOR.focusSub}`}>{focusSub}</span>}
         </div>
         <div className="flex-1 min-w-0 px-3.5 py-2.5 space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <span className={`font-mono text-[8px] tracking-[0.18em] font-bold uppercase truncate ${MODULE_COLOR[card.module] ?? 'text-white/50'}`}>{card.module}</span>
-            <span className="font-mono text-[8px] tracking-widest text-white/30 uppercase shrink-0">{statusLabel}</span>
+            <span className={`font-mono text-[8px] tracking-[0.18em] font-bold uppercase truncate ${MODULE_COLOR[card.module] ?? (isShared ? 'text-white/50' : 'text-[#1A1A1A]/50')}`}>{card.module}</span>
+            <span className={`font-mono text-[8px] tracking-widest uppercase shrink-0 ${COLOR.label}`}>{statusLabel}</span>
           </div>
-          <p className={`font-sans font-semibold leading-snug truncate text-[13px] ${isDeleted ? 'text-white/40 line-through' : 'text-white/90'}`}>{card.title}</p>
+          <p className={`font-sans font-semibold leading-snug truncate text-[13px] ${isDeleted ? COLOR.titleDel + ' line-through' : COLOR.title}`}>{card.title}</p>
           {tags.length > 0 && (
             <div className="flex items-center gap-2 pt-0.5">
               {tags.map((tag, i) => (
-                <span key={i} className="font-mono text-[9px] text-white/35 px-1.5 py-0.5 rounded bg-white/[0.04] truncate">{tag}</span>
+                <span key={i} className={`font-mono text-[9px] px-1.5 py-0.5 rounded truncate ${COLOR.tag}`}>{tag}</span>
               ))}
             </div>
           )}
