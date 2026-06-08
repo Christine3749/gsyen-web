@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { localDateStr } from '../utils/date';
 import { 
   Inbox, 
   Star, 
@@ -620,7 +621,7 @@ export default function MailModule({ lang }: MailModuleProps) {
       subject: composeSubject,
       snippet: composeBody.substring(0, 75) + (composeBody.length > 75 ? '...' : ''),
       body: composeBody || (lang === 'zh' ? '未标注附带文本主体。' : 'Empty transcript body.'),
-      date: new Date().toISOString().split('T')[0],
+      date: localDateStr(new Date()),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
       starred: false,
       important: false,
@@ -633,7 +634,7 @@ export default function MailModule({ lang }: MailModuleProps) {
           senderName: lang === 'zh' ? '亚历山大·斯特林' : 'Alexander Sterling',
           senderAddress: 'alexander@atelier.internal',
           body: composeBody,
-          date: new Date().toISOString().split('T')[0],
+          date: localDateStr(new Date()),
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
           isMe: true
         }
@@ -661,7 +662,7 @@ export default function MailModule({ lang }: MailModuleProps) {
       senderName: lang === 'zh' ? '亚历山大·斯特林' : 'Alexander Sterling',
       senderAddress: 'alexander@atelier.internal',
       body: inlineReplyText,
-      date: new Date().toISOString().split('T')[0],
+      date: localDateStr(new Date()),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
       isMe: true
     };
@@ -1230,7 +1231,7 @@ export default function MailModule({ lang }: MailModuleProps) {
                             
                             {/* Standard Static Font Rendering of transmission date */}
                             <div className="group-hover:opacity-0 transition-opacity font-mono text-[9px] uppercase tracking-wider text-neutral-400">
-                              {m.date === new Date().toISOString().split('T')[0] ? m.time : m.date.slice(5)}
+                              {m.date === localDateStr(new Date()) ? m.time : m.date.slice(5)}
                             </div>
 
                             {/* Quick Mini Hover action tools representing clean Atelier workflow buttons */}

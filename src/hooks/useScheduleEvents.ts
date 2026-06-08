@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { EventItem, ColumnId } from '../types/schedule';
 import { scheduleStore } from '../stores/scheduleStore';
+import { localDateStr } from '../utils/date';
 
 interface UseScheduleEventsReturn {
   events: EventItem[];
@@ -43,7 +44,7 @@ export function useScheduleEvents(defaults: EventItem[]): UseScheduleEventsRetur
       try {
         const durationMs = new Date(event.endDate).getTime() - new Date(event.date).getTime();
         const newEnd = new Date(new Date(targetDate).getTime() + durationMs);
-        endDate = newEnd.toISOString().split('T')[0];
+        endDate = localDateStr(newEnd);
       } catch { /* keep targetDate */ }
     }
     sync(scheduleStore.update(id, { date: targetDate, endDate }));

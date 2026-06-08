@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, Calendar, FileText, ArrowUpRight, BarChart3, Receipt, Eye, Sparkles } from 'lucide-react';
+import { localDateStr } from '../utils/date';
 
 interface Transaction {
   id: string;
@@ -81,7 +82,7 @@ export default function FinanceModule({ lang }: FinanceModuleProps) {
       setTransactions(defaultData);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultData));
     }
-    setNewDate(new Date().toISOString().split('T')[0]);
+    setNewDate(localDateStr(new Date()));
   }, [lang]);
 
   const saveTransactions = (updated: Transaction[]) => {
@@ -102,7 +103,7 @@ export default function FinanceModule({ lang }: FinanceModuleProps) {
       amount: amountNum,
       type: newType,
       category: newCategory,
-      date: newDate || new Date().toISOString().split('T')[0],
+      date: newDate || localDateStr(new Date()),
       notes: newNotes
     };
 

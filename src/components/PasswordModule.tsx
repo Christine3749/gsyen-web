@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Key, ShieldCheck, Copy, Eye, EyeOff, Plus, Trash2, ShieldAlert, Sliders, RefreshCw, Sparkles, Search, Check } from 'lucide-react';
+import { localDateStr } from '../utils/date';
 
 interface CredentialRow {
   id: string;
@@ -143,7 +144,7 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
       username: newUsername || 'n/a',
       secretVal: newSecretVal,
       category: newCategory,
-      lastUpdated: new Date().toISOString().split('T')[0]
+      lastUpdated: localDateStr(new Date())
     };
 
     const updated = [row, ...credentials];
