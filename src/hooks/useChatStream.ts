@@ -1,51 +1,15 @@
 import { useState, useCallback, useRef } from 'react';
 import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId } from '../config/models';
-import { EventItem } from '../types/schedule';
 import { sendToGateway, readSSEStream } from '../services/chatService';
 import { askPredictionExpert } from '../services/predictService';
-import {
-  scheduleStore,
-  detectScheduleIntent,
-  enrichMessageForSchedule,
-} from '../stores/scheduleStore';
+import { domainHandlers } from '../domains/registry';
+import { DomainHandler, DomainActionResult } from '../domains/types';
 
 // Models that return application/json with {text, action, event} instead of SSE.
 const STRUCTURED_MODELS = new Set<ModelId>(['gemini', 'ethan', 'fast'] as ModelId[]);
 
 export type ScheduleActionType = 'create' | 'update' | 'delete' | 'query';
-
-/** Build a ready-to-save EventItem from raw AI structured data. */
-function buildEventItem(data: any): EventItem {
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  return {
-    id:       `ai-${Date.now()}`,
-    title:    data.title,
-    subtitle: data.subtitle  || '',
-    time:     data.time      || '09:00',
-    date:     data.date      || todayStr,
-    endDate:  data.endDate   || data.date || todayStr,
-    category: data.category  || 'strategy',
-    location: data.location  || '',
-    completed: false,
-    status:   'todo',
-  };
-}
-
-/** Build an ActionCard for chat display */
-function buildCard(
-  action: ActionCard['action'],
-  item: EventItem | { title: string; date?: string; time?: string; category?: string; location?: string }
-): ActionCard {
-  const meta: string[] = [];
-  if ('date' in item && item.date) {
-    meta.push(`${item.date}${('time' in item && item.time) ? '  ·  ' + item.time : ''}`);
-  }
-  if ('category' in item && item.category) meta.push(item.category);
-  if ('location' in item && item.location) meta.push(item.location);
-  return { module: 'CHRONOS', action, title: item.title, meta: meta.filter(Boolean) };
-}
 
 // 用户确认/否认短语
 const CONFIRM_WORDS = ['是', '好', '建', '确认', '对', '要', '行', '加', 'yes', 'ok', 'sure', 'yeah', 'yep'];
@@ -101,15 +65,35 @@ interface UseChatStreamReturn {
   }) => Promise<void>;
 }
 
+/** Stashed cross-turn confirmation: which handler raised it + its payload. */
+interface PendingConfirmation {
+  handler: DomainHandler;
+  pending: unknown;
+}
+
 export function useChatStream(): UseChatStreamReturn {
   const [isLoading, setIsLoading] = useState(false);
-  const pendingEvent = useRef<any>(null);
+  const pendingConfirmation = useRef<PendingConfirmation | null>(null);
 
   const send = useCallback(async ({
     text, model, history, lang,
     onToken, onDone, onError, onScheduleAction, onActionCard,
   }: Parameters<UseChatStreamReturn['send']>[0]) => {
     setIsLoading(true);
+
+    /** Apply a domain handler's result: render card, notify, optionally typewrite a reply. */
+    const applyResult = async (result: DomainActionResult | null): Promise<boolean> => {
+      if (!result) return false;
+      if (result.card) onActionCard?.(result.card);
+      if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
+      if (result.reply) {
+        await typewrite(result.reply, onToken);
+        setIsLoading(false);
+        onDone(result.reply);
+        return true;
+      }
+      return false;
+    };
 
     try {
       // 1. Local prediction expert
@@ -121,33 +105,33 @@ export function useChatStream(): UseChatStreamReturn {
       }
 
       // 2. 待确认行程处理
-      if (pendingEvent.current) {
+      if (pendingConfirmation.current) {
+        const { handler, pending } = pendingConfirmation.current;
+        pendingConfirmation.current = null;
         if (isConfirmation(text)) {
-          const item = buildEventItem(pendingEvent.current);
-          scheduleStore.add(item);
-          window.dispatchEvent(new CustomEvent('schedule-updated'));
-          onScheduleAction?.('create', item.title);
-          onActionCard?.(buildCard('create', item));
-          pendingEvent.current = null;
-          const confirmReply = lang === 'zh' ? '已建立。' : 'Done.';
-          await typewrite(confirmReply, onToken);
-          setIsLoading(false);
-          onDone(confirmReply);
-          return;
+          const result = handler.resolveConfirmation(pending, lang);
+          if (await applyResult(result)) return;
         } else if (isDenial(text)) {
-          pendingEvent.current = null;
-        } else {
-          pendingEvent.current = null;
+          // dropped — fall through to normal handling
         }
       }
 
       const isStructured = STRUCTURED_MODELS.has(model);
 
-      // 3. SSE 模型消息增强
+      // 3. SSE 模型消息增强（首个命中意图的 handler 生效）
       let enrichedText = text;
+      let streamHandler: DomainHandler | null = null;
+      let streamIntent: string | null = null;
       if (!isStructured) {
-        const intent = detectScheduleIntent(text);
-        if (intent) enrichedText = enrichMessageForSchedule(text, intent, lang);
+        for (const handler of domainHandlers) {
+          const intent = handler.detectIntent(text);
+          if (intent) {
+            enrichedText = handler.enrichMessage(text, intent, lang);
+            streamHandler = handler;
+            streamIntent = intent;
+            break;
+          }
+        }
       }
 
       // 4. Build history
@@ -159,9 +143,9 @@ export function useChatStream(): UseChatStreamReturn {
       };
       const apiMessages = [...history, { ...userMsg, content: enrichedText }];
 
-      // 5. 结构化模型带日程上下文
+      // 5. 结构化模型带域上下文（首个提供上下文的 handler 生效）
       const eventsCtx = isStructured
-        ? scheduleStore.getAll().map(e => ({ id: e.id, title: e.title, date: e.date, time: e.time }))
+        ? domainHandlers.map(h => h.buildContext()).find((ctx): ctx is NonNullable<typeof ctx> => ctx != null)
         : undefined;
 
       const response = await sendToGateway(model, apiMessages, eventsCtx);
@@ -179,15 +163,8 @@ export function useChatStream(): UseChatStreamReturn {
             await new Promise(r => setTimeout(r, charDelay(char)));
           }
         }
-        const intent = detectScheduleIntent(text);
-        if (intent === 'add') {
-          const event = scheduleStore.parseFromAIResponse(fullText);
-          if (event) {
-            scheduleStore.add(event);
-            window.dispatchEvent(new CustomEvent('schedule-updated'));
-            onScheduleAction?.('create', event.title);
-            onActionCard?.(buildCard('create', event));
-          }
+        if (streamHandler && streamIntent) {
+          await applyResult(streamHandler.handleStreamResult(streamIntent, fullText));
         }
         onDone(fullText || '…');
 
@@ -198,57 +175,19 @@ export function useChatStream(): UseChatStreamReturn {
         const action = data.action ?? 'none';
         const ev     = data.event;
 
-        if (action === 'create' && ev?.title) {
-          const item = buildEventItem(ev);
-          scheduleStore.add(item);
-          window.dispatchEvent(new CustomEvent('schedule-updated'));
-          onScheduleAction?.('create', item.title);
-          onActionCard?.(buildCard('create', item));
-
-        } else if (action === 'confirm' && ev?.title) {
-          pendingEvent.current = ev;
-
-        } else if (action === 'delete' && ev?.title) {
-          const target = scheduleStore.getAll().find(e =>
-            e.title.includes(ev.title) || ev.title.includes(e.title)
-          );
-          if (target) {
-            scheduleStore.remove(target.id);
-            window.dispatchEvent(new CustomEvent('schedule-updated'));
-            onScheduleAction?.('delete', target.title);
-            onActionCard?.(buildCard('delete', target));
+        if (action !== 'none') {
+          for (const handler of domainHandlers) {
+            const result = handler.handleAction(action, ev, lang);
+            if (result) {
+              if (result.pending) {
+                pendingConfirmation.current = { handler, pending: result.pending };
+              } else {
+                if (result.card) onActionCard?.(result.card);
+                if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
+              }
+              break;
+            }
           }
-
-        } else if (action === 'update' && ev?.title) {
-          const target = scheduleStore.getAll().find(e =>
-            e.title.includes(ev.title) || ev.title.includes(e.title)
-          );
-          if (target) {
-            const changes = {
-              ...(ev.date     && { date:     ev.date }),
-              ...(ev.time     && { time:     ev.time }),
-              ...(ev.location && { location: ev.location }),
-              ...(ev.subtitle && { subtitle: ev.subtitle }),
-            };
-            scheduleStore.update(target.id, changes);
-            window.dispatchEvent(new CustomEvent('schedule-updated'));
-            onScheduleAction?.('update', target.title);
-            onActionCard?.(buildCard('update', { ...target, ...changes }));
-          }
-
-        } else if (action === 'query') {
-          const todayEvents = scheduleStore.getToday();
-          if (todayEvents.length > 0) {
-            onActionCard?.({
-              module: 'CHRONOS',
-              action: 'query',
-              title:  lang === 'zh' ? '今日日程' : "Today's Schedule",
-              meta:   todayEvents.map(e =>
-                `${e.time}  ${e.title}${e.location ? '  · ' + e.location : ''}`
-              ),
-            });
-          }
-          onScheduleAction?.('query', '');
         }
 
         await typewrite(reply, onToken);

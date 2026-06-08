@@ -336,19 +336,22 @@ async function startServer() {
         const rawContent = ollamaData.message?.content ?? '{}';
         try {
           const parsed = JSON.parse(rawContent);
-          // 兼容层：模型可能输出旧格式或 action:none 但 ev 有数据
-          const modelAction = parsed.action
-            ?? (parsed.shouldCreateEvent ? 'create' : 'none');
-          const action = (modelAction === 'none' && parsed.event?.title)
-            ? 'create'
-            : modelAction;
-          // 司辰：模型日期偏离 clientDate 超过 3 天 → 静默修正为今天
-          const ev = parsed.event?.title ? parsed.event : null;
-          if (ev && clientDate) {
-            const evMs = new Date(ev.date || '').getTime();
-            const refMs = new Date(clientDate).getTime();
-            if (!evMs || Math.abs(refMs - evMs) > 3 * 86400_000) {
-              ev.date = clientDate;
+          // 只信任模型显式给出的 action —— 不再用 "event.title 是否非空" 推断意图。
+          // （v5 模型即便正确判定 action:"none"，也会习惯性把 event 字段填满，
+          //   event.title 非空是模型的 schema 填充惯性，不是用户的真实意图信号）
+          const action = parsed.action ?? (parsed.shouldCreateEvent ? 'create' : 'none');
+          const ev = (action !== 'none' && parsed.event?.title) ? parsed.event : null;
+
+          // 司辰 · 语义校验式日期纠正：
+          // 只有用户原话里出现明确的日期/时间指代词，才信任模型给的 event.date；
+          // 否则一律视为模型幻觉，强制采用 clientDate（今天）。
+          if (ev) {
+            const lastUserMsg = [...messages].reverse().find((m: any) => m.role !== 'model')?.content ?? '';
+            const hasExplicitDateRef = /明天|后天|大后天|下周|下个月|\d{1,2}[月\/-]\d{1,2}|星期[一二三四五六日天]|周[一二三四五六日天]/.test(lastUserMsg);
+            const refMs = new Date(clientDate || todayDateStr()).getTime();
+            const evMs  = new Date(ev.date || '').getTime();
+            if (!hasExplicitDateRef || !ev.date || !evMs || Math.abs(refMs - evMs) > 30 * 86400_000) {
+              ev.date = clientDate || todayDateStr();
             }
           }
           return res.json({

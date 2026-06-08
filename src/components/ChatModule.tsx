@@ -27,11 +27,12 @@ import { renderMessageContent } from '../utils/renderMessage';
 import { exportQuoteCard } from '../utils/exportCard';
 
 // ── 神机百炼 · 操作卡片 ────────────────────────────────────────────────────────
+// 深色基调，呼应用户气泡（bg-[#1A1A1A]）与 `>` 引用块的暗色细节语言
 const MODULE_COLOR: Record<string, string> = {
-  CHRONOS: 'text-amber-700',
-  MAIL:    'text-blue-700',
-  VAULT:   'text-red-700',
-  CANVAS:  'text-emerald-700',
+  CHRONOS: 'text-amber-400',
+  MAIL:    'text-sky-400',
+  VAULT:   'text-rose-400',
+  CANVAS:  'text-emerald-400',
 };
 const ACTION_LABEL_ZH: Record<string, string> = {
   create: '已建立', update: '已更新', delete: '已删除', query: '今日日程',
@@ -47,23 +48,23 @@ function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 'en' })
     : ACTION_LABEL_EN[card.action] ?? '';
 
   return (
-    <div className="mt-3 border border-[#1A1A1A]/12 overflow-hidden select-none">
+    <div className="mt-3 rounded-2xl border border-white/10 bg-[#1A1A1A] overflow-hidden select-none">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#F4F2EE] border-b border-[#1A1A1A]/10">
-        <span className={`font-mono text-[8px] tracking-[0.22em] font-bold ${MODULE_COLOR[card.module] ?? 'text-neutral-600'}`}>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10">
+        <span className={`font-mono text-[8px] tracking-[0.22em] font-bold ${MODULE_COLOR[card.module] ?? 'text-white/60'}`}>
           {card.module}
         </span>
-        <span className="font-mono text-[8px] tracking-widest text-[#1A1A1A]/40 uppercase">
+        <span className="font-mono text-[8px] tracking-widest text-white/35 uppercase">
           {statusLabel}
         </span>
       </div>
       {/* Body */}
-      <div className="px-3 py-2.5 bg-white space-y-1">
-        <p className={`font-sans text-[13px] font-semibold text-[#1A1A1A] leading-snug tracking-tight ${isDeleted ? 'line-through opacity-30' : ''}`}>
+      <div className="px-3 py-2.5 space-y-1">
+        <p className={`font-sans text-[13px] font-semibold text-white leading-snug tracking-tight ${isDeleted ? 'line-through opacity-30' : ''}`}>
           {card.title}
         </p>
         {card.meta.filter(Boolean).map((m, i) => (
-          <p key={i} className="font-mono text-[10px] text-[#1A1A1A]/45 tracking-wide leading-relaxed">
+          <p key={i} className="font-mono text-[10px] text-white/45 tracking-wide leading-relaxed">
             {m}
           </p>
         ))}

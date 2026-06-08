@@ -22,18 +22,33 @@ function sanitize(raw: any[]): EventItem[] {
   }));
 }
 
+function readRaw(): EventItem[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    return sanitize(JSON.parse(saved));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Atomic read-modify-write: re-reads from localStorage immediately before
+ * applying `fn` and writing back, so each call sees the latest persisted
+ * state instead of a possibly-stale snapshot held by the caller.
+ */
+function mutate(fn: (events: EventItem[]) => EventItem[]): EventItem[] {
+  const updated = sortByDateTime(fn(readRaw()));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  return updated;
+}
+
 // ─── store ──────────────────────────────────────────────────────────────────
 
 export const scheduleStore = {
   /** Read all events */
   getAll(): EventItem[] {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return [];
-      return sanitize(JSON.parse(saved));
-    } catch {
-      return [];
-    }
+    return readRaw();
   },
 
   /** Persist all events */
@@ -50,27 +65,26 @@ export const scheduleStore = {
     });
   },
 
-  /** Add a new event, returns updated list */
+  /** Add a new event (or replace an existing one with the same id), returns updated list */
   add(event: EventItem): EventItem[] {
-    const updated = sortByDateTime([...this.getAll(), event]);
-    this.save(updated);
-    return updated;
+    return mutate(events => {
+      const exists = events.some(e => e.id === event.id);
+      return exists ? events.map(e => (e.id === event.id ? event : e)) : [...events, event];
+    });
   },
 
   /** Update fields on an existing event */
   update(id: string, changes: Partial<EventItem>): EventItem[] {
-    const updated = this.getAll().map(e =>
-      e.id === id ? { ...e, ...changes, completed: (changes.status ?? e.status) === 'done' } : e
+    return mutate(events =>
+      events.map(e =>
+        e.id === id ? { ...e, ...changes, completed: (changes.status ?? e.status) === 'done' } : e
+      )
     );
-    this.save(updated);
-    return updated;
   },
 
   /** Delete an event */
   remove(id: string): EventItem[] {
-    const updated = this.getAll().filter(e => e.id !== id);
-    this.save(updated);
-    return updated;
+    return mutate(events => events.filter(e => e.id !== id));
   },
 
   /** Wipe all events */
