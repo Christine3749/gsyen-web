@@ -13,10 +13,18 @@ function parseBoldText(text: string, isAI: boolean): React.ReactNode {
 
 /**
  * Render a markdown-lite message into React nodes.
- * Supports: **bold**, ## headings, ### headings, bullet lists, numbered lists.
+ * Supports: **bold**, ## headings, ### headings, bullet lists, numbered lists, > blockquotes.
  */
 export function renderMessageContent(text: string, isAI: boolean): React.ReactNode[] {
   return text.split('\n').map((line, i) => {
+    // Blockquote > — 暗色引用块
+    if (line.trim().startsWith('> ')) {
+      return (
+        <div key={i} className={`border-l-2 pl-3 my-1.5 font-sans text-xs leading-relaxed ${isAI ? 'border-[#CCCCCC] text-[#999999]' : 'border-white/30 text-white/45'}`}>
+          {parseBoldText(line.trim().slice(2), isAI)}
+        </div>
+      );
+    }
     // Bullet list
     if (/^[-*]\s/.test(line.trim())) {
       return (

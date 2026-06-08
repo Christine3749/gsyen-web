@@ -350,16 +350,17 @@ export default function ChatModule({ lang }: ChatModuleProps) {
                 const isAI = msg.role === 'model';
                 return (
                   <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    className={`flex gap-4 max-w-4xl ${isAI ? '' : 'ml-auto flex-row-reverse'}`}>
-                    <div className={`w-8 h-8 flex items-center justify-center border shrink-0 py-1.5 ${isAI ? 'bg-[#1A1A1A] text-[#F9F8F6] border-[#1A1A1A]' : 'bg-[#F4F2EE] text-[#1A1A1A] border-[#1A1A1A]/20'}`}>
-                      {isAI ? <Sparkles className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                    className={`flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto flex-row-reverse'}`}>
+                    {/* 头像 */}
+                    <div className={`w-7 h-7 flex items-center justify-center shrink-0 mt-1 ${isAI ? 'rounded-full bg-[#1A1A1A] text-[#F9F8F6]' : 'rounded-full bg-[#E8E6E1] text-[#1A1A1A]'}`}>
+                      {isAI ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
                     </div>
-                    <div className="space-y-1.5 max-w-[85%]">
-                      <div className={`flex items-center gap-2 text-[9px] font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
-                        <span className="font-bold text-[#1A1A1A]/70">{isAI ? (lang === 'zh' ? 'Atelier AI' : 'ATELIER AI') : (lang === 'zh' ? '您' : 'CLIENT')}</span>
-                        <span>•</span><span>{msg.timestamp}</span>
+                    <div className="space-y-1 max-w-[88%]">
+                      <div className={`flex items-center gap-1.5 text-[9px] font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
+                        <span className="font-bold text-[#1A1A1A]/50">{isAI ? (lang === 'zh' ? 'Atelier AI' : 'ATELIER AI') : (lang === 'zh' ? '您' : 'CLIENT')}</span>
+                        <span>·</span><span>{msg.timestamp}</span>
                       </div>
-                      <div className={`p-4 border text-left leading-relaxed shadow-xs ${isAI ? 'bg-white border-[#1A1A1A]/10 text-[#2F2F2F]' : 'bg-[#1A1A1A] text-white border-[#1A1A1A] font-medium'}`}>
+                      <div className={`text-left leading-relaxed ${isAI ? 'pt-0.5' : 'px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
                         <div className="space-y-1">{renderMessageContent(msg.content, isAI)}</div>
                         {isAI && msg.card && <ActionCardView card={msg.card} lang={lang} />}
                         {isAI && (
@@ -381,17 +382,18 @@ export default function ChatModule({ lang }: ChatModuleProps) {
 
             {/* Loading indicator */}
             {isLoading && (
-              <div className="flex gap-4 max-w-4xl">
-                <div className="w-8 h-8 flex items-center justify-center bg-[#1A1A1A] text-[#F9F8F6] border border-[#1A1A1A] shrink-0">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin" />
+              <div className="flex gap-3 max-w-3xl">
+                <div className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1A1A1A] text-[#F9F8F6] shrink-0 mt-1">
+                  <Sparkles className="w-3 h-3" />
                 </div>
-                <div className="space-y-1.5 max-w-[85%]">
-                  <div className="flex items-center gap-2 text-[9px] font-mono tracking-wider uppercase text-neutral-400">
-                    <span className="font-bold text-[#1A1A1A]/70">{lang === 'zh' ? 'AI 正在融汇思绪' : 'AI STUDYING DETAILS'}</span>
+                <div className="space-y-1">
+                  <div className="text-[9px] font-mono tracking-wider uppercase text-neutral-400">
+                    <span className="font-bold text-[#1A1A1A]/50">{lang === 'zh' ? 'Atelier AI' : 'ATELIER AI'}</span>
                   </div>
-                  <div className="p-4 bg-white border border-[#1A1A1A]/10 shadow-xs flex items-center gap-2 text-neutral-400 font-mono text-[10px] uppercase tracking-wider">
-                    <span className="w-2 h-2 rounded-full bg-neutral-400 animate-ping" />
-                    <span>{lang === 'zh' ? '深度推演中...' : 'Formulating creative solutions...'}</span>
+                  <div className="pt-0.5 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:300ms]" />
                   </div>
                 </div>
               </div>
