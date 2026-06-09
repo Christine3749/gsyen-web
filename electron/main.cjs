@@ -42,6 +42,7 @@ function createWindow() {
     minHeight: 600,
     backgroundColor: '#1A1A1A',
     autoHideMenuBar: true,
+    icon: path.join(__dirname, '../public/icon.png'),
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),

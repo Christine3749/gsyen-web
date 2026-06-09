@@ -45,11 +45,11 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/icon.ico"
+      "icon": "public/icon.png"
     },
     "mac": {
       "target": "dmg",
-      "icon": "public/icon.icns"
+      "icon": "public/icon.png"
     },
     "linux": {
       "target": "AppImage"
@@ -67,6 +67,7 @@
     "electron": "^42.3.3",
     "electron-builder": "^26.15.2",
     "esbuild": "^0.25.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
