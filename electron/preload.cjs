@@ -6,6 +6,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     write:   (id, data)  => ipcRenderer.invoke('canvas:write', id, data),
     delete:  (id)        => ipcRenderer.invoke('canvas:delete', id),
   },
+  window: {
+    minimize: () => ipcRenderer.invoke('window:minimize'),
+    maximize: () => ipcRenderer.invoke('window:maximize'),
+    close:    () => ipcRenderer.invoke('window:close'),
+  },
   getAppPath: () => ipcRenderer.invoke('app:getPath'),
   isElectron: true,
 });

@@ -32,6 +32,20 @@ ipcMain.handle('canvas:delete', (_e, id) => {
 
 ipcMain.handle('app:getPath', () => app.getPath('userData'));
 
+// ── 窗口控制 IPC ──────────────────────────────────────────────────────────────
+
+ipcMain.handle('window:minimize', (e) => {
+  BrowserWindow.fromWebContents(e.sender)?.minimize();
+});
+ipcMain.handle('window:maximize', (e) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  if (!win) return;
+  win.isMaximized() ? win.unmaximize() : win.maximize();
+});
+ipcMain.handle('window:close', (e) => {
+  BrowserWindow.fromWebContents(e.sender)?.close();
+});
+
 // ── 窗口 ──────────────────────────────────────────────────────────────────────
 
 function createWindow() {
@@ -40,14 +54,9 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#F9F8F6',
     icon: path.join(__dirname, '../public/icon.png'),
     titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#1A1A1A',
-      symbolColor: '#CCCCCC',
-      height: 80,
-    },
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
