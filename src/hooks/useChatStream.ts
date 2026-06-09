@@ -123,12 +123,16 @@ export function useChatStream(): UseChatStreamReturn {
       let enrichedText = text;
       let streamHandler: DomainHandler | null = null;
       let streamIntent: string | null = null;
+      let eagerCardEmitted = false;
       for (const handler of domainHandlers) {
         const intent = handler.detectIntent(text);
         if (intent) {
           streamHandler = handler;
           streamIntent = intent;
           if (!isStructured) enrichedText = handler.enrichMessage(text, intent, lang);
+          // 意图命中时立即渲染卡片（如 MAIL），无需等 AI 回复
+          const early = handler.eagerCard?.(text, lang);
+          if (early) { onActionCard?.(early); eagerCardEmitted = true; }
           break;
         }
       }
@@ -183,6 +187,8 @@ export function useChatStream(): UseChatStreamReturn {
         if (action !== 'none' && streamIntent && streamHandler) {
           const result = streamHandler.handleAction(action, ev, lang);
           if (result) {
+            // eagerCard 已先行渲染时，跳过 AI 返回的重复卡片
+            if (result.card && !eagerCardEmitted) onActionCard?.(result.card);
             if (result.pending) {
               pendingConfirmation.current = { handler: streamHandler, pending: result.pending };
               // 模型自己写的 reply 可能和"待确认"状态对不上(比如声称"已安排"
@@ -194,7 +200,6 @@ export function useChatStream(): UseChatStreamReturn {
                   : `Create "${ev.title}" (${ev.date ?? ''} ${ev.time ?? ''})? Reply "yes" to confirm.`;
               }
             } else {
-              if (result.card) onActionCard?.(result.card);
               if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
             }
           }

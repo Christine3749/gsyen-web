@@ -135,6 +135,22 @@ export const MODEL_ROUTES: Record<string, { url: string; envKey: string; modelId
   fast:     { url: `${OLLAMA_BASE_URL}/v1/chat/completions`,          envKey: 'OLLAMA_BASE_URL',   modelId: 'qwen2.5:3b' },
 };
 
+// ── 神机百炼 · Mail 系统后缀（邮件撰写） ────────────────────────────────────
+export function mailSystemSuffix(): string {
+  return `
+
+【神机百炼 · Mail — 必须输出 JSON】
+每次回复必须是严格 JSON，格式：
+{"reply":"回复内容","action":"create","event":{"recipient":"收件人姓名或邮箱","subject":"邮件主题"}}
+
+action 枚举：
+- "create" → 用户想写/发邮件 → 从用户话语提取收件人和主题
+- "none"   → 与邮件无关的闲聊
+
+recipient：从用户原话提取收件人名字（如"yuki""张总"），没有则留空字符串。
+subject：根据语境推断生成邮件主题，简洁一句，不要加书名号。`;
+}
+
 // ── 服务端提示词注入过滤 ───────────────────────────────────────────────────
 export const INJECTION_PATTERNS = [
   /忽略.*指令/,

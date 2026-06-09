@@ -31,6 +31,10 @@ export const CARD_WIDTH: Record<string, string> = {
 export const CARD_WIDTH_EXPANDED: Record<string, string> = {
   CHRONOS: 'w-[420px]',
   LEDGER:  'w-[420px]',
+  MAIL:    'w-[520px]',   // Level 2 展开态
+};
+export const CARD_WIDTH_COMPOSE: Record<string, string> = {
+  MAIL: 'w-[900px]',      // Level 3 撰写态（max-w-full 兜底，确保不超出容器）
 };
 
 // 两种身份 → 两套配色。对内(self)=PANTONE 10101 C 冷灰深字；对外(shared)=Regatta 蓝白字。

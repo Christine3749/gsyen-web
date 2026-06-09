@@ -41,4 +41,11 @@ export interface DomainHandler {
 
   /** Handle the SSE path: full text has streamed, check for an embedded action block */
   handleStreamResult(intent: string, fullText: string): DomainActionResult | null;
+
+  /**
+   * Optional: emit a card immediately on intent detection, before the API responds.
+   * Return null to skip — most handlers don't need this.
+   * If a card is returned here, useChatStream will NOT render a second card from handleAction.
+   */
+  eagerCard?(text: string, lang: 'zh' | 'en'): ActionCard | null;
 }

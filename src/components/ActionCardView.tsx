@@ -5,7 +5,7 @@
  */
 import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import MailCardExpand from './MailCardExpand';
+import { MailExpandContent } from './MailExpandContent';
 import { ActionCard } from '../types/chat';
 import { Currency, detectSymbolCurrency } from '../utils/exchangeRate';
 import { useDisplayCurrency } from '../hooks/useDisplayCurrency';
@@ -13,7 +13,7 @@ import { EventItem } from '../types/schedule';
 import { scheduleStore } from '../stores/scheduleStore';
 import { ledgerStore, Transaction } from '../stores/ledgerStore';
 import {
-  ACTION_LABEL_ZH, ACTION_LABEL_EN, CARD_WIDTH, CARD_WIDTH_EXPANDED, getCardColor,
+  ACTION_LABEL_ZH, ACTION_LABEL_EN, CARD_WIDTH, CARD_WIDTH_EXPANDED, CARD_WIDTH_COMPOSE, getCardColor,
 } from './cardConstants';
 import { CardExpandPanel } from './CardExpandPanel';
 
@@ -90,18 +90,19 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
     : isLedger
       ? ledgerStore.getAll().find(t => t.id === card.id)?.scope
       : scheduleStore.getAll().find(e => e.id === card.id)?.scope;
-  const isShared = (persistedScope ?? scopeGuess) === 'shared';
-  const COLOR = getCardColor(isShared);
-
-  const isMail = card.module === 'MAIL';
-  const [mailOpen, setMailOpen] = useState(false);
-
-  // CHRONOS / LEDGER 携带真实记录 id 时可「原地展开」，与看板同源联动。
+  const isMail    = card.module === 'MAIL';
   const isChronos = card.module === 'CHRONOS';
   const canExpandChronos = isChronos && !!card.id && card.action !== 'query';
   const canExpandLedger  = isLedger  && !!card.id && card.action !== 'query';
-  const canExpand = canExpandChronos || canExpandLedger;
-  const [expanded, setExpanded] = useState(false);
+  const canExpand = canExpandChronos || canExpandLedger || isMail;
+  const [expanded,      setExpanded]      = useState(false);
+  const [mailComposing, setMailComposing] = useState(false);
+  const [mailScope,     setMailScope]     = useState<'self' | 'shared'>('self');
+
+  const isShared = isMail
+    ? mailScope === 'shared'
+    : (persistedScope ?? scopeGuess) === 'shared';
+  const COLOR = getCardColor(isShared);
 
   const [event, setEvent] = useState<EventItem | null>(() =>
     canExpandChronos && card.id ? scheduleStore.getAll().find(e => e.id === card.id) ?? null : null
@@ -124,24 +125,23 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
     }
   }, [canExpandChronos, canExpandLedger, card.id]);
 
-  const stillExists = canExpandLedger ? !!tx : !!event;
+  const stillExists = canExpandLedger ? !!tx : canExpandChronos ? !!event : true;
 
   return (
     <div className="mt-3 select-none">
       <div className={`rounded-xl border ${COLOR.border} ${COLOR.body} ${
-        (canExpand && expanded && CARD_WIDTH_EXPANDED[card.module])
-          ? CARD_WIDTH_EXPANDED[card.module]
-          : (CARD_WIDTH[card.module] ?? 'w-[400px]')
+        (mailComposing && CARD_WIDTH_COMPOSE[card.module])
+          ? CARD_WIDTH_COMPOSE[card.module]
+          : (canExpand && expanded && CARD_WIDTH_EXPANDED[card.module])
+            ? CARD_WIDTH_EXPANDED[card.module]
+            : (CARD_WIDTH[card.module] ?? 'w-[400px]')
       } max-w-full overflow-hidden transition-[width,box-shadow] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
         canExpand && expanded
           ? 'shadow-[inset_0_1px_5px_rgba(0,0,0,0.07),_0_6px_20px_-4px_rgba(0,0,0,0.10)]'
           : ''
       }`}>
         <div
-          onClick={() => {
-            if (isMail) setMailOpen(o => !o);
-            else if (canExpand) setExpanded(o => !o);
-          }}
+          onClick={() => { if (canExpand) setExpanded(o => !o); }}
           className={`flex h-[104px] transition-[filter] duration-200 ${(isMail || canExpand) ? 'cursor-pointer hover:brightness-105' : ''}`}
         >
           <div
@@ -189,7 +189,7 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
           </div>
         </div>
 
-        {canExpand && (
+        {canExpand && !isMail && (
           <CardExpandPanel
             cardTitle={card.title}
             lang={lang}
@@ -203,15 +203,22 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
             onCollapse={() => setExpanded(false)}
           />
         )}
-      </div>
 
-      {isMail && mailOpen && (
-        <MailCardExpand
-          recipient={focusText !== card.title ? focusText : ''}
-          subject={card.title}
-          onClose={() => setMailOpen(false)}
-        />
-      )}
+        {isMail && (
+          <MailExpandContent
+            lang={lang}
+            color={COLOR}
+            recipient={focusText}
+            subject={card.title}
+            expanded={expanded}
+            scope={mailScope}
+            onScopeChange={setMailScope}
+            onCollapse={() => setExpanded(false)}
+            onCompose={() => setMailComposing(true)}
+            onComposeClose={() => setMailComposing(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   scheduleSystemSuffix,
   noScheduleSystemSuffix,
   ledgerSystemSuffix,
+  mailSystemSuffix,
   GEMINI_RESPONSE_SCHEMA,
   MODEL_ROUTES,
 } from './shared/chatConfig';
@@ -25,6 +26,7 @@ const PORT = 3000;
 
 /** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
 function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
+  if (domain === 'MAIL')   return mailSystemSuffix();
   if (domain === 'LEDGER') return ledgerSystemSuffix(today);
   if (scheduleIntent)      return scheduleSystemSuffix(today, events);
   return noScheduleSystemSuffix();
