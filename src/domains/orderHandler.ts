@@ -74,15 +74,15 @@ function buildCard(action: ActionCard['action'], order: Order): ActionCard {
   const symbol = order.currency === 'USD' ? '$' : '¥';
   // 左侧：服务名（大字）+ 套餐·金额（小字）
   // 右侧：订单状态（主标题）+ 会员名（tag）
+  const amountStr = `${symbol}${order.amount > 0 ? order.amount : 0}`;
   return {
     module: 'ORDER',
     action,
-    title:  STATUS_LABEL[order.status],  // 状态作主标题
+    title:  STATUS_LABEL[order.status],           // 右侧主标题：状态
     meta:   [
-      order.service,                                              // focusText（左大字：疆域）
-      order.plan,                                                 // focusSub（左小字：月会员）
-      `${symbol}${order.amount > 0 ? order.amount : 0}`,          // tag：金额（无则显示¥0）
-      ...(order.customer && order.customer !== '待确认' ? [order.customer] : []), // tag：客户名（有才显示）
+      amountStr,                                   // focusText（左大字：¥199）
+      `${order.service} · ${order.plan}`,          // focusSub（左小字：疆域 · 月会员）
+      ...(order.customer && order.customer !== '待确认' ? [order.customer] : []), // tag：客户名
     ],
     id: order.id,
   };
