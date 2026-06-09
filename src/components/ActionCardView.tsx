@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { MailExpandContent } from './MailExpandContent';
 import { VaultExpandContent } from './VaultExpandContent';
+import { OrderExpandContent } from './OrderExpandContent';
 import { ActionCard } from '../types/chat';
 import { Currency, detectSymbolCurrency } from '../utils/exchangeRate';
 import { useDisplayCurrency } from '../hooks/useDisplayCurrency';
@@ -72,6 +73,11 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
       focusSub  = subRaw;
     }
     tags = meta.slice(2);
+  } else if (card.module === 'ORDER') {
+    // ORDER: meta[0]=service, meta[1]=plan, meta[2]=amount, meta[3]=status
+    focusText = meta[0] ?? card.title;
+    focusSub  = meta[1] ?? '';
+    tags      = meta.slice(2);
   } else {
     const dtMatch = (meta[0] ?? '').match(/(\d{4}-)?(\d{2}-\d{2})\s*[·•]\s*(\d{1,2}):(\d{2})/);
     if (dtMatch) {
@@ -94,20 +100,25 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
   const isMail    = card.module === 'MAIL';
   const isVault   = card.module === 'VAULT';
   const isChronos = card.module === 'CHRONOS';
+  const isOrder   = card.module === 'ORDER';
   const canExpandChronos = isChronos && !!card.id && card.action !== 'query';
   const canExpandLedger  = isLedger  && !!card.id && card.action !== 'query';
   const canExpandVault   = isVault   && !!card.id;
-  const canExpand = canExpandChronos || canExpandLedger || isMail || canExpandVault;
+  const canExpandOrder   = isOrder   && !!card.id;
+  const canExpand = canExpandChronos || canExpandLedger || isMail || canExpandVault || canExpandOrder;
   const [expanded,      setExpanded]      = useState(false);
   const [mailComposing, setMailComposing] = useState(false);
   const [mailScope,     setMailScope]     = useState<'self' | 'shared'>('self');
   const [vaultScope,    setVaultScope]    = useState<'self' | 'shared'>('self');
 
-  const isShared = isMail
-    ? mailScope === 'shared'
-    : isVault
-      ? vaultScope === 'shared'
-      : (persistedScope ?? scopeGuess) === 'shared';
+  // ORDER 始终涉及客户，强制 shared（Regatta 蓝）
+  const isShared = isOrder
+    ? true
+    : isMail
+      ? mailScope === 'shared'
+      : isVault
+        ? vaultScope === 'shared'
+        : (persistedScope ?? scopeGuess) === 'shared';
   const COLOR = getCardColor(isShared);
 
   const [event, setEvent] = useState<EventItem | null>(() =>
@@ -219,6 +230,16 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
             expanded={expanded}
             scope={vaultScope}
             onScopeChange={setVaultScope}
+            onCollapse={() => setExpanded(false)}
+          />
+        )}
+
+        {isOrder && (
+          <OrderExpandContent
+            lang={lang}
+            color={COLOR}
+            orderId={card.id}
+            expanded={expanded}
             onCollapse={() => setExpanded(false)}
           />
         )}

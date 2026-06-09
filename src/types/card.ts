@@ -14,7 +14,7 @@
  *    不会出现「切到另一个东西」的割裂感。"安静的打开，安静的关上"。
  */
 
-export type CardModule = 'CHRONOS' | 'LEDGER' | 'PAYMENT' | 'MAIL' | 'VAULT' | 'CANVAS';
+export type CardModule = 'CHRONOS' | 'LEDGER' | 'PAYMENT' | 'MAIL' | 'VAULT' | 'CANVAS' | 'ORDER';
 
 export interface CardRecord {
   /** 全局唯一，建议加模块前缀避免碰撞，如 "chronos-ai-1234" */
