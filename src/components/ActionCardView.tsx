@@ -110,10 +110,10 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
   const [mailComposing, setMailComposing] = useState(false);
   const [mailScope,     setMailScope]     = useState<'self' | 'shared'>('self');
   const [vaultScope,    setVaultScope]    = useState<'self' | 'shared'>('self');
+  const [orderScope,    setOrderScope]    = useState<'self' | 'shared'>('shared'); // 默认团队
 
-  // ORDER 始终涉及客户，强制 shared（Regatta 蓝）
   const isShared = isOrder
-    ? true
+    ? orderScope === 'shared'
     : isMail
       ? mailScope === 'shared'
       : isVault
@@ -246,6 +246,8 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
             color={COLOR}
             orderId={card.id}
             expanded={expanded}
+            scope={orderScope}
+            onScopeChange={setOrderScope}
             onCollapse={() => setExpanded(false)}
           />
         )}

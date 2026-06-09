@@ -8,11 +8,13 @@ import { CardColor } from './cardConstants';
 import { orderStore, Order, OrderStatus } from '../stores/orderStore';
 
 interface Props {
-  lang:       'zh' | 'en';
-  color:      CardColor;
-  orderId:    string | undefined;
-  expanded:   boolean;
-  onCollapse: () => void;
+  lang:          'zh' | 'en';
+  color:         CardColor;
+  orderId:       string | undefined;
+  expanded:      boolean;
+  scope:         'self' | 'shared';
+  onScopeChange: (s: 'self' | 'shared') => void;
+  onCollapse:    () => void;
 }
 
 const STATUS_CONFIG: Record<OrderStatus, { zh: string; en: string; Icon: typeof Clock }> = {
@@ -28,13 +30,12 @@ interface EditState {
   amount: string; startDate: string; expireDate: string; notes: string;
 }
 
-export function OrderExpandContent({ lang, color: C, orderId, expanded, onCollapse }: Props) {
+export function OrderExpandContent({ lang, color: C, orderId, expanded, scope, onScopeChange, onCollapse }: Props) {
   const zh = lang === 'zh';
   const [order, setOrder] = useState<Order | null>(() =>
     orderId ? (orderStore.getAll().find(o => o.id === orderId) ?? null) : null
   );
   const [editing, setEditing] = useState(false);
-  const [scope,   setScope]   = useState<'self' | 'shared'>('shared');
   const [edit,    setEdit]    = useState<EditState>({
     customer: '', plan: '', service: '', amount: '', startDate: '', expireDate: '', notes: '',
   });
@@ -51,10 +52,8 @@ export function OrderExpandContent({ lang, color: C, orderId, expanded, onCollap
     if (!expanded) setEditing(false);
   }, [expanded]);
 
-  if (!expanded || !order) return null;
-
-  const symbol  = order.currency === 'USD' ? '$' : '¥';
-  const balance = Math.max(0, order.amount - order.paidAmount);
+  const symbol  = order?.currency === 'USD' ? '$' : '¥';
+  const balance = Math.max(0, (order?.amount ?? 0) - (order?.paidAmount ?? 0));
 
   const handleStatusChange = (s: OrderStatus) => orderStore.update(order.id, { status: s });
 
@@ -91,8 +90,9 @@ export function OrderExpandContent({ lang, color: C, orderId, expanded, onCollap
   const labelCls = `font-mono text-[8px] tracking-[0.15em] uppercase shrink-0 w-14 ${C.panelLabel}`;
 
   return (
-    <div className="overflow-hidden">
-      <div className={`border-t ${C.panelBorder} px-4 pt-3.5 pb-4 space-y-3.5`}>
+    <div className={`grid transition-[grid-template-rows] duration-[360ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${expanded && order ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+      <div className="overflow-hidden">
+      <div className={`border-t ${C.panelBorder} px-4 pt-3 pb-4 space-y-3`} onClick={e => e.stopPropagation()}>
 
         {/* 状态切换 */}
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -207,10 +207,10 @@ export function OrderExpandContent({ lang, color: C, orderId, expanded, onCollap
         {/* 底部操作 */}
         <div className="flex items-center justify-between pt-0.5">
           {/* 个人/团队 */}
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {(['self', 'shared'] as const).map(s => (
-              <button key={s} onClick={() => setScope(s)}
-                className={`px-2.5 py-1 rounded-[2px] font-mono text-[9px] tracking-wide transition-all ${
+              <button key={s} onClick={() => onScopeChange(s)}
+                className={`px-3 py-1.5 rounded-md font-mono text-[9px] uppercase tracking-widest transition-all ${
                   scope === s ? C.btnPrimary : C.btnGhost
                 }`}>
                 {s === 'self' ? (zh ? '个人' : 'Personal') : (zh ? '团队' : 'Team')}
@@ -240,6 +240,7 @@ export function OrderExpandContent({ lang, color: C, orderId, expanded, onCollap
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
