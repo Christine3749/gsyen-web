@@ -147,9 +147,9 @@ function buildCard(row: CredentialRow, _lang: 'zh' | 'en'): ActionCard {
   return {
     module: 'VAULT',
     action: 'create',
-    title:  row.serviceName,                  // 右侧标题
+    title:  row.username || '—',              // 右侧主标题：用户名
     meta:   [
-      row.username || '—',                    // meta[0] → focusText 左侧大字（用户名）
+      row.serviceName,                        // meta[0] → focusText 左侧大字（产品名）
       CATEGORY_LABEL[row.category],           // meta[1] → focusSub 左侧小字（分类）
       row.lastUpdated,                        // meta[2] → tag
     ],
