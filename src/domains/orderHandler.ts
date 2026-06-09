@@ -57,9 +57,10 @@ function extractAmount(text: string): { amount: number; currency: 'CNY' | 'USD' 
 }
 
 function extractCustomer(text: string): string {
-  // 简单匹配"帮 XXX 开"/"给 XXX"等模式，提取2-4字人名
+  // 匹配"帮 XXX 开"/"给 XXX"等模式，提取2-4字人名
+  // 排除"我"——"帮我开"是自己操作，客户待确认
   const m = text.match(/(?:帮|给|为)\s*([^\s买购开通订阅]{1,4})\s*(?:开|买|购|订)/);
-  if (m) return m[1];
+  if (m && m[1] !== '我') return m[1];
   return '待确认';
 }
 
@@ -78,7 +79,7 @@ function buildCard(action: ActionCard['action'], order: Order): ActionCard {
     meta:   [
       order.service,
       order.plan,
-      `${symbol}${order.amount > 0 ? order.amount : '—'}`,
+      ...(order.amount > 0 ? [`${symbol}${order.amount}`] : []),
       STATUS_LABEL[order.status],
     ],
     id: order.id,

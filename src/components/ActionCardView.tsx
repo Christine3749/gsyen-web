@@ -199,8 +199,9 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
             {tags.length > 0 && (
               <div className="flex items-center gap-2 pt-0.5">
                 {tags.map((tag, i) => {
-                  // ORDER 的状态 tag（index=1）用徽章样式，在卡片色系内突出
-                  const isOrderStatus = isOrder && i === 1;
+                  // ORDER 的状态 tag 用徽章样式——按文字匹配，不依赖 index
+                  const ORDER_STATUSES = ['待付款', '部分付款', '已生效', '已到期'];
+                  const isOrderStatus = isOrder && ORDER_STATUSES.includes(tag);
                   const orderStatusClass = isOrderStatus
                     ? tag === '待付款'   ? 'bg-amber-400/25 text-amber-300 font-bold'
                     : tag === '部分付款' ? 'bg-amber-300/20 text-amber-200 font-bold'
