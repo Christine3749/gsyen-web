@@ -40,12 +40,12 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
-    backgroundColor: '#F9F8F6',
+    backgroundColor: '#1A1A1A',
     icon: path.join(__dirname, '../public/icon.png'),
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#F9F8F6',
-      symbolColor: '#1A1A1A',
+      color: '#1A1A1A',
+      symbolColor: '#CCCCCC',
       height: 80,
     },
     webPreferences: {

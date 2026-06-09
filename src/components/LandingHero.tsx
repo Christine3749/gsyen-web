@@ -45,12 +45,14 @@ const iOSIcon = () => (
   </svg>
 );
 
+const WINDOWS_DOWNLOAD = 'https://github.com/Christine2031/gsyen-web/releases/latest/download/GSYEN-Setup-Windows.exe';
+
 const PLATFORMS = [
-  { label: 'Windows', icon: <WinIcon />,     available: true,  soon: false },
-  { label: 'macOS',   icon: <AppleIcon />,   available: false, soon: true  },
-  { label: 'Android', icon: <AndroidIcon />, available: false, soon: true  },
-  { label: 'Linux',   icon: <LinuxIcon />,   available: false, soon: true  },
-  { label: 'iOS',     icon: <iOSIcon />,     available: false, soon: true  },
+  { label: 'Windows', icon: <WinIcon />,     available: true,  soon: false, href: WINDOWS_DOWNLOAD },
+  { label: 'macOS',   icon: <AppleIcon />,   available: false, soon: true,  href: null },
+  { label: 'Android', icon: <AndroidIcon />, available: false, soon: true,  href: null },
+  { label: 'Linux',   icon: <LinuxIcon />,   available: false, soon: true,  href: null },
+  { label: 'iOS',     icon: <iOSIcon />,     available: false, soon: true,  href: null },
 ];
 
 interface LandingHeroProps {
@@ -142,28 +144,29 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="flex items-center gap-2 mt-1"
         >
-          {PLATFORMS.map(({ label, icon, available, soon }) => (
-            <div
-              key={label}
-              className={`flex items-center gap-2 px-4 py-2.5 border transition-colors ${
-                available
-                  ? 'border-[#F9F8F6]/25 bg-[#F9F8F6]/6 cursor-pointer hover:border-[#F9F8F6]/45 hover:bg-[#F9F8F6]/10'
-                  : 'border-[#F9F8F6]/8 bg-transparent cursor-default'
-              }`}
-            >
-              <span className={available ? 'text-[#F9F8F6]/65' : 'text-[#F9F8F6]/18'}>
-                {icon}
-              </span>
-              <span className={`font-mono text-[10px] tracking-[0.2em] ${available ? 'text-[#F9F8F6]/60' : 'text-[#F9F8F6]/20'}`}>
-                {label}
-              </span>
-              {soon && (
-                <span className="font-mono text-[8px] tracking-[0.1em] text-[#F9F8F6]/20 leading-none">
-                  soon
+          {PLATFORMS.map(({ label, icon, available, soon, href }) => {
+            const cls = `flex items-center gap-2 px-4 py-2.5 border transition-colors ${
+              available
+                ? 'border-[#F9F8F6]/25 bg-[#F9F8F6]/6 cursor-pointer hover:border-[#F9F8F6]/45 hover:bg-[#F9F8F6]/10'
+                : 'border-[#F9F8F6]/8 bg-transparent cursor-default'
+            }`;
+            const inner = (
+              <>
+                <span className={available ? 'text-[#F9F8F6]/65' : 'text-[#F9F8F6]/18'}>{icon}</span>
+                <span className={`font-mono text-[10px] tracking-[0.2em] ${available ? 'text-[#F9F8F6]/60' : 'text-[#F9F8F6]/20'}`}>
+                  {label}
                 </span>
-              )}
-            </div>
-          ))}
+                {soon && (
+                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F9F8F6]/20 leading-none">soon</span>
+                )}
+              </>
+            );
+            return href ? (
+              <a key={label} href={href} download className={cls}>{inner}</a>
+            ) : (
+              <div key={label} className={cls}>{inner}</div>
+            );
+          })}
         </motion.div>
       </div>
 
