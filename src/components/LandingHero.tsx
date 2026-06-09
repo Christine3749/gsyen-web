@@ -145,21 +145,21 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           {PLATFORMS.map(({ label, icon, available, soon }) => (
             <div
               key={label}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-full border transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2.5 border transition-colors ${
                 available
-                  ? 'border-[#F9F8F6]/20 bg-[#F9F8F6]/5 cursor-pointer hover:border-[#F9F8F6]/35 hover:bg-[#F9F8F6]/8'
+                  ? 'border-[#F9F8F6]/25 bg-[#F9F8F6]/6 cursor-pointer hover:border-[#F9F8F6]/45 hover:bg-[#F9F8F6]/10'
                   : 'border-[#F9F8F6]/8 bg-transparent cursor-default'
               }`}
             >
-              <span className={available ? 'text-[#F9F8F6]/60' : 'text-[#F9F8F6]/20'}>
+              <span className={available ? 'text-[#F9F8F6]/65' : 'text-[#F9F8F6]/18'}>
                 {icon}
               </span>
-              <span className={`font-mono text-[10px] tracking-[0.18em] ${available ? 'text-[#F9F8F6]/55' : 'text-[#F9F8F6]/22'}`}>
+              <span className={`font-mono text-[10px] tracking-[0.2em] ${available ? 'text-[#F9F8F6]/60' : 'text-[#F9F8F6]/20'}`}>
                 {label}
               </span>
               {soon && (
-                <span className="font-mono text-[8px] tracking-[0.12em] text-[#F9F8F6]/18 border border-[#F9F8F6]/12 px-1 py-0.5 rounded-sm leading-none">
-                  SOON
+                <span className="font-mono text-[8px] tracking-[0.1em] text-[#F9F8F6]/20 leading-none">
+                  soon
                 </span>
               )}
             </div>
