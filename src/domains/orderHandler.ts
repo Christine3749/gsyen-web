@@ -81,7 +81,7 @@ function buildCard(action: ActionCard['action'], order: Order): ActionCard {
     meta:   [
       order.service,                                              // focusText（左大字：疆域）
       order.plan,                                                 // focusSub（左小字：月会员）
-      ...(order.amount > 0 ? [`${symbol}${order.amount}`] : []), // tag：金额（有才显示）
+      `${symbol}${order.amount > 0 ? order.amount : 0}`,          // tag：金额（无则显示¥0）
       ...(order.customer && order.customer !== '待确认' ? [order.customer] : []), // tag：客户名（有才显示）
     ],
     id: order.id,
