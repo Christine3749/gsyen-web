@@ -3,6 +3,7 @@ import { chronosHandler } from './chronosHandler';
 import { ledgerHandler } from './ledgerHandler';
 import { paymentHandler } from './paymentHandler';
 import { mailHandler } from './mailHandler';
+import { vaultHandler } from './vaultHandler';
 
 /**
  * All domain handlers known to the chat router.
@@ -13,6 +14,7 @@ import { mailHandler } from './mailHandler';
  */
 export const domainHandlers: DomainHandler[] = [
   mailHandler,     // 先判，避免"给xxx写邮件"被 chronos 误抢
+  vaultHandler,    // 密钥存储，关键词独立无歧义
   chronosHandler,
   paymentHandler,  // 比 ledgerHandler 更具体（"收款码/扫码收款"等），需先判定，避免被宽泛的记账关键词抢跑
   ledgerHandler,

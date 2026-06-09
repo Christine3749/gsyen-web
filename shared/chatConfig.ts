@@ -151,6 +151,29 @@ recipient：从用户原话提取收件人名字（如"yuki""张总"），没有
 subject：根据语境推断生成邮件主题，简洁一句，不要加书名号。`;
 }
 
+// ── 神机百炼 · Vault 系统后缀（密钥存储） ────────────────────────────────────
+export function vaultSystemSuffix(): string {
+  return `
+
+【神机百炼 · Vault — 必须输出 JSON】
+每次回复必须是严格 JSON，格式：
+{"reply":"回复内容","action":"create","event":{"service":"服务名","username":"用户名","secret":"密钥值","category":"类型"}}
+
+action 枚举：
+- "create" → 用户想保存密码/密钥/凭证
+- "none"   → 与密钥存储无关的闲聊
+
+category 枚举（根据描述判断，必须四选一）：
+- "api"      → API Key / Token / 接口令牌
+- "server"   → 服务器 / SSH / 证书 / VPS
+- "database" → 数据库 / MySQL / Postgres / SQL
+- "personal" → 个人账号密码 / 默认
+
+service：服务或工具名称，如 GitHub、Supabase、MySQL。
+username：账号名或邮箱，没有则留空字符串。
+secret：密码/密钥/token 的值，从用户原话提取，没有则留空字符串。`;
+}
+
 // ── 服务端提示词注入过滤 ───────────────────────────────────────────────────
 export const INJECTION_PATTERNS = [
   /忽略.*指令/,

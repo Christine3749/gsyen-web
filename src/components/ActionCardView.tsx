@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { MailExpandContent } from './MailExpandContent';
+import { VaultExpandContent } from './VaultExpandContent';
 import { ActionCard } from '../types/chat';
 import { Currency, detectSymbolCurrency } from '../utils/exchangeRate';
 import { useDisplayCurrency } from '../hooks/useDisplayCurrency';
@@ -91,17 +92,22 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
       ? ledgerStore.getAll().find(t => t.id === card.id)?.scope
       : scheduleStore.getAll().find(e => e.id === card.id)?.scope;
   const isMail    = card.module === 'MAIL';
+  const isVault   = card.module === 'VAULT';
   const isChronos = card.module === 'CHRONOS';
   const canExpandChronos = isChronos && !!card.id && card.action !== 'query';
   const canExpandLedger  = isLedger  && !!card.id && card.action !== 'query';
-  const canExpand = canExpandChronos || canExpandLedger || isMail;
+  const canExpandVault   = isVault   && !!card.id;
+  const canExpand = canExpandChronos || canExpandLedger || isMail || canExpandVault;
   const [expanded,      setExpanded]      = useState(false);
   const [mailComposing, setMailComposing] = useState(false);
   const [mailScope,     setMailScope]     = useState<'self' | 'shared'>('self');
+  const [vaultScope,    setVaultScope]    = useState<'self' | 'shared'>('self');
 
   const isShared = isMail
     ? mailScope === 'shared'
-    : (persistedScope ?? scopeGuess) === 'shared';
+    : isVault
+      ? vaultScope === 'shared'
+      : (persistedScope ?? scopeGuess) === 'shared';
   const COLOR = getCardColor(isShared);
 
   const [event, setEvent] = useState<EventItem | null>(() =>
@@ -189,7 +195,7 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
           </div>
         </div>
 
-        {canExpand && !isMail && (
+        {canExpand && !isMail && !isVault && (
           <CardExpandPanel
             cardTitle={card.title}
             lang={lang}
@@ -200,6 +206,19 @@ export function ActionCardView({ card, lang }: { card: ActionCard; lang: 'zh' | 
             tx={tx}
             stillExists={stillExists}
             scopeGuess={scopeGuess}
+            onCollapse={() => setExpanded(false)}
+          />
+        )}
+
+        {isVault && (
+          <VaultExpandContent
+            lang={lang}
+            color={COLOR}
+            credentialId={card.id}
+            serviceName={card.title}
+            expanded={expanded}
+            scope={vaultScope}
+            onScopeChange={setVaultScope}
             onCollapse={() => setExpanded(false)}
           />
         )}

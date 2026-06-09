@@ -21,17 +21,23 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
-      try {
-        setCredentials(JSON.parse(saved));
-        return;
-      } catch (e) {
-        console.error(e);
-      }
+      try { setCredentials(JSON.parse(saved)); return; }
+      catch (e) { console.error(e); }
     }
     const seed = defaultCredentials(lang);
     setCredentials(seed);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(seed));
   }, [lang]);
+
+  // 与 vaultStore 双向同步——VAULT 卡片的增删会触发此事件
+  useEffect(() => {
+    const sync = () => {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) try { setCredentials(JSON.parse(saved)); } catch {}
+    };
+    window.addEventListener('vault-updated', sync);
+    return () => window.removeEventListener('vault-updated', sync);
+  }, []);
 
   const handleAdd = useCallback((row: CredentialRow) => {
     setCredentials((prev) => {

@@ -32,6 +32,7 @@ export const CARD_WIDTH_EXPANDED: Record<string, string> = {
   CHRONOS: 'w-[420px]',
   LEDGER:  'w-[420px]',
   MAIL:    'w-[520px]',   // Level 2 展开态
+  VAULT:   'w-[460px]',
 };
 export const CARD_WIDTH_COMPOSE: Record<string, string> = {
   MAIL: 'w-[900px]',      // Level 3 撰写态（max-w-full 兜底，确保不超出容器）
