@@ -36,8 +36,8 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
 
   return (
     <>
-      <header className="border-b border-[#1A1A1A]/10 bg-[#F9F8F6]/90 backdrop-blur-md sticky top-0 z-40 px-8 py-6 flex items-center justify-between" id="app-header">
-        <div className="flex items-center gap-4">
+      <header className="border-b border-[#1A1A1A]/10 bg-[#F9F8F6]/90 backdrop-blur-md sticky top-0 z-40 px-8 py-6 flex items-center justify-between" id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+        <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           <div className="p-2.5 bg-transparent rounded-none border border-[#1A1A1A]/15 shadow-[1px_1px_0px_rgba(26,26,26,0.06)] shrink-0 transition-transform duration-500 hover:rotate-6">
             <VintageCar size={44} className="text-[#1A1A1A]/95" />
           </div>
@@ -53,7 +53,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
         </div>
 
         {/* 桌面标签栏 */}
-        <div className="hidden md:flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1">
+        <div className="hidden md:flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {SPACES.map(({ value, Icon, iconClass, zh, en }) => (
             <button
               key={value}
@@ -69,7 +69,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
         </div>
 
         {/* 语言切换 + 状态 */}
-        <div className="flex items-center gap-3 text-[10px]">
+        <div className="flex items-center gap-3 text-[10px]" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           <div className="flex bg-[#1A1A1A]/5 p-0.5 rounded-none border border-[#1A1A1A]/10">
             <button
               onClick={() => setLang('en')}

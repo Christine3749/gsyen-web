@@ -40,10 +40,14 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
-    backgroundColor: '#1A1A1A',
-    autoHideMenuBar: true,
+    backgroundColor: '#F9F8F6',
     icon: path.join(__dirname, '../public/icon.png'),
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#F9F8F6',
+      symbolColor: '#1A1A1A',
+      height: 80,
+    },
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
