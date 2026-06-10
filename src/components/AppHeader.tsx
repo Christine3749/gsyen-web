@@ -15,13 +15,13 @@ interface SpaceTab {
 }
 
 const SPACES: SpaceTab[] = [
-  { value: 'chat',     Icon: Sparkles,   iconClass: 'w-3.5 h-3.5 text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',      shortZh: '灵阁', shortEn: 'Muse'    },
-  { value: 'mail',     Icon: Mail,       iconClass: 'w-3.5 h-3.5',                               zh: '工作邮件',     en: 'Mailbox',         shortZh: '邮件', shortEn: 'Mail'    },
-  { value: 'schedule', Icon: KanbanIcon, iconClass: 'w-3.5 h-3.5 animate-pulse',                 zh: '项目看板',     en: 'Kanban',          shortZh: '看板', shortEn: 'Kanban'  },
-  { value: 'calendar', Icon: Calendar,   iconClass: 'w-3.5 h-3.5',                               zh: '日程日历',     en: 'Calendar',        shortZh: '日历', shortEn: 'Cal'     },
-  { value: 'finance',  Icon: DollarSign, iconClass: 'w-3.5 h-3.5',                               zh: '复式财务账簿', en: 'Atelier Ledger',  shortZh: '财务', shortEn: 'Ledger'  },
-  { value: 'password', Icon: Lock,       iconClass: 'w-3.5 h-3.5',                               zh: '军事级密钥库', en: 'Citadel Key',     shortZh: '密钥', shortEn: 'Keys'    },
-  { value: 'brand',    Icon: Sparkles,   iconClass: 'w-3.5 h-3.5',                               zh: '品牌实验室',   en: 'Brand Lab',       shortZh: '品牌', shortEn: 'Brand'   },
+  { value: 'chat',     Icon: Sparkles,   iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',      shortZh: '灵阁', shortEn: 'Muse'    },
+  { value: 'mail',     Icon: Mail,       iconClass: '',                             zh: '工作邮件',     en: 'Mailbox',         shortZh: '邮件', shortEn: 'Mail'    },
+  { value: 'schedule', Icon: KanbanIcon, iconClass: 'animate-pulse',               zh: '项目看板',     en: 'Kanban',          shortZh: '看板', shortEn: 'Kanban'  },
+  { value: 'calendar', Icon: Calendar,   iconClass: '',                             zh: '日程日历',     en: 'Calendar',        shortZh: '日历', shortEn: 'Cal'     },
+  { value: 'finance',  Icon: DollarSign, iconClass: '',                             zh: '复式财务账簿', en: 'Atelier Ledger',  shortZh: '财务', shortEn: 'Ledger'  },
+  { value: 'password', Icon: Lock,       iconClass: '',                             zh: '军事级密钥库', en: 'Citadel Key',     shortZh: '密钥', shortEn: 'Keys'    },
+  { value: 'brand',    Icon: Sparkles,   iconClass: '',                             zh: '品牌实验室',   en: 'Brand Lab',       shortZh: '品牌', shortEn: 'Brand'   },
 ];
 
 interface AppHeaderProps {
@@ -74,7 +74,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
                 activeSpace === value ? 'bg-[#1A1A1A] text-[#F9F8F6] shadow-sm font-bold' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
               }`}
             >
-              <Icon className={iconClass} />
+              <Icon className={`${compact ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconClass}`} />
               <span>{lang === 'zh' ? (compact ? shortZh : zh) : (compact ? shortEn : en)}</span>
             </button>
           ))}
