@@ -50,7 +50,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
     <>
       <header className="relative border-b border-[#1A1A1A]/10 bg-[#F9F8F6]/90 backdrop-blur-md sticky top-0 z-40 px-8 py-6 flex items-start justify-between" id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          <div className="p-2.5 bg-transparent rounded-none border border-[#1A1A1A]/15 shadow-[1px_1px_0px_rgba(26,26,26,0.06)] shrink-0 transition-transform duration-500 hover:rotate-6">
+          <div className="shrink-0 transition-transform duration-500 hover:rotate-6 -mt-1">
             <VintageCar size={44} className="text-[#1A1A1A]/95" />
           </div>
           <div className="flex flex-col">
