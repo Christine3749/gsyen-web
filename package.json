@@ -50,7 +50,7 @@
       "createStartMenuShortcut": true,
       "shortcutName": "GSYEN",
       "menuCategory": "GSYEN",
-      "deleteAppDataOnUninstall": false,
+      "deleteAppDataOnUninstall": true,
       "installerLanguages": ["zh_CN", "en_US"],
       "language": "2052"
     },

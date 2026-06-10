@@ -20,7 +20,8 @@ import BrandLab from './components/brand/BrandLab';
  */
 export default function App() {
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
-  const [showLanding, setShowLanding] = useState(true);
+  const isElectron = !!(window as any).electronAPI?.isElectron;
+  const [showLanding, setShowLanding] = useState(!isElectron);
   const [activeSpace, setActiveSpace] = useState<ActiveSpace>('chat');
 
   return (
