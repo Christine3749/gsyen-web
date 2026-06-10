@@ -3,6 +3,8 @@ const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs   = require('fs');
 
+app.setAppUserModelId('com.gsyen.app');
+
 const isDev = !app.isPackaged;
 const CANVAS_DIR = path.join(app.getPath('userData'), 'canvas');
 

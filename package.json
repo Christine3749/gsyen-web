@@ -33,24 +33,37 @@
     ],
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
+        { "target": "nsis",     "arch": ["x64"] },
+        { "target": "nsis-web", "arch": ["x64"] }
       ],
       "icon": "public/icon.ico",
-      "artifactName": "GSYEN-Setup-${version}.exe"
+      "artifactName": "GSYEN-Setup-${version}.exe",
+      "publisherName": "GSYEN"
     },
     "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": false,
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/icon.ico",
+      "uninstallerIcon": "public/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "GSYEN",
-      "deleteAppDataOnUninstall": false
+      "menuCategory": "GSYEN",
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": ["zh_CN", "en_US"],
+      "language": "2052"
+    },
+    "nsisWeb": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "GSYEN",
+      "menuCategory": "GSYEN",
+      "artifactName": "GSYEN-WebSetup-${version}.exe"
     },
     "mac": {
       "target": "dmg",
