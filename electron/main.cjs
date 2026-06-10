@@ -26,11 +26,11 @@ function toggleFullscreen(w) {
   } else {
     savedBounds = w.getBounds();
     const { bounds } = screen.getDisplayMatching(w.getBounds());
-    // 先铺满屏幕，再 toggle alwaysOnTop 刷新 z-order 到任务栏之上
-    w.setAlwaysOnTop(false);
-    w.setBounds({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height });
+    // 先声明 topmost，再扩展尺寸，最后 moveTop 确保压住任务栏
     w.setAlwaysOnTop(true, 'screen-saver');
-    w.focus();   // 抢焦点，确保 Windows 把我们置于最顶
+    w.setBounds({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height });
+    w.moveTop();
+    w.focus();
   }
 }
 

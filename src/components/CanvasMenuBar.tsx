@@ -74,8 +74,8 @@ export function CanvasMenuBar({ title, onTitle, dark, onDark, focus, onFocus, tw
   const Sep = () => <div style={{ margin: '4px 0', borderTop: `1px solid ${bdr}` }} />;
 
   const fullscreen = () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else document.documentElement.requestFullscreen();
+    if (isEl()) (window as any).electronAPI.window.fullscreen();
+    // web 版不做全屏（防止浏览器强占全屏）
   };
 
   const MENUS: Record<string, React.ReactNode> = {
