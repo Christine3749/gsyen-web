@@ -20,16 +20,17 @@ let savedBounds = null;  // fullscreen 前的窗口位置
 
 function toggleFullscreen(w) {
   if (savedBounds) {
-    // 退出：还原位置，撤销置顶
     w.setAlwaysOnTop(false);
     w.setBounds(savedBounds);
     savedBounds = null;
   } else {
-    // 进入：记录当前位置，铺满整块屏幕（含任务栏区域）
     savedBounds = w.getBounds();
-    const display = screen.getDisplayMatching(w.getBounds());
-    w.setBounds(display.bounds);          // bounds 不同于 workArea，包含任务栏
-    w.setAlwaysOnTop(true, 'screen-saver'); // 层级高于任务栏
+    const { bounds } = screen.getDisplayMatching(w.getBounds());
+    // 先铺满屏幕，再 toggle alwaysOnTop 刷新 z-order 到任务栏之上
+    w.setAlwaysOnTop(false);
+    w.setBounds({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height });
+    w.setAlwaysOnTop(true, 'screen-saver');
+    w.focus();   // 抢焦点，确保 Windows 把我们置于最顶
   }
 }
 
