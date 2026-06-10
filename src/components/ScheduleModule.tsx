@@ -6,12 +6,12 @@
  *   ScheduleWeekView  · ScheduleDayView  · ScheduleKanbanView
  *   ScheduleEventModal
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { KanbanIcon } from '../gsyen-designer';
 
 import { ScheduleToolbar, ScheduleFooter, type ViewMode } from './ScheduleChrome';
-import { EventItem, ColumnId } from '../types/schedule';
+import { EventItem } from '../types/schedule';
 import { DEFAULT_EVENTS }       from '../config/scheduleConfig';
 import { useScheduleEvents }    from '../hooks/useScheduleEvents';
 import { scheduleStore }        from '../stores/scheduleStore';
@@ -23,24 +23,22 @@ import ScheduleSidebar    from './ScheduleSidebar';
 import ScheduleMonthView  from './ScheduleMonthView';
 import ScheduleWeekView   from './ScheduleWeekView';
 import ScheduleDayView    from './ScheduleDayView';
-import ScheduleKanbanView from './ScheduleKanbanView';
 import ScheduleEventModal from './ScheduleEventModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ScheduleModuleProps {
   lang: 'zh' | 'en';
-  defaultView?: 'kanban' | 'calendar';
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function ScheduleModule({ lang, defaultView = 'kanban' }: ScheduleModuleProps) {
+export default function ScheduleModule({ lang }: ScheduleModuleProps) {
   const todayDate   = new Date();
   const todayString = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2,'0')}-${String(todayDate.getDate()).padStart(2,'0')}`;
 
   // ── UI State ──────────────────────────────────────────────────────────────
-  const [viewMode,          setViewMode]          = useState<ViewMode>(defaultView === 'calendar' ? 'month' : 'kanban');
+  const [viewMode,          setViewMode]          = useState<ViewMode>('month');
   const [filterCategory,    setFilterCategory]    = useState('all');
   const [searchText,        setSearchText]        = useState('');
   const [isSidebarOpen,     setIsSidebarOpen]     = useState(true);
@@ -49,24 +47,19 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
     creative: true, finance: true, secure: true, strategy: true,
   });
   const [showAddForm,           setShowAddForm]           = useState(false);
-  const [addFormInitialStatus,  setAddFormInitialStatus]  = useState<ColumnId>('todo');
   const [addFormInitialDate,    setAddFormInitialDate]    = useState<string | undefined>(undefined);
   const [selectedEventForView,  setSelectedEventForView]  = useState<EventItem | null>(null);
   const [notification,          setNotification]          = useState<string | null>(null);
 
   // ── Data & Calendar Hooks ─────────────────────────────────────────────────
   const { events, addEvent, updateEvent, removeEvent, moveEvent, changeStatus } = useScheduleEvents(DEFAULT_EVENTS);
-  const { draggingId, dragOverColumn, dragOverDate,
+  const { draggingId, dragOverDate,
           onDragStart, onDragEnd,
-          onDragOverColumn, onDragOverDate,
-          onDropColumn, onDropDate } = useDragDrop();
+          onDragOverDate, onDropDate } = useDragDrop();
 
   const miniCalendarDays     = useMiniCalendarDays(selectedDate);
   const mainCalendarGridDays = useMainCalendarDays(selectedDate, events);
   const currentWeekDaysList  = useWeekDays(selectedDate, lang);
-
-  // ── Effects ───────────────────────────────────────────────────────────────
-  useEffect(() => { setViewMode(defaultView === 'calendar' ? 'month' : 'kanban'); }, [defaultView]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const notify = (text: string) => {
@@ -83,9 +76,8 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
   });
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const openAddForm = (dateStr?: string, status: ColumnId = 'todo') => {
+  const openAddForm = (dateStr?: string) => {
     setAddFormInitialDate(dateStr);
-    setAddFormInitialStatus(status);
     setShowAddForm(true);
   };
 
@@ -115,14 +107,6 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
     notify(lang === 'zh' ? '信条变动调整已同步保存' : 'Manuscript revisions deployed & updated successfully');
   };
 
-  const handleDropColumn = (e: React.DragEvent, targetStatus: ColumnId) => {
-    const id = onDropColumn(e);
-    if (id) {
-      changeStatus(id, targetStatus);
-      notify(lang === 'zh' ? `阶段迁移至 ${targetStatus.toUpperCase()}` : `Stage updated to ${targetStatus.toUpperCase()}`);
-    }
-  };
-
   const handleDropDate = (e: React.DragEvent, dateStr: string) => {
     const id = onDropDate(e);
     if (id) {
@@ -130,16 +114,6 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
       moveEvent(id, dateStr);
       notify(lang === 'zh' ? `日程已拖拽至: ${dateStr}` : `Event "${movedItem?.title}" rescheduled to ${dateStr}`);
     }
-  };
-
-  const handleShiftCard = (id: string, dir: 'back' | 'forward', e: React.MouseEvent) => {
-    e.stopPropagation();
-    const cycle: ColumnId[] = ['todo', 'progress', 'review', 'done'];
-    const ev = events.find(item => item.id === id);
-    if (!ev) return;
-    const cur = cycle.indexOf(ev.status || (ev.completed ? 'done' : 'todo'));
-    const nxt = dir === 'forward' ? Math.min(cur + 1, 3) : Math.max(cur - 1, 0);
-    if (nxt !== cur) changeStatus(id, cycle[nxt]);
   };
 
   const handleNavigateToday = () => {
@@ -201,7 +175,6 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
         <ScheduleAddForm
           lang={lang}
           todayString={todayString}
-          initialStatus={addFormInitialStatus}
           initialDate={addFormInitialDate}
           onAdd={handleAddEvent}
           onClose={() => setShowAddForm(false)}
@@ -211,11 +184,10 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
       {/* Main layout: sidebar + view */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-        {/* Sidebar (calendar views only) */}
-        {viewMode !== 'kanban' && (
-          <aside className={`bg-white border-[#1A1A1A]/10 rounded-none shadow-sm flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-            isSidebarOpen ? 'w-full lg:w-[280px] p-4 border opacity-100' : 'w-0 lg:w-0 p-0 border-transparent opacity-0 pointer-events-none'
-          }`}>
+        {/* Sidebar */}
+        <aside className={`bg-white border-[#1A1A1A]/10 rounded-none shadow-sm flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
+          isSidebarOpen ? 'w-full lg:w-[280px] p-4 border opacity-100' : 'w-0 lg:w-0 p-0 border-transparent opacity-0 pointer-events-none'
+        }`}>
             <ScheduleSidebar
               lang={lang}
               selectedDate={selectedDate}
@@ -229,8 +201,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
               onNavigateToday={handleNavigateToday}
               onOpenAddForm={dateStr => openAddForm(dateStr)}
             />
-          </aside>
-        )}
+        </aside>
 
         {/* Main view */}
         <section className="flex-grow flex-1 min-w-0 w-full">
@@ -262,17 +233,6 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
               activeFilteredList={activeFilteredList}
               onOpenEvent={setSelectedEventForView}
               onNavigateToday={handleNavigateToday} onNavigate={handleNavigateDiff}
-            />
-          )}
-          {viewMode === 'kanban' && (
-            <ScheduleKanbanView
-              lang={lang} activeFilteredList={activeFilteredList}
-              dragOverColumn={dragOverColumn} draggingId={draggingId}
-              onDragStart={onDragStart} onDragEnd={onDragEnd}
-              onDragOverColumn={onDragOverColumn} onDropColumn={handleDropColumn}
-              onOpenEvent={setSelectedEventForView}
-              onDeleteEvent={handleDeleteEvent} onShiftCard={handleShiftCard}
-              onDraftHere={colId => openAddForm(undefined, colId)}
             />
           )}
         </section>

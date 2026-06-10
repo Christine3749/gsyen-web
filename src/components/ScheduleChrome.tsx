@@ -1,7 +1,7 @@
 // ScheduleModule 的工具栏与页脚（单例 UI 外壳，从协调器拆出以保持精简）。
 import { Plus, Search, X, CheckCircle2, PanelLeft } from 'lucide-react';
 
-export type ViewMode = 'month' | 'week' | 'day' | 'kanban';
+export type ViewMode = 'month' | 'week' | 'day';
 
 interface ToolbarProps {
   lang: 'zh' | 'en';
@@ -23,12 +23,10 @@ export function ScheduleToolbar(p: ToolbarProps) {
   return (
     <div className="bg-white border border-[#1A1A1A]/10 p-3.5 flex flex-col xl:flex-row items-center justify-between gap-4">
       <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-        {p.viewMode !== 'kanban' && (
-          <button onClick={() => p.setIsSidebarOpen(o => !o)}
-            className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all flex items-center justify-center ${p.isSidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'bg-transparent text-[#1A1A1A]/70'}`}>
-            <PanelLeft className="w-4 h-4" />
-          </button>
-        )}
+        <button onClick={() => p.setIsSidebarOpen(o => !o)}
+          className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all flex items-center justify-center ${p.isSidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'bg-transparent text-[#1A1A1A]/70'}`}>
+          <PanelLeft className="w-4 h-4" />
+        </button>
         <div className="relative">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#1A1A1A]/40" />
           <input type="text" placeholder={lang === 'zh' ? '搜索文书卡片...' : 'Filter schedule archives...'}
@@ -47,13 +45,12 @@ export function ScheduleToolbar(p: ToolbarProps) {
 
       <div className="flex items-center justify-between w-full xl:w-auto gap-4 flex-wrap">
         <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40">
-          {(['month','week','day','kanban'] as ViewMode[]).map(mode => (
+          {(['month','week','day'] as ViewMode[]).map(mode => (
             <button key={mode} onClick={() => p.setViewMode(mode)}
               className={`p-1.5 px-3.5 text-[9px] font-mono uppercase tracking-wider transition-all rounded-none ${p.viewMode === mode ? 'bg-[#1A1A1A] text-white font-bold' : 'text-[#1A1A1A]/60 hover:bg-[#1A1A1A]/5'}`}>
-              {mode === 'kanban' ? `👑 ${lang === 'zh' ? '阶段看板' : 'Kanban Board'}`
-                : mode === 'month' ? (lang === 'zh' ? '格网月历' : 'Month Grid')
-                : mode === 'week'  ? (lang === 'zh' ? '执行周历' : 'Week Timeline')
-                :                   (lang === 'zh' ? '单日重点' : 'Day Focus')}
+              {mode === 'month' ? (lang === 'zh' ? '格网月历' : 'Month Grid')
+                : mode === 'week' ? (lang === 'zh' ? '执行周历' : 'Week Timeline')
+                :                  (lang === 'zh' ? '单日重点' : 'Day Focus')}
             </button>
           ))}
         </div>

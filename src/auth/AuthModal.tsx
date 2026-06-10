@@ -140,7 +140,7 @@ export default function AuthModal({ lang, initialTab = 'login', onClose }: Props
                   fontSize: 9, letterSpacing: '0.25em', textTransform: 'uppercase',
                   fontWeight: 700, border: 'none', cursor: 'pointer',
                   transition: 'background 0.22s, color 0.22s',
-                  background: tab === t ? 'rgba(249,248,246,0.93)' : 'transparent',
+                  background: tab === t ? 'rgba(249,248,246,0.93)' : 'rgba(249,248,246,0.07)',
                   color:      tab === t ? '#111111'                 : 'rgba(249,248,246,0.42)',
                 }}>
                 {t === 'login' ? (zh ? '登录' : 'LOGIN') : (zh ? '注册' : 'REGISTER')}

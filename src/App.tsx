@@ -11,6 +11,7 @@ import FinanceModule from './components/FinanceModule';
 import PasswordModule from './components/PasswordModule';
 import MailModule from './components/MailModule';
 import ChatModule from './components/ChatModule';
+import KanbanModule from './components/KanbanModule';
 import LandingHero from './components/LandingHero';
 import AppHeader, { ActiveSpace } from './components/AppHeader';
 import BrandLab from './components/brand/BrandLab';
@@ -41,8 +42,8 @@ export default function App() {
           <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
             {activeSpace === 'chat' && <ChatModule lang={lang} />}
             {activeSpace === 'mail' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><MailModule lang={lang} /></div>}
-            {activeSpace === 'schedule' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><ScheduleModule lang={lang} defaultView="kanban" /></div>}
-            {activeSpace === 'calendar' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><ScheduleModule lang={lang} defaultView="calendar" /></div>}
+            {activeSpace === 'schedule' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><KanbanModule lang={lang} /></div>}
+            {activeSpace === 'calendar' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><ScheduleModule lang={lang} /></div>}
             {activeSpace === 'finance' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><FinanceModule lang={lang} /></div>}
             {activeSpace === 'password' && <div className="h-full overflow-y-auto px-8 pb-10 pt-0"><PasswordModule lang={lang} /></div>}
           </div>
