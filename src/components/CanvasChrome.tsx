@@ -106,15 +106,11 @@ export function CanvasChrome({
           })}
         </div>
 
-        {/* Electron: – □ 管窗口，× 退回 Chat；web: 只有 × */}
+        {/* 三剑客常驻；Electron 下实际控窗，web 下静默 */}
         <div className="flex items-center"
           style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}}>
-          {isElectron && (
-            <>
-              <WinCtrl sym="–" title="Minimize" P={P} dark={dark} onClick={() => (window as any).electronAPI.window.minimize()} />
-              <WinCtrl sym="□" title="Maximize" P={P} dark={dark} onClick={() => (window as any).electronAPI.window.maximize()} />
-            </>
-          )}
+          <WinCtrl sym="–" title="Minimize" P={P} dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.minimize()} />
+          <WinCtrl sym="□" title="Maximize" P={P} dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.maximize()} />
           <WinCtrl sym="×" title="退回 Chat  Esc" P={P} dark={dark} onClick={onClose} danger />
         </div>
       </div>
