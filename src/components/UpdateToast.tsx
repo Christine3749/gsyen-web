@@ -99,23 +99,34 @@ export function UpdateToast() {
             {/* Downloading */}
             {phase === 'downloading' && (
               <>
-                <div style={{ width: '100%', height: 1, background: IV(0.1),
-                  marginBottom: 9, position: 'relative' }}>
+                {/* Track */}
+                <div style={{ width: '100%', height: 20, background: IV(0.07),
+                  position: 'relative', overflow: 'hidden', marginBottom: 8 }}>
+                  {/* Fill — diagonal stripe pattern */}
                   <div style={{
                     position: 'absolute', left: 0, top: 0, height: '100%',
-                    width: `${pct}%`, background: AMB(0.75),
-                    transition: 'width 0.35s linear',
+                    width: `${pct}%`,
+                    background: `repeating-linear-gradient(
+                      -45deg,
+                      ${AMB(0.82)} 0px, ${AMB(0.82)} 5px,
+                      ${AMB(0.5)}  5px, ${AMB(0.5)}  10px
+                    )`,
+                    transition: 'width 0.4s linear',
                   }} />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: MONO, fontSize: 10, color: IV(0.35), letterSpacing: '0.05em' }}>
-                    {speed > 0 ? speedStr : '—'}
-                  </span>
-                  <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600,
-                    color: AMB(0.7), letterSpacing: '0.08em' }}>
+                  {/* Percentage inside bar */}
+                  <span style={{
+                    position: 'absolute', right: 8, top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontFamily: MONO, fontSize: 10, fontWeight: 700,
+                    color: pct > 80 ? '#111111' : AMB(0.9),
+                    letterSpacing: '0.08em', lineHeight: 1,
+                  }}>
                     {pct}%
                   </span>
                 </div>
+                <span style={{ fontFamily: MONO, fontSize: 10, color: IV(0.32), letterSpacing: '0.05em' }}>
+                  {speed > 0 ? speedStr : '—'}
+                </span>
               </>
             )}
 

@@ -163,10 +163,16 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // F11 真全屏（在渲染层拦截前注册，覆盖系统默认行为）
+  // F11 真全屏 — setAlwaysOnTop('screen-saver') 确保盖住 Windows 任务栏
   win.webContents.on('before-input-event', (_e, input) => {
     if (input.type === 'keyDown' && input.key === 'F11') {
-      win.setFullScreen(!win.isFullScreen());
+      const goFull = !win.isFullScreen();
+      win.setFullScreen(goFull);
+      if (goFull) {
+        win.setAlwaysOnTop(true, 'screen-saver');
+      } else {
+        win.setAlwaysOnTop(false);
+      }
     }
   });
 
