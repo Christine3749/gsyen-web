@@ -7,7 +7,7 @@ import { Dropdown } from './CanvasEditorUI';
 import { WinCtrlButton, SidebarIcon, DocIcon, DrawIcon, NodeIcon, PreviewIcon } from '../gsyen-designer';
 import {
   Palette, MenuSpec, MenuId, EditorMode,
-  TITLE_H, MENU_H, SYS_FONT, isElectron,
+  TITLE_H, MENU_H, SYS_FONT, isElectron, isMac,
 } from './CanvasEditorTypes';
 
 interface Props {
@@ -100,12 +100,12 @@ export function CanvasChrome({
           })}
         </div>
 
-        {/* 三剑客常驻；Electron 下实际控窗，web 下静默 */}
+        {/* 窗口控制：Windows 全三键；Mac 只保留 close（返回 Chat），min/max 用原生红绿灯 */}
         <div className="flex items-center"
           style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}}>
-          <WinCtrlButton action="minimize" dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.minimize()} title="Minimize" />
-          <WinCtrlButton action="maximize" dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.maximize()} title="Maximize" />
-          <WinCtrlButton action="close"    dark={dark} onClick={onClose} title="退回 Chat  Esc" />
+          {!isMac && <WinCtrlButton action="minimize" dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.minimize()} title="Minimize" />}
+          {!isMac && <WinCtrlButton action="maximize" dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.maximize()} title="Maximize" />}
+          <WinCtrlButton action="close" dark={dark} onClick={onClose} title="退回 Chat  Esc" />
         </div>
       </div>
 

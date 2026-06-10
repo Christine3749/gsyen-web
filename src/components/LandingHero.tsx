@@ -46,12 +46,12 @@ const IOSIcon = () => (
   </svg>
 );
 
-const WINDOWS_OSS    = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Windows.exe';
-const WINDOWS_GITHUB = 'https://github.com/Christine2031/gsyen-web/releases/latest/download/GSYEN-Setup-Windows.exe';
+const WINDOWS_OSS = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Windows.exe';
+const MAC_OSS     = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Mac.dmg';
 
 const PLATFORMS = [
-  { label: 'Windows', icon: <WinIcon />,     available: true,  soon: false, href: WINDOWS_OSS },
-  { label: 'macOS',   icon: <AppleIcon />,   available: false, soon: true,  href: null },
+  { label: 'Windows', icon: <WinIcon />,     available: true, soon: false, href: WINDOWS_OSS },
+  { label: 'macOS',   icon: <AppleIcon />,   available: true, soon: false, href: MAC_OSS },
   { label: 'Android', icon: <AndroidIcon />, available: false, soon: true,  href: null },
   { label: 'Linux',   icon: <LinuxIcon />,   available: false, soon: true,  href: null },
   { label: 'iOS',     icon: <IOSIcon />,     available: false, soon: true,  href: null },

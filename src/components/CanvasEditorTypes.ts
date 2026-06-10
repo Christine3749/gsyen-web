@@ -65,3 +65,4 @@ export const SYS_FONT =
   '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif';
 
 export const isElectron = !!(window as any).electronAPI?.isElectron;
+export const isMac      = (window as any).electronAPI?.platform === 'darwin';

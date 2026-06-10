@@ -38,6 +38,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
   const [compact, setCompact] = useState(window.innerWidth < 1100);
   const [showAbout, setShowAbout] = useState(false);
   const isElectron = !!(window as any).electronAPI?.isElectron;
+  const isMac = (window as any).electronAPI?.platform === 'darwin';
 
   useEffect(() => {
     let raf = 0;
@@ -51,7 +52,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
 
   return (
     <>
-      <header className="relative border-b border-[#1A1A1A]/10 bg-[#F9F8F6]/90 backdrop-blur-md sticky top-0 z-40 px-8 py-6 flex items-start justify-between" id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+      <header className={`relative border-b border-[#1A1A1A]/10 bg-[#F9F8F6]/90 backdrop-blur-md sticky top-0 z-40 py-6 flex items-start justify-between ${isMac ? 'pl-20 pr-8' : 'px-8'}`} id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           <div
             className={`shrink-0 transition-transform duration-500 hover:rotate-6 -mt-1 ${isElectron ? 'cursor-pointer' : ''}`}
