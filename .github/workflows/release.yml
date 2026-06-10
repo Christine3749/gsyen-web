@@ -62,13 +62,14 @@ jobs:
       - name: Upload Mac to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ../gsyen-dist/GSYEN-Setup-Mac.dmg
+          files: ../gsyen-dist/GSYEN-Setup-Mac-*.dmg
 
       - name: Upload Mac to OSS
         run: |
           curl -sL https://gosspublic.alicdn.com/ossutil/1.7.18/ossutil64 -o ossutil
           chmod +x ossutil
-          ./ossutil cp "../gsyen-dist/GSYEN-Setup-Mac.dmg" oss://gsyen-releases/GSYEN-Setup-Mac.dmg -e oss-cn-shenzhen.aliyuncs.com -i $OSS_KEY_ID -k $OSS_KEY_SECRET -f
+          ./ossutil cp "../gsyen-dist/GSYEN-Setup-Mac-arm64.dmg" oss://gsyen-releases/GSYEN-Setup-Mac-arm64.dmg -e oss-cn-shenzhen.aliyuncs.com -i $OSS_KEY_ID -k $OSS_KEY_SECRET -f
+          ./ossutil cp "../gsyen-dist/GSYEN-Setup-Mac-x64.dmg" oss://gsyen-releases/GSYEN-Setup-Mac-x64.dmg -e oss-cn-shenzhen.aliyuncs.com -i $OSS_KEY_ID -k $OSS_KEY_SECRET -f
         env:
           OSS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
           OSS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
