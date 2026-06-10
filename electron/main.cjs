@@ -13,8 +13,10 @@ let forceQuit = false;
 // ── 系统托盘 ──────────────────────────────────────────────────────────────────
 
 function createTray() {
-  // dev: public/icon.png；prod: __dirname = app.asar/electron/，../dist/icon.png 正确
-  const iconPath = path.join(__dirname, isDev ? '../public/icon.png' : '../dist/icon.png');
+  // dev: public/icon.ico；prod: extraResources 放到 asar 外的 resources/icon.ico
+  const iconPath = isDev
+    ? path.join(__dirname, '../public/icon.ico')
+    : path.join(process.resourcesPath, 'icon.ico');
 
   let icon;
   try {
