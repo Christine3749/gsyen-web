@@ -59,7 +59,7 @@ const IOSIcon = () => (
 );
 
 const WINDOWS_OSS    = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Windows.exe';
-const MAC_OSS        = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Mac.dmg';
+const MAC_OSS        = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Mac-arm64.dmg';
 const WINDOWS_GITHUB = 'https://github.com/Christine2031/gsyen-web/releases/latest';
 const GITHUB_URL     = 'https://github.com/Christine2031/gsyen-web';
 const YOUTUBE_URL    = 'https://www.youtube.com/@iSgsyenTt';
@@ -119,6 +119,9 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
             </span>
             <span className="font-cinzel text-2xl font-bold tracking-[0.3em] text-[#F9F8F6]/70 uppercase leading-none">
               GSYEN
+            </span>
+            <span className="font-mono text-[9px] tracking-[0.2em] uppercase px-1.5 py-0.5 border border-[#4A90D9]/60 text-[#4A90D9] leading-none self-center">
+              BETA
             </span>
           </div>
           <p className="font-cinzel text-[11px] tracking-[0.35em] text-[#F9F8F6]/35 uppercase">
