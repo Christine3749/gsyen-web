@@ -47,6 +47,7 @@ export function CanvasChrome({
       {/* ─ Title bar ─ */}
       <div style={{ height: TITLE_H, background: P.chrome,
         display: 'flex', alignItems: 'center',
+        paddingLeft: isMac ? 70 : 0,
         ...(isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : {}) }}>
 
         {/* Sidebar icon */}
