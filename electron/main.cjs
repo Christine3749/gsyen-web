@@ -1,7 +1,12 @@
 const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const Sentry = require('@sentry/electron/main');
 const path = require('path');
 const fs   = require('fs');
+
+Sentry.init({
+  dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
+});
 
 app.setAppUserModelId('com.gsyen.app');
 
