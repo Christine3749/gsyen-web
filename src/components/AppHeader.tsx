@@ -1,5 +1,5 @@
 import React, { ComponentType, useState, useEffect } from 'react';
-import { Sparkles, Mail, Calendar, DollarSign, Lock } from 'lucide-react';
+import { Sparkles, Mail, Calendar, DollarSign, Lock, Globe } from 'lucide-react';
 import { translations } from '../translations';
 import VintageCar from './VintageCar';
 import { WinCtrlButton, KanbanIcon } from '../gsyen-designer';
@@ -91,28 +91,44 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
           </div>
         )}
 
-        {/* 右侧：语言 + 状态 */}
-        <div className="flex items-center gap-3 text-[10px] shrink-0"
+        {/* 右侧：状态 + 语言 + 登录/注册 */}
+        <div className="flex items-center gap-2 shrink-0"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
 
-          <div className="flex bg-[#1A1A1A]/5 p-0.5 rounded-none border border-[#1A1A1A]/10 shrink-0">
-            <button
-              onClick={() => setLang('en')}
-              className={`px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all ${lang === 'en' ? 'bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'}`}
-            >EN</button>
-            <button
-              onClick={() => setLang('zh')}
-              className={`px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all ${lang === 'zh' ? 'bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'}`}
-            >中文</button>
-          </div>
-          <div className="flex bg-[#1A1A1A]/5 p-0.5 rounded-none border border-[#1A1A1A]/10 shrink-0">
-            <button className="px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all text-[#1A1A1A]/60 hover:text-[#1A1A1A]">
-              {lang === 'zh' ? '登录' : 'LOGIN'}
-            </button>
-            <button className="px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all bg-[#1A1A1A] text-[#F9F8F6]">
-              {lang === 'zh' ? '注册' : 'REGISTER'}
-            </button>
-          </div>
+          {/* 绿点 ONLINE */}
+          {!compact && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 border border-[#1A1A1A]/10 bg-[#1A1A1A]/[0.03] shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+              <span className="text-[8px] font-mono font-bold tracking-[0.12em] text-[#1A1A1A]/40 uppercase whitespace-nowrap">ONLINE</span>
+            </div>
+          )}
+
+          {/* 竖线 */}
+          {!compact && <div className="w-px h-3.5 bg-[#1A1A1A]/15 shrink-0" />}
+
+          {/* 地球仪 — 点击切换语言 */}
+          <button
+            onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+            className="flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/10 bg-[#1A1A1A]/5 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-all shrink-0"
+          >
+            <Globe className="w-3 h-3" />
+            <span className="text-[9px] font-bold tracking-wider uppercase">{lang === 'zh' ? '中文' : 'EN'}</span>
+          </button>
+
+          {/* 竖线 */}
+          <div className="w-px h-3.5 bg-[#1A1A1A]/15 shrink-0" />
+
+          {/* 登录 文字链 */}
+          <button className="px-2 py-1.5 text-[9px] font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A] transition-all whitespace-nowrap shrink-0">
+            {lang === 'zh' ? '登录' : 'LOGIN'}
+          </button>
+
+          {/* 注册 实块 */}
+          <button className="flex items-center gap-1 px-3 py-1.5 bg-[#1A1A1A] text-[#F9F8F6] text-[9px] font-bold tracking-wider uppercase hover:bg-[#1A1A1A]/80 transition-all whitespace-nowrap shrink-0">
+            {lang === 'zh' ? '注册' : 'REGISTER'}
+            <span className="text-[#F9F8F6]/50 ml-0.5">→</span>
+          </button>
+
         </div>
       </header>
 
