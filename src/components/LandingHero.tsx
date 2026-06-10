@@ -50,11 +50,11 @@ const WINDOWS_OSS = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-S
 const MAC_OSS     = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Mac.dmg';
 
 const PLATFORMS = [
-  { label: 'Windows', icon: <WinIcon />,     available: true, soon: false, href: WINDOWS_OSS },
-  { label: 'macOS',   icon: <AppleIcon />,   available: true, soon: false, href: MAC_OSS },
-  { label: 'Android', icon: <AndroidIcon />, available: false, soon: true,  href: null },
-  { label: 'Linux',   icon: <LinuxIcon />,   available: false, soon: true,  href: null },
-  { label: 'iOS',     icon: <IOSIcon />,     available: false, soon: true,  href: null },
+  { label: 'Windows', icon: <WinIcon />,     available: true, soon: false, beta: false, href: WINDOWS_OSS },
+  { label: 'macOS',   icon: <AppleIcon />,   available: true, soon: false, beta: true,  href: MAC_OSS },
+  { label: 'Android', icon: <AndroidIcon />, available: false, soon: true,  beta: false, href: null },
+  { label: 'Linux',   icon: <LinuxIcon />,   available: false, soon: true,  beta: false, href: null },
+  { label: 'iOS',     icon: <IOSIcon />,     available: false, soon: true,  beta: false, href: null },
 ];
 
 interface LandingHeroProps {
@@ -166,17 +166,26 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
             </a>
           </div>
           {/* Other platforms */}
-          {PLATFORMS.slice(1).map(({ label, icon, soon }: any) => (
-            <div
-              key={label}
-              className="flex items-center gap-2 px-4 py-2.5 border transition-colors border-[#F9F8F6]/8 bg-transparent cursor-default"
-            >
-              <span className="text-[#F9F8F6]/18">{icon}</span>
-              <span className="font-mono text-[10px] tracking-[0.2em] text-[#F9F8F6]/20">{label}</span>
-              {soon && (
-                <span className="font-mono text-[8px] tracking-[0.1em] text-[#F9F8F6]/20 leading-none">soon</span>
-              )}
-            </div>
+          {PLATFORMS.slice(1).map(({ label, icon, soon, beta, available, href }: any) => (
+            available ? (
+              <a key={label} href={href}
+                className="flex items-center gap-2 px-4 py-2.5 border transition-colors border-[#F9F8F6]/20 bg-transparent hover:border-[#F9F8F6]/40 cursor-pointer">
+                <span className="text-[#F9F8F6]/60">{icon}</span>
+                <span className="font-mono text-[10px] tracking-[0.2em] text-[#F9F8F6]/60">{label}</span>
+                {beta && (
+                  <span className="font-mono text-[7px] tracking-[0.15em] text-amber-400/70 border border-amber-400/30 px-1 py-0.5 leading-none uppercase">beta</span>
+                )}
+              </a>
+            ) : (
+              <div key={label}
+                className="flex items-center gap-2 px-4 py-2.5 border transition-colors border-[#F9F8F6]/8 bg-transparent cursor-default">
+                <span className="text-[#F9F8F6]/18">{icon}</span>
+                <span className="font-mono text-[10px] tracking-[0.2em] text-[#F9F8F6]/20">{label}</span>
+                {soon && (
+                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F9F8F6]/20 leading-none">soon</span>
+                )}
+              </div>
+            )
           ))}
         </motion.div>
       </div>
