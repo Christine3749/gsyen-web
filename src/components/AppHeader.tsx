@@ -1,4 +1,4 @@
-import React, { ComponentType } from 'react';
+import React, { ComponentType, useState, useEffect } from 'react';
 import { Sparkles, Mail, Calendar, DollarSign, Lock } from 'lucide-react';
 import { translations } from '../translations';
 import VintageCar from './VintageCar';
@@ -10,18 +10,18 @@ interface SpaceTab {
   value: ActiveSpace;
   Icon: ComponentType<any>;
   iconClass: string;
-  zh: string; en: string;     // 桌面标签
-  mZh: string; mEn: string;   // 移动标签
+  zh: string; en: string;       // 完整标签
+  shortZh: string; shortEn: string; // 压缩时两字短词
 }
 
 const SPACES: SpaceTab[] = [
-  { value: 'chat',     Icon: Sparkles,   iconClass: 'w-3.5 h-3.5 text-amber-500 animate-pulse', zh: '灵阁', en: 'Muse',    mZh: '灵阁', mEn: 'MUSE' },
-  { value: 'mail',     Icon: Mail,       iconClass: 'w-3.5 h-3.5',                                zh: '邮件', en: 'Mail',    mZh: '邮件', mEn: 'MAIL' },
-  { value: 'schedule', Icon: KanbanIcon, iconClass: 'w-3.5 h-3.5 animate-pulse',                  zh: '看板', en: 'Kanban',  mZh: '看板', mEn: 'KANBAN' },
-  { value: 'calendar', Icon: Calendar,   iconClass: 'w-3.5 h-3.5',                                zh: '日历', en: 'Calendar',mZh: '日历', mEn: 'CAL' },
-  { value: 'finance',  Icon: DollarSign, iconClass: 'w-3.5 h-3.5',                                zh: '财务', en: 'Ledger',  mZh: '财务', mEn: 'LEDGER' },
-  { value: 'password', Icon: Lock,       iconClass: 'w-3.5 h-3.5',                                zh: '密钥', en: 'Keys',    mZh: '密钥', mEn: 'KEYS' },
-  { value: 'brand',    Icon: Sparkles,   iconClass: 'w-3.5 h-3.5',                                zh: '品牌', en: 'Brand',   mZh: '品牌', mEn: 'BRAND' },
+  { value: 'chat',     Icon: Sparkles,   iconClass: 'w-3.5 h-3.5 text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',      shortZh: '灵阁', shortEn: 'Muse'    },
+  { value: 'mail',     Icon: Mail,       iconClass: 'w-3.5 h-3.5',                               zh: '工作邮件',     en: 'Mailbox',         shortZh: '邮件', shortEn: 'Mail'    },
+  { value: 'schedule', Icon: KanbanIcon, iconClass: 'w-3.5 h-3.5 animate-pulse',                 zh: '项目看板',     en: 'Kanban',          shortZh: '看板', shortEn: 'Kanban'  },
+  { value: 'calendar', Icon: Calendar,   iconClass: 'w-3.5 h-3.5',                               zh: '日程日历',     en: 'Calendar',        shortZh: '日历', shortEn: 'Cal'     },
+  { value: 'finance',  Icon: DollarSign, iconClass: 'w-3.5 h-3.5',                               zh: '复式财务账簿', en: 'Atelier Ledger',  shortZh: '财务', shortEn: 'Ledger'  },
+  { value: 'password', Icon: Lock,       iconClass: 'w-3.5 h-3.5',                               zh: '军事级密钥库', en: 'Citadel Key',     shortZh: '密钥', shortEn: 'Keys'    },
+  { value: 'brand',    Icon: Sparkles,   iconClass: 'w-3.5 h-3.5',                               zh: '品牌实验室',   en: 'Brand Lab',       shortZh: '品牌', shortEn: 'Brand'   },
 ];
 
 interface AppHeaderProps {
@@ -34,6 +34,13 @@ interface AppHeaderProps {
 /** 顶部导航栏 + 移动端横向标签条 */
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }: AppHeaderProps) {
   const t = translations[lang];
+  const [compact, setCompact] = useState(window.innerWidth < 1100);
+
+  useEffect(() => {
+    const fn = () => setCompact(window.innerWidth < 1100);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
 
   return (
     <>
@@ -55,7 +62,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
 
         {/* 桌面标签栏 */}
         <div className="flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          {SPACES.map(({ value, Icon, iconClass, zh, en }) => (
+          {SPACES.map(({ value, Icon, iconClass, zh, en, shortZh, shortEn }) => (
             <button
               key={value}
               onClick={() => setActiveSpace(value)}
@@ -64,7 +71,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
               }`}
             >
               <Icon className={iconClass} />
-              <span>{lang === 'zh' ? zh : en}</span>
+              <span>{lang === 'zh' ? (compact ? shortZh : zh) : (compact ? shortEn : en)}</span>
             </button>
           ))}
         </div>
