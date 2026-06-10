@@ -38,8 +38,8 @@ export const DARK: Palette = {
 };
 
 export const LIGHT: Palette = {
-  bg:          '#EFEFEF',  // 写作区：与 chrome 完全统一，消除色带（同 dark 策略）
-  chrome:      '#EFEFEF',  // 标题栏 / 菜单栏，与 bg 相同
+  bg:          '#F8F8F8',  // 写作区：中性浅灰（R=G=B=248），比 chrome 亮一档，纸感
+  chrome:      '#EFEFEF',  // 标题栏 / 菜单栏：比写作区深一档，工具感
   fg:          '#1A1A1A',  // 正文：近黑，饱和阅读对比
   menuFg:      '#3D3D3D',  // 菜单标签静止态：接近正文色，清晰可读
   menuFgHover: '#1A1A1A',  // hover 变全黑
