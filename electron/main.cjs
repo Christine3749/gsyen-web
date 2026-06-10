@@ -18,7 +18,19 @@ let tray = null;
 let forceQuit = false;
 
 function toggleFullscreen(w) {
-  w.setFullScreen(!w.isFullScreen());
+  const going = !w.isFullScreen();
+  if (process.platform === 'win32') {
+    if (going) {
+      // 无边框窗口在 Windows 上 setFullScreen 单独不够，需先声明最高层级
+      w.setAlwaysOnTop(true, 'screen-saver');
+      w.setFullScreen(true);
+    } else {
+      w.setFullScreen(false);
+      w.setAlwaysOnTop(false);
+    }
+  } else {
+    w.setFullScreen(going);
+  }
 }
 
 // ── 系统托盘 ──────────────────────────────────────────────────────────────────
