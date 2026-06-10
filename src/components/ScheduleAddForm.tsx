@@ -5,17 +5,27 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X, Sparkles } from 'lucide-react';
 import { EventItem, ColumnId, EventCategory } from '../types/schedule';
+import { KanbanColumn } from '../stores/kanbanColumnStore';
+
+const FALLBACK_COLUMNS: KanbanColumn[] = [
+  { id: 'todo',     title: '预约待编' },
+  { id: 'progress', title: '执行中柜' },
+  { id: 'review',   title: '评审阶段' },
+  { id: 'done',     title: '极速已成' },
+];
 
 interface Props {
   lang: 'zh' | 'en';
   todayString: string;
   initialStatus?: ColumnId;
   initialDate?: string;
+  columns?: KanbanColumn[];   // 动态列；不传则用默认 4 列
   onAdd: (event: EventItem) => void;
   onClose: () => void;
 }
 
-export default function ScheduleAddForm({ lang, todayString, initialStatus = 'todo', initialDate, onAdd, onClose }: Props) {
+export default function ScheduleAddForm({ lang, todayString, initialStatus = 'todo', initialDate, columns, onAdd, onClose }: Props) {
+  const colOptions = columns ?? FALLBACK_COLUMNS;
   const [title,    setTitle]    = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [time,     setTime]     = useState('10:00');
@@ -127,10 +137,9 @@ export default function ScheduleAddForm({ lang, todayString, initialStatus = 'to
             </label>
             <select value={status} onChange={e => setStatus(e.target.value as ColumnId)}
               className="w-full px-2 py-1.5 text-xs border border-[#1A1A1A]/15 bg-white rounded-none text-neutral-800">
-              <option value="todo">{lang === 'zh' ? '预约待编 (Backlog)' : 'Backlog Tasks'}</option>
-              <option value="progress">{lang === 'zh' ? '执行中柜 (Progress)' : 'In Progress'}</option>
-              <option value="review">{lang === 'zh' ? '评审阶段 (Review)' : 'Under Review'}</option>
-              <option value="done">{lang === 'zh' ? '极速已成 (Complete)' : 'Completed'}</option>
+              {colOptions.map(c => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
             </select>
           </div>
         </div>

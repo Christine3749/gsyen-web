@@ -1,4 +1,4 @@
-export type ColumnId = 'todo' | 'progress' | 'review' | 'done';
+export type ColumnId = string; // 动态列，支持任意 id
 
 export type EventCategory = 'creative' | 'finance' | 'secure' | 'strategy';
 
