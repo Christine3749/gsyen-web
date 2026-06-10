@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { Github } from 'lucide-react';
 import VintageCar from './VintageCar';
+import { version } from '../../package.json';
 
 const DiscordIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -121,7 +122,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
               GSYEN
             </span>
             <span className="font-mono text-[9px] tracking-[0.2em] uppercase px-1.5 py-0.5 border border-[#4A90D9]/60 text-[#4A90D9] leading-none self-center">
-              BETA
+              BETA · v{version}
             </span>
           </div>
           <p className="font-cinzel text-[11px] tracking-[0.35em] text-[#F9F8F6]/35 uppercase">
