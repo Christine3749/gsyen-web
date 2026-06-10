@@ -55,17 +55,6 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
     return () => { window.removeEventListener('resize', fn); cancelAnimationFrame(raf); };
   }, []);
 
-  useEffect(() => {
-    if (!isElectron) return;
-    const fn = (e: KeyboardEvent) => {
-      if (e.key === 'F11') {
-        e.preventDefault();
-        (window as any).electronAPI.window.fullscreen();
-      }
-    };
-    window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
-  }, [isElectron]);
 
   return (
     <>

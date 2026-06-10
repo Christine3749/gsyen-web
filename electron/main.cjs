@@ -86,7 +86,7 @@ function setupAutoUpdater() {
   }), 5000);
 }
 
-ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall(false, true));
+ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall(true, true));
 ipcMain.handle('updater:check',   () => autoUpdater.checkForUpdates());
 
 // ── 文件系统 IPC ──────────────────────────────────────────────────────────────
