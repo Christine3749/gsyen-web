@@ -24,6 +24,7 @@ interface Props {
   docType:     'doc' | 'canvas' | 'nodes';
   setDocType:  (t: 'doc' | 'canvas' | 'nodes') => void;
   onAddCard?:  () => void;
+  onClose:     () => void;
   /* style */
   P: Palette; dark: boolean;
   onMouseEnter: () => void;
@@ -38,7 +39,7 @@ const NodeIcon = () => <svg width="13" height="13" viewBox="0 0 13 13" fill="non
 export function CanvasChrome({
   title, titleEdit, onTitleChange, setTitleEdit, titleInputRef,
   menus, activeMenu, setActiveMenu, mode, setMode, docType,
-  setDocType, onAddCard,
+  setDocType, onAddCard, onClose,
   P, dark, onMouseEnter, menuBarRef,
 }: Props) {
 
@@ -47,7 +48,7 @@ export function CanvasChrome({
   return (
     <div onMouseEnter={onMouseEnter}>
       {/* ─ Title bar ─ */}
-      <div style={{ height: TITLE_H, background: P.chrome, borderBottom: `1px solid ${P.border}`,
+      <div style={{ height: TITLE_H, background: P.chrome,
         display: 'flex', alignItems: 'center',
         ...(isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : {}) }}>
 
@@ -59,8 +60,8 @@ export function CanvasChrome({
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.menuFgHover}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = P.menuFg}>
           <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-            <rect x="0.5" y="0.5" width="5"  height="11" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-            <rect x="7.5" y="0.5" width="8"  height="11" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+            <rect x="0.75" y="0.75" width="14.5" height="10.5" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+            <line x1="5.25" y1="0.75" x2="5.25" y2="11.25" stroke="currentColor" strokeWidth="1.5"/>
           </svg>
         </button>
 
@@ -75,10 +76,10 @@ export function CanvasChrome({
                 ...(isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}) }} />
           ) : (
             <span title="双击编辑标题" onDoubleClick={() => setTitleEdit(true)}
-              style={{ fontFamily: SYS_FONT, fontSize: 13, color: P.menuFg, userSelect: 'none',
+              style={{ fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500, color: P.menuFg, userSelect: 'none',
                 letterSpacing: '0.01em', cursor: 'text', maxWidth: 440,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {title || '无标题'}&nbsp;— CANVAS
+              {title || '无标题'}.md&nbsp;— GSYEN Writer
             </span>
           )}
         </div>
@@ -105,32 +106,29 @@ export function CanvasChrome({
           })}
         </div>
 
-        {/* Window controls */}
+        {/* Electron: – □ 管窗口，× 退回 Chat；web: 只有 × */}
         <div className="flex items-stretch h-full"
           style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}}>
-          {isElectron ? (
+          {isElectron && (
             <>
               <WinCtrl sym="–" title="Minimize" P={P} dark={dark} onClick={() => (window as any).electronAPI.window.minimize()} />
               <WinCtrl sym="□" title="Maximize" P={P} dark={dark} onClick={() => (window as any).electronAPI.window.maximize()} />
-              <WinCtrl sym="×" title="Close"    P={P} dark={dark} onClick={() => (window as any).electronAPI.window.close()} danger />
             </>
-          ) : (
-            <WinCtrl sym="×" title="关闭 Esc" P={P} dark={dark}
-              onClick={() => { setActiveMenu(null); }} danger />
           )}
+          <WinCtrl sym="×" title="退回 Chat  Esc" P={P} dark={dark} onClick={onClose} danger />
         </div>
       </div>
 
       {/* ─ Menu/action bar ─ */}
       {docType === 'doc' && (
         <div ref={menuBarRef} onClick={stopProp}
-          style={{ height: MENU_H, background: P.chrome, borderBottom: `1px solid ${P.border}`,
+          style={{ height: MENU_H, background: P.chrome, borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}`,
             display: 'flex', alignItems: 'stretch' }}>
           <div className="flex items-stretch" style={{ flex: 1 }}>
             {menus.map(menu => (
               <div key={menu.id as string} style={{ position: 'relative' }}>
                 <button style={{
-                  height: '100%', padding: '0 11px', fontFamily: SYS_FONT, fontSize: 13,
+                  height: '100%', padding: '0 11px', fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500,
                   color: activeMenu === menu.id ? P.menuFgHover : P.menuFg,
                   background: activeMenu === menu.id ? (dark ? '#2E2A2A' : '#E2DED8') : 'transparent',
                   border: 'none', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
@@ -149,10 +147,10 @@ export function CanvasChrome({
           <button title="Preview (Ctrl+P)" onClick={() => setMode(m => m === 'preview' ? 'write' : 'preview')}
             style={{ width: 40, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: mode !== 'write' ? P.accent : P.menuFg, background: 'transparent', border: 'none',
-              cursor: 'pointer', borderLeft: `1px solid ${P.border}`, transition: 'color 0.1s' }}
+              cursor: 'pointer', transition: 'color 0.1s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.menuFgHover}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = mode !== 'write' ? P.accent : P.menuFg}>
-            <svg width="9" height="11" viewBox="0 0 9 11" fill="currentColor"><path d="M0 0L9 5.5L0 11V0Z"/></svg>
+            <svg width="15" height="17" viewBox="0 0 15 17" fill="none"><path d="M2 1.5L12.5 7.5Q14 8.5 12.5 9.5L2 15.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"/></svg>
           </button>
         </div>
       )}
@@ -160,7 +158,7 @@ export function CanvasChrome({
       {/* ─ Non-doc action bar ─ */}
       {docType !== 'doc' && (
         <div onClick={stopProp}
-          style={{ height: MENU_H, background: P.chrome, borderBottom: `1px solid ${P.border}`,
+          style={{ height: MENU_H, background: P.chrome,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' }}>
           <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
             {docType === 'canvas' ? 'Whiteboard · Excalidraw' : 'Node Canvas · 拖拽连线，双击编辑'}

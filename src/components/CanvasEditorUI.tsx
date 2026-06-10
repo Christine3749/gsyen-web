@@ -1,4 +1,5 @@
 /** CanvasEditorUI — Dropdown + WinCtrl（模块层定义，避免 render 时重建组件类型） */
+import React from 'react';
 import { Palette, MenuItem, SYS_FONT } from './CanvasEditorTypes';
 
 interface DropdownProps {
@@ -22,7 +23,7 @@ export function Dropdown({ items, P, dark }: DropdownProps) {
             <div key={i}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '5px 16px 5px 36px', fontSize: 13, fontFamily: SYS_FONT,
+                padding: '5px 16px 5px 36px', fontSize: 14, fontWeight: 500, fontFamily: SYS_FONT,
                 color: item.disabled ? P.dim : P.menuFgHover,
                 cursor: item.disabled ? 'default' : 'pointer',
                 userSelect: 'none', position: 'relative', gap: 24,
@@ -48,19 +49,38 @@ export function Dropdown({ items, P, dark }: DropdownProps) {
   );
 }
 
+const MinIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+    <line x1="2" y1="5.5" x2="9" y2="5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+const MaxIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+    <rect x="1" y="1" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+const CloseIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+    <line x1="2" y1="2" x2="9" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <line x1="9" y1="2" x2="2" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+const WIN_ICON: Record<string, React.FC> = { '–': MinIcon, '□': MaxIcon, '×': CloseIcon };
+
 interface WinCtrlProps {
   sym: string; title?: string; onClick: () => void;
   danger?: boolean; P: Palette; dark: boolean;
 }
 export function WinCtrl({ sym, title: tip, onClick, danger, P, dark }: WinCtrlProps) {
+  const idle = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+  const Icon = WIN_ICON[sym] ?? (() => <span>{sym}</span>);
   return (
     <button title={tip} onClick={onClick}
       style={{
         width: 46, height: '100%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: SYS_FONT, fontSize: 14,
-        color: P.menuFg, background: 'transparent', border: 'none',
-        cursor: 'pointer', flexShrink: 0, transition: 'background 0.1s,color 0.1s',
+        color: idle, background: 'transparent', border: 'none',
+        cursor: 'pointer', flexShrink: 0, transition: 'background 0.18s, color 0.18s',
       }}
       onMouseEnter={e => {
         const el = e.currentTarget as HTMLElement;
@@ -70,9 +90,9 @@ export function WinCtrl({ sym, title: tip, onClick, danger, P, dark }: WinCtrlPr
       onMouseLeave={e => {
         const el = e.currentTarget as HTMLElement;
         el.style.background = 'transparent';
-        el.style.color = P.menuFg;
+        el.style.color = idle;
       }}>
-      {sym}
+      <Icon />
     </button>
   );
 }

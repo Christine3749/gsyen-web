@@ -67,11 +67,13 @@ export function CanvasStatsPill({ words, chars, sentences, readSec, P, dark }: P
         onClick={e => { e.stopPropagation(); setStatsOpen(o => !o); }}
         style={pillStyle}>
         {statButtonLabel(statsSelected, { words, chars, sentences, readSec, goal, selected: statsSelected })}
-        <span style={{
-          fontSize: 8, opacity: 0.6, display: 'inline-block',
+        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" style={{
+          opacity: 0.6, flexShrink: 0,
           transform: statsOpen ? 'rotate(180deg)' : 'none',
           transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1)',
-        }}>▼</span>
+        }}>
+          <path d="M1 1L4 4L7 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </div>
     </div>
   );

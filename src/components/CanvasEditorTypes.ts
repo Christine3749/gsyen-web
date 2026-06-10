@@ -38,16 +38,16 @@ export const DARK: Palette = {
 };
 
 export const LIGHT: Palette = {
-  bg:          '#F8F8F8',  // 写作区：中性浅灰（R=G=B=248），无黄味
-  chrome:      '#EFEFEF',  // 标题栏 / 菜单栏：比写作区深一档，工具感
+  bg:          '#EFEFEF',  // 写作区：与 chrome 完全统一，消除色带（同 dark 策略）
+  chrome:      '#EFEFEF',  // 标题栏 / 菜单栏，与 bg 相同
   fg:          '#1A1A1A',  // 正文：近黑，饱和阅读对比
-  menuFg:      '#888888',  // 菜单标签静止态
+  menuFg:      '#3D3D3D',  // 菜单标签静止态：接近正文色，清晰可读
   menuFgHover: '#1A1A1A',  // hover 变全黑
   menuBg:      '#F5F5F5',  // 下拉背景
   menuHover:   '#E8E8E8',  // 菜单项 hover fill
   menuBorder:  '#E0E0E0',  // 下拉边框
   menuSep:     '#E8E8E8',  // 分隔线
-  border:      '#E3E3E3',  // 区域分割线
+  border:      '#D8D8D8',  // 区域分割线：加深，在 #EFEFEF 背景上清晰可见
   accent:      '#1A6ECC',  // 唯一彩色：蓝（比 dark 饱和度略高）
   dim:         '#AAAAAA',  // 辅助信息
 };

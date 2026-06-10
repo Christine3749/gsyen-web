@@ -251,6 +251,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           mode={mode} setMode={setMode} docType={docType}
           setDocType={(t) => { setDocType(t); if (docId) canvasStore.update(docId, { type: t }); setActiveMenu(null); }}
           onAddCard={() => nodeEditorRef.current?.addCard()}
+          onClose={onClose}
           P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef} />
       </div>
 
