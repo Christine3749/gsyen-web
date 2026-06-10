@@ -128,6 +128,12 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
   useEffect(() => { if (titleEdit) titleInputRef.current?.select(); }, [titleEdit]);
 
+  /* ── auto-focus editor on mount ── */
+  useEffect(() => {
+    const t = setTimeout(() => editorRef.current?.view?.focus(), 80);
+    return () => clearTimeout(t);
+  }, []);
+
   /* ── helpers ── */
   const wrap = useCallback((b: string, a: string) => {
     const view = editorRef.current?.view; if (!view) return;
@@ -165,7 +171,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const padStyle = { maxWidth: LINE_W[lineLen], width: '100%', margin: '0 auto', padding: '48px 32px 128px' };
 
   const EditorPane = (
-    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden"><div className="flex-1 overflow-y-auto"><div style={padStyle}>
+    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden" style={{ background: P.bg }}><div className="flex-1 overflow-y-auto" style={{ background: P.bg }}><div style={padStyle}>
       <CodeMirror value={content} onChange={onContent} extensions={extensions} theme="none"
         basicSetup={{ lineNumbers:false, foldGutter:false, highlightActiveLine:false, dropCursor:false, allowMultipleSelections:false, highlightSelectionMatches:false, bracketMatching:false, closeBrackets:false, autocompletion:false, rectangularSelection:false, crosshairCursor:false, indentOnInput:false }}
         style={{ background:'transparent' }} ref={editorRef as any} />

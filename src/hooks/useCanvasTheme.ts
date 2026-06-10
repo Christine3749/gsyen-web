@@ -8,7 +8,7 @@
  *  typewriterExt()    打字机模式
  *  baseExtensions()   markdown + lineWrapping
  */
-import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet } from '@codemirror/view';
+import { EditorView, ViewPlugin, ViewUpdate, Decoration, DecorationSet, placeholder } from '@codemirror/view';
 import { RangeSetBuilder } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
 
@@ -54,8 +54,10 @@ function injectFocusCSS() {
     .cm-focus-dim { opacity: 0.25; transition: opacity 0.22s ease; }
     .cm-editor, .cm-editor.cm-focused, .cm-editor:focus, .cm-editor:focus-within {
       border: none !important; outline: none !important; box-shadow: none !important;
+      background: inherit !important;
     }
     .cm-scroller { background: transparent !important; }
+    .cm-placeholder { opacity: 0.35; font-style: italic; }
   `;
   document.head.appendChild(s);
 }
@@ -141,6 +143,11 @@ export function typewriterExt() {
 }
 
 // ─── 基础扩展 ────────────────────────────────────────────────────────────────
-export function baseExtensions() {
-  return [markdown(), EditorView.lineWrapping, EditorView.contentAttributes.of({ spellcheck: 'false' })];
+export function baseExtensions(placeholderText = '开始写作…') {
+  return [
+    markdown(),
+    EditorView.lineWrapping,
+    EditorView.contentAttributes.of({ spellcheck: 'false' }),
+    placeholder(placeholderText),
+  ];
 }
