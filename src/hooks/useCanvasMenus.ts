@@ -20,6 +20,7 @@ interface Params {
   wrap:         (b: string, a: string) => void;
   importFile:   () => void;
   exportMd:     () => void;
+  printDoc:     () => void;
   toggleDocType:() => void;
   onClose:      () => void;
 }
@@ -31,6 +32,8 @@ export function useCanvasMenus(p: Params): MenuSpec[] {
       '---',
       { label: 'Export as Markdown', shortcut: 'Ctrl+E', action: p.exportMd },
       { label: 'Export as HTML',     disabled: true },
+      '---',
+      { label: 'Print…', shortcut: 'Ctrl+P', action: p.printDoc },
       '---',
       { label: 'Close', shortcut: 'Esc', action: () => { p.setActiveMenu(null); p.onClose(); } },
     ]},

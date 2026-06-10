@@ -12,6 +12,7 @@ import {
   EditorMode, FocusMode, MenuId, LineLen, FontChoice,
 } from './CanvasEditorTypes';
 import { useCanvasMenus } from '../hooks/useCanvasMenus';
+import { useCanvasFileOps } from '../hooks/useCanvasFileOps';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
 import { canvasStore } from '../stores/canvasStore';
@@ -149,22 +150,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     view.focus(); setActiveMenu(null);
   }, [setActiveMenu]);
 
-  const exportMd = useCallback(() => {
-    const blob = new Blob([`# ${title}\n\n${content}`], { type: 'text/markdown' });
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${title || 'untitled'}.md` });
-    a.click(); URL.revokeObjectURL(a.href); setActiveMenu(null);
-  }, [title, content, setActiveMenu]);
-
-  const importFile = useCallback(() => {
-    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.md,.txt';
-    inp.onchange = (ev) => {
-      const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return;
-      const r = new FileReader();
-      r.onload = (e) => { const txt = e.target?.result as string; const lines = txt.split('\n'); const h1 = lines[0].replace(/^#+\s*/, '').trim(); if (h1) onTitleChange(h1); onContent(lines.slice(1).join('\n').trimStart()); };
-      r.readAsText(f);
-    };
-    inp.click(); setActiveMenu(null);
-  }, [onTitleChange, onContent, setActiveMenu]);
+  const { exportMd, importFile, printDoc } = useCanvasFileOps({ title, content, onTitleChange, onContent, setActiveMenu });
 
   const toggleDocType = useCallback(() => {
     const cycle = ['doc', 'canvas', 'nodes'] as const;
@@ -177,7 +163,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   }, [docType, docId, setActiveMenu]);
 
   /* ── menus ── */
-  const menus = useCanvasMenus({ words, chars, readMin, mode, dark, tw, focusMode, lineLen, font, docType, setMode, setDark, setTw, setFocusMode, setLineLen, setFontSize, setFont, setActiveMenu, wrap, importFile, exportMd, toggleDocType, onClose });
+  const menus = useCanvasMenus({ words, chars, readMin, mode, dark, tw, focusMode, lineLen, font, docType, setMode, setDark, setTw, setFocusMode, setLineLen, setFontSize, setFont, setActiveMenu, wrap, importFile, exportMd, printDoc, toggleDocType, onClose });
 
   /* ── panes ── */
   const padStyle = { maxWidth: LINE_W[lineLen], width: '100%', margin: '0 auto', padding: '48px 32px 128px' };
