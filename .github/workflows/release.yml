@@ -35,7 +35,7 @@ jobs:
 
       - name: Upload Windows to OSS
         run: |
-          Invoke-WebRequest -Uri "https://gosspublic.alicdn.com/ossutil/1.7.18/ossutil64.exe" -OutFile ossutil.exe
+          Invoke-WebRequest -Uri "https://gosspublic.alicdn.com/ossutil/1.7.19/ossutil64.exe" -OutFile ossutil.exe
           .\ossutil.exe cp "..\gsyen-dist\GSYEN-Setup-Windows.exe" oss://gsyen-releases/GSYEN-Setup-Windows.exe -e oss-cn-shenzhen.aliyuncs.com -i $env:OSS_KEY_ID -k $env:OSS_KEY_SECRET -f
         shell: pwsh
         env:
@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload Mac to OSS
         run: |
-          curl -sL https://gosspublic.alicdn.com/ossutil/1.7.18/ossutil64 -o ossutil
+          curl -sL https://gosspublic.alicdn.com/ossutil/1.7.19/ossutilmac64 -o ossutil
           chmod +x ossutil
           ./ossutil cp "../gsyen-dist/GSYEN-Setup-Mac-arm64.dmg" oss://gsyen-releases/GSYEN-Setup-Mac-arm64.dmg -e oss-cn-shenzhen.aliyuncs.com -i $OSS_KEY_ID -k $OSS_KEY_SECRET -f
           ./ossutil cp "../gsyen-dist/GSYEN-Setup-Mac-x64.dmg" oss://gsyen-releases/GSYEN-Setup-Mac-x64.dmg -e oss-cn-shenzhen.aliyuncs.com -i $OSS_KEY_ID -k $OSS_KEY_SECRET -f
