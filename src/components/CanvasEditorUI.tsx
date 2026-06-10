@@ -84,7 +84,7 @@ export function WinCtrl({ sym, title: tip, onClick, danger, P, dark }: WinCtrlPr
       }}
       onMouseEnter={e => {
         const el = e.currentTarget as HTMLElement;
-        el.style.background = dark ? '#3A3636' : '#D8D4CF';
+        el.style.background = dark ? '#3A3A3A' : '#D8D8D8';
         el.style.color = P.menuFgHover;
       }}
       onMouseLeave={e => {

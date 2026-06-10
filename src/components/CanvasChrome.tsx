@@ -130,7 +130,7 @@ export function CanvasChrome({
                 <button style={{
                   height: '100%', padding: '0 11px', fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500,
                   color: activeMenu === menu.id ? P.menuFgHover : P.menuFg,
-                  background: activeMenu === menu.id ? (dark ? '#2E2A2A' : '#E2DED8') : 'transparent',
+                  background: activeMenu === menu.id ? (dark ? '#2E2A2A' : '#E2E2E2') : 'transparent',
                   border: 'none', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={e => { if (activeMenu !== null) setActiveMenu(menu.id); (e.currentTarget as HTMLElement).style.color = P.menuFgHover; }}
