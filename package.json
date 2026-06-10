@@ -12,7 +12,8 @@
     "lint": "tsc --noEmit",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
     "electron:build": "vite build && electron-builder",
-    "electron:preview": "cross-env NODE_ENV=production electron ."
+    "electron:preview": "cross-env NODE_ENV=production electron .",
+    "version:era": "node -e \"const v=require('./package.json').version.split('.');v[0]=String(Number(v[0])+1);const nv=v.join('.');require('child_process').execSync('npm version '+nv+' --no-git-tag-version',{stdio:'inherit'});\""
   },
   "build": {
     "appId": "com.gsyen.app",
