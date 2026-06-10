@@ -38,7 +38,7 @@
         }
       ],
       "icon": "public/icon.ico",
-      "artifactName": "GSYEN-Setup-Windows.exe"
+      "artifactName": "GSYEN-Setup-${version}.exe"
     },
     "nsis": {
       "oneClick": true,
