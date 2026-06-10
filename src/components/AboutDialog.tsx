@@ -62,7 +62,7 @@ export default function AboutDialog({ lang, onClose }: AboutDialogProps) {
 
         {/* 版本号 */}
         <p className="text-[10px] font-mono text-[#1A1A1A]/40 tracking-wider mb-6">
-          Version {version || '…'}
+          Version {version || '…'} ({__GIT_SHA__})
         </p>
 
         {/* 检查更新按钮 */}
