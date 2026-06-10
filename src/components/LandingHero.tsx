@@ -38,7 +38,7 @@ const LinuxIcon = () => (
   </svg>
 );
 
-const iOSIcon = () => (
+const IOSIcon = () => (
   <svg width="8" height="12" viewBox="0 0 8 12" fill="currentColor">
     <rect x="1" y="0" width="6" height="10" rx="1.5"/>
     <rect x="2.5" y="10.5" width="3" height="1.5" rx=".75" opacity=".5"/>
@@ -54,7 +54,7 @@ const PLATFORMS = [
   { label: 'macOS',   icon: <AppleIcon />,   available: false, soon: true,  href: null },
   { label: 'Android', icon: <AndroidIcon />, available: false, soon: true,  href: null },
   { label: 'Linux',   icon: <LinuxIcon />,   available: false, soon: true,  href: null },
-  { label: 'iOS',     icon: <iOSIcon />,     available: false, soon: true,  href: null },
+  { label: 'iOS',     icon: <IOSIcon />,     available: false, soon: true,  href: null },
 ];
 
 interface LandingHeroProps {
