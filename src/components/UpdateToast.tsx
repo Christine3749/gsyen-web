@@ -62,7 +62,7 @@ export function UpdateToast() {
           exit={{    opacity: 0, y: 10 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           style={{
-            position: 'fixed', bottom: 28, right: 28, zIndex: 9998,
+            position: 'fixed', bottom: 28, left: 28, zIndex: 9998,
             width: 300,
             background: '#111111',
             border: `1px solid ${IV(0.18)}`,
