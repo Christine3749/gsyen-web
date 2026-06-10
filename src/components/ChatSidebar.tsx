@@ -3,8 +3,7 @@
  * 从 ChatModule.tsx 拆出（保持核心壳文件精简、稳定）。
  * 底部状态栏：平时显示存储状态，有更新时切换为更新提示。
  */
-import { useState, useEffect } from 'react';
-import { MessageSquare, Terminal, X, Download } from 'lucide-react';
+import { MessageSquare, Terminal, X } from 'lucide-react';
 import { StoredSession } from '../types/chat';
 
 interface ChatSidebarProps {
@@ -22,28 +21,6 @@ export function ChatSidebar({
   lang, open, recentsOpen, setRecentsOpen,
   sessions, currentSessionId, loadSession, deleteSession,
 }: ChatSidebarProps) {
-  const updaterApi = (window as any).electronAPI?.updater;
-  const [updateReady,    setUpdateReady]    = useState(false);
-  const [updateVersion,  setUpdateVersion]  = useState('');
-  const [downloading,    setDownloading]    = useState(false);
-  const [downloadPct,    setDownloadPct]    = useState(0);
-
-  useEffect(() => {
-    if (!updaterApi) return;
-    updaterApi.onAvailable((info: any) => {
-      setUpdateVersion(info.version ?? '');
-      setDownloading(true);
-    });
-    updaterApi.onProgress((p: any) => {
-      setDownloadPct(Math.round(p.percent ?? 0));
-    });
-    updaterApi.onDownloaded((info: any) => {
-      setUpdateVersion(info.version ?? '');
-      setDownloading(false);
-      setUpdateReady(true);
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <aside className={`bg-[#F4F2EE] border-[#1A1A1A]/10 flex flex-col justify-between transition-all duration-300 overflow-hidden shrink-0 ${open ? 'w-full md:w-[320px] p-6 border-r opacity-100' : 'w-0 p-0 border-r-0 opacity-0 pointer-events-none'}`}>
@@ -81,52 +58,16 @@ export function ChatSidebar({
           ))}
         </div>
 
-        {/* 底部状态栏：空闲 → 下载中 → 就绪 */}
-        {updateReady ? (
-          /* ── 就绪：黑底，点击重启 ── */
-          <div className="space-y-2.5 bg-[#1A1A1A] p-3.5 border border-[#1A1A1A] font-mono text-[9px] uppercase tracking-wider shadow-xs shrink-0">
-            <div className="inline-flex items-center gap-1.5 text-white/80 font-bold">
-              <Download className="w-3 h-3" />
-              {updateVersion ? `v${updateVersion} READY` : 'UPDATE READY'}
-            </div>
-            <p className="text-[8px] text-white/50 leading-normal normal-case tracking-normal">
-              {lang === 'zh' ? '新版本已下载完成，重启即可安装。' : 'New version downloaded. Restart to install.'}
-            </p>
-            <button
-              onClick={() => updaterApi?.install()}
-              className="w-full py-1.5 bg-white text-[#1A1A1A] text-[9px] font-mono font-bold uppercase tracking-wider hover:bg-white/90 transition-colors">
-              {lang === 'zh' ? '重启以升级' : 'Restart to update'}
-            </button>
+        {/* 底部存储状态 */}
+        <div className="space-y-1.5 bg-white p-3.5 border border-[#1A1A1A]/10 font-mono text-[9px] uppercase tracking-wider text-neutral-500 shadow-xs shrink-0">
+          <div className="inline-flex items-center gap-1.5 text-[#1A1A1A]/60 font-bold">
+            <Terminal className="w-3 h-3" />
+            {lang === 'zh' ? '本地存储 · 云同步就绪' : 'LOCAL · CLOUD READY'}
           </div>
-        ) : downloading ? (
-          /* ── 下载中：红点呼吸 + 进度条 ── */
-          <div className="space-y-2.5 bg-white p-3.5 border border-[#1A1A1A]/15 font-mono text-[9px] uppercase tracking-wider shadow-xs shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 text-[#1A1A1A]/80 font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" style={{ animation: 'gsyen-breathe 1.2s ease-in-out infinite' }} />
-                {updateVersion ? `v${updateVersion}` : 'NEW VERSION'}
-              </div>
-              <span className="text-[8px] text-[#1A1A1A]/40">{downloadPct}%</span>
-            </div>
-            <div className="w-full h-0.5 bg-[#1A1A1A]/10 rounded-full overflow-hidden">
-              <div className="h-full bg-[#1A1A1A] transition-all duration-300 rounded-full" style={{ width: `${downloadPct}%` }} />
-            </div>
-            <p className="text-[8px] text-[#1A1A1A]/40 leading-normal normal-case tracking-normal">
-              {lang === 'zh' ? '正在后台下载，完成后点击升级。' : 'Downloading in background…'}
-            </p>
-          </div>
-        ) : (
-          /* ── 空闲：正常存储状态 ── */
-          <div className="space-y-1.5 bg-white p-3.5 border border-[#1A1A1A]/10 font-mono text-[9px] uppercase tracking-wider text-neutral-500 shadow-xs shrink-0">
-            <div className="inline-flex items-center gap-1.5 text-[#1A1A1A]/60 font-bold">
-              <Terminal className="w-3 h-3" />
-              {lang === 'zh' ? '本地存储 · Supabase 就绪' : 'LOCAL · SUPABASE READY'}
-            </div>
-            <p className="text-[8px] text-[#1A1A1A]/40 leading-normal normal-case tracking-normal">
-              {lang === 'zh' ? '记录保存于本设备。配置 Supabase 后自动云同步。' : 'Sessions stored locally. Cloud sync activates once Supabase is configured.'}
-            </p>
-          </div>
-        )}
+          <p className="text-[8px] text-[#1A1A1A]/40 leading-normal normal-case tracking-normal">
+            {lang === 'zh' ? '记录保存于本设备，登录后自动云同步。' : 'Sessions stored locally. Sign in to enable cloud sync.'}
+          </p>
+        </div>
       </div>
     </aside>
   );
