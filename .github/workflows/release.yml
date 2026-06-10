@@ -63,7 +63,9 @@ jobs:
       - name: Upload Mac to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ../gsyen-dist/GSYEN-Setup-Mac-*.dmg
+          files: |
+            ../gsyen-dist/GSYEN-Setup-Mac-*.dmg
+            ../gsyen-dist/latest-mac.yml
           body: |
             ## macOS 安装说明
             - **Apple Silicon (M1/M2/M3)** → 下载 `GSYEN-Setup-Mac-arm64.dmg`
