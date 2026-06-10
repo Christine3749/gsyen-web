@@ -44,6 +44,9 @@
   - `src/components/CanvasNodeCard.tsx` — 四向连接 handle，双击编辑
   - `src/components/CanvasNodeEditor.tsx` — React Flow Node Canvas
   - 默认 Light mode；Stats pill 与 panel 间距 ~13px
+  - **光标规格（iA Writer 标准，勿改）**：`width: 2.5px`，`marginLeft: 0`，`borderRadius: 99px`，`height: 1.36em`
+    - 原 `marginLeft: -1px` 会在段首（position 0）裁掉 1px → 只剩 1px 可见；必须为 0
+    - 宽度 2px 偏细，2.5px 与 iA Writer 视觉一致
 - **Electron Windows 客户端 v1.0.7（2026-06-10）**：
   - `app.isPackaged` 替代 `NODE_ENV` 检测开发/生产（`NODE_ENV` 打包后是 undefined，会导致白屏）
   - `electron-updater` 必须在 `dependencies`（不是 devDependencies），否则打包后找不到模块
