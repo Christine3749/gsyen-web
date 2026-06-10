@@ -52,7 +52,7 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
   const [notification,          setNotification]          = useState<string | null>(null);
 
   // ── Data & Calendar Hooks ─────────────────────────────────────────────────
-  const { events, addEvent, updateEvent, removeEvent, moveEvent, changeStatus } = useScheduleEvents(DEFAULT_EVENTS);
+  const { events, addEvent, updateEvent, removeEvent, moveEvent } = useScheduleEvents(DEFAULT_EVENTS);
   const { draggingId, dragOverDate,
           onDragStart, onDragEnd,
           onDragOverDate, onDropDate } = useDragDrop();

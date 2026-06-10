@@ -7,23 +7,44 @@ import { useState, useEffect } from 'react';
 import { MessageSquare, Terminal, X } from 'lucide-react';
 import { StoredSession } from '../types/chat';
 
-function useUpdater() {
+// ── 模块级单例：状态在 React 组件 unmount 后仍存活 ──────────────────────────
+// 解决：切换 Space 导致 ChatModule 卸载，下载状态丢失的问题
+type Phase = 'idle' | 'downloading' | 'ready';
+let _cache: { phase: Phase; version: string; pct: number } = { phase: 'idle', version: '', pct: 0 };
+let _subs: Array<() => void> = [];
+let _registered = false;
+
+function _notify() { _subs.forEach(fn => fn()); }
+
+function _initUpdater() {
+  if (_registered) return;
+  _registered = true;
   const api = (window as any).electronAPI?.updater;
-  const [phase, setPhase] = useState<'idle' | 'downloading' | 'ready'>('idle');
-  const [version, setVersion] = useState('');
-  const [pct, setPct] = useState(0);
+  if (!api) return;
+  // 两个平台都等 onDownloaded 才显示"重启"按钮（Mac autoDownload=true 同样异步）
+  api.onAvailable((i: any) => {
+    _cache = { ..._cache, version: i.version ?? '', phase: 'downloading' };
+    _notify();
+  });
+  api.onProgress((p: any) => {
+    _cache = { ..._cache, pct: Math.round(p.percent ?? 0) };
+    _notify();
+  });
+  api.onDownloaded((i: any) => {
+    _cache = { version: i.version ?? '', pct: 100, phase: 'ready' };
+    _notify();
+  });
+}
+
+function useUpdater() {
+  const [, tick] = useState(0);
   useEffect(() => {
-    if (!api) return;
-    const isMac = (window as any).electronAPI?.platform === 'darwin';
-    if (isMac) {
-      api.onAvailable((i: any) => { setVersion(i.version ?? ''); setPhase('ready'); });
-    } else {
-      api.onAvailable((i: any) => { setVersion(i.version ?? ''); setPhase('downloading'); });
-      api.onProgress((p: any) => setPct(Math.round(p.percent ?? 0)));
-      api.onDownloaded((i: any) => { setVersion(i.version ?? ''); setPhase('ready'); setPct(100); });
-    }
+    _initUpdater();
+    const rerender = () => tick(n => n + 1);
+    _subs.push(rerender);
+    return () => { _subs = _subs.filter(fn => fn !== rerender); };
   }, []);
-  return { api, phase, version, pct };
+  return { api: (window as any).electronAPI?.updater, ..._cache };
 }
 
 interface ChatSidebarProps {
@@ -102,11 +123,23 @@ export function ChatSidebar({
               </div>
               {phase === 'downloading' && (
                 <>
-                  <div style={{ width: '100%', height: 18, background: 'rgba(249,248,246,0.07)', position: 'relative', overflow: 'hidden', marginBottom: 7 }}>
-                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, transition: 'width 0.4s linear',
-                      background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.9) 0px,rgba(245,158,11,0.9) 5px,rgba(0,0,0,0.75) 5px,rgba(0,0,0,0.75) 10px)' }} />
-                    <span style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', fontFamily: 'monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em',
-                      color: pct > 80 ? '#111' : 'rgba(245,158,11,0.9)' }}>{pct}%</span>
+                  {/* 全轨道暗条纹，填充段亮条纹 — 施工警戒带感 */}
+                  <div style={{
+                    width: '100%', height: 20, position: 'relative', overflow: 'hidden', marginBottom: 8,
+                    border: '1px solid rgba(249,248,246,0.14)',
+                    background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.14) 0px,rgba(245,158,11,0.14) 5px,rgba(0,0,0,0.22) 5px,rgba(0,0,0,0.22) 10px)',
+                  }}>
+                    <div style={{
+                      position: 'absolute', left: 0, top: 0, bottom: 0,
+                      width: `${pct}%`, transition: 'width 0.4s linear',
+                      background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.92) 0px,rgba(245,158,11,0.92) 5px,rgba(180,100,0,0.68) 5px,rgba(180,100,0,0.68) 10px)',
+                    }} />
+                    <span style={{
+                      position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)',
+                      fontFamily: 'monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em',
+                      color: 'rgba(249,248,246,0.9)',
+                      textShadow: '0 1px 3px rgba(0,0,0,0.95)',
+                    }}>{pct}%</span>
                   </div>
                 </>
               )}

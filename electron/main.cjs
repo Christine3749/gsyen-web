@@ -31,6 +31,8 @@ function toggleFullscreen(w) {
   w.webContents.send('fullscreen:change', { phase: 'out' });
 
   setTimeout(() => {
+    // 窗口可能在 100ms 内被关闭，必须检查
+    if (w.isDestroyed()) { fsTransitioning = false; return; }
     if (process.platform === 'win32') {
       if (savedBounds !== null) {
         w.setAlwaysOnTop(false);
@@ -45,12 +47,15 @@ function toggleFullscreen(w) {
       }
       // Windows resize 是同步的，80ms 后直接淡入
       setTimeout(() => {
+        if (w.isDestroyed()) { fsTransitioning = false; return; }
         w.webContents.send('fullscreen:change', { phase: 'in' });
         setTimeout(() => { fsTransitioning = false; }, 240);
       }, 80);
     } else {
       // macOS：setFullScreen 异步，淡入由 enter/leave-full-screen 事件驱动
       w.setFullScreen(!w.isFullScreen());
+      // 兜底：OS 若拒绝全屏（系统弹窗等），事件不触发 → 3s 后强制解锁
+      setTimeout(() => { fsTransitioning = false; }, 3000);
     }
   }, 100);
 }
@@ -203,6 +208,8 @@ function createWindow() {
   // macOS：native 全屏动画结束后触发淡入
   if (process.platform === 'darwin') {
     const onFsChange = () => {
+      // 只响应用户主动触发的全屏（忽略 OS/其他进程发起的事件）
+      if (!fsTransitioning) return;
       win.webContents.send('fullscreen:change', { phase: 'in' });
       setTimeout(() => { fsTransitioning = false; }, 240);
     };

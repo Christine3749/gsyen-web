@@ -16,6 +16,7 @@ export function FullscreenFade() {
         setTimeout(() => setVisible(false), 220);
       }
     });
+    return () => { api.offFullscreenChange?.(); };
   }, []);
 
   if (!visible) return null;
