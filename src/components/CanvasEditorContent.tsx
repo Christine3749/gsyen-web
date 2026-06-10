@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { CanvasDrawEditor } from './CanvasDrawEditor';
-import { CanvasNodeEditor } from './CanvasNodeEditor';
+import { CanvasNodeEditor, type CanvasNodeEditorRef } from './CanvasNodeEditor';
 import { CanvasChrome } from './CanvasChrome';
 import {
   DARK, LIGHT, CHROME_H, STATUS_H, LINE_W, SYS_FONT,
@@ -18,6 +18,7 @@ import { canvasStore } from '../stores/canvasStore';
 import { iaWriterTheme, focusModeExt, sentenceFocusExt, typewriterExt, baseExtensions } from '../hooks/useCanvasTheme';
 import ReactMarkdown from 'react-markdown';
 import { MermaidBlock } from './MermaidBlock';
+import { CanvasStatsPill } from './CanvasStatsPill';
 
 interface Props { docId: string | undefined; onClose: () => void; }
 
@@ -27,10 +28,10 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const [title,         setTitle]         = useState(stored?.title   ?? '');
   const [content,       setContent]       = useState(stored?.content ?? '');
   const [mode,          setMode]          = useState<EditorMode>('write');
-  const [dark,          setDark]          = useState(true);
+  const [dark,          setDark]          = useState(false);
   const [tw,            setTw]            = useState(false);
   const [focusMode,     setFocusMode]     = useState<FocusMode>('off');
-  const [docType,       setDocType]       = useState<'doc'|'canvas'>(stored?.type ?? 'doc');
+  const [docType,       setDocType]       = useState<'doc'|'canvas'|'nodes'>(stored?.type ?? 'doc');
   const [chromeVisible, setChromeVisible] = useState(true);
   const [lineLen,       setLineLen]       = useState<LineLen>(72);
   const [fontSize,      setFontSize]      = useState(17);
@@ -41,6 +42,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const activeMenuRef  = useRef<MenuId>(null);
   const editorRef      = useRef<{ view: EditorView } | null>(null);
   const saveRef        = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const nodeEditorRef  = useRef<CanvasNodeEditorRef>(null);
   const menuBarRef     = useRef<HTMLDivElement>(null);
   const hideTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef  = useRef<HTMLInputElement>(null);
@@ -50,9 +52,12 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     ? '"iA Writer Mono","Courier New",monospace'
     : '"iA Writer Quattro","Georgia","Times New Roman",serif';
 
-  const words   = content.trim().split(/\s+/).filter(Boolean).length;
-  const chars   = content.length;
-  const readMin = Math.max(1, Math.round(words / 200));
+  const words     = content.trim().split(/\s+/).filter(Boolean).length;
+  const chars     = content.length;
+  const sentences = content.trim() ? (content.match(/[.!?。！？]+/g) ?? []).length : 0;
+  const readSec   = Math.round((words / 200) * 60);
+  const readMin   = Math.max(1, Math.ceil(readSec / 60));
+
 
   /* ── chrome auto-hide ── */
   const showChrome = useCallback(() => {
@@ -164,7 +169,11 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const toggleDocType = useCallback(() => {
     const cycle = ['doc', 'canvas', 'nodes'] as const;
     const next = cycle[(cycle.indexOf(docType as typeof cycle[number]) + 1) % cycle.length];
-    setDocType(next); if (docId) canvasStore.update(docId, { type: next }); setActiveMenu(null);
+    setDocType(next);
+    if (docId) canvasStore.update(docId, { type: next });
+    setActiveMenu(null);
+    // 切换到 canvas/nodes 时立即显示 chrome
+    if (next !== 'doc') setChromeVisible(true);
   }, [docType, docId, setActiveMenu]);
 
   /* ── menus ── */
@@ -214,13 +223,24 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     <div className="fixed inset-0 z-50" style={{ background:P.bg, color:P.fg }}
       onClick={() => setActiveMenu(null)} onMouseMove={handleMouseMove}>
 
-      {/* Content */}
-      <div style={{ position:'absolute', inset:0, paddingTop:CHROME_H, paddingBottom:STATUS_H, display:'flex', overflow:'hidden' }}>
-        {docType === 'nodes'  ? <CanvasNodeEditor docId={docId!} dark={dark} />
-          : docType === 'canvas' ? <CanvasDrawEditor docId={docId!} dark={dark} />
-          : mode === 'write'   ? EditorPane
-          : mode === 'preview' ? PreviewPane
-          : <>{EditorPane}{PreviewPane}</>}
+      {/* Content — 三个面板常驻 DOM，display 切换避免重复挂载卸载 */}
+      <div style={{ position:'absolute', inset:0, paddingTop:CHROME_H, paddingBottom:0, overflow:'hidden' }}>
+        {/* Doc */}
+        <div style={{ display: docType === 'doc' ? 'flex' : 'none', width:'100%', height:'100%' }}>
+          {mode === 'split' ? <>{EditorPane}{PreviewPane}</> : mode === 'preview' ? PreviewPane : EditorPane}
+        </div>
+        {/* Whiteboard */}
+        {docId && (
+          <div style={{ display: docType === 'canvas' ? 'block' : 'none', width:'100%', height:'100%' }}>
+            <CanvasDrawEditor docId={docId} dark={dark} />
+          </div>
+        )}
+        {/* Node Canvas */}
+        {docId && (
+          <div style={{ display: docType === 'nodes' ? 'flex' : 'none', width:'100%', height:'100%' }}>
+            <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
+          </div>
+        )}
       </div>
 
       {/* Chrome overlay */}
@@ -229,24 +249,15 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           setTitleEdit={setTitleEdit} titleInputRef={titleInputRef}
           menus={menus} activeMenu={activeMenu} setActiveMenu={setActiveMenu}
           mode={mode} setMode={setMode} docType={docType}
+          setDocType={(t) => { setDocType(t); if (docId) canvasStore.update(docId, { type: t }); setActiveMenu(null); }}
+          onAddCard={() => nodeEditorRef.current?.addCard()}
           P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef} />
       </div>
 
       {/* Hot zone */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:8, zIndex:30, pointerEvents: chromeVisible ? 'none' : 'auto' }} onMouseEnter={showChrome} />
 
-      {/* Status bar */}
-      {docType === 'doc' && (
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:STATUS_H, zIndex:10, background:P.chrome, borderTop:`1px solid ${P.border}`, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 12px' }}>
-          <div style={{ fontFamily:SYS_FONT, fontSize:11, color:P.dim, display:'flex', gap:10 }}>
-            {focusMode !== 'off' && <span style={{ color:P.accent }}>{focusMode === 'paragraph' ? 'Paragraph' : 'Sentence'} Focus</span>}
-            {tw && <span style={{ color:P.accent }}>Typewriter</span>}
-            {mode !== 'write' && <span style={{ color:P.accent }}>{mode === 'split' ? 'Split' : 'Preview'}</span>}
-            <span>{lineLen} chars · {fontSize}px · {font === 'mono' ? 'Mono' : 'Quattro'}</span>
-          </div>
-          <div style={{ fontFamily:SYS_FONT, fontSize:11, color:P.dim }}>{words} words · {chars} chars · ~{readMin} min</div>
-        </div>
-      )}
+      {docType === 'doc' && <CanvasStatsPill words={words} chars={chars} sentences={sentences} readSec={readSec} P={P} dark={dark} />}
     </div>,
     document.body
   );

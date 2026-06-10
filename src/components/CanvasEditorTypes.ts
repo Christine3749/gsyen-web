@@ -12,19 +12,44 @@ export type MenuItem = {
 };
 export type MenuSpec = { id: MenuId; label: string; items: (MenuItem | '---')[] };
 
-export const DARK = {
-  bg: '#1A1A1A', chrome: '#1E1C1C', fg: '#C8C4BC',
-  menuFg: '#7A7570', menuFgHover: '#C8C4BC',
-  menuBg: '#242020', menuHover: '#2E2A2A',
-  menuBorder: '#353030', menuSep: '#2C2828',
-  border: '#272323', accent: '#4A90D9', dim: '#484442',
+// ─────────────────────────────────────────────────────────────────────────────
+// CANVAS 调色板 — iA Writer 标准（锁定，勿随意改动）
+//
+// 设计原则（来自 iA Writer）：
+//   Dark  — chrome = bg，全局统一黑，中性灰文字，无暖色分量
+//   Light — bg 中性浅灰（R=G=B），chrome 略深一档，写作区与工具区有层次
+//   Accent — 单一蓝，其余一律灰阶，绝不引入第二彩色
+//   Border — 仅用于分层，对比度控制在最低可见阈值
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const DARK: Palette = {
+  bg:          '#1A1A1A',  // 写作区背景 = chrome 背景，完全统一，消除色带
+  chrome:      '#1A1A1A',  // 标题栏 / 菜单栏，与 bg 相同
+  fg:          '#CCCCCC',  // 正文：中性灰，R=G=B，无暖色
+  menuFg:      '#666666',  // 菜单标签静止态：低调，不抢正文
+  menuFgHover: '#CCCCCC',  // 菜单 hover：与正文色一致
+  menuBg:      '#232323',  // 下拉背景：比 bg 略亮，R=G=B
+  menuHover:   '#2C2C2C',  // 菜单项 hover fill
+  menuBorder:  '#333333',  // 下拉边框
+  menuSep:     '#282828',  // 分隔线
+  border:      '#252525',  // 区域分割线：刚好可见，不抢戏
+  accent:      '#4A90D9',  // 唯一彩色：蓝，聚焦 / 链接 / 选中
+  dim:         '#555555',  // 辅助信息：字数、模式指示
 };
-export const LIGHT = {
-  bg: '#F9F8F6', chrome: '#F2F0EC', fg: '#1A1A1A',
-  menuFg: '#6A6865', menuFgHover: '#1A1A1A',
-  menuBg: '#F5F3EF', menuHover: '#ECEAE6',
-  menuBorder: '#D8D6D0', menuSep: '#DCD9D3',
-  border: '#D8D5CF', accent: '#1A6ECC', dim: '#B0ADA8',
+
+export const LIGHT: Palette = {
+  bg:          '#F8F8F8',  // 写作区：中性浅灰（R=G=B=248），无黄味
+  chrome:      '#EFEFEF',  // 标题栏 / 菜单栏：比写作区深一档，工具感
+  fg:          '#1A1A1A',  // 正文：近黑，饱和阅读对比
+  menuFg:      '#888888',  // 菜单标签静止态
+  menuFgHover: '#1A1A1A',  // hover 变全黑
+  menuBg:      '#F5F5F5',  // 下拉背景
+  menuHover:   '#E8E8E8',  // 菜单项 hover fill
+  menuBorder:  '#E0E0E0',  // 下拉边框
+  menuSep:     '#E8E8E8',  // 分隔线
+  border:      '#E3E3E3',  // 区域分割线
+  accent:      '#1A6ECC',  // 唯一彩色：蓝（比 dark 饱和度略高）
+  dim:         '#AAAAAA',  // 辅助信息
 };
 export type Palette = typeof DARK;
 

@@ -21,16 +21,24 @@ interface Props {
   setActiveMenu: (v: MenuId | ((p: MenuId) => MenuId)) => void;
   mode:        EditorMode;
   setMode:     (m: EditorMode | ((p: EditorMode) => EditorMode)) => void;
-  docType:     'doc' | 'canvas';
+  docType:     'doc' | 'canvas' | 'nodes';
+  setDocType:  (t: 'doc' | 'canvas' | 'nodes') => void;
+  onAddCard?:  () => void;
   /* style */
   P: Palette; dark: boolean;
   onMouseEnter: () => void;
   menuBarRef:  React.RefObject<HTMLDivElement>;
 }
 
+// 模式图标 SVG
+const DocIcon  = () => <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><line x1="3.5" y1="4" x2="9.5" y2="4" stroke="currentColor" strokeWidth="1.1"/><line x1="3.5" y1="6.5" x2="9.5" y2="6.5" stroke="currentColor" strokeWidth="1.1"/><line x1="3.5" y1="9" x2="7"   y2="9" stroke="currentColor" strokeWidth="1.1"/></svg>;
+const DrawIcon = () => <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 10.5 L4 6 L8 8 L10 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><circle cx="10.5" cy="2.5" r="1.2" stroke="currentColor" strokeWidth="1.1"/></svg>;
+const NodeIcon = () => <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="4"  height="3" rx="1" stroke="currentColor" strokeWidth="1.1"/><rect x="8" y="1" width="4"  height="3" rx="1" stroke="currentColor" strokeWidth="1.1"/><rect x="4" y="9" width="5"  height="3" rx="1" stroke="currentColor" strokeWidth="1.1"/><line x1="3" y1="4" x2="6.5" y2="9" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1.5"/><line x1="10" y1="4" x2="6.5" y2="9" stroke="currentColor" strokeWidth="1" strokeDasharray="1.5 1.5"/></svg>;
+
 export function CanvasChrome({
   title, titleEdit, onTitleChange, setTitleEdit, titleInputRef,
   menus, activeMenu, setActiveMenu, mode, setMode, docType,
+  setDocType, onAddCard,
   P, dark, onMouseEnter, menuBarRef,
 }: Props) {
 
@@ -75,6 +83,28 @@ export function CanvasChrome({
           )}
         </div>
 
+        {/* Mode switcher — 3 icons always visible */}
+        <div onClick={stopProp} style={{ display:'flex', alignItems:'center', gap:2, marginRight:6,
+          ...(isElectron ? { WebkitAppRegion:'no-drag' } as React.CSSProperties : {}) }}>
+          {(['doc','canvas','nodes'] as const).map(type => {
+            const active = docType === type;
+            const Icon = type === 'doc' ? DocIcon : type === 'canvas' ? DrawIcon : NodeIcon;
+            const label = type === 'doc' ? 'Document' : type === 'canvas' ? 'Whiteboard' : 'Node Canvas';
+            return (
+              <button key={type} title={label}
+                onClick={() => { if (!active) setDocType(type); }}
+                style={{ width:26, height:22, display:'flex', alignItems:'center', justifyContent:'center',
+                  border:'none', borderRadius:4, cursor: active ? 'default' : 'pointer',
+                  background: active ? (dark ? '#3a3a3a' : '#e0dcd6') : 'transparent',
+                  color: active ? P.accent : P.menuFg, transition:'all 0.15s' }}
+                onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = P.menuFgHover; }}
+                onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = P.menuFg; }}>
+                <Icon />
+              </button>
+            );
+          })}
+        </div>
+
         {/* Window controls */}
         <div className="flex items-stretch h-full"
           style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}}>
@@ -86,12 +116,12 @@ export function CanvasChrome({
             </>
           ) : (
             <WinCtrl sym="×" title="关闭 Esc" P={P} dark={dark}
-              onClick={() => { setActiveMenu(null); /* onClose handled by parent Esc */ }} danger />
+              onClick={() => { setActiveMenu(null); }} danger />
           )}
         </div>
       </div>
 
-      {/* ─ Menu bar ─ */}
+      {/* ─ Menu/action bar ─ */}
       {docType === 'doc' && (
         <div ref={menuBarRef} onClick={stopProp}
           style={{ height: MENU_H, background: P.chrome, borderBottom: `1px solid ${P.border}`,
@@ -124,6 +154,25 @@ export function CanvasChrome({
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = mode !== 'write' ? P.accent : P.menuFg}>
             <svg width="9" height="11" viewBox="0 0 9 11" fill="currentColor"><path d="M0 0L9 5.5L0 11V0Z"/></svg>
           </button>
+        </div>
+      )}
+
+      {/* ─ Non-doc action bar ─ */}
+      {docType !== 'doc' && (
+        <div onClick={stopProp}
+          style={{ height: MENU_H, background: P.chrome, borderBottom: `1px solid ${P.border}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' }}>
+          <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
+            {docType === 'canvas' ? 'Whiteboard · Excalidraw' : 'Node Canvas · 拖拽连线，双击编辑'}
+          </span>
+          {docType === 'nodes' && onAddCard && (
+            <button onClick={onAddCard}
+              style={{ background: P.accent, color: '#fff', border: 'none', borderRadius: 5,
+                padding: '3px 12px', fontSize: 12, cursor: 'pointer',
+                fontFamily: SYS_FONT, fontWeight: 500, letterSpacing: '0.01em' }}>
+              + 卡片
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -1,11 +1,9 @@
-import { memo, useState, useRef, useEffect, useCallback } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { memo, useState, useRef, useEffect } from 'react';
+import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react';
 
 export interface CardData extends Record<string, unknown> {
-  text:    string;
-  color?:  string;
-  dark?:   boolean;
-  onChange?: (text: string) => void;
+  text:   string;
+  color?: string;
 }
 
 const ACCENT: Record<string, string> = {
@@ -13,64 +11,79 @@ const ACCENT: Record<string, string> = {
   '4': '#20bf6b', '5': '#0fb9b1', '6': '#8854d0',
 };
 
-export const CanvasNodeCard = memo(({ data, selected }: NodeProps) => {
+// 每个方向都支持连出和连入
+const SIDES = [
+  { pos: Position.Top,    id: 't' },
+  { pos: Position.Right,  id: 'r' },
+  { pos: Position.Bottom, id: 'b' },
+  { pos: Position.Left,   id: 'l' },
+];
+
+export const CanvasNodeCard = memo(({ id, data, selected }: NodeProps) => {
+  const { updateNodeData } = useReactFlow();
   const d = data as CardData;
   const [editing, setEditing] = useState(false);
-  const [text,    setText]    = useState(d.text);
+  const [draft,   setDraft]   = useState(d.text);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => { setText(d.text); }, [d.text]);
   useEffect(() => { if (editing) taRef.current?.focus(); }, [editing]);
 
-  const commit = useCallback(() => {
-    setEditing(false);
-    d.onChange?.(text);
-  }, [d, text]);
+  // 每次进入编辑模式时同步最新 text
+  useEffect(() => { if (editing) setDraft(d.text); }, [editing, d.text]);
 
-  const accent = ACCENT[d.color ?? ''];
-  const bg     = d.dark ? '#242424' : '#ffffff';
-  const fg     = d.dark ? '#cccccc' : '#1a1a1a';
-  const dim    = d.dark ? '#666'    : '#aaa';
-  const brd    = selected ? '#4488CC' : (d.dark ? '#383838' : '#e0e0e0');
-  const leftBorder = `4px solid ${accent ?? brd}`;
+  const commit = () => {
+    setEditing(false);
+    if (draft !== d.text) updateNodeData(id, { text: draft });
+  };
+
+  const accent   = ACCENT[d.color ?? ''];
+  const brdColor = selected ? '#4488CC' : 'var(--cn-border)';
 
   return (
     <div
-      onDoubleClick={() => setEditing(true)}
+      onDoubleClick={e => { e.stopPropagation(); setEditing(true); }}
       style={{
-        background: bg, color: fg,
-        border: `1.5px solid ${brd}`, borderLeft: leftBorder,
+        background: 'var(--cn-bg)', color: 'var(--cn-fg)',
+        border: `1.5px solid ${brdColor}`,
+        borderLeft: `4px solid ${accent ?? brdColor}`,
         borderRadius: 8, padding: '10px 14px',
-        minWidth: 200, minHeight: 80, maxWidth: 340,
-        boxShadow: selected ? `0 0 0 2px #4488CC44` : '0 2px 8px rgba(0,0,0,0.07)',
+        minWidth: 180, minHeight: 72, maxWidth: 320,
+        boxShadow: selected ? '0 0 0 2px #4488CC33' : '0 1px 6px rgba(0,0,0,0.06)',
         cursor: editing ? 'text' : 'grab',
-        fontFamily: 'inherit', fontSize: 13, lineHeight: 1.65,
+        fontSize: 13, lineHeight: 1.65, fontFamily: 'inherit',
+        position: 'relative',
       }}
     >
-      <Handle type="target" position={Position.Top}   style={{ opacity: 0.35 }} />
-      <Handle type="target" position={Position.Left}  style={{ opacity: 0.35 }} />
+      {/* 四个方向各一个 handle，同时支持 source 和 target */}
+      {SIDES.map(({ pos, id: hid }) => (
+        <Handle key={hid} id={`src-${hid}`} type="source" position={pos}
+          style={{ opacity: 0.35, width: 8, height: 8 }} />
+      ))}
+      {SIDES.map(({ pos, id: hid }) => (
+        <Handle key={`t-${hid}`} id={`tgt-${hid}`} type="target" position={pos}
+          style={{ opacity: 0, width: 14, height: 14 }} />
+      ))}
 
       {editing ? (
         <textarea
           ref={taRef}
-          value={text}
-          onChange={e => setText(e.target.value)}
+          value={draft}
+          className="nodrag nopan"
+          onChange={e => setDraft(e.target.value)}
           onBlur={commit}
           onKeyDown={e => { if (e.key === 'Escape') commit(); }}
           style={{
-            width: '100%', minHeight: 64, background: 'transparent',
+            width: '100%', minHeight: 56, background: 'transparent',
             border: 'none', outline: 'none', resize: 'none',
-            color: fg, fontFamily: 'inherit', fontSize: 13, lineHeight: 1.65,
+            color: 'var(--cn-fg)', fontFamily: 'inherit',
+            fontSize: 13, lineHeight: 1.65,
           }}
         />
       ) : (
-        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-          {text || <span style={{ color: dim, fontStyle: 'italic' }}>双击编辑…</span>}
+        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', pointerEvents: 'none' }}>
+          {d.text || <span style={{ color: 'var(--cn-dim)', fontStyle: 'italic' }}>双击编辑…</span>}
         </div>
       )}
-
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0.35 }} />
-      <Handle type="source" position={Position.Right}  style={{ opacity: 0.35 }} />
     </div>
   );
 });

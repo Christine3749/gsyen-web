@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import {
   ReactFlow, Background, Controls, MiniMap,
   addEdge, useNodesState, useEdgesState,
@@ -20,78 +20,67 @@ function loadGraph(docId: string): SavedGraph {
   return { nodes: [], edges: [] };
 }
 
+export interface CanvasNodeEditorRef { addCard: () => void }
+
 interface Props { docId: string; dark: boolean }
 
-export function CanvasNodeEditor({ docId, dark }: Props) {
-  const initial       = loadGraph(docId);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, Props>(
+  ({ docId, dark }, ref) => {
+    const initial = loadGraph(docId);
+    const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
+    const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const scheduleSave = useCallback((ns: Node[], es: Edge[]) => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      canvasStore.update(docId, { content: JSON.stringify({ nodes: ns, edges: es }) });
-    }, 600);
-  }, [docId]);
+    const scheduleSave = useCallback((ns: Node[], es: Edge[]) => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        canvasStore.update(docId, { content: JSON.stringify({ nodes: ns, edges: es }) });
+      }, 600);
+    }, [docId]);
 
-  useEffect(() => { scheduleSave(nodes, edges); }, [nodes, edges, scheduleSave]);
+    useEffect(() => { scheduleSave(nodes, edges); }, [nodes, edges, scheduleSave]);
 
-  const onConnect = useCallback((conn: Connection) => {
-    setEdges(es => addEdge({ ...conn, animated: false }, es));
-  }, [setEdges]);
+    const onConnect = useCallback((conn: Connection) => {
+      setEdges(es => addEdge({ ...conn, animated: false }, es));
+    }, [setEdges]);
 
-  const addCard = useCallback(() => {
-    const id = `card-${Date.now()}`;
-    const onChange = (text: string) => {
-      setNodes(ns => ns.map(n => n.id === id ? { ...n, data: { ...n.data, text } } : n));
-    };
-    const newNode: Node = {
-      id, type: 'card',
-      position: { x: 120 + Math.random() * 200, y: 100 + Math.random() * 160 },
-      data: { text: '', color: '', dark, onChange } satisfies CardData,
-    };
-    setNodes(ns => [...ns, newNode]);
-  }, [dark, setNodes]);
+    const addCard = useCallback(() => {
+      const id = `card-${Date.now()}`;
+      setNodes(ns => [...ns, {
+        id, type: 'card',
+        position: { x: 80 + Math.random() * 240, y: 80 + Math.random() * 160 },
+        data: { text: '', color: '' } satisfies CardData,
+      }]);
+    }, [setNodes]);
 
-  // sync dark prop into existing nodes
-  useEffect(() => {
-    setNodes(ns => ns.map(n => ({ ...n, data: { ...n.data, dark } })));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dark]);
+    useImperativeHandle(ref, () => ({ addCard }), [addCard]);
 
-  const bg  = dark ? '#1a1a1a' : '#f6f5f2';
-  const dot = dark ? '#2e2e2e' : '#dddbd5';
+    // CSS 变量注入 — 节点只读变量，不存 dark prop
+    const vars = dark
+      ? { '--cn-bg': '#242424', '--cn-fg': '#cccccc', '--cn-border': '#383838', '--cn-dim': '#666' }
+      : { '--cn-bg': '#ffffff', '--cn-fg': '#1a1a1a', '--cn-border': '#e0e0e0', '--cn-dim': '#aaa' };
 
-  return (
-    <div style={{ width: '100%', height: '100%', background: bg }}>
-      <ReactFlow
-        nodes={nodes} edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={NODE_TYPES}
-        fitView
-        colorMode={dark ? 'dark' : 'light'}
-      >
-        <Background color={dot} gap={20} size={1.2} />
-        <Controls />
-        <MiniMap nodeStrokeWidth={3} zoomable pannable />
-      </ReactFlow>
+    const bg  = dark ? '#1a1a1a' : '#f6f5f2';
+    const dot = dark ? '#2e2e2e' : '#dddbd5';
 
-      {/* Add card button */}
-      <button
-        onClick={addCard}
-        style={{
-          position: 'absolute', bottom: 56, right: 16, zIndex: 10,
-          background: '#4488CC', color: '#fff', border: 'none',
-          borderRadius: 8, padding: '8px 16px', fontSize: 13,
-          cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500,
-          boxShadow: '0 2px 8px rgba(68,136,204,0.4)',
-        }}
-      >
-        + 卡片
-      </button>
-    </div>
-  );
-}
+    return (
+      <div style={{ width: '100%', height: '100%', background: bg, ...vars } as React.CSSProperties}>
+        <ReactFlow
+          nodes={nodes} edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={NODE_TYPES}
+          colorMode={dark ? 'dark' : 'light'}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        >
+          <Background color={dot} gap={20} size={1.2} />
+          <Controls />
+          <MiniMap nodeStrokeWidth={3} zoomable pannable />
+        </ReactFlow>
+      </div>
+    );
+  }
+);
+
+CanvasNodeEditor.displayName = 'CanvasNodeEditor';
