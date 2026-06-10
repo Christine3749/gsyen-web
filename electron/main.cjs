@@ -1,9 +1,43 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs   = require('fs');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const CANVAS_DIR = path.join(app.getPath('userData'), 'canvas');
+
+// ── 自动更新 ──────────────────────────────────────────────────────────────────
+
+function setupAutoUpdater(win) {
+  autoUpdater.autoDownload    = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-available', info => {
+    win.webContents.send('updater:available', info);
+  });
+  autoUpdater.on('update-not-available', () => {
+    win.webContents.send('updater:not-available');
+  });
+  autoUpdater.on('download-progress', progress => {
+    win.webContents.send('updater:progress', progress);
+  });
+  autoUpdater.on('update-downloaded', info => {
+    win.webContents.send('updater:downloaded', info);
+  });
+  autoUpdater.on('error', err => {
+    win.webContents.send('updater:error', err?.message ?? String(err));
+  });
+
+  // 启动 5 秒后检查（避免影响启动速度）
+  setTimeout(() => autoUpdater.checkForUpdates(), 5000);
+}
+
+ipcMain.handle('updater:install', () => {
+  autoUpdater.quitAndInstall(false, true);
+});
+ipcMain.handle('updater:check', () => {
+  autoUpdater.checkForUpdates();
+});
 
 // ── 文件系统 IPC ──────────────────────────────────────────────────────────────
 
@@ -31,6 +65,7 @@ ipcMain.handle('canvas:delete', (_e, id) => {
 });
 
 ipcMain.handle('app:getPath', () => app.getPath('userData'));
+ipcMain.handle('app:getVersion', () => app.getVersion());
 
 // ── 窗口控制 IPC ──────────────────────────────────────────────────────────────
 
@@ -68,6 +103,7 @@ function createWindow() {
     win.loadURL('http://localhost:3000');
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
+    setupAutoUpdater(win);
   }
 
   win.webContents.setWindowOpenHandler(({ url }) => {

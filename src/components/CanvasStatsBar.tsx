@@ -46,10 +46,10 @@ export function CanvasStatsBar({ content, dark, fg, dim, bdr, mono, open, closin
             border: `1px solid ${bdr}`, minWidth: 260, fontFamily: mono,
             animation: closing
               ? 'statsSlideDown 0.20s cubic-bezier(0.4,0,1,1) forwards'
-              : 'statsSlideUp 0.28s cubic-bezier(0.16,1,0.3,1)',
+              : 'statsSlideUp   0.20s cubic-bezier(0,0,0.6,1) forwards',
           }}>
           <style>{`
-            @keyframes statsSlideUp   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+            @keyframes statsSlideUp   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
             @keyframes statsSlideDown { from{opacity:1;transform:translateY(0)}    to{opacity:0;transform:translateY(16px)} }
           `}</style>
           {rows.map(({ key, label: rowLabel }) => {
