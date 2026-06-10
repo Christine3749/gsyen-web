@@ -3,7 +3,7 @@ const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs   = require('fs');
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = !app.isPackaged;
 const CANVAS_DIR = path.join(app.getPath('userData'), 'canvas');
 
 // ── 自动更新 ──────────────────────────────────────────────────────────────────
