@@ -96,7 +96,7 @@ export function CanvasChrome({
                 onClick={() => { if (!active) setDocType(type); }}
                 style={{ width:26, height:22, display:'flex', alignItems:'center', justifyContent:'center',
                   border:'none', borderRadius:4, cursor: active ? 'default' : 'pointer',
-                  background: active ? (dark ? '#3a3a3a' : '#e0dcd6') : 'transparent',
+                  background: active ? (dark ? '#3a3a3a' : '#E0E0E0') : 'transparent',
                   color: active ? P.accent : P.menuFg, transition:'all 0.15s' }}
                 onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = P.menuFgHover; }}
                 onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = P.menuFg; }}>
