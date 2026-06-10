@@ -86,8 +86,11 @@ export default function AboutDialog({ lang, onClose }: AboutDialogProps) {
         </div>
 
         {/* 版权 */}
-        <p className="text-[8px] font-mono text-[#1A1A1A]/25 tracking-wider pb-4">
-          © 2026 GSYEN. All rights reserved.
+        <p className="text-[8px] font-mono text-[#1A1A1A]/25 tracking-wider pb-1">
+          © 2026 雍彻科技 · GSYEN
+        </p>
+        <p className="text-[8px] font-mono text-[#1A1A1A]/15 tracking-wider pb-4">
+          All rights reserved.
         </p>
       </div>
     </div>

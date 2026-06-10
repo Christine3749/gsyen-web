@@ -195,9 +195,14 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.5 }}
-        className="absolute bottom-8 font-mono text-[8px] tracking-[0.3em] text-[#F9F8F6]/18 uppercase"
+        className="absolute bottom-8 flex flex-col items-center gap-1.5"
       >
-        GSYEN WORKSPACE SUITE · ATELIER EDITION
+        <p className="font-mono text-[8px] tracking-[0.3em] text-[#F9F8F6]/18 uppercase">
+          GSYEN WORKSPACE SUITE · ATELIER EDITION
+        </p>
+        <p className="font-mono text-[7px] tracking-[0.25em] text-[#F9F8F6]/12 uppercase">
+          © 2026 雍彻科技 · All rights reserved.
+        </p>
       </motion.div>
     </motion.div>
   );
