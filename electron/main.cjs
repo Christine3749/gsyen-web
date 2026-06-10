@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const Sentry = require('@sentry/electron/main');
 const path = require('path');
@@ -16,6 +16,22 @@ const CANVAS_DIR = path.join(app.getPath('userData'), 'canvas');
 let win  = null;
 let tray = null;
 let forceQuit = false;
+let savedBounds = null;  // fullscreen 前的窗口位置
+
+function toggleFullscreen(w) {
+  if (savedBounds) {
+    // 退出：还原位置，撤销置顶
+    w.setAlwaysOnTop(false);
+    w.setBounds(savedBounds);
+    savedBounds = null;
+  } else {
+    // 进入：记录当前位置，铺满整块屏幕（含任务栏区域）
+    savedBounds = w.getBounds();
+    const display = screen.getDisplayMatching(w.getBounds());
+    w.setBounds(display.bounds);          // bounds 不同于 workArea，包含任务栏
+    w.setAlwaysOnTop(true, 'screen-saver'); // 层级高于任务栏
+  }
+}
 
 // ── 系统托盘 ──────────────────────────────────────────────────────────────────
 
@@ -127,8 +143,7 @@ ipcMain.handle('window:maximize', (e) => {
 });
 ipcMain.handle('window:fullscreen', (e) => {
   const w = BrowserWindow.fromWebContents(e.sender);
-  if (!w) return;
-  w.setFullScreen(!w.isFullScreen());
+  if (w) toggleFullscreen(w);
 });
 ipcMain.handle('window:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
 
@@ -163,16 +178,10 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // F11 真全屏 — setAlwaysOnTop('screen-saver') 确保盖住 Windows 任务栏
+  // F11 真全屏 — 手动 setBounds 铺满整块屏幕（绕过 setFullScreen 对任务栏无效的问题）
   win.webContents.on('before-input-event', (_e, input) => {
     if (input.type === 'keyDown' && input.key === 'F11') {
-      const goFull = !win.isFullScreen();
-      win.setFullScreen(goFull);
-      if (goFull) {
-        win.setAlwaysOnTop(true, 'screen-saver');
-      } else {
-        win.setAlwaysOnTop(false);
-      }
+      toggleFullscreen(win);
     }
   });
 
