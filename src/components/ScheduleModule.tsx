@@ -7,7 +7,8 @@
  *   ScheduleEventModal
  */
 import React, { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { KanbanIcon } from '../gsyen-designer';
 
 import { ScheduleToolbar, ScheduleFooter, type ViewMode } from './ScheduleChrome';
 import { EventItem, ColumnId } from '../types/schedule';
@@ -170,7 +171,7 @@ export default function ScheduleModule({ lang, defaultView = 'kanban' }: Schedul
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-serif text-[#1A1A1A] font-bold tracking-tight flex items-center gap-2">
-            <span className="p-1.5 bg-[#1A1A1A] text-white rounded-none"><CalendarIcon className="w-4 h-4" /></span>
+            <span className="p-1.5 bg-[#1A1A1A] text-white rounded-none"><KanbanIcon className="w-4 h-4" /></span>
             <span>{lang === 'zh' ? 'Chronos 极速格栅日程空间' : 'Chronos Multi-Interactive Calendar'}</span>
           </h2>
           <p className="text-xs text-[#1A1A1A]/40 font-mono uppercase tracking-widest mt-1">

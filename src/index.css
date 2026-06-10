@@ -155,6 +155,9 @@
 /* 最小宽度 880px — 防止窗口压缩破版 / 文字竖排 */
 html, body {
   min-width: 880px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 body {
   overflow-x: auto;
