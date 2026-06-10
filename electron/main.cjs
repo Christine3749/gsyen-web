@@ -17,8 +17,34 @@ let win  = null;
 let tray = null;
 let forceQuit = false;
 
+// Windows 任务栏覆盖：setFullScreen 对 frameless 窗口不可靠，
+// 改用手动 setBounds 覆盖全显示区 + screen-saver 层级
+let savedBounds = null;
+
+function isManualFullscreen(w) {
+  if (process.platform !== 'win32') return w.isFullScreen();
+  if (!savedBounds) return false;
+  const b = w.getBounds();
+  const d = screen.getDisplayNearestPoint({ x: b.x, y: b.y });
+  return b.x === d.bounds.x && b.y === d.bounds.y &&
+         b.width === d.bounds.width && b.height === d.bounds.height;
+}
+
 function toggleFullscreen(w) {
-  w.setFullScreen(!w.isFullScreen());
+  if (process.platform !== 'win32') {
+    w.setFullScreen(!w.isFullScreen());
+    return;
+  }
+  if (isManualFullscreen(w)) {
+    w.setAlwaysOnTop(false);
+    if (savedBounds) { w.setBounds(savedBounds); savedBounds = null; }
+  } else {
+    savedBounds = w.getBounds();
+    const d = screen.getDisplayNearestPoint({ x: savedBounds.x, y: savedBounds.y });
+    w.setAlwaysOnTop(true, 'screen-saver');
+    w.setBounds(d.bounds);
+    w.moveTop();
+  }
 }
 
 // ── 系统托盘 ──────────────────────────────────────────────────────────────────
@@ -165,18 +191,6 @@ function createWindow() {
     shell.openExternal(url);
     return { action: 'deny' };
   });
-
-  // Windows frameless 全屏：必须在 enter-full-screen 事件后才能 setAlwaysOnTop
-  // 先设 alwaysOnTop 再 setFullScreen 无效（Electron issue #24932）
-  if (process.platform === 'win32') {
-    win.on('enter-full-screen', () => {
-      win.setAlwaysOnTop(true, 'screen-saver');
-      win.moveTop();
-    });
-    win.on('leave-full-screen', () => {
-      win.setAlwaysOnTop(false);
-    });
-  }
 
   // F11
   win.webContents.on('before-input-event', (_e, input) => {
