@@ -105,12 +105,14 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
               className={`px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all ${lang === 'zh' ? 'bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'}`}
             >中文</button>
           </div>
-          {!compact && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1A1A1A]/5 border border-[#1A1A1A]/10 rounded-none shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A] animate-pulse" />
-              <span className="text-[#1A1A1A]/75 font-serif-sc text-[10px] tracking-[0.12em] font-medium uppercase whitespace-nowrap">{t.inkModeActive}</span>
-            </div>
-          )}
+          <div className="flex bg-[#1A1A1A]/5 p-0.5 rounded-none border border-[#1A1A1A]/10 shrink-0">
+            <button className="px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all text-[#1A1A1A]/60 hover:text-[#1A1A1A]">
+              {lang === 'zh' ? '登录' : 'LOGIN'}
+            </button>
+            <button className="px-2 py-1 rounded-none text-[9px] font-bold tracking-wider uppercase transition-all bg-[#1A1A1A] text-[#F9F8F6]">
+              {lang === 'zh' ? '注册' : 'REGISTER'}
+            </button>
+          </div>
         </div>
       </header>
 
