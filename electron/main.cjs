@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs   = require('fs');
@@ -6,38 +6,74 @@ const fs   = require('fs');
 const isDev = !app.isPackaged;
 const CANVAS_DIR = path.join(app.getPath('userData'), 'canvas');
 
+let win  = null;
+let tray = null;
+let forceQuit = false;
+
+// ── 系统托盘 ──────────────────────────────────────────────────────────────────
+
+function createTray() {
+  const iconPath = isDev
+    ? path.join(__dirname, '../public/icon.png')
+    : path.join(process.resourcesPath, 'app.asar', 'dist', 'icon.png');
+
+  // 托盘图标（32×32，Electron 自动缩放）
+  let icon;
+  try {
+    icon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 });
+  } catch {
+    icon = nativeImage.createEmpty();
+  }
+
+  tray = new Tray(icon);
+  tray.setToolTip('GSYEN');
+
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'Show GSYEN',
+      click: () => showWindow(),
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        forceQuit = true;
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setContextMenu(menu);
+
+  // 双击恢复窗口
+  tray.on('double-click', () => showWindow());
+}
+
+function showWindow() {
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+}
+
 // ── 自动更新 ──────────────────────────────────────────────────────────────────
 
-function setupAutoUpdater(win) {
-  autoUpdater.autoDownload    = true;
+function setupAutoUpdater() {
+  autoUpdater.autoDownload         = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
-  autoUpdater.on('update-available', info => {
-    win.webContents.send('updater:available', info);
-  });
-  autoUpdater.on('update-not-available', () => {
-    win.webContents.send('updater:not-available');
-  });
-  autoUpdater.on('download-progress', progress => {
-    win.webContents.send('updater:progress', progress);
-  });
-  autoUpdater.on('update-downloaded', info => {
-    win.webContents.send('updater:downloaded', info);
-  });
-  autoUpdater.on('error', err => {
-    win.webContents.send('updater:error', err?.message ?? String(err));
-  });
+  autoUpdater.on('update-available',    info     => win?.webContents.send('updater:available',     info));
+  autoUpdater.on('update-not-available',()       => win?.webContents.send('updater:not-available'));
+  autoUpdater.on('download-progress',   progress => win?.webContents.send('updater:progress',      progress));
+  autoUpdater.on('update-downloaded',   info     => win?.webContents.send('updater:downloaded',    info));
+  autoUpdater.on('error',               err      => win?.webContents.send('updater:error',         err?.message ?? String(err)));
 
-  // 启动 5 秒后检查（避免影响启动速度）
+  // 启动 5 秒后检查
   setTimeout(() => autoUpdater.checkForUpdates(), 5000);
 }
 
-ipcMain.handle('updater:install', () => {
-  autoUpdater.quitAndInstall(false, true);
-});
-ipcMain.handle('updater:check', () => {
-  autoUpdater.checkForUpdates();
-});
+ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall(false, true));
+ipcMain.handle('updater:check',   () => autoUpdater.checkForUpdates());
 
 // ── 文件系统 IPC ──────────────────────────────────────────────────────────────
 
@@ -64,27 +100,23 @@ ipcMain.handle('canvas:delete', (_e, id) => {
   return true;
 });
 
-ipcMain.handle('app:getPath', () => app.getPath('userData'));
+ipcMain.handle('app:getPath',    () => app.getPath('userData'));
 ipcMain.handle('app:getVersion', () => app.getVersion());
 
 // ── 窗口控制 IPC ──────────────────────────────────────────────────────────────
 
-ipcMain.handle('window:minimize', (e) => {
-  BrowserWindow.fromWebContents(e.sender)?.minimize();
-});
+ipcMain.handle('window:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
 ipcMain.handle('window:maximize', (e) => {
-  const win = BrowserWindow.fromWebContents(e.sender);
-  if (!win) return;
-  win.isMaximized() ? win.unmaximize() : win.maximize();
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w) return;
+  w.isMaximized() ? w.unmaximize() : w.maximize();
 });
-ipcMain.handle('window:close', (e) => {
-  BrowserWindow.fromWebContents(e.sender)?.close();
-});
+ipcMain.handle('window:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
 
 // ── 窗口 ──────────────────────────────────────────────────────────────────────
 
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1400,
     height: 900,
     minWidth: 900,
@@ -100,25 +132,46 @@ function createWindow() {
   });
 
   if (isDev) {
-    win.loadURL('http://localhost:3000');
+    win.loadURL('http://127.0.0.1:3000');
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
-    setupAutoUpdater(win);
+    setupAutoUpdater();
   }
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
   });
+
+  // 关闭窗口 → 最小化到托盘，不退出
+  win.on('close', (e) => {
+    if (!forceQuit) {
+      e.preventDefault();
+      win.hide();
+    }
+  });
+
+  win.on('closed', () => { win = null; });
 }
+
+// ── 启动 ──────────────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
   createWindow();
+  createTray();
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    else showWindow();
   });
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  // Windows/Linux：窗口全关也不退出（托盘常驻）
+  // 只有 forceQuit（托盘菜单 Quit）才真正退出
+  if (process.platform === 'darwin' && !forceQuit) return;
+  if (!forceQuit) return;
+  app.quit();
 });
+
+app.on('before-quit', () => { forceQuit = true; });
