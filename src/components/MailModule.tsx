@@ -51,11 +51,6 @@ export default function MailModule({ lang }: MailModuleProps) {
             <div className="w-[1px] h-3 bg-[#1A1A1A]/10" />
             <div>{lang === 'zh' ? '归档/推迟:' : 'ARCH/SNOOZE:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>
           </div>
-          <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
-            className="p-1 px-2.5 border border-[#1A1A1A]/10 hover:bg-[#1A1A1A]/5 text-[9px] font-mono tracking-widest uppercase transition rounded-none"
-          >
-            {store.isSidebarCollapsed ? (lang === 'zh' ? '展开目录' : 'Expand Folders') : (lang === 'zh' ? '收缩目录' : 'Collapse')}
-          </button>
           <button onClick={() => compose.setComposeState('window')}
             className="px-4 py-1.5 bg-[#1A1A1A] text-white hover:bg-[#2C2C2C] text-[10px] font-mono font-bold tracking-widest uppercase transition-all flex items-center gap-2 rounded-none"
           >
