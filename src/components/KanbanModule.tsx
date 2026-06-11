@@ -4,8 +4,9 @@ import { CheckCircle2, Plus, Search, PanelLeft, MessageSquare, Trash2, Send } fr
 import { categoryMap } from '../config/scheduleConfig';
 
 import { EventItem, ColumnId } from '../types/schedule';
-import { StoredSession }       from '../types/chat';
+import { StoredSession, ChatMessage } from '../types/chat';
 import { useDragDrop }         from '../hooks/useDragDrop';
+import { useChatStream }       from '../hooks/useChatStream';
 import { sessionKanbanStore, KanbanColumn } from '../stores/sessionKanbanStore';
 import { chatSessionStore }    from '../stores/chatSessionStore';
 import { runSessionGC }        from '../stores/sessionGC';
@@ -59,6 +60,37 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
   const [notification,         setNotification]         = useState<string | null>(null);
 
   const { draggingId, dragOverColumn, onDragStart, onDragEnd, onDragOverColumn, onDropColumn } = useDragDrop();
+  const { send: chatSend } = useChatStream();
+
+  const activeMessages = (sessions.find(s => s.id === activeSessionId)?.messages ?? []).slice(-6);
+
+  const handleKanbanSend = async () => {
+    if (!chatInput.trim()) return;
+    const userMsg: ChatMessage = {
+      id: `user-${Date.now()}`, role: 'user', content: chatInput,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    const existingMsgs = sessions.find(s => s.id === activeSessionId)?.messages ?? [];
+    const history = [...existingMsgs, userMsg];
+    chatSessionStore.upsert(activeSessionId, history, 'ethan');
+    setSessions(chatSessionStore.loadAll());
+    setChatInput('');
+    const aiId = `ai-${Date.now()}`;
+    const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    await chatSend({
+      text: userMsg.content, model: 'ethan', history: existingMsgs, lang,
+      onDone: (full) => {
+        const done = [...history, { id: aiId, role: 'model' as const, content: full, timestamp: aiTime }];
+        chatSessionStore.upsert(activeSessionId, done, 'ethan');
+        setSessions(chatSessionStore.loadAll());
+      },
+      onError: (err) => {
+        const done = [...history, { id: aiId, role: 'model' as const, content: err, timestamp: aiTime }];
+        chatSessionStore.upsert(activeSessionId, done, 'ethan');
+        setSessions(chatSessionStore.loadAll());
+      },
+    });
+  };
 
   const sid    = activeSessionId;
   const notify = (t: string) => { setNotification(t); setTimeout(() => setNotification(null), 3500); };
@@ -221,8 +253,20 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
             />
           </div>
 
+          {/* Ghost messages — AI 呼吸区，从下往上，若隐若现 */}
+          {activeMessages.length > 0 && (
+            <div className="shrink-0 px-8 pt-1 pb-2 max-h-[88px] overflow-hidden flex flex-col justify-end gap-0.5 pointer-events-none select-none"
+              style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)' }}>
+              {activeMessages.map(m => (
+                <p key={m.id} className={`text-[10px] font-mono leading-snug truncate ${m.role === 'user' ? 'text-[#1A1A1A]/30' : 'text-[#1A1A1A]/20'}`}>
+                  {m.role === 'user' ? '›' : '·'} {typeof m.content === 'string' ? m.content.slice(0, 160) : ''}
+                </p>
+              ))}
+            </div>
+          )}
+
           <div className="shrink-0 p-4 border-t border-[#1A1A1A]/10 bg-white">
-            <form onSubmit={e => e.preventDefault()} className="flex items-center gap-2">
+            <form onSubmit={e => { e.preventDefault(); handleKanbanSend(); }} className="flex items-center gap-2">
               <button type="button" onClick={() => setChatInput('')} className="p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition-colors text-neutral-500 rounded-none shrink-0">
                 <Trash2 className="w-4 h-4" />
               </button>
