@@ -137,6 +137,7 @@ export default function ScheduleKanbanView({
 
   const [draggingColId, setDraggingColId] = useState<string | null>(null);
   const [colDragOver,   setColDragOver]   = useState<string | null>(null);
+  const lastReorderPair = useRef('');
 
   const boardRef   = useRef<HTMLDivElement>(null);
   const isPanning  = useRef(false);
@@ -188,13 +189,21 @@ export default function ScheduleKanbanView({
         return (
           <div key={col.id}
             draggable
-            onDragStart={e => { e.dataTransfer.setData('col-id', col.id); e.dataTransfer.effectAllowed = 'move'; setDraggingColId(col.id); }}
-            onDragEnd={() => { setDraggingColId(null); setColDragOver(null); onDragEnd(); }}
-            onDragOver={e => { e.preventDefault(); setColDragOver(col.id); if (!e.dataTransfer.types.includes('col-id')) onDragOverColumn(e, col.id); }}
+            onDragStart={e => { e.dataTransfer.setData('col-id', col.id); e.dataTransfer.effectAllowed = 'move'; setDraggingColId(col.id); lastReorderPair.current = ''; }}
+            onDragEnd={() => { setDraggingColId(null); setColDragOver(null); lastReorderPair.current = ''; onDragEnd(); }}
+            onDragOver={e => {
+              e.preventDefault();
+              setColDragOver(col.id);
+              if (e.dataTransfer.types.includes('col-id') && draggingColId && draggingColId !== col.id) {
+                const pair = `${draggingColId}→${col.id}`;
+                if (lastReorderPair.current !== pair) { lastReorderPair.current = pair; onReorderColumn(draggingColId, col.id); }
+              } else if (!e.dataTransfer.types.includes('col-id')) {
+                onDragOverColumn(e, col.id);
+              }
+            }}
             onDrop={e => {
               const cid = e.dataTransfer.getData('col-id');
-              if (cid && cid !== col.id) { onReorderColumn(cid, col.id); setDraggingColId(null); setColDragOver(null); }
-              else onDropColumn(e, col.id);
+              if (!cid) onDropColumn(e, col.id);
             }}
             className={`shrink-0 w-[272px] flex flex-col min-h-[120px] p-2 border transition-all ${
               draggingColId === col.id ? 'opacity-40 border-dashed border-[#1A1A1A]/30 bg-white' :
