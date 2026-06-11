@@ -8,11 +8,14 @@ import AboutDialog from './AboutDialog';
 import AuthModal from '../auth/AuthModal';
 import { useAuth, type UserTier } from '../auth/useAuth';
 
+/** 自定义 icon 公共 props — strokeWidth 按渲染尺寸反算可保持 1.5px 实际笔触 */
+interface GsIconProps { className?: string; strokeWidth?: number }
+
 /** ReportMoney icon — 精确复刻 Tabler ti-report-money（账簿 + $） */
-function ReportMoneyIcon({ className }: { className?: string }) {
+function ReportMoneyIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
       <path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2" />
       <path d="M14 11h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" />
@@ -22,10 +25,10 @@ function ReportMoneyIcon({ className }: { className?: string }) {
 }
 
 /** ShieldLock icon — 精确复刻 Tabler ti-shield-lock（护盾 + 钥匙孔） */
-function ShieldLockIcon({ className }: { className?: string }) {
+function ShieldLockIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
       <path d="M11 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
       <path d="M12 12l0 2.5" />
@@ -34,21 +37,21 @@ function ShieldLockIcon({ className }: { className?: string }) {
 }
 
 /** Prism icon — 等腰三角形，底角 70°，顶角 40°（viewBox 24 与全系一致，笔触等宽） */
-function PrismIcon({ className }: { className?: string }) {
+function PrismIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <polygon points="12,3 5.45,21 18.55,21" />
     </svg>
   );
 }
 
 /** Google Calendar 风格：显示当天日期数字的动态日历 icon */
-function CalendarDateIcon({ className }: { className?: string }) {
+function CalendarDateIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
   const day = new Date().getDate();
   return (
     <svg viewBox="0 0 24 24" className={className}
-      style={{ fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }}>
+      style={{ fill: 'none', stroke: 'currentColor', strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round' }}>
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <line x1="3" y1="10" x2="21" y2="10" />
       <line x1="8" y1="2" x2="8" y2="6" />
@@ -127,7 +130,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
                 >
                   {isHome
                     ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
-                    : Icon && <Icon strokeWidth={1.5} className={`w-10 h-10 text-[#1A1A1A]/90 ${activeSpace === 'schedule' ? 'scale-[1.3]' : ''}`} />
+                    : Icon && <Icon strokeWidth={0.9} className={`w-10 h-10 text-[#1A1A1A]/90 ${activeSpace === 'schedule' ? 'scale-[1.3]' : ''}`} />
                   }
                 </div>
                 <div className="flex flex-col">
@@ -228,20 +231,6 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
         {authModal && <AuthModal key="auth-modal" lang={lang} initialTab={authModal} onClose={() => setAuthModal(null)} />}
       </AnimatePresence>
 
-      {/* 移动端横向标签条 — 已禁用（最小宽度 880px 桌面应用） */}
-      <div className="hidden">
-        {SPACES.map(({ value, mZh, mEn }) => (
-          <button
-            key={value}
-            onClick={() => setActiveSpace(value)}
-            className={`[scroll-snap-align:start] shrink-0 px-5 py-3 font-mono text-[10px] font-bold tracking-widest uppercase whitespace-nowrap transition-all border-b-2 ${
-              activeSpace === value ? 'text-[#1A1A1A] border-[#1A1A1A]' : 'text-[#1A1A1A]/40 border-transparent hover:text-[#1A1A1A]/70'
-            }`}
-          >
-            {lang === 'zh' ? mZh : mEn}
-          </button>
-        ))}
-      </div>
     </>
   );
 }
