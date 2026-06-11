@@ -60,8 +60,8 @@ export default function BrandLab({ lang }: BrandLabProps) {
   const tabBtn = (tab: BrandTab, label: string) => (
     <button
       onClick={() => setActiveTab(tab)}
-      className={`px-3 py-1 rounded-none text-[9px] font-mono tracking-widest uppercase transition-all border ${
-        activeTab === tab ? 'bg-white border-[#1A1A1A]/15 text-[#1A1A1A] font-bold' : 'border-transparent text-[#1A1A1A]/50 hover:text-[#1A1A1A] hover:bg-[#1A1A1A]/5'
+      className={`p-1.5 px-3.5 text-[9px] font-mono uppercase tracking-wider transition-all rounded-none ${
+        activeTab === tab ? 'bg-[#1A1A1A] text-white font-bold' : 'text-[#1A1A1A]/60 hover:bg-[#1A1A1A]/5'
       }`}
     >
       {label}
@@ -70,12 +70,9 @@ export default function BrandLab({ lang }: BrandLabProps) {
 
   return (
     <>
-      {/* 品牌子标签条 */}
-      <div className="bg-[#1A1A1A]/5 border-b border-[#1A1A1A]/10 px-8 py-3 flex items-center gap-4 flex-wrap">
-        <span className="text-[9px] font-mono tracking-widest text-[#1A1A1A]/45 uppercase font-bold">
-          {lang === 'zh' ? '品牌研发工具集:' : 'ATELIER BRAND LAB ENGINE:'}
-        </span>
-        <div className="flex gap-1.5 flex-wrap">
+      {/* 品牌子标签条 — 透明无色带，切换器样式与日历视图切换统一 */}
+      <div className="px-8 py-3 flex items-center">
+        <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40">
           {tabBtn('orders', lang === 'zh' ? '订单' : 'Orders')}
           {tabBtn('expert', t.creativeAssistant)}
           {tabBtn('studio', t.studioCanvas)}
@@ -117,13 +114,6 @@ export default function BrandLab({ lang }: BrandLabProps) {
             )}
           </AnimatePresence>
 
-          <footer className="mt-auto pt-6 border-t border-[#1A1A1A]/10 text-[9px] text-[#1A1A1A]/40 font-mono uppercase tracking-widest flex flex-col sm:flex-row items-center justify-between gap-4" id="app-footer">
-            <p>{lang === 'zh' ? '© 2026 标识美学设计工作室。原生生成合规、生产级可复用的 SVG 矢量资源。' : '© 2026 Logo Design Studio. Generates valid and production-certified SVG assets.'}</p>
-            <div className="flex gap-4">
-              <span className="hover:text-[#1A1A1A] cursor-pointer">{t.securitySandbox}</span>
-              <span className="hover:text-[#1A1A1A] cursor-pointer">{t.reactNativeCompat}</span>
-            </div>
-          </footer>
         </main>
       </div>
     </>

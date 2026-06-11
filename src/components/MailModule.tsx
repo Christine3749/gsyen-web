@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { Search, Filter, Plus, PanelLeft } from 'lucide-react';
 import { useMailStore } from '../hooks/useMailStore';
@@ -19,12 +19,15 @@ export default function MailModule({ lang }: MailModuleProps) {
   const compose = useMailCompose({
     lang, emails: store.emails, saveEmails: store.saveEmails, showToast: store.showToast,
   });
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
 
   return (
     <div className="space-y-6 text-[#1A1A1A] font-sans">
-      {/* Control strip — 模块身份由顶栏 logo 区承担，此处不再重复标题 */}
-      <div className="bg-white border border-[#1A1A1A]/10 p-3 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+      {/* Control strip — 透明单行，与日历工具栏风格统一 */}
+      <div className="flex flex-row items-center justify-between gap-3 flex-nowrap">
+        <div className="flex items-center gap-3 shrink-0">
           <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
             className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all flex items-center justify-center ${!store.isSidebarCollapsed ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'bg-transparent text-[#1A1A1A]/70'}`}
           >
@@ -37,26 +40,35 @@ export default function MailModule({ lang }: MailModuleProps) {
             <span>{lang === 'zh' ? '亲书信函' : 'Seal New Letter'}</span>
           </button>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+        <div className="flex items-center gap-2 flex-nowrap min-w-0">
           <div className="hidden sm:flex gap-3 items-center px-3 py-1 border border-[#1A1A1A]/10 text-[9px] font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
             <div>{lang === 'zh' ? '未读:' : 'UNREAD:'} <strong className="text-amber-800 font-bold">{store.unreadInboxCount}</strong></div>
             <div className="w-[1px] h-3 bg-[#1A1A1A]/10" />
             <div>{lang === 'zh' ? '归档/推迟:' : 'ARCH/SNOOZE:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>
           </div>
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#1A1A1A]/40" />
-            <input type="text"
+          {/* Google 式搜索：平时只有放大镜，点击展开 */}
+          <div className="flex items-center">
+            <button onClick={() => setSearchOpen(o => !o)}
+              className="p-1.5 hover:bg-[#1A1A1A]/5 text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition rounded-none"
+              title={lang === 'zh' ? '搜索' : 'Search'}>
+              <Search className="w-4 h-4" />
+            </button>
+            <input ref={searchRef} type="text"
               placeholder={lang === 'zh' ? '根据指令搜索信箱...' : 'Filter mailbox...'}
               value={store.searchText}
               onChange={e => store.setSearchText(e.target.value)}
-              className="w-full sm:w-64 pl-9 pr-8 py-1.5 text-xs border border-[#1A1A1A]/10 rounded-none bg-[#F9F8F6]/40 focus:bg-white focus:outline-none focus:border-[#1A1A1A] transition-colors"
-            />
-            <button onClick={() => store.setShowFilters(!store.showFilters)}
-              className="absolute right-2 top-2 p-0.5 hover:bg-[#1A1A1A]/5 rounded-none text-neutral-500"
-            >
-              <Filter className="w-3 h-3" />
-            </button>
+              onBlur={() => { if (!store.searchText) setSearchOpen(false); }}
+              className={`transition-all duration-300 ease-out text-xs rounded-none bg-transparent focus:outline-none text-[#1A1A1A] ${
+                searchOpen
+                  ? 'w-52 opacity-100 px-3 py-1.5 border-b border-[#1A1A1A]/30 focus:border-[#1A1A1A]'
+                  : 'w-0 opacity-0 p-0 border-0 pointer-events-none'
+              }`} />
           </div>
+          <button onClick={() => store.setShowFilters(!store.showFilters)}
+            className="p-1.5 hover:bg-[#1A1A1A]/5 text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition rounded-none"
+            title={lang === 'zh' ? '高级筛选' : 'Advanced filters'}>
+            <Filter className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
