@@ -121,10 +121,6 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
           <button onClick={() => openAddForm()} className="flex items-center gap-1 px-2 py-1 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all text-[#1A1A1A]/70">
             <Plus className="w-3 h-3" /><span>NEW</span>
           </button>
-          <button className="flex items-center gap-2 px-2 py-1 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all text-[#1A1A1A]/70">
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '疆域灵感创意国度' : 'GSYEN Muse'}</span>
-          </button>
         </div>
       </div>
 
@@ -138,10 +134,16 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
               <h2 className="text-[11px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">{lang === 'zh' ? '往来' : 'Recents'}</h2>
               <span className="text-[8px] font-mono text-[#1A1A1A]/25">{sessions.length}</span>
             </div>
-            {/* default 入口 */}
+            {/* default 入口 — 与 session 条目完全一致 */}
             <div onClick={() => setActiveSessionId('default')}
-              className={`flex items-center gap-2 p-3 border cursor-pointer transition-all ${activeSessionId === 'default' ? 'border-[#1A1A1A]/30 bg-white' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
-              <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/50">{lang === 'zh' ? '默认看板' : 'Default Board'}</span>
+              className={`group flex items-start gap-2.5 p-3 border cursor-pointer transition-all ${activeSessionId === 'default' ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
+              <div className="flex-1 min-w-0 space-y-1">
+                <p className="text-[11px] font-sans text-[#1A1A1A]/80 leading-snug">Default Kanban</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[8px] font-mono text-[#1A1A1A]/30 uppercase">{new Date().toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
+                  <span className="text-[8px] font-mono text-[#1A1A1A]/25 uppercase">ETHAN</span>
+                </div>
+              </div>
             </div>
             <div className="overflow-y-auto space-y-1.5 pr-0.5 flex-1">
               {sessions.length === 0 ? (
