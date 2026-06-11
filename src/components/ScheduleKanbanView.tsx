@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Clock, MapPin, Move, ArrowLeft, ArrowRight, Trash2, Plus, X, Check } from 'lucide-react';
 import { EventItem, ColumnId } from '../types/schedule';
-import { KanbanColumn, kanbanColumnStore } from '../stores/kanbanColumnStore';
+import { KanbanColumn } from '../stores/kanbanColumnStore';
 import { categoryMap } from '../config/scheduleConfig';
 
 // 列头色点，按索引轮换
@@ -30,6 +30,7 @@ interface Props {
   onAddColumn: (title: string) => void;
   onRenameColumn: (id: string, title: string) => void;
   onDeleteColumn: (id: string) => void;
+  onReorderColumn: (fromId: string, toId: string) => void;
 }
 
 // ── 内联改名输入框 ──────────────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ export default function ScheduleKanbanView({
   lang, columns, activeFilteredList, dragOverColumn, draggingId,
   onDragStart, onDragEnd, onDragOverColumn, onDropColumn,
   onOpenEvent, onDeleteEvent, onShiftCard, onDraftHere,
-  onAddColumn, onRenameColumn, onDeleteColumn,
+  onAddColumn, onRenameColumn, onDeleteColumn, onReorderColumn,
 }: Props) {
   const getColEvents = (colId: ColumnId) =>
     activeFilteredList.filter(e => (e.status || (e.completed ? 'done' : 'todo')) === colId);
@@ -192,7 +193,7 @@ export default function ScheduleKanbanView({
             onDragOver={e => { e.preventDefault(); setColDragOver(col.id); if (!e.dataTransfer.types.includes('col-id')) onDragOverColumn(e, col.id); }}
             onDrop={e => {
               const cid = e.dataTransfer.getData('col-id');
-              if (cid && cid !== col.id) { kanbanColumnStore.reorder(cid, col.id); setDraggingColId(null); setColDragOver(null); }
+              if (cid && cid !== col.id) { onReorderColumn(cid, col.id); setDraggingColId(null); setColDragOver(null); }
               else onDropColumn(e, col.id);
             }}
             className={`shrink-0 w-[272px] flex flex-col min-h-[120px] p-2 border transition-all ${
