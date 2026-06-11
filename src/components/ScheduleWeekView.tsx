@@ -2,7 +2,7 @@
  * ScheduleWeekView — 7-column week timeline with drag-drop.
  */
 import React from 'react';
-import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { EventItem } from '../types/schedule';
 import { categoryMap } from '../config/scheduleConfig';
 import { isEventOnDate } from '../hooks/useCalendarDays';
@@ -22,41 +22,17 @@ interface Props {
   onDragOverDate: (e: React.DragEvent, dateStr: string) => void;
   onDropDate: (e: React.DragEvent, dateStr: string) => void;
   onOpenEvent: (item: EventItem) => void;
-  onNavigateToday: () => void;
-  onNavigate: (n: number) => void;
 }
 
 export default function ScheduleWeekView({
   lang, currentWeekDaysList, activeFilteredList,
   dragOverDate, draggingId, onDragStart, onDragEnd,
   onDragOverDate, onDropDate, onOpenEvent,
-  onNavigateToday, onNavigate,
 }: Props) {
   return (
     <div className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden" id="week-timeline-wrapper">
 
-      {/* Header */}
-      <div className="p-3.5 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-        <div className="flex items-center gap-2">
-          <button onClick={onNavigateToday}
-            className="px-3 py-1 bg-white border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition text-[9px] font-bold tracking-widest uppercase rounded-none">
-            {lang === 'zh' ? '回到本周' : 'THIS WEEK'}
-          </button>
-          <div className="flex items-center border border-[#1A1A1A]/15 bg-white">
-            <button onClick={() => onNavigate(-1)} className="p-1 px-2 hover:bg-neutral-100 border-r border-[#1A1A1A]/10">
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-            <button onClick={() => onNavigate(1)} className="p-1 px-2 hover:bg-neutral-100">
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-          <h3 className="text-xs font-serif font-bold italic">
-            WEEK DURATION RANGE OF: {currentWeekDaysList[0]?.dateString} to {currentWeekDaysList[6]?.dateString}
-          </h3>
-        </div>
-      </div>
-
-      {/* 7 columns */}
+      {/* 7 columns — 导航已上移至 ScheduleToolbar */}
       <div className="grid grid-cols-1 md:grid-cols-7 border-b border-[#1A1A1A]/10">
         {currentWeekDaysList.map((day, idx) => {
           const dayEventsList = activeFilteredList.filter(e => isEventOnDate(e, day.dateString));

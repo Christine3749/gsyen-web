@@ -2,7 +2,7 @@
  * ScheduleMonthView — 42-slot month grid with drag-drop + quick-add.
  */
 import React, { useState } from 'react';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { EventItem } from '../types/schedule';
 import { categoryMap } from '../config/scheduleConfig';
 import { isEventOnDate } from '../hooks/useCalendarDays';
@@ -14,8 +14,6 @@ interface CalendarDay {
 
 interface Props {
   lang: 'zh' | 'en';
-  todayDate: Date;
-  selectedDate: Date;
   mainCalendarGridDays: CalendarDay[];
   activeFilteredList: EventItem[];
   dragOverDate: string | null;
@@ -25,16 +23,13 @@ interface Props {
   onDragOverDate: (e: React.DragEvent, dateStr: string) => void;
   onDropDate: (e: React.DragEvent, dateStr: string) => void;
   onOpenEvent: (item: EventItem, e?: React.MouseEvent) => void;
-  onNavigateToday: () => void;
-  onNavigate: (n: number) => void;
   onQuickAdd: (event: EventItem) => void;
 }
 
 export default function ScheduleMonthView({
-  lang, todayDate, selectedDate, mainCalendarGridDays, activeFilteredList,
+  lang, mainCalendarGridDays, activeFilteredList,
   dragOverDate, draggingId, onDragStart, onDragEnd,
-  onDragOverDate, onDropDate, onOpenEvent,
-  onNavigateToday, onNavigate, onQuickAdd,
+  onDragOverDate, onDropDate, onOpenEvent, onQuickAdd,
 }: Props) {
   const [quickAddDate,  setQuickAddDate]  = useState<string | null>(null);
   const [quickAddTitle, setQuickAddTitle] = useState('');
@@ -57,31 +52,7 @@ export default function ScheduleMonthView({
   return (
     <div className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden" id="month-grid-wrapper">
 
-      {/* Header */}
-      <div className="p-3 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-        <div className="flex items-center gap-3">
-          <button onClick={onNavigateToday}
-            className="px-3.5 py-1 bg-white border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition text-[10px] font-bold tracking-widest uppercase rounded-none">
-            {lang === 'zh' ? `今天 ${todayDate.getDate()}日` : `TODAY ${todayDate.getDate()}`}
-          </button>
-          <div className="flex items-center border border-[#1A1A1A]/15 bg-white">
-            <button onClick={() => onNavigate(-1)} className="p-1 px-2.5 hover:bg-neutral-100 border-r border-[#1A1A1A]/10">
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => onNavigate(1)} className="p-1 px-2.5 hover:bg-neutral-100">
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <h3 className="text-sm font-serif font-bold tracking-tight px-1 italic">
-            {selectedDate.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'long', year: 'numeric' })}
-          </h3>
-        </div>
-        <div className="text-[9px] text-neutral-400 max-w-[200px] truncate">
-          {lang === 'zh' ? '💡 支持托拽事件到别日期，点击日期空白行增事件' : '💡 Tip: Drag and drop cards to rearrange dates.'}
-        </div>
-      </div>
-
-      {/* Day-of-week headers */}
+      {/* Day-of-week headers — 导航已上移至 ScheduleToolbar */}
       <div className="grid grid-cols-7 border-b border-[#1A1A1A]/10 text-center text-[10px] font-mono uppercase bg-neutral-50/30 text-neutral-500 py-2 select-none tracking-widest font-bold">
         {(lang === 'zh'
           ? ['周日 Sun','周一 Mon','周二 Tue','周三 Wed','周四 Thu','周五 Fri','周六 Sat']

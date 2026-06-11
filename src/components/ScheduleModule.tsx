@@ -143,6 +143,8 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
       {/* Toolbar — 模块身份由顶栏 logo 区承担，此处不再重复标题 */}
       <ScheduleToolbar
         total={events.length} active={activeFilteredList.length}
+        selectedDate={selectedDate}
+        onNavigateToday={handleNavigateToday} onNavigate={handleNavigateDiff}
         lang={lang}
         viewMode={viewMode} setViewMode={setViewMode}
         searchText={searchText} setSearchText={setSearchText}
@@ -189,13 +191,12 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
         <section className="flex-grow flex-1 min-w-0 w-full">
           {viewMode === 'month' && (
             <ScheduleMonthView
-              lang={lang} todayDate={todayDate} selectedDate={selectedDate}
+              lang={lang}
               mainCalendarGridDays={mainCalendarGridDays} activeFilteredList={activeFilteredList}
               dragOverDate={dragOverDate} draggingId={draggingId}
               onDragStart={onDragStart} onDragEnd={onDragEnd}
               onDragOverDate={onDragOverDate} onDropDate={handleDropDate}
               onOpenEvent={setSelectedEventForView}
-              onNavigateToday={handleNavigateToday} onNavigate={handleNavigateDiff}
               onQuickAdd={handleAddEvent}
             />
           )}
@@ -206,7 +207,6 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
               onDragStart={onDragStart} onDragEnd={onDragEnd}
               onDragOverDate={onDragOverDate} onDropDate={handleDropDate}
               onOpenEvent={setSelectedEventForView}
-              onNavigateToday={handleNavigateToday} onNavigate={handleNavigateDiff}
             />
           )}
           {viewMode === 'day' && (
@@ -214,7 +214,6 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
               lang={lang} selectedDate={selectedDate} todayString={todayString}
               activeFilteredList={activeFilteredList}
               onOpenEvent={setSelectedEventForView}
-              onNavigateToday={handleNavigateToday} onNavigate={handleNavigateDiff}
             />
           )}
         </section>

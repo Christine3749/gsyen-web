@@ -1,6 +1,6 @@
 // ScheduleModule 的工具栏（单例 UI 外壳，从协调器拆出以保持精简）。
-// 布局参考 Google Calendar：主操作左置贴目录开关，视图切换 / 筛选 / 搜索归右。
-import { Plus, Search, X, PanelLeft } from 'lucide-react';
+// 布局参考 Google Calendar：主操作 + 今天/翻页/日期标题左置，视图切换 / 筛选 / 搜索归右。
+import { Plus, Search, X, PanelLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type ViewMode = 'month' | 'week' | 'day';
 
@@ -19,13 +19,19 @@ interface ToolbarProps {
   onClearAll: () => void;
   total: number;
   active: number;
+  selectedDate: Date;
+  onNavigateToday: () => void;
+  onNavigate: (n: number) => void;
 }
 
 export function ScheduleToolbar(p: ToolbarProps) {
   const { lang } = p;
+  const dateLabel = p.viewMode === 'day'
+    ? p.selectedDate.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : p.selectedDate.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'long' });
   return (
     <div className="flex flex-row items-center justify-between gap-3 flex-nowrap">
-      {/* 左：目录开关 + 签发事件（主操作，Gmail Compose 惯例） */}
+      {/* 左：目录开关 + 签发事件 + 今天 / 翻页 / 日期标题（Google Calendar 惯例） */}
       <div className="flex items-center gap-3 shrink-0">
         <button onClick={() => p.setIsSidebarOpen(o => !o)}
           className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all flex items-center justify-center ${p.isSidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'bg-transparent text-[#1A1A1A]/70'}`}>
@@ -36,6 +42,19 @@ export function ScheduleToolbar(p: ToolbarProps) {
           {p.showAddForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           <span>{p.showAddForm ? (lang === 'zh' ? '收回表单' : 'Collapse Scribe') : (lang === 'zh' ? '签发事件' : 'Sealed Event')}</span>
         </button>
+        <button onClick={p.onNavigateToday}
+          className="px-3.5 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition text-[10px] font-mono font-bold tracking-widest uppercase rounded-none">
+          {lang === 'zh' ? '今天' : 'Today'}
+        </button>
+        <div className="flex items-center">
+          <button onClick={() => p.onNavigate(-1)} className="p-1.5 hover:bg-[#1A1A1A]/5 text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button onClick={() => p.onNavigate(1)} className="p-1.5 hover:bg-[#1A1A1A]/5 text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+        <h3 className="text-sm font-serif font-bold tracking-tight italic whitespace-nowrap">{dateLabel}</h3>
       </div>
 
       {/* 右：统计 + 视图切换 + 分流筛选 + 搜索 + 清空 */}

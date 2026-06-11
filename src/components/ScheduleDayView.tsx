@@ -2,7 +2,7 @@
  * ScheduleDayView — single-day event list with hour focus.
  */
 import React from 'react';
-import { Clock, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, MapPin } from 'lucide-react';
 import { EventItem } from '../types/schedule';
 import { categoryMap } from '../config/scheduleConfig';
 import { isEventOnDate } from '../hooks/useCalendarDays';
@@ -13,13 +13,11 @@ interface Props {
   todayString: string;
   activeFilteredList: EventItem[];
   onOpenEvent: (item: EventItem) => void;
-  onNavigateToday: () => void;
-  onNavigate: (n: number) => void;
 }
 
 export default function ScheduleDayView({
   lang, selectedDate, todayString, activeFilteredList,
-  onOpenEvent, onNavigateToday, onNavigate,
+  onOpenEvent,
 }: Props) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
   const todayEvents = activeFilteredList
@@ -29,28 +27,7 @@ export default function ScheduleDayView({
   return (
     <div className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden" id="day-timeline-wrapper">
 
-      {/* Header */}
-      <div className="p-4 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-        <div className="flex items-center gap-3">
-          <button onClick={onNavigateToday}
-            className="px-3 py-1 bg-white border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition text-[9px] font-bold tracking-widest uppercase rounded-none">
-            {lang === 'zh' ? '回到今天' : 'REF TODAY'}
-          </button>
-          <div className="flex items-center border border-[#1A1A1A]/15 bg-white">
-            <button onClick={() => onNavigate(-1)} className="p-1 px-2.5 hover:bg-neutral-100 border-r border-[#1A1A1A]/10">
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => onNavigate(1)} className="p-1 px-2.5 hover:bg-neutral-100">
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <h3 className="text-sm font-serif font-bold italic">
-            SPECIFIC SINGLE DAY FOCUS SPHERE: {dateKey}
-          </h3>
-        </div>
-      </div>
-
-      {/* Day content */}
+      {/* Day content — 导航已上移至 ScheduleToolbar */}
       <div className="p-6 max-w-3xl mx-auto space-y-6">
         <div className="pb-3 border-b border-[#1A1A1A]/10 flex items-center justify-between">
           <div className="space-y-0.5">
