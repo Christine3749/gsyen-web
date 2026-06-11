@@ -38,27 +38,78 @@ async function startServer() {
   const app = express();
   app.use(express.json());
 
-  // Health probe
-  app.get('/api/health', async (_req, res) => {
-    const ollamaBase = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-    let ollamaAlive = false;
-    try {
-      const r = await fetch(`${ollamaBase}/api/tags`, { signal: AbortSignal.timeout(5000) });
-      ollamaAlive = r.ok;
-    } catch {}
+  // Health probe — real API verification
+  const healthCache: Record<string, { available: boolean; error?: string; timestamp: number }> = {};
+  const HEALTH_CACHE_TTL = 30_000; // 30s cache
 
-    const models: Record<string, any> = {};
-    for (const [modelId, route] of Object.entries(MODEL_ROUTES)) {
-      const hasKey = !!process.env[route.envKey];
-      if (modelId === 'ethan' || modelId === 'fast') {
-        models[modelId] = { available: ollamaAlive };
-        if (!ollamaAlive) models[modelId].error = 'MODEL UNAVAILABLE';
-      } else {
-        models[modelId] = { available: hasKey };
-        if (!hasKey) models[modelId].error = 'API KEY MISSING';
+  async function verifyModel(modelId: string, route: any): Promise<{ available: boolean; error?: string }> {
+    const now = Date.now();
+    const cached = healthCache[modelId];
+    if (cached && now - cached.timestamp < HEALTH_CACHE_TTL) {
+      return { available: cached.available, error: cached.error };
+    }
+
+    if (modelId === 'ethan' || modelId === 'fast') {
+      // 本地模型：检查 Ollama 服务
+      const ollamaBase = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+      try {
+        const r = await fetch(`${ollamaBase}/api/tags`, { signal: AbortSignal.timeout(5000) });
+        const result = { available: r.ok, ...(r.ok ? {} : { error: 'MODEL UNAVAILABLE' }) };
+        healthCache[modelId] = { ...result, timestamp: now };
+        return result;
+      } catch (e) {
+        const result = { available: false, error: 'SERVICE UNREACHABLE' };
+        healthCache[modelId] = { ...result, timestamp: now };
+        return result;
+      }
+    } else {
+      // 云模型：检查 API key 存在 + 简单可用性验证
+      const apiKey = process.env[route.envKey];
+      if (!apiKey) {
+        const result = { available: false, error: 'API_KEY_MISSING' };
+        healthCache[modelId] = { ...result, timestamp: now };
+        return result;
+      }
+
+      // 简单的可用性验证（不发费用请求，只检查 endpoint）
+      try {
+        let testUrl = '';
+        if (modelId === 'kimi') {
+          testUrl = 'https://api.moonshot.cn/v1/models';
+        } else if (modelId === 'deepseek') {
+          testUrl = 'https://api.deepseek.com/v1/models';
+        } else if (modelId === 'gemini') {
+          testUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+        }
+
+        if (testUrl) {
+          const r = await fetch(testUrl, {
+            headers: { 'Authorization': `Bearer ${apiKey}` },
+            signal: AbortSignal.timeout(5000),
+          });
+          const available = r.ok || r.status === 401; // 401 = key invalid，但至少 service 在线
+          const result = available
+            ? { available: r.ok, ...(r.ok ? {} : { error: 'API_KEY_INVALID' }) }
+            : { available: false, error: 'SERVICE_UNREACHABLE' };
+          healthCache[modelId] = { ...result, timestamp: now };
+          return result;
+        }
+      } catch (e) {
+        const result = { available: false, error: 'CONNECTION_TIMEOUT' };
+        healthCache[modelId] = { ...result, timestamp: now };
+        return result;
       }
     }
-    res.json({ status: 'ok', ollamaAlive, models });
+    return { available: false, error: 'UNKNOWN' };
+  }
+
+  app.get('/api/health', async (_req, res) => {
+    const models: Record<string, any> = {};
+    for (const [modelId, route] of Object.entries(MODEL_ROUTES)) {
+      const result = await verifyModel(modelId, route);
+      models[modelId] = result;
+    }
+    res.json({ status: 'ok', models });
   });
 
   // Chat proxy — model-agnostic
