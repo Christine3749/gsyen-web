@@ -39,11 +39,17 @@ async function startServer() {
   app.use(express.json());
 
   // Health probe
-  app.get('/api/health', (_req, res) => {
+  app.get('/api/health', async (_req, res) => {
+    const ollamaBase = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+    let ollamaAlive = false;
+    try {
+      const r = await fetch(`${ollamaBase}/api/tags`, { signal: AbortSignal.timeout(5000) });
+      ollamaAlive = r.ok;
+    } catch {}
     const configured = Object.fromEntries(
       Object.entries(MODEL_ROUTES).map(([k, v]) => [k, !!process.env[v.envKey]])
     );
-    res.json({ status: 'ok', models: configured });
+    res.json({ status: 'ok', ollamaAlive, models: configured });
   });
 
   // Chat proxy — model-agnostic

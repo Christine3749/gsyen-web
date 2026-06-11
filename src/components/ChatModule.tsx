@@ -23,6 +23,7 @@ import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId, MODELS } from '../config/models';
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
+import { useModelHealth } from '../hooks/useModelHealth';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { ChatSidebar } from './ChatSidebar';
 import { ChatEmptyState } from './ChatEmptyState';
@@ -39,6 +40,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
   const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
   const [toast, setToast]             = useState<string | null>(null);
   const [creativeDocId, setCreativeDocId] = useState<string | null>(null);
+  const isAlive = useModelHealth();
 
   // 创意国度：直接建文档 → 开全屏编辑器
   const openCreativeKingdom = () => {
@@ -163,7 +165,6 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     setTimeout(() => setIsCopiedId(null), 2000);
   };
 
-  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <>
     <div className="flex-1 flex flex-col min-h-0 bg-[#F9F8F6]" id="ai-chat-root-workspace">
@@ -207,8 +208,8 @@ export default function ChatModule({ lang }: ChatModuleProps) {
             </div>
           </div>
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            SYSTEM GATEWAY IS ALIVE
+            <span className={`w-1.5 h-1.5 rounded-full transition-colors ${isAlive ? 'bg-emerald-600 animate-pulse' : 'bg-neutral-400'}`} />
+            {isAlive ? 'SYSTEM GATEWAY IS ALIVE' : 'GSYEN MODEL OFFLINE'}
           </span>
         </div>
       </div>
