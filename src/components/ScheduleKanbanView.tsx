@@ -61,7 +61,7 @@ export default function ScheduleKanbanView({
         const dotColor   = DOT_COLORS[idx % DOT_COLORS.length];
         const isFirstCol = idx === 0;
         const isLastCol  = idx === columns.length - 1;
-        const isColOver  = colDragOver === col.id && draggingColId !== col.id;
+        const isColOver  = colDragOver === col.id && draggingColId !== null && draggingColId !== col.id;
 
         return (
           <div key={col.id} draggable
