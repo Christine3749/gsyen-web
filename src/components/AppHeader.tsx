@@ -8,6 +8,16 @@ import AboutDialog from './AboutDialog';
 import AuthModal from '../auth/AuthModal';
 import { useAuth, type UserTier } from '../auth/useAuth';
 
+/** Prism icon — 等腰三角形，底角 70°，顶角 40° */
+function PrismIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor"
+      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="16,3 7.26,27 24.74,27" />
+    </svg>
+  );
+}
+
 /** Google Calendar 风格：显示当天日期数字的动态日历 icon */
 function CalendarDateIcon({ className }: { className?: string }) {
   const day = new Date().getDate();
@@ -32,18 +42,19 @@ interface SpaceTab {
   value: ActiveSpace;
   Icon: ComponentType<any>;
   iconClass: string;
-  zh: string; en: string;       // 完整标签
-  shortZh: string; shortEn: string; // 压缩时两字短词
+  zh: string; en: string;
+  shortZh: string; shortEn: string;
+  subtitle: string; // 模块副标题（logo 区展示）
 }
 
 const SPACES: SpaceTab[] = [
-  { value: 'chat',     Icon: Sparkles,   iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',      shortZh: '灵阁', shortEn: 'Muse'    },
-  { value: 'mail',     Icon: Mail,       iconClass: '',                             zh: '工作邮件',     en: 'Mailbox',         shortZh: '邮件', shortEn: 'Mail'    },
-  { value: 'schedule', Icon: KanbanIcon, iconClass: 'animate-pulse',               zh: '项目看板',     en: 'Kanban',          shortZh: '看板', shortEn: 'Kanban'  },
-  { value: 'calendar', Icon: CalendarDateIcon, iconClass: '',                        zh: '日程日历',     en: 'Calendar',        shortZh: '日历', shortEn: 'Cal'     },
-  { value: 'finance',  Icon: DollarSign, iconClass: '',                             zh: '复式财务账簿', en: 'Atelier Ledger',  shortZh: '财务', shortEn: 'Ledger'  },
-  { value: 'password', Icon: Lock,       iconClass: '',                             zh: '军事级密钥库', en: 'Citadel Key',     shortZh: '密钥', shortEn: 'Keys'    },
-  { value: 'brand',    Icon: Sparkles,   iconClass: '',                             zh: '品牌实验室',   en: 'Brand Lab',       shortZh: '品牌', shortEn: 'Brand'   },
+  { value: 'chat',     Icon: Sparkles,         iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',     shortZh: '灵阁', shortEn: 'Muse',   subtitle: '' },
+  { value: 'mail',     Icon: Mail,             iconClass: '',                             zh: '工作邮件',     en: 'Mailbox',        shortZh: '邮件', shortEn: 'Mail',   subtitle: 'Hermes · 极雅私密邮件信道' },
+  { value: 'schedule', Icon: KanbanIcon,       iconClass: 'animate-pulse',               zh: '项目看板',     en: 'Kanban',         shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
+  { value: 'calendar', Icon: CalendarDateIcon, iconClass: '',                             zh: '日程日历',     en: 'Calendar',       shortZh: '日历', shortEn: 'Cal',    subtitle: 'Chronos · 极速格栅日程空间' },
+  { value: 'finance',  Icon: DollarSign,       iconClass: '',                             zh: '复式财务账簿', en: 'Atelier Ledger', shortZh: '财务', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
+  { value: 'password', Icon: Lock,             iconClass: '',                             zh: '军事级密钥库', en: 'Citadel Key',    shortZh: '密钥', shortEn: 'Keys',   subtitle: 'Citadel · 军事级密匙生成与保管箱' },
+  { value: 'brand',    Icon: PrismIcon,        iconClass: '',                             zh: '品牌实验室',   en: 'Brand Lab',      shortZh: '品牌', shortEn: 'Brand',  subtitle: 'Prism · 品牌基因折射实验室' },
 ];
 
 interface AppHeaderProps {
@@ -78,22 +89,34 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
     <>
       <header className={`relative border-b border-[#1A1A1A]/10 bg-[#F9F8F6]/90 backdrop-blur-md sticky top-0 z-40 py-6 flex items-start justify-between ${isMac ? 'pl-20 pr-8' : 'px-8'}`} id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
         <div className="flex items-center gap-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          <div
-            className={`shrink-0 transition-transform duration-500 hover:rotate-6 -mt-1 ${isElectron ? 'cursor-pointer' : ''}`}
-            onClick={() => isElectron && setShowAbout(true)}
-            title={isElectron ? (lang === 'zh' ? '关于 GSYEN' : 'About GSYEN') : undefined}
-          >
-            <VintageCar size={44} className="text-[#1A1A1A]/95" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-baseline gap-2.5 flex-nowrap whitespace-nowrap">
-              <span className="text-xl md:text-2xl font-black font-serif-sc tracking-[0.12em] text-[#111111] leading-none select-none">疆域</span>
-              <span className="font-cinzel text-xs md:text-[14px] font-bold tracking-[0.22em] text-[#111111]/85 uppercase leading-none select-none ml-0.5">GSYEN</span>
-            </div>
-            <p className="text-[7.5px] md:text-[8px] text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5">
-              {t.headerSubtitle}
-            </p>
-          </div>
+          {(() => {
+            const space = SPACES.find(s => s.value === activeSpace);
+            const isHome = activeSpace === 'chat';
+            const Icon = space?.Icon;
+            return (
+              <>
+                <div
+                  className={`shrink-0 -mt-1 transition-transform duration-500 ${isHome ? 'hover:rotate-6' : ''} ${isElectron ? 'cursor-pointer' : ''}`}
+                  onClick={() => isElectron && setShowAbout(true)}
+                  title={isElectron ? (lang === 'zh' ? '关于 GSYEN' : 'About GSYEN') : undefined}
+                >
+                  {isHome
+                    ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
+                    : Icon && <Icon className="w-10 h-10 text-[#1A1A1A]/90" />
+                  }
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-2.5 flex-nowrap whitespace-nowrap">
+                    <span className="text-xl md:text-2xl font-black font-serif-sc tracking-[0.12em] text-[#111111] leading-none select-none">疆域</span>
+                    <span className="font-cinzel text-xs md:text-[14px] font-bold tracking-[0.22em] text-[#111111]/85 uppercase leading-none select-none ml-0.5">GSYEN</span>
+                  </div>
+                  <p className="text-[7.5px] md:text-[8px] text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5">
+                    {isHome ? t.headerSubtitle : space?.subtitle}
+                  </p>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* 桌面标签栏 */}
