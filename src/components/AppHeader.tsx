@@ -81,9 +81,9 @@ interface SpaceTab {
 
 const SPACES: SpaceTab[] = [
   { value: 'chat',     Icon: Sparkles,         iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',     shortZh: '灵阁', shortEn: 'Muse',   subtitle: '' },
-  { value: 'mail',     Icon: Mail,             iconClass: '',                             zh: '工作邮件',     en: 'Mailbox',        shortZh: '邮件', shortEn: 'Mail',   subtitle: 'Hermes · 极雅私密邮件信道' },
+  { value: 'mail',     Icon: Mail,             iconClass: 'scale-90',                     zh: '工作邮件',     en: 'Mailbox',        shortZh: '邮件', shortEn: 'Mail',   subtitle: 'Hermes · 极雅私密邮件信道' },
   { value: 'schedule', Icon: KanbanIcon,       iconClass: 'animate-pulse scale-[1.3]',   zh: '项目看板',     en: 'Kanban',         shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
-  { value: 'calendar', Icon: CalendarDateIcon, iconClass: '',                             zh: '日程日历',     en: 'Calendar',       shortZh: '日历', shortEn: 'Cal',    subtitle: 'Chronos · 极速格栅日程空间' },
+  { value: 'calendar', Icon: CalendarDateIcon, iconClass: 'scale-90',                     zh: '日程日历',     en: 'Calendar',       shortZh: '日历', shortEn: 'Cal',    subtitle: 'Chronos · 极速格栅日程空间' },
   { value: 'finance',  Icon: ReportMoneyIcon,  iconClass: '',                             zh: '复式财务账簿', en: 'Atelier Ledger', shortZh: '财务', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
   { value: 'password', Icon: ShieldLockIcon,   iconClass: '',                             zh: '军事级密钥库', en: 'Citadel Key',    shortZh: '密钥', shortEn: 'Keys',   subtitle: 'Citadel · 军事级密匙生成与保管箱' },
   { value: 'brand',    Icon: PrismIcon,        iconClass: '',                             zh: '品牌实验室',   en: 'Brand Lab',      shortZh: '品牌', shortEn: 'Brand',  subtitle: 'Prism · 品牌基因折射实验室' },
@@ -134,7 +134,9 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
                 >
                   {isHome
                     ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
-                    : Icon && <Icon strokeWidth={0.9} className={`w-10 h-10 text-[#1A1A1A]/90 ${activeSpace === 'schedule' ? 'scale-[1.3]' : ''}`} />
+                    : Icon && <Icon strokeWidth={0.9} className={`w-10 h-10 text-[#1A1A1A]/90 ${
+                        { schedule: 'scale-[1.3]', mail: 'scale-90', calendar: 'scale-90' }[activeSpace as string] ?? ''
+                      }`} />
                   }
                 </div>
                 <div className="flex flex-col">
