@@ -33,12 +33,12 @@ function ShieldLockIcon({ className }: { className?: string }) {
   );
 }
 
-/** Prism icon — 等腰三角形，底角 70°，顶角 40° */
+/** Prism icon — 等腰三角形，底角 70°，顶角 40°（viewBox 24 与全系一致，笔触等宽） */
 function PrismIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor"
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
       strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="16,3 7.26,27 24.74,27" />
+      <polygon points="12,3 5.45,21 18.55,21" />
     </svg>
   );
 }
@@ -75,7 +75,7 @@ interface SpaceTab {
 const SPACES: SpaceTab[] = [
   { value: 'chat',     Icon: Sparkles,         iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',     shortZh: '灵阁', shortEn: 'Muse',   subtitle: '' },
   { value: 'mail',     Icon: Mail,             iconClass: '',                             zh: '工作邮件',     en: 'Mailbox',        shortZh: '邮件', shortEn: 'Mail',   subtitle: 'Hermes · 极雅私密邮件信道' },
-  { value: 'schedule', Icon: KanbanIcon,       iconClass: 'animate-pulse',               zh: '项目看板',     en: 'Kanban',         shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
+  { value: 'schedule', Icon: KanbanIcon,       iconClass: 'animate-pulse scale-[1.3]',   zh: '项目看板',     en: 'Kanban',         shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
   { value: 'calendar', Icon: CalendarDateIcon, iconClass: '',                             zh: '日程日历',     en: 'Calendar',       shortZh: '日历', shortEn: 'Cal',    subtitle: 'Chronos · 极速格栅日程空间' },
   { value: 'finance',  Icon: ReportMoneyIcon,  iconClass: '',                             zh: '复式财务账簿', en: 'Atelier Ledger', shortZh: '财务', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
   { value: 'password', Icon: ShieldLockIcon,   iconClass: '',                             zh: '军事级密钥库', en: 'Citadel Key',    shortZh: '密钥', shortEn: 'Keys',   subtitle: 'Citadel · 军事级密匙生成与保管箱' },
@@ -127,7 +127,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
                 >
                   {isHome
                     ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
-                    : Icon && <Icon className="w-10 h-10 text-[#1A1A1A]/90" />
+                    : Icon && <Icon strokeWidth={1.5} className={`w-10 h-10 text-[#1A1A1A]/90 ${activeSpace === 'schedule' ? 'scale-[1.3]' : ''}`} />
                   }
                 </div>
                 <div className="flex flex-col">
@@ -154,7 +154,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace }
                 activeSpace === value ? 'bg-[#1A1A1A] text-[#F9F8F6] shadow-sm font-bold' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
               }`}
             >
-              <Icon className={`${compact ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconClass}`} />
+              <Icon strokeWidth={1.5} className={`${compact ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconClass}`} />
               <span>{lang === 'zh' ? (compact ? shortZh : zh) : (compact ? shortEn : en)}</span>
             </button>
           ))}
