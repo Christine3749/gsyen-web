@@ -30,6 +30,19 @@ export default function MailModule({ lang }: MailModuleProps) {
           >
             <PanelLeft className="w-4 h-4" />
           </button>
+          <button onClick={() => compose.setComposeState('window')}
+            className="px-4 py-1.5 bg-[#1A1A1A] text-white hover:bg-[#2C2C2C] text-[10px] font-mono font-bold tracking-widest uppercase transition-all flex items-center gap-2 rounded-none"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>{lang === 'zh' ? '亲书信函' : 'Seal New Letter'}</span>
+          </button>
+        </div>
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="hidden sm:flex gap-3 items-center px-3 py-1 border border-[#1A1A1A]/10 text-[9px] font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
+            <div>{lang === 'zh' ? '未读:' : 'UNREAD:'} <strong className="text-amber-800 font-bold">{store.unreadInboxCount}</strong></div>
+            <div className="w-[1px] h-3 bg-[#1A1A1A]/10" />
+            <div>{lang === 'zh' ? '归档/推迟:' : 'ARCH/SNOOZE:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>
+          </div>
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#1A1A1A]/40" />
             <input type="text"
@@ -44,19 +57,6 @@ export default function MailModule({ lang }: MailModuleProps) {
               <Filter className="w-3 h-3" />
             </button>
           </div>
-        </div>
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-          <div className="hidden sm:flex gap-3 items-center px-3 py-1 border border-[#1A1A1A]/10 text-[9px] font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
-            <div>{lang === 'zh' ? '未读:' : 'UNREAD:'} <strong className="text-amber-800 font-bold">{store.unreadInboxCount}</strong></div>
-            <div className="w-[1px] h-3 bg-[#1A1A1A]/10" />
-            <div>{lang === 'zh' ? '归档/推迟:' : 'ARCH/SNOOZE:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>
-          </div>
-          <button onClick={() => compose.setComposeState('window')}
-            className="px-4 py-1.5 bg-[#1A1A1A] text-white hover:bg-[#2C2C2C] text-[10px] font-mono font-bold tracking-widest uppercase transition-all flex items-center gap-2 rounded-none"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '亲书信函' : 'Seal New Letter'}</span>
-          </button>
         </div>
       </div>
 
