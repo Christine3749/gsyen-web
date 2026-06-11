@@ -56,7 +56,6 @@ export default function ChatModule({ lang }: ChatModuleProps) {
   const { isLoading, send } = useChatStream();
   const pendingCard = useRef<ActionCard | null>(null);
 
-  // ── scroll management ──────────────────────────────────────────────────────
   const chatEndRef       = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottom       = useRef(true);
@@ -65,7 +64,6 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     if (isAtBottom.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // ── model selector drag-scroll ─────────────────────────────────────────────
   const modelScrollRef = useRef<HTMLDivElement>(null);
   const isDragging     = useRef(false);
   const dragStartX     = useRef(0);
@@ -87,8 +85,6 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     isDragging.current = false;
     if (modelScrollRef.current) modelScrollRef.current.style.cursor = 'grab';
   };
-
-  // ── send ───────────────────────────────────────────────────────────────────
   const handleSend = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
@@ -208,7 +204,11 @@ export default function ChatModule({ lang }: ChatModuleProps) {
             </div>
           </div>
           <span className="flex items-center gap-1">
-            <span className={`w-1.5 h-1.5 rounded-full transition-colors ${isAlive ? 'bg-emerald-600 animate-pulse' : 'bg-neutral-400'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full transition-all ${isAlive ? 'bg-emerald-500 animate-pulse' : 'bg-[#1F1F1F]'}`}
+              style={isAlive
+                ? { boxShadow: '0 0 5px rgba(74,222,128,0.7), 0 0 0 1px rgba(74,222,128,0.3)' }
+                : { boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.06)' }
+              } />
             {isAlive ? 'SYSTEM GATEWAY IS ALIVE' : 'GSYEN MODEL OFFLINE'}
           </span>
         </div>
