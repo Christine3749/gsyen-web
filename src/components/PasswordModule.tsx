@@ -57,15 +57,7 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
 
   return (
     <div className="space-y-6">
-      <div className="max-w-4xl">
-        <h2 className="text-xl font-serif text-[#1A1A1A] font-bold tracking-tight">
-          {lang === 'zh' ? 'Secret Key Citadel 军事级密匙生成与保管箱' : 'Secret Key Citadel & Cryptographic Key Vault'}
-        </h2>
-        <p className="text-xs text-[#1A1A1A]/60 font-mono uppercase tracking-widest mt-1">
-          {lang === 'zh' ? '高水准密码学熵值防泄露面板与隔离保护数据库' : 'Algorithmic entropy fortress engineered to safeguard critical digital blueprints'}
-        </p>
-      </div>
-
+      {/* 模块身份由顶栏 logo 区承担，此处不再重复标题 */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 space-y-4">
           <PasswordGeneratorPanel lang={lang} onGeneratedChange={setGeneratedPass} />
