@@ -84,7 +84,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
   const activeSession = sessions.find(s => s.id === boardId);
 
   return (
-    <div className="flex h-full min-h-[600px] text-[#1A1A1A] font-sans animate-fadeIn" style={{ minHeight: '600px' }}>
+    <div className="flex h-full text-[#1A1A1A] font-sans animate-fadeIn overflow-hidden">
 
       {/* ── 左侧：往来列表 ───────────────────────────────────────────────── */}
       <aside className={`shrink-0 flex flex-col border-r border-[#1A1A1A]/10 bg-[#F4F2EE] transition-all duration-200 overflow-hidden ${
@@ -144,8 +144,8 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
           </div>
         </div>
 
-        {/* 看板主体 */}
-        <div className="flex-1 overflow-auto p-4">
+        {/* 看板主体 — overflow-hidden，内部 BoardKanbanView 自己管滚动 */}
+        <div className="flex-1 overflow-hidden p-4 pb-0">
           {!boardId ? (
             <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
               <MessageSquare className="w-10 h-10 text-[#1A1A1A]/10" />

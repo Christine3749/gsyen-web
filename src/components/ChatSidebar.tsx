@@ -131,22 +131,24 @@ export function ChatSidebar({
               </div>
               {phase === 'downloading' && (
                 <>
-                  {/* 全轨道暗条纹，填充段亮条纹 — 施工警戒带感 */}
+                  {/* 施工警戒带进度条 — 内嵌凹陷感 */}
                   <div style={{
-                    width: '100%', height: 20, position: 'relative', overflow: 'hidden', marginBottom: 8,
-                    border: '1px solid rgba(249,248,246,0.14)',
-                    background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.14) 0px,rgba(245,158,11,0.14) 5px,rgba(0,0,0,0.22) 5px,rgba(0,0,0,0.22) 10px)',
+                    width: '100%', height: 18, position: 'relative', overflow: 'hidden', marginBottom: 8,
+                    background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.11) 0px,rgba(245,158,11,0.11) 6px,rgba(0,0,0,0.55) 6px,rgba(0,0,0,0.55) 12px)',
+                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.85), inset 0 1px 2px rgba(0,0,0,0.6)',
+                    border: '1px solid rgba(0,0,0,0.5)',
                   }}>
                     <div style={{
                       position: 'absolute', left: 0, top: 0, bottom: 0,
                       width: `${pct}%`, transition: 'width 0.4s linear',
-                      background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.92) 0px,rgba(245,158,11,0.92) 5px,rgba(180,100,0,0.68) 5px,rgba(180,100,0,0.68) 10px)',
+                      background: 'repeating-linear-gradient(-45deg,rgba(245,158,11,0.95) 0px,rgba(245,158,11,0.95) 6px,rgba(160,90,0,0.75) 6px,rgba(160,90,0,0.75) 12px)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,220,80,0.3)',
                     }} />
                     <span style={{
-                      position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)',
-                      fontFamily: 'monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em',
-                      color: 'rgba(249,248,246,0.9)',
-                      textShadow: '0 1px 3px rgba(0,0,0,0.95)',
+                      position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                      fontFamily: 'monospace', fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+                      color: 'rgba(249,248,246,0.95)',
+                      textShadow: '0 1px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.8)',
                     }}>{pct}%</span>
                   </div>
                 </>
