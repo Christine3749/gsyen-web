@@ -4,16 +4,17 @@
  * 卡片数据与 ScheduleModule 共享 scheduleStore。
  */
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Plus, Search, X, PanelLeft, MessageSquare } from 'lucide-react';
+import { CheckCircle2, Plus, Search, X, PanelLeft, MessageSquare, Trash2, Send } from 'lucide-react';
 import { KanbanIcon } from '../gsyen-designer';
 
 import { EventItem, ColumnId } from '../types/schedule';
+import { StoredSession }        from '../types/chat';
 import { DEFAULT_EVENTS }       from '../config/scheduleConfig';
 import { useScheduleEvents }    from '../hooks/useScheduleEvents';
 import { scheduleStore }        from '../stores/scheduleStore';
 import { useDragDrop }          from '../hooks/useDragDrop';
 import { kanbanColumnStore, KanbanColumn } from '../stores/kanbanColumnStore';
-import { ScheduleFooter }       from './ScheduleChrome';
+import { chatSessionStore }     from '../stores/chatSessionStore';
 
 import ScheduleAddForm    from './ScheduleAddForm';
 import ScheduleKanbanView from './ScheduleKanbanView';
@@ -34,10 +35,19 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
     return () => window.removeEventListener('kanban-columns-updated', sync);
   }, []);
 
+  // ── 往来会话（只读，接收 storage 事件刷新）────────────────────────────────
+  const [sessions, setSessions] = useState<StoredSession[]>(() => chatSessionStore.loadAll());
+  useEffect(() => {
+    const sync = () => setSessions(chatSessionStore.loadAll());
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, []);
+
   // ── 卡片状态 ──────────────────────────────────────────────────────────────
   const [sidebarOpen,          setSidebarOpen]          = useState(true);
   const [filterCategory,       setFilterCategory]       = useState('all');
   const [searchText,           setSearchText]           = useState('');
+  const [chatInput,            setChatInput]            = useState('');
   const [showAddForm,          setShowAddForm]          = useState(false);
   const [addFormInitialStatus, setAddFormInitialStatus] = useState<ColumnId>('todo');
   const [selectedEventForView, setSelectedEventForView] = useState<EventItem | null>(null);
@@ -134,7 +144,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
         </div>
       )}
 
-      {/* ── 左侧往来侧边栏（视觉，功能待接） ─────────────────────────── */}
+      {/* ── 左侧往来侧边栏 ──────────────────────────────────────────── */}
       <aside className={`shrink-0 flex flex-col border-r border-[#1A1A1A]/10 bg-[#F4F2EE] transition-all duration-300 overflow-hidden ${
         sidebarOpen ? 'w-[320px] p-6 opacity-100' : 'w-0 p-0 opacity-0 pointer-events-none'
       }`}>
@@ -143,17 +153,29 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
             <h2 className="text-[11px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">
               {lang === 'zh' ? '往来' : 'Recents'}
             </h2>
-            <div className="flex items-center gap-2">
-              <span className="text-[8px] font-mono text-[#1A1A1A]/25">0</span>
-              <span className="text-[#1A1A1A]/30 text-[10px]">›</span>
-            </div>
+            <span className="text-[8px] font-mono text-[#1A1A1A]/25">{sessions.length}</span>
           </div>
           <div className="overflow-y-auto space-y-1.5 pr-0.5 flex-1">
-            <div className="py-10 text-center">
-              <p className="text-[9px] font-mono text-[#1A1A1A]/30 uppercase tracking-widest">
-                {lang === 'zh' ? '暂无记录' : 'No history yet'}
-              </p>
-            </div>
+            {sessions.length === 0 ? (
+              <div className="py-10 text-center space-y-2">
+                <MessageSquare className="w-6 h-6 text-[#1A1A1A]/15 mx-auto" />
+                <p className="text-[9px] font-mono text-[#1A1A1A]/30 uppercase tracking-widest">
+                  {lang === 'zh' ? '暂无记录' : 'No history yet'}
+                </p>
+              </div>
+            ) : sessions.map(s => (
+              <div key={s.id} className="group relative flex items-start gap-2.5 p-3 border border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60 cursor-pointer transition-all">
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-[11px] font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2">{s.title}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[8px] font-mono text-[#1A1A1A]/30 uppercase">
+                      {new Date(s.updatedAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span className="text-[8px] font-mono text-[#1A1A1A]/25 uppercase">{s.model}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </aside>
@@ -246,9 +268,19 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
       />
       </div>{/* end flex-1 kanban */}
 
-      {/* Footer */}
-      <div className="shrink-0 px-8">
-        <ScheduleFooter lang={lang} total={events.length} active={activeFilteredList.length} />
+      {/* 底部聊天输入框（功能待接） */}
+      <div className="shrink-0 border-t border-[#1A1A1A]/10 bg-white flex items-center gap-2 px-3 py-2.5">
+        <button className="p-2 text-[#1A1A1A]/25 hover:text-red-400 transition-colors" onClick={() => setChatInput('')}>
+          <Trash2 className="w-4 h-4" />
+        </button>
+        <input
+          value={chatInput} onChange={e => setChatInput(e.target.value)}
+          placeholder={lang === 'zh' ? '向 Atelier AI 咨询任何品牌策划、符号创意、日程安排吧...' : 'Ask Atelier AI anything about your board...'}
+          className="flex-1 bg-transparent text-sm text-[#1A1A1A] placeholder-[#1A1A1A]/30 outline-none py-1"
+        />
+        <button disabled={!chatInput.trim()} className="p-2 bg-[#F4F2EE] border border-[#1A1A1A]/12 text-[#1A1A1A]/40 hover:bg-[#1A1A1A]/8 disabled:opacity-30 transition-all">
+          <Send className="w-4 h-4" />
+        </button>
       </div>
 
       {selectedEventForView && (
