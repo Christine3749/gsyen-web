@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence } from 'motion/react';
-import { Inbox, Search, Filter, Plus, PanelLeft } from 'lucide-react';
+import { Search, Filter, Plus, PanelLeft } from 'lucide-react';
 import { useMailStore } from '../hooks/useMailStore';
 import { useMailCompose } from '../hooks/useMailCompose';
 import MailSidebar from './mail/MailSidebar';
@@ -22,25 +22,7 @@ export default function MailModule({ lang }: MailModuleProps) {
 
   return (
     <div className="space-y-6 text-[#1A1A1A] font-sans">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-serif text-[#1A1A1A] font-bold tracking-tight flex items-center gap-2">
-            <span className="p-1.5 bg-[#1A1A1A] text-white rounded-none"><Inbox className="w-4 h-4" /></span>
-            <span>{lang === 'zh' ? 'Hermes 极雅私密邮件信道' : 'Hermes Secure Atelier Mail Channel'}</span>
-          </h2>
-          <p className="text-xs text-[#1A1A1A]/40 font-mono uppercase tracking-widest mt-1">
-            {lang === 'zh' ? '双重密钥封装排版系统。支持线程穿透与独立沙箱防泄漏保护' : 'An offline architectural correspondence depot styled with monospace metadata'}
-          </p>
-        </div>
-        <div className="flex gap-4 items-center bg-white border border-[#1A1A1A]/10 px-4 py-2 text-[10px] font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
-          <div>{lang === 'zh' ? '未读信件:' : 'UNREAD:'} <strong className="text-amber-800 font-bold">{store.unreadInboxCount}封</strong></div>
-          <div className="w-[1px] h-4 bg-[#1A1A1A]/10" />
-          <div>{lang === 'zh' ? '总归档 / 推迟:' : 'ARCHIVED / SNOOZED:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>
-        </div>
-      </div>
-
-      {/* Control strip */}
+      {/* Control strip — 模块身份由顶栏 logo 区承担，此处不再重复标题 */}
       <div className="bg-white border border-[#1A1A1A]/10 p-3 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
@@ -64,6 +46,11 @@ export default function MailModule({ lang }: MailModuleProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="hidden sm:flex gap-3 items-center px-3 py-1 border border-[#1A1A1A]/10 text-[9px] font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
+            <div>{lang === 'zh' ? '未读:' : 'UNREAD:'} <strong className="text-amber-800 font-bold">{store.unreadInboxCount}</strong></div>
+            <div className="w-[1px] h-3 bg-[#1A1A1A]/10" />
+            <div>{lang === 'zh' ? '归档/推迟:' : 'ARCH/SNOOZE:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>
+          </div>
           <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
             className="p-1 px-2.5 border border-[#1A1A1A]/10 hover:bg-[#1A1A1A]/5 text-[9px] font-mono tracking-widest uppercase transition rounded-none"
           >
