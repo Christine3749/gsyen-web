@@ -25,10 +25,13 @@ async function fetchTier(userId: string): Promise<UserTier | null> {
 }
 
 export function useAuth() {
-  const [state, setState] = useState<AuthState>({ user: null, session: null, tier: null, emailVerified: false, loading: false });
+  const [state, setState] = useState<AuthState>({ user: null, session: null, tier: null, emailVerified: false, loading: true });
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      setState(s => ({ ...s, loading: false }));
+      return;
+    }
     setState(s => ({ ...s, loading: true }));
 
     supabase.auth.getSession().then(async ({ data }) => {
