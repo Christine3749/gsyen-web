@@ -11,9 +11,10 @@ import BrandCollateral from './BrandCollateral';
 import BrandExpert from './BrandExpert';
 import BrandOrders from './BrandOrders';
 import BrandContacts from './BrandContacts';
+import BrandTeam from './BrandTeam';
 import PrismRoutes from './PrismRoutes';
 
-type BrandTab = 'studio' | 'collateral' | 'expert' | 'orders' | 'contacts' | 'routes';
+type BrandTab = 'studio' | 'collateral' | 'expert' | 'orders' | 'contacts' | 'team' | 'routes';
 
 const DEFAULT_CONFIG: LogoConfig = {
   brandName: 'GSYEN',
@@ -77,6 +78,7 @@ export default function BrandLab({ lang }: BrandLabProps) {
         <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40">
           {tabBtn('orders', lang === 'zh' ? '订单' : 'Orders')}
           {tabBtn('contacts', lang === 'zh' ? '往来' : 'Contacts')}
+          {tabBtn('team',    lang === 'zh' ? '团队' : 'Team')}
           {tabBtn('expert', t.creativeAssistant)}
           {tabBtn('studio', t.studioCanvas)}
           {tabBtn('collateral', t.collateralMockups)}
@@ -87,7 +89,7 @@ export default function BrandLab({ lang }: BrandLabProps) {
 
       <div className="flex-1 flex flex-col lg:flex-row min-h-0" id="main-studio-workspace">
         {/* 左侧控制面板 — 订单/往来/线路页时隐藏 */}
-        {activeTab !== 'orders' && activeTab !== 'contacts' && activeTab !== 'routes' && (
+        {activeTab !== 'orders' && activeTab !== 'contacts' && activeTab !== 'team' && activeTab !== 'routes' && (
           <aside className="w-full lg:w-[420px] border-r border-[#1A1A1A]/10 bg-[#F4F2EE] px-6 pb-6 pt-0 overflow-y-auto space-y-7 flex-shrink-0" id="design-control-sidebar">
             <BrandControlsIdentity lang={lang} config={config} setConfig={setConfig} />
             <hr className="border-[#1A1A1A]/10" />
@@ -119,6 +121,9 @@ export default function BrandLab({ lang }: BrandLabProps) {
             )}
             {activeTab === 'contacts' && (
               <BrandContacts key="contacts" lang={lang} />
+            )}
+            {activeTab === 'team' && (
+              <BrandTeam key="team" />
             )}
             {activeTab === 'routes' && (
               <PrismRoutes key="routes" />

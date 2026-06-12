@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PrismQuota from './PrismQuota';
 import PrismStability, { RouteHealth, DEMO_HEALTH } from './PrismStability';
 import PrismKeyInput from './PrismKeyInput';
+import { useAuth } from '../../auth/useAuth';
 
 interface NodeInfo {
   index:      number;
@@ -33,6 +34,8 @@ function mergeHealth(nodes: NodeInfo[]): RouteHealth[] {
 }
 
 export default function PrismRoutes() {
+  const { tier } = useAuth();
+  const isOwner = tier === 'owner';
   const [health,    setHealth]    = useState<RouteHealth[]>(DEMO_HEALTH);
   const [switching, setSwitching] = useState<number | null>(null);
   const [realCount, setRealCount] = useState(0); // 真实已配置线路数（密钥激活后 > 0）
@@ -66,6 +69,7 @@ export default function PrismRoutes() {
           connected={connected}
           count={realCount}
           onActivated={refresh}
+          isOwner={isOwner}
         />
         <PrismQuota />
         <PrismStability

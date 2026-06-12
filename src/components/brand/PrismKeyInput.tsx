@@ -13,9 +13,10 @@ interface Props {
   connected:   boolean;
   count:       number;
   onActivated: () => void;
+  isOwner?:    boolean;
 }
 
-export default function PrismKeyInput({ connected, count, onActivated }: Props) {
+export default function PrismKeyInput({ connected, count, onActivated, isOwner = false }: Props) {
   const [expanded,     setExpanded]     = useState(!connected);
   const [input,        setInput]        = useState('');
   const [subUrl,       setSubUrl]       = useState<string | null>(null);
@@ -78,7 +79,7 @@ export default function PrismKeyInput({ connected, count, onActivated }: Props) 
             更换
           </button>
         </div>
-        {/* 钟馗开关行 */}
+        {/* 钟馗行 — 所有人可见，仅 owner 可操作 */}
         <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-3">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-[#1A1A1A]/50">⚔ 钟馗</span>
@@ -86,16 +87,22 @@ export default function PrismKeyInput({ connected, count, onActivated }: Props) 
               {llmOnly ? '仅限大模型通道' : '全局代理'}
             </span>
           </div>
-          <button
-            onClick={toggleGateway}
-            className={`px-3 py-1 text-[10px] font-mono font-bold tracking-widest uppercase rounded-none transition-all ${
-              llmOnly
-                ? 'bg-[#1A1A1A] text-[#F9F8F6]'
-                : 'border border-[#1A1A1A]/15 text-[#1A1A1A]/50 hover:bg-[#1A1A1A]/5'
-            }`}
-          >
-            {llmOnly ? '已开启' : '关闭'}
-          </button>
+          {isOwner ? (
+            <button
+              onClick={toggleGateway}
+              className={`px-3 py-1 text-[10px] font-mono font-bold tracking-widest uppercase rounded-none transition-all ${
+                llmOnly
+                  ? 'bg-[#1A1A1A] text-[#F9F8F6]'
+                  : 'border border-[#1A1A1A]/15 text-[#1A1A1A]/50 hover:bg-[#1A1A1A]/5'
+              }`}
+            >
+              {llmOnly ? '已开启' : '关闭'}
+            </button>
+          ) : (
+            <span className={`text-[10px] font-mono tracking-widest ${llmOnly ? 'text-[#137333]' : 'text-[#9AA0A6]'}`}>
+              {llmOnly ? '● 开启' : '○ 关闭'}
+            </span>
+          )}
         </div>
       </div>
     );
