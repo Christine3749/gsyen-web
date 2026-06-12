@@ -220,6 +220,9 @@ export default function ChatModule({ lang }: ChatModuleProps) {
           loadSession={loadSession}
           deleteSession={deleteSession}
           onNewChat={newChat}
+          teams={[]}
+          onSelectTeam={() => {}}
+          onCreateTeam={() => {}}
         />
 
         {/* Chat panel */}

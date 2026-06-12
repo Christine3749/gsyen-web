@@ -1,79 +1,114 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from './supabase';
+import { supabase } from './supabaseClient';
+import { initializeUserData, signInWithEmail, signUpWithEmail, signInWithOAuth, signOut } from './authService';
+import type { AuthState, OAuthProvider, UserTier, LoginProvider } from '../types/auth';
 
-export type UserTier = 'guest' | 'user' | 'admin' | 'owner';
-
-export interface AuthState {
-  user:          User | null;
-  session:       Session | null;
-  tier:          UserTier | null;   // halfsphere 会员等级
-  emailVerified: boolean;           // Supabase email_confirmed_at 非空
-  loading:       boolean;
-}
-
-const NOT_CONFIGURED = { error: { message: 'Supabase not configured' } } as any;
-
-async function fetchTier(userId: string): Promise<UserTier | null> {
-  if (!supabase) return null;
-  const { data } = await supabase
-    .from('user_tiers')
-    .select('tier')
-    .eq('user_id', userId)
-    .single();
-  return (data?.tier as UserTier) ?? 'guest';
-}
+const DEFAULT_AUTH_STATE: AuthState = {
+  user: null,
+  session: null,
+  tier: null,
+  emailVerified: false,
+  loginProvider: null,
+  loading: true,
+};
 
 export function useAuth() {
-  const [state, setState] = useState<AuthState>({ user: null, session: null, tier: null, emailVerified: false, loading: true });
+  const [state, setState] = useState<AuthState>(DEFAULT_AUTH_STATE);
 
+  // Effect 1: 初始化 session，cancelled 标志防 StrictMode 竞态
   useEffect(() => {
     if (!supabase) {
       setState(s => ({ ...s, loading: false }));
       return;
     }
-    setState(s => ({ ...s, loading: true }));
 
-    // authSeq 防止 fetchTier 竞态：SIGNED_OUT 后旧的 SIGNED_IN fetchTier 不得覆写 user:null
-    let authSeq = 0;
+    let cancelled = false;
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      const seq = ++authSeq;
-      const user = data.session?.user ?? null;
-      const tier = user ? await fetchTier(user.id) : null;
-      if (authSeq !== seq) return;
-      const emailVerified = !!user?.email_confirmed_at;
-      setState({ user, session: data.session, tier, emailVerified, loading: false });
-    }).catch(() => {
-      setState(s => ({ ...s, loading: false }));
-    });
+    (async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (cancelled) return;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const seq = ++authSeq;
+        if (error) {
+          setState(s => ({ ...s, loading: false }));
+          return;
+        }
+
+        const user = data.session?.user ?? null;
+        let tier: UserTier | null = null;
+        if (user) {
+          tier = await initializeUserData(user.id, user.user_metadata?.provider ?? 'email');
+          if (cancelled) return;
+        }
+
+        setState({
+          user,
+          session: data.session,
+          tier,
+          emailVerified: !!user?.email_confirmed_at,
+          loginProvider: (user?.user_metadata?.provider ?? null) as LoginProvider | null,
+          loading: false,
+        });
+      } catch {
+        if (!cancelled) setState(s => ({ ...s, loading: false }));
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, []);
+
+  // Effect 2: 监听后续认证变化，同步写入 user/session，tier 异步补
+  useEffect(() => {
+    if (!supabase) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const user = session?.user ?? null;
-      const tier = user ? await fetchTier(user.id) : null;
-      if (authSeq !== seq) return;
-      const emailVerified = !!user?.email_confirmed_at;
-      setState({ user, session, tier, emailVerified, loading: false });
+
+      console.log(`[Auth] Auth state changed: event=${_event}, user=${user?.email ?? 'none'}`);
+
+      setState(s => ({
+        ...s,
+        user,
+        session,
+        emailVerified: !!user?.email_confirmed_at,
+        loginProvider: (user?.user_metadata?.provider ?? null) as LoginProvider | null,
+        loading: false,
+        tier: null,
+      }));
+
+      if (user) {
+        initializeUserData(user.id, user.user_metadata?.provider ?? 'email')
+          .then(tier => setState(s => s.user?.id === user.id ? { ...s, tier } : s));
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = () =>
-    supabase ? supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
-             : Promise.resolve(NOT_CONFIGURED);
+  const signInEmailHandler = useCallback(async (email: string, password: string) => {
+    return signInWithEmail(email, password);
+  }, []);
 
-  const signInWithEmail = (email: string, password: string) =>
-    supabase ? supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
-             : Promise.resolve(NOT_CONFIGURED);
+  const signUpEmailHandler = useCallback(async (email: string, password: string) => {
+    return signUpWithEmail(email, password);
+  }, []);
 
-  const signUpWithEmail = (email: string, password: string) =>
-    supabase ? supabase.auth.signUp({ email: email.trim().toLowerCase(), password })
-             : Promise.resolve(NOT_CONFIGURED);
+  const signInOAuthHandler = useCallback(async (provider: OAuthProvider) => {
+    return signInWithOAuth(provider);
+  }, []);
 
-  const signOut = () =>
-    supabase ? supabase.auth.signOut() : Promise.resolve({ error: null });
+  const signOutHandler = useCallback(async () => {
+    return signOut();
+  }, []);
 
-  return { ...state, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut };
+  return {
+    ...state,
+    signInWithEmail: signInEmailHandler,
+    signUpWithEmail: signUpEmailHandler,
+    signInWithOAuth: signInOAuthHandler,
+    signOut: signOutHandler,
+  };
 }
+
+export type UseAuthReturn = ReturnType<typeof useAuth>;

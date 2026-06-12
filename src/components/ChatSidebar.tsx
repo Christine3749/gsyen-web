@@ -4,8 +4,13 @@
  * 底部状态栏：平时显示存储状态，有更新时切换为更新提示。
  */
 import { useState, useEffect } from 'react';
-import { MessageSquare, Terminal, X } from 'lucide-react';
+import { MessageSquare, Terminal, X, Plus } from 'lucide-react';
 import { StoredSession } from '../types/chat';
+
+export interface Team {
+  id: string;
+  name: string;
+}
 
 // ── 模块级单例：状态在 React 组件 unmount 后仍存活 ──────────────────────────
 // 解决：切换 Space 导致 ChatModule 卸载，下载状态丢失的问题
@@ -57,11 +62,15 @@ interface ChatSidebarProps {
   loadSession: (s: StoredSession) => void;
   deleteSession: (id: string) => void;
   onNewChat: () => void;
+  teams?: Team[];
+  onSelectTeam?: (team: Team) => void;
+  onCreateTeam?: () => void;
 }
 
 export function ChatSidebar({
   lang, open, recentsOpen, setRecentsOpen,
   sessions, currentSessionId, loadSession, deleteSession, onNewChat,
+  teams = [], onSelectTeam, onCreateTeam,
 }: ChatSidebarProps) {
   const { api, phase, version, pct } = useUpdater();
 
@@ -112,6 +121,34 @@ export function ChatSidebar({
             </div>
           ))}
         </div>
+
+        {/* 团队列表 */}
+        {(recentsOpen && teams.length > 0) && (
+          <div className="space-y-1.5 pt-2 border-t border-[#1A1A1A]/10">
+            {teams.map(t => {
+              const colors = ['bg-[#1A73E8]', 'bg-[#137333]', 'bg-[#B05E00]', 'bg-[#9334E6]', 'bg-[#D93025]', 'bg-[#0097A7]'];
+              const color = colors[t.id.charCodeAt(0) % colors.length];
+              return (
+                <button key={t.id} onClick={() => onSelectTeam?.(t)}
+                  className="group flex items-center gap-2.5 w-full p-3 border rounded hover:bg-white/60 transition-all border-transparent hover:border-[#1A1A1A]/10">
+                  <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center shrink-0 text-white text-[10px] font-bold`}>
+                    {t.name[0].toUpperCase()}
+                  </div>
+                  <span className="text-[11px] font-sans text-[#1A1A1A]/80 flex-1 line-clamp-1">{t.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 开团按钮 — 总是显示 */}
+        {recentsOpen && (
+          <button onClick={() => onCreateTeam?.()}
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 text-[11px] font-sans font-medium border border-[#1A1A1A]/10 rounded hover:bg-white/60 hover:border-[#1A1A1A]/20 transition-all text-[#1A1A1A]/70 hover:text-[#1A1A1A] mt-2">
+            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+            {lang === 'zh' ? '开团' : 'New Team'}
+          </button>
+        )}
 
         {/* 底部：有更新时显示 Art Deco 更新卡，否则显示存储状态 */}
         {phase !== 'idle' && (

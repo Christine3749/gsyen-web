@@ -78,7 +78,6 @@ export default function BrandLab({ lang }: BrandLabProps) {
         <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40">
           {tabBtn('orders', lang === 'zh' ? '订单' : 'Orders')}
           {tabBtn('contacts', lang === 'zh' ? '往来' : 'Contacts')}
-          {tabBtn('team',    lang === 'zh' ? '团队' : 'Team')}
           {tabBtn('expert', t.creativeAssistant)}
           {tabBtn('studio', t.studioCanvas)}
           {tabBtn('collateral', t.collateralMockups)}
