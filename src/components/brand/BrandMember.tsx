@@ -24,8 +24,9 @@ export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
     const el = document.getElementById(`member-${id}`);
     const container = scrollRef.current;
     if (!el || !container) return;
-    const top = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 32;
-    container.scrollTo({ top, behavior: 'smooth' });
+    const offset = Math.round(container.clientHeight * 0.3);
+    const top = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - offset;
+    container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
           </section>
           <div className="border-t border-[#1A1A1A]/6" />
           <section id="member-perms">
-            <BrandMemberPerms lang={lang} />
+            <BrandMemberPerms lang={lang} onScrollToPlans={() => scrollTo('plans')} />
           </section>
           <div className="border-t border-[#1A1A1A]/6" />
           <section id="member-plans">

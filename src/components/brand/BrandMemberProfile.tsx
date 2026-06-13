@@ -103,8 +103,8 @@ export default function BrandMemberProfile({ lang }: Props) {
         <FormRow label={zh ? '主邮箱' : 'Primary email'} sub={zh ? '用于账户通知与登录' : 'Used for account notifications'} last={false}>
           <div className="flex items-center gap-2 px-3 py-2 border border-[#DADCE0] bg-[#F8F9FA] text-[13px] font-sans text-[#5F6368] rounded-sm">
             {user?.email ?? '—'}
-            <span className={`ml-auto text-[7px] font-mono font-bold tracking-widest uppercase px-1.5 py-0.5 rounded-none ${emailVerified ? 'text-[#137333] bg-[#E6F4EA]' : 'text-[#B05E00] bg-[#FEF7E0]'}`}>
-              {emailVerified ? (zh ? '已验证' : 'Verified') : (zh ? '未验证' : 'Unverified')}
+            <span className={`ml-auto text-[7px] font-mono font-bold tracking-widest uppercase px-1.5 py-0.5 rounded-none ${!isUnverified ? 'text-[#137333] bg-[#E6F4EA]' : 'text-[#B05E00] bg-[#FEF7E0]'}`}>
+              {!isUnverified ? (zh ? '已验证' : 'Verified') : (zh ? '未验证' : 'Unverified')}
             </span>
           </div>
         </FormRow>

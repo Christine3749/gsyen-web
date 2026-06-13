@@ -1,7 +1,7 @@
 import { useAuth } from '../../auth/useAuth';
 import type { UserTier } from '../../types/auth';
 
-interface Props { lang: 'zh' | 'en' }
+interface Props { lang: 'zh' | 'en'; onScrollToPlans?: () => void }
 
 interface Perm { zh: string; en: string; tiers: UserTier[] }
 
@@ -32,7 +32,7 @@ const TIER_META: Record<string, { label: string; cls: string }> = {
   admin:           { label: 'ADMIN',      cls: 'border-[#1A1A1A]/30 text-[#1A1A1A]/70 bg-[#1A1A1A]/5' },
 };
 
-export default function BrandMemberPerms({ lang }: Props) {
+export default function BrandMemberPerms({ lang, onScrollToPlans }: Props) {
   const zh = lang === 'zh';
   const { tier, user } = useAuth();
   const isLoggedIn = !!user;
@@ -70,9 +70,10 @@ export default function BrandMemberPerms({ lang }: Props) {
           </span>
         </div>
         {(t === 'free_unverified' || t === 'free') && (
-          <p className="text-[10px] font-mono text-[#1A6ECC]/70 tracking-wide">
+          <button onClick={onScrollToPlans}
+            className="text-[10px] font-mono text-[#1A6ECC]/70 tracking-wide hover:text-[#1A6ECC] transition-colors cursor-pointer">
             {zh ? '升级 PRO 解锁更多 →' : 'Upgrade to PRO for more →'}
-          </p>
+          </button>
         )}
       </div>
       )}
