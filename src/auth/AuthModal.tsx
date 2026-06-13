@@ -67,7 +67,7 @@ export default function AuthModal({ lang, initialTab = 'login', onClose }: Props
     } else {
       const { error: err } = await signUpWithEmail(email, password);
       if (err) setError(err.message);
-      else { setVerifyMsg(zh ? `注册成功！请检查 ${email} 的收件箱，点击验证链接完成验证后即可登录` : `Account created! Check ${email} for the verification link.`); }
+      else { onClose(); }
     }
     setBusy(false);
   };
