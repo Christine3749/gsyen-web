@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/useAuth';
 import BrandTeamDetail, { type MemberItem } from './BrandTeamDetail';
 import BrandTeamModal from './BrandTeamModal';
+import BrandTeamJoinModal from './BrandTeamJoinModal';
 
 export interface TeamItem {
   id:          string;
@@ -74,7 +75,7 @@ export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Pro
       .filter(Boolean) as TeamItem[];
     setTeams(list);
     if (list.length && !selected) setSelected(list[0]);
-  }, [user, selected]);
+  }, [user]);
 
   const loadMembers = useCallback(async (teamId: string) => {
     if (!supabase) return;
@@ -114,7 +115,11 @@ export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Pro
   }
 
   async function joinTeam() {
-    if (!supabase || !user || !inputCode.trim()) return;
+    if (!supabase || !user) return;
+    if (!inputCode.trim()) {
+      setError('请输入邀请码');
+      return;
+    }
     setBusy(true); setError(null);
     const { data: team, error: e1 } = await supabase
       .from('gsyen_teams')
@@ -232,31 +237,15 @@ export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Pro
       )}
 
       {/* 加入 Modal */}
-      {modal === 'join' && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50"
-          onClick={() => setModal('none')}>
-          <div className="bg-white rounded-2xl border border-[#DADCE0] px-6 py-5 w-80 flex flex-col gap-4"
-            onClick={e => e.stopPropagation()}>
-            <p className="text-[13px] font-sans font-semibold text-[#202124]">加入团队</p>
-            <input autoFocus value={inputCode} onChange={e => setInputCode(e.target.value)}
-              placeholder="粘贴邀请码…"
-              className="border border-[#DADCE0] rounded-lg px-3 py-2 text-[13px] font-sans text-[#202124] placeholder:text-[#9AA0A6] outline-none focus:border-[#1A73E8] transition-colors"
-              onKeyDown={e => e.key === 'Enter' && joinTeam()}
-            />
-            {error && <p className="text-[12px] font-sans text-[#D93025]">{error}</p>}
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setModal('none')}
-                className="px-4 py-2 rounded-full text-[12px] font-sans text-[#5F6368] hover:bg-[#F1F3F4] transition-all">
-                取消
-              </button>
-              <button onClick={joinTeam} disabled={busy}
-                className="px-4 py-2 rounded-full text-[12px] font-sans font-medium bg-[#1A73E8] text-white hover:bg-[#1557B0] disabled:opacity-40 transition-all">
-                {busy ? '…' : '加入'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BrandTeamJoinModal
+        isOpen={modal === 'join'}
+        busy={busy}
+        error={error}
+        value={inputCode}
+        onChange={setInputCode}
+        onJoin={joinTeam}
+        onClose={() => { setModal('none'); setError(null); }}
+      />
     </div>
   );
 }

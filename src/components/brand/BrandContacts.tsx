@@ -142,6 +142,7 @@ export default function BrandContacts({ lang }: Props) {
         <StatCard label={zh ? '联系人总数' : 'Total Contacts'} value={String(DEMO_CONTACTS.length)} icon={Users} />
         <StatCard label={zh ? `客户 ${clients} · 供应商 ${suppliers}` : `${clients} Clients · ${suppliers} Suppliers`} value={String(clients + suppliers)} icon={Phone} />
         <StatCard label={zh ? '合作伙伴' : 'Partners'} value={String(partners)} icon={Mail} />
+        <StatCard label={zh ? '我的团队' : 'My Teams'} value="—" icon={Users} />
       </div>
 
       {/* 开团按钮 + 筛选 chips + 搜索 */}
