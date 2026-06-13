@@ -97,12 +97,25 @@ export default function BrandMemberProfile({ lang }: Props) {
         {zh ? '基本信息' : 'Profile information'}
       </p>
       <div className="bg-white border border-[#DADCE0] mb-6">
-        <FormRow label={zh ? '姓' : 'Last name'} sub={zh ? 'Last name' : undefined} last={false}>
-          <input className={INP} value={lastName} onChange={e => setLastName(e.target.value)} placeholder={zh ? '姓' : 'Last name'} />
-        </FormRow>
-        <FormRow label={zh ? '名' : 'First name'} sub={zh ? 'First name' : undefined} last={false}>
-          <input className={INP} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder={zh ? '名' : 'First name'} />
-        </FormRow>
+        {zh ? (
+          <>
+            <FormRow label="姓" sub="Last name" last={false}>
+              <input className={INP} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="姓" />
+            </FormRow>
+            <FormRow label="名" sub="First name" last={false}>
+              <input className={INP} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="名" />
+            </FormRow>
+          </>
+        ) : (
+          <>
+            <FormRow label="First name" last={false}>
+              <input className={INP} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name" />
+            </FormRow>
+            <FormRow label="Last name" last={false}>
+              <input className={INP} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" />
+            </FormRow>
+          </>
+        )}
         <FormRow label={zh ? '主邮箱' : 'Primary email'} sub={zh ? '用于账户通知与登录' : 'Used for account notifications'} last={false}>
           <div className="flex items-center gap-2 px-3 py-2 border border-[#DADCE0] bg-[#F8F9FA] text-[13px] font-sans text-[#5F6368] rounded-sm">
             {user?.email ?? '—'}
