@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
-import { initializeUserData, signInWithEmail, signUpWithEmail, signInWithOAuth, signOut } from './authService';
+import { initializeUserData, upgradeTierToFree, signInWithEmail, signUpWithEmail, signInWithOAuth, signOut } from './authService';
 import type { AuthState, OAuthProvider, UserTier, LoginProvider } from '../types/auth';
 
 const DEFAULT_AUTH_STATE: AuthState = {
@@ -40,6 +40,11 @@ export function useAuth() {
         if (user) {
           tier = await initializeUserData(user.id, user.user_metadata?.provider ?? 'email');
           if (cancelled) return;
+          if (user.email_confirmed_at && tier === 'free_unverified') {
+            await upgradeTierToFree(user.id);
+            if (cancelled) return;
+            tier = 'free';
+          }
         }
 
         setState({
@@ -79,7 +84,14 @@ export function useAuth() {
 
       if (user) {
         initializeUserData(user.id, user.user_metadata?.provider ?? 'email')
-          .then(tier => setState(s => s.user?.id === user.id ? { ...s, tier } : s));
+          .then(async (tier) => {
+            let finalTier = tier;
+            if (user.email_confirmed_at && tier === 'free_unverified') {
+              await upgradeTierToFree(user.id);
+              finalTier = 'free';
+            }
+            setState(s => s.user?.id === user.id ? { ...s, tier: finalTier } : s);
+          });
       }
     });
 

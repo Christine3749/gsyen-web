@@ -168,6 +168,23 @@ export async function signInWithOAuth(provider: OAuthProvider): Promise<AuthResu
 }
 
 /**
+ * 邮箱验证后升级 tier：free_unverified → free
+ */
+export async function upgradeTierToFree(userId: string): Promise<void> {
+  if (!supabase) return;
+  try {
+    await supabase
+      .from('gsyen_user_tiers')
+      .update({ tier: 'free' })
+      .eq('user_id', userId)
+      .eq('tier', 'free_unverified');
+    console.log(`[Auth] Upgraded tier to free for ${userId}`);
+  } catch (err) {
+    console.error('[Auth] Failed to upgrade tier to free:', err);
+  }
+}
+
+/**
  * 登出
  */
 export async function signOut(): Promise<AuthResult> {
