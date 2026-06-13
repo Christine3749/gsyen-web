@@ -9,18 +9,18 @@ function RegisterCTABadge({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="inline-flex items-center px-2 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono cursor-pointer select-none"
+      className="inline-flex items-center px-3 py-1 text-[9px] font-bold tracking-[0.2em] uppercase border font-mono cursor-pointer select-none"
       style={{ borderColor: 'rgba(26,110,204,0.55)', color: '#4A90D9' }}
       animate={hovered
-        ? { backgroundColor: '#1A6ECC', color: '#FFFFFF', y: -2, scale: 1.07,
+        ? { backgroundColor: '#1A6ECC', color: '#FFFFFF', y: -2, scale: 1.06,
             borderColor: '#1A6ECC',
-            boxShadow: '0 4px 14px rgba(26,110,204,0.45), 0 1px 3px rgba(26,110,204,0.3)' }
+            boxShadow: '0 4px 16px rgba(26,110,204,0.5), 0 1px 4px rgba(26,110,204,0.3)' }
         : { backgroundColor: 'rgba(26,110,204,0.07)', color: '#4A90D9', y: 0, scale: 1,
             borderColor: 'rgba(26,110,204,0.55)',
             boxShadow: '0 0px 0px rgba(26,110,204,0)' }
       }
-      whileTap={{ scale: 0.95, y: 0 }}
-      transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+      whileTap={{ scale: 0.91, y: 2 }}
+      transition={{ type: 'spring', stiffness: 480, damping: 18 }}
     >
       <motion.span
         animate={hovered ? { textShadow: '0 1px 0 rgba(0,40,100,0.45), 0 2px 8px rgba(26,110,204,0.35)' } : { textShadow: 'none' }}
