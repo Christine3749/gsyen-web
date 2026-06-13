@@ -1,10 +1,7 @@
 import { EventItem } from '../types/schedule';
 import { ActionCard } from '../types/chat';
-import {
-  scheduleStore,
-  detectScheduleIntent,
-  enrichMessageForSchedule,
-} from '../stores/scheduleStore';
+import { scheduleStore } from '../stores/scheduleStore';
+import { detectScheduleIntent, enrichMessageForSchedule } from '../stores/scheduleIntent';
 import { DomainHandler, DomainActionResult } from './types';
 
 /** Build a ready-to-save EventItem from raw AI structured data. */

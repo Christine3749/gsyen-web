@@ -2,7 +2,56 @@
 import { EventItem } from '../types/schedule';
 import { DEFAULT_EVENTS } from '../config/scheduleConfig';
 import { KanbanColumn } from './kanbanColumnStore';
+import { supabase } from '../lib/supabase';
 export type { KanbanColumn };
+
+// ── Supabase 双写 ─────────────────────────────────────────────────────────────
+let _uid: string | null = null;
+
+async function _upsertCol(sid: string, col: KanbanColumn, pos: number) {
+  if (!supabase || !_uid) return;
+  await supabase.from('gsyen_kanban_cols').upsert(
+    { id: col.id, user_id: _uid, session_id: sid, title: col.title, position: pos }
+  );
+}
+async function _upsertCard(sid: string, card: EventItem, pos: number) {
+  if (!supabase || !_uid) return;
+  await supabase.from('gsyen_kanban_cards').upsert({
+    id: card.id, user_id: _uid, session_id: sid, col_id: card.status ?? 'todo',
+    title: card.title, subtitle: card.subtitle ?? '', date: card.date,
+    end_date: card.endDate ?? null, status: card.status ?? 'todo',
+    category: card.category, completed: card.completed, position: pos,
+  });
+}
+async function _deleteCard(id: string) {
+  if (!supabase || !_uid) return;
+  await supabase.from('gsyen_kanban_cards').delete().eq('id', id).eq('user_id', _uid);
+}
+async function _pull(userId: string) {
+  if (!supabase) return;
+  const [{ data: cols }, { data: cards }] = await Promise.all([
+    supabase.from('gsyen_kanban_cols').select('*').eq('user_id', userId),
+    supabase.from('gsyen_kanban_cards').select('*').eq('user_id', userId),
+  ]);
+  if (cols) {
+    const bySid: Record<string, KanbanColumn[]> = {};
+    cols.forEach((r: any) => { (bySid[r.session_id] ??= []).push({ id: r.id, title: r.title }); });
+    Object.entries(bySid).forEach(([sid, cs]) => localStorage.setItem(colKey(sid), JSON.stringify(cs)));
+  }
+  if (cards) {
+    const bySid: Record<string, EventItem[]> = {};
+    cards.forEach((r: any) => {
+      (bySid[r.session_id] ??= []).push({ id: r.id, title: r.title, subtitle: r.subtitle,
+        date: r.date, endDate: r.end_date ?? undefined, status: r.status,
+        category: r.category, completed: r.completed, time: '09:00' } as EventItem);
+    });
+    Object.entries(bySid).forEach(([sid, cs]) => localStorage.setItem(cardKey(sid), JSON.stringify(cs)));
+  }
+}
+supabase?.auth.onAuthStateChange((_ev, session) => {
+  _uid = session?.user?.id ?? null;
+  if (_uid) _pull(_uid);
+});
 
 const DEFAULT_COLS: KanbanColumn[] = [
   { id: 'todo',     title: '预约待编' },
@@ -26,11 +75,13 @@ function loadCards(sid: string): EventItem[] {
 
 function saveCols(sid: string, cols: KanbanColumn[]) {
   localStorage.setItem(colKey(sid), JSON.stringify(cols));
+  cols.forEach((c, i) => _upsertCol(sid, c, i));
   window.dispatchEvent(new CustomEvent('kanban-columns-updated'));
 }
 
 function saveCards(sid: string, cards: EventItem[]) {
   localStorage.setItem(cardKey(sid), JSON.stringify(cards));
+  cards.forEach((c, i) => _upsertCard(sid, c, i));
   window.dispatchEvent(new CustomEvent('schedule-updated'));
 }
 
@@ -69,7 +120,9 @@ export const sessionKanbanStore = {
   },
   removeCard: (sid: string, id: string) => {
     const cards = loadCards(sid).filter(c => c.id !== id);
-    saveCards(sid, cards); return cards;
+    saveCards(sid, cards);
+    _deleteCard(id);
+    return cards;
   },
   clearCards: (sid: string) => { saveCards(sid, []); return []; },
 };

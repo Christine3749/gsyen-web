@@ -2,6 +2,7 @@ import { localDateStr } from '../utils/date';
 import { Currency, detectCurrency } from '../utils/exchangeRate';
 import { cardRegistry } from './cardRegistry';
 import { CardRecord } from '../types/card';
+import { supabase } from '../lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface Transaction {
@@ -69,24 +70,72 @@ function syncRegistry(items: Transaction[]): void {
   knownIds = nextIds;
 }
 
+// ── Supabase 双写同步（本地优先，云端镜像）────────────────────────────────────
+let _uid: string | null = null;
+
+function _row(item: Transaction) {
+  return { id: item.id, user_id: _uid!, description: item.description,
+    type: item.type, amount: item.amount, currency: item.currency,
+    category: item.category, date: item.date, note: item.notes ?? '',
+    scope: item.scope ?? null };
+}
+
+async function _upsert(item: Transaction) {
+  if (!supabase || !_uid) return;
+  await supabase.from('gsyen_transactions').upsert(_row(item));
+}
+
+async function _remove(id: string) {
+  if (!supabase || !_uid) return;
+  await supabase.from('gsyen_transactions').delete().eq('id', id).eq('user_id', _uid);
+}
+
+async function _pull(userId: string) {
+  if (!supabase) return;
+  const { data } = await supabase.from('gsyen_transactions')
+    .select('*').eq('user_id', userId).order('date', { ascending: false });
+  if (!data) return;
+  const remote: Transaction[] = data.map((r: any) => ({
+    id: r.id, description: r.description, amount: r.amount,
+    currency: (r.currency === 'USD' ? 'USD' : 'CNY') as Currency,
+    type: r.type as 'income' | 'expense', category: r.category,
+    date: r.date, notes: r.note || undefined, scope: r.scope || undefined,
+  }));
+  const local  = readRaw();
+  const remIds = new Set(remote.map(r => r.id));
+  const localOnly = local.filter(t => !remIds.has(t.id));
+  for (const item of localOnly) await _upsert(item); // 把本机独有记录推上去
+  const merged = [...remote, ...localOnly];
+  writeRaw(merged);
+  syncRegistry(merged);
+}
+
+// 登录时自动拉云端数据，logout 时清除 uid
+supabase?.auth.onAuthStateChange((_e, session) => {
+  _uid = session?.user?.id ?? null;
+  if (_uid) _pull(_uid);
+});
+
 export const ledgerStore = {
   getAll(): Transaction[] { return readRaw(); },
   add(item: Transaction): void {
     const updated = [item, ...readRaw()];
     writeRaw(updated);
-    // 登记点落在 store 层——chat 记一笔、未来账簿手动记一笔，都在这里
-    // 被同一处逻辑收编进卡片集，不会出现"只有 chat 记的才进集合"。
     syncRegistry(updated);
+    _upsert(item);
   },
   remove(id: string): void {
     const updated = readRaw().filter(t => t.id !== id);
     writeRaw(updated);
     syncRegistry(updated);
+    _remove(id);
   },
   update(id: string, changes: Partial<Omit<Transaction, 'id'>>): void {
     const updated = readRaw().map(t => t.id === id ? { ...t, ...changes } : t);
     writeRaw(updated);
     syncRegistry(updated);
+    const item = updated.find(t => t.id === id);
+    if (item) _upsert(item);
   },
   getRecent(n = 5): Transaction[] { return readRaw().slice(0, n); },
 };
