@@ -24,7 +24,8 @@ export default function BrandMemberProfile({ lang }: Props) {
   const [firstName, setFirstName] = useState<string>(meta.first_name ?? '');
   const [lastName,  setLastName]  = useState<string>(meta.last_name  ?? '');
   const [username,  setUsername]  = useState<string>(meta.username   ?? '');
-  const [phone,     setPhone]     = useState<string>(meta.phone      ?? '');
+  const [phone,        setPhone]       = useState<string>(meta.phone         ?? '');
+  const [phoneCountry, setPhoneCountry] = useState<string>(meta.phone_country ?? '+86');
 
   const isUnverified = tier === 'free_unverified' || (!emailVerified && !!user);
   const provider = user?.app_metadata?.provider ?? meta.provider ?? 'email';
@@ -44,7 +45,7 @@ export default function BrandMemberProfile({ lang }: Props) {
 
   const handleSave = async () => {
     setSaving(true);
-    await supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName, username, phone } });
+    await supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName, username, phone, phone_country: phoneCountry } });
     setSaving(false); setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -102,15 +103,28 @@ export default function BrandMemberProfile({ lang }: Props) {
         <FormRow label={zh ? '名' : 'First name'} sub={zh ? 'First name' : undefined} last={false}>
           <input className={INP} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder={zh ? '名' : 'First name'} />
         </FormRow>
-        <FormRow label={zh ? '手机号' : 'Phone'} sub={zh ? '用于账户安全验证' : 'Used for account security'} last={false}>
-          <input className={INP} value={phone} onChange={e => setPhone(e.target.value)} placeholder={zh ? '+86 138 0000 0000' : '+1 (555) 000-0000'} />
-        </FormRow>
         <FormRow label={zh ? '主邮箱' : 'Primary email'} sub={zh ? '用于账户通知与登录' : 'Used for account notifications'} last={false}>
           <div className="flex items-center gap-2 px-3 py-2 border border-[#DADCE0] bg-[#F8F9FA] text-[13px] font-sans text-[#5F6368] rounded-sm">
             {user?.email ?? '—'}
             <span className={`ml-auto text-[7px] font-mono font-bold tracking-widest uppercase px-1.5 py-0.5 rounded-none ${!isUnverified ? 'text-[#137333] bg-[#E6F4EA]' : 'text-[#B05E00] bg-[#FEF7E0]'}`}>
               {!isUnverified ? (zh ? '已验证' : 'Verified') : (zh ? '未验证' : 'Unverified')}
             </span>
+          </div>
+        </FormRow>
+        <FormRow label={zh ? '手机号' : 'Phone'} sub={zh ? '用于账户安全验证' : 'Used for account security'} last={false}>
+          <div className="flex gap-2">
+            <select
+              value={phoneCountry} onChange={e => setPhoneCountry(e.target.value)}
+              className="px-2 py-2 border border-[#DADCE0] text-[12px] font-sans text-[#202124] outline-none focus:border-[#1A6ECC] transition-colors rounded-sm bg-white shrink-0 cursor-pointer"
+            >
+              <option value="+86">{zh ? '🇨🇳 中国 +86'       : '🇨🇳 China +86'}</option>
+              <option value="+1"> {zh ? '🇺🇸 美国 +1'        : '🇺🇸 USA +1'}</option>
+              <option value="+852">{zh ? '🇭🇰 香港 +852'     : '🇭🇰 HK +852'}</option>
+              <option value="+853">{zh ? '🇲🇴 澳门 +853'     : '🇲🇴 Macao +853'}</option>
+              <option value="+886">{zh ? '🇹🇼 台湾省 +886'   : '🇹🇼 Taiwan +886'}</option>
+              <option value="+64"> {zh ? '🇳🇿 新西兰 +64'    : '🇳🇿 NZ +64'}</option>
+            </select>
+            <input className={INP} value={phone} onChange={e => setPhone(e.target.value)} placeholder={zh ? '手机号码' : 'Phone number'} />
           </div>
         </FormRow>
         <FormRow label={zh ? '用户名' : 'Username'} sub={zh ? '在工作坊中的显示名称' : 'Display name across the workspace'} last>
