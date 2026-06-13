@@ -19,7 +19,14 @@ interface FinanceModuleProps {
  * 本文件只持有账目状态、显示币种、实时汇率，并计算汇总口径（统一换算到 USD）。
  */
 export default function FinanceModule({ lang }: FinanceModuleProps) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  // 同步读 localStorage，第一帧即有数据（无空白闪烁）
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) { try { return sanitizeTransactions(JSON.parse(saved)); } catch {} }
+    const seed = defaultTransactions(lang);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(seed));
+    return seed;
+  });
 
   // 全站联动的显示币种（聊天卡片与本页共用，见 useDisplayCurrency）
   const [displayCurrency, toggleDisplayCurrency] = useDisplayCurrency();
@@ -27,22 +34,6 @@ export default function FinanceModule({ lang }: FinanceModuleProps) {
 
   const [usdToCny, setUsdToCny] = useState(getCachedUsdToCnyRate());
   useEffect(() => { void getUsdToCnyRate().then(setUsdToCny); }, []);
-
-  // 初次加载：读本地存储（兼容旧记录），无则写入默认账目
-  useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
-      try {
-        setTransactions(sanitizeTransactions(JSON.parse(saved)));
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    const seed = defaultTransactions(lang);
-    setTransactions(seed);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(seed));
-  }, [lang]);
 
   const handleAdd = useCallback((row: Transaction) => {
     setTransactions((prev) => {

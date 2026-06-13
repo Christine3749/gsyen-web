@@ -134,7 +134,7 @@ export default function BrandMemberProfile({ lang }: Props) {
               <option value="+1"> {zh ? '🇺🇸 美国 +1'        : '🇺🇸 USA +1'}</option>
               <option value="+852">{zh ? '🇭🇰 香港 +852'     : '🇭🇰 HK +852'}</option>
               <option value="+853">{zh ? '🇲🇴 澳门 +853'     : '🇲🇴 Macao +853'}</option>
-              <option value="+886">{zh ? '🇹🇼 台湾省 +886'   : '🇹🇼 Taiwan +886'}</option>
+              <option value="+886">{zh ? '🇨🇳 台湾省 +886'   : '🇨🇳 Taiwan +886'}</option>
               <option value="+64"> {zh ? '🇳🇿 新西兰 +64'    : '🇳🇿 NZ +64'}</option>
             </select>
             <input className={INP} value={phone} onChange={e => setPhone(e.target.value)} placeholder={zh ? '手机号码' : 'Phone number'} />

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Users, Phone, Mail, Shield, TrendingUp, Heart, Zap, Globe } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth';
 import { useBrandTeams } from '../../hooks/useBrandTeams';
+import { createTeam } from '../../hooks/useTeams';
 import BrandTeam from './BrandTeam';
 import { ContactRow, Contact, TYPE_CFG, STATUS_CFG } from './BrandContactRow';
 import { CreateTeamModal } from './CreateTeamModal';
@@ -257,6 +258,10 @@ export default function BrandContacts({ lang }: Props) {
         onSetCreateType={setCreateType}
         onSetTeamType={setTeamType}
         onSetTeamName={setTeamName}
+        onSubmit={async () => {
+          if (!user || !teamType || !teamName.trim()) return;
+          await createTeam(user.id, teamName.trim(), teamType);
+        }}
       />
     </div>
   );

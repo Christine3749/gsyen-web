@@ -4,7 +4,7 @@
  * 底部状态栏：平时显示存储状态，有更新时切换为更新提示。
  */
 import { useState, useEffect } from 'react';
-import { MessageSquare, Terminal, X, Plus } from 'lucide-react';
+import { MessageSquare, Terminal, X, Plus, Users, User } from 'lucide-react';
 import { StoredSession } from '../types/chat';
 
 export interface Team {
@@ -63,6 +63,7 @@ interface ChatSidebarProps {
   deleteSession: (id: string) => void;
   onNewChat: () => void;
   teams?: Team[];
+  selectedTeamId?: string;
   onSelectTeam?: (team: Team) => void;
   onCreateTeam?: () => void;
 }
@@ -70,7 +71,7 @@ interface ChatSidebarProps {
 export function ChatSidebar({
   lang, open, recentsOpen, setRecentsOpen,
   sessions, currentSessionId, loadSession, deleteSession, onNewChat,
-  teams = [], onSelectTeam, onCreateTeam,
+  teams = [], selectedTeamId, onSelectTeam, onCreateTeam,
 }: ChatSidebarProps) {
   const { api, phase, version, pct } = useUpdater();
 
@@ -123,31 +124,29 @@ export function ChatSidebar({
         </div>
 
         {/* 团队列表 */}
-        {(recentsOpen && teams.length > 0) && (
-          <div className="space-y-1.5 pt-2 border-t border-[#1A1A1A]/10">
+        {recentsOpen && (
+          <div className="pt-2 border-t border-[#1A1A1A]/10 space-y-0.5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/40">
+                {lang === 'zh' ? '我的团队' : 'Teams'} · {teams.length}
+              </span>
+            </div>
             {teams.map(t => {
-              const colors = ['bg-[#1A73E8]', 'bg-[#137333]', 'bg-[#B05E00]', 'bg-[#9334E6]', 'bg-[#D93025]', 'bg-[#0097A7]'];
-              const color = colors[t.id.charCodeAt(0) % colors.length];
+              const active = selectedTeamId === t.id;
               return (
                 <button key={t.id} onClick={() => onSelectTeam?.(t)}
-                  className="group flex items-center gap-2.5 w-full p-3 border rounded hover:bg-white/60 transition-all border-transparent hover:border-[#1A1A1A]/10">
-                  <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center shrink-0 text-white text-[10px] font-bold`}>
-                    {t.name[0].toUpperCase()}
-                  </div>
-                  <span className="text-[11px] font-sans text-[#1A1A1A]/80 flex-1 line-clamp-1">{t.name}</span>
+                  className={`group flex items-start gap-2.5 p-3 w-full border cursor-pointer transition-all text-left ${active ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
+                  <Users className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${active ? 'text-[#1A1A1A]/70' : 'text-[#1A1A1A]/25 group-hover:text-[#1A1A1A]/50'}`} strokeWidth={1.5} />
+                  <span className="text-[11px] font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2 flex-1">{t.name}</span>
                 </button>
               );
             })}
+            <button onClick={() => onCreateTeam?.()}
+              className="flex items-center gap-1.5 w-full px-3 py-2 mt-1 text-[10px] font-mono font-bold tracking-widest uppercase border border-[#1A1A1A]/12 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-all text-[#1A1A1A]/40 rounded-none">
+              <Plus className="w-3 h-3" />
+              {lang === 'zh' ? '开团' : 'New Team'}
+            </button>
           </div>
-        )}
-
-        {/* 开团按钮 — 总是显示 */}
-        {recentsOpen && (
-          <button onClick={() => onCreateTeam?.()}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 text-[11px] font-sans font-medium border border-[#1A1A1A]/10 rounded hover:bg-white/60 hover:border-[#1A1A1A]/20 transition-all text-[#1A1A1A]/70 hover:text-[#1A1A1A] mt-2">
-            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-            {lang === 'zh' ? '开团' : 'New Team'}
-          </button>
         )}
 
         {/* 底部：有更新时显示 Art Deco 更新卡，否则显示存储状态 */}

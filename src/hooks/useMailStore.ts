@@ -6,8 +6,14 @@ import { getDefaultEmails } from '../data/mailDefaults';
 const LOCAL_STORAGE_KEY = 'atelier_workspace_mail_v2';
 
 export function useMailStore(lang: 'zh' | 'en') {
-  // ── Emails ──────────────────────────────────────────────────────────────
-  const [emails, setEmails] = useState<EmailItem[]>([]);
+  // ── Emails — 同步读 localStorage，第一帧即有数据 ────────────────────────
+  const [emails, setEmails] = useState<EmailItem[]>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) { try { return JSON.parse(saved); } catch {} }
+    const defaults = getDefaultEmails(lang);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaults));
+    return defaults;
+  });
 
   // ── Folder / Category ───────────────────────────────────────────────────
   const [currentFolder, setCurrentFolder] = useState<MailFolder>('inbox');
@@ -40,17 +46,6 @@ export function useMailStore(lang: 'zh' | 'en') {
   const [toastUndoAction, setToastUndoAction] = useState<(() => void) | null>(null);
   const [toastTimer, setToastTimer] = useState<number | null>(null);
 
-  // ── Init ─────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
-      try { setEmails(JSON.parse(saved)); } catch (e) { console.error('mail load error', e); }
-    } else {
-      const defaults = getDefaultEmails(lang);
-      setEmails(defaults);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaults));
-    }
-  }, [lang]);
 
   // ── Persistence ──────────────────────────────────────────────────────────
   const saveEmails = (list: EmailItem[]) => {

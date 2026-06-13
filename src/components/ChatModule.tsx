@@ -1,15 +1,11 @@
 /**
- * ChatModule — UI shell only (~300 lines).
- * All business logic and large sub-views live in:
+ * ChatModule — UI shell only (~280 lines).
+ * Business logic lives in:
  *   hooks/useChatSession   — session persistence
  *   hooks/useChatStream    — streaming + schedule bridge
- *   utils/renderMessage    — markdown rendering
- *   utils/exportCard       — HTML card download
- *   config/models          — model list
- *   config/presets         — preset queries
- *   ActionCardView         — 神机百炼操作卡片渲染
- *   ChatSidebar            — 往来会话列表侧栏
- *   ChatEmptyState         — 空会话欢迎屏
+ *   hooks/useModelScroll   — drag-to-scroll model selector
+ *   hooks/useTeams         — Supabase team list
+ *   hooks/useTeamPanel     — team panel state + event listener
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -23,24 +19,44 @@ import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId, MODELS } from '../config/models';
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
+import { useModelScroll } from '../hooks/useModelScroll';
+import { useTeams } from '../hooks/useTeams';
+import { useTeamPanel } from '../hooks/useTeamPanel';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { ChatSidebar } from './ChatSidebar';
 import { ChatEmptyState } from './ChatEmptyState';
 import { CanvasEditorContent } from './CanvasEditorContent';
 import { ModelStatusLight } from './ModelStatusLight';
+import { TeamMembersPanel } from './TeamMembersPanel';
+import { FriendsPanel } from './FriendsPanel';
+import { ChatCreateTeamModal } from './ChatCreateTeamModal';
+import { useFriends } from '../hooks/useFriends';
 import { canvasStore } from '../stores/canvasStore';
 
-interface ChatModuleProps { lang: 'zh' | 'en' }
+interface ChatModuleProps { lang: 'zh' | 'en'; onTeamChange?: (active: boolean) => void }
 
-export default function ChatModule({ lang }: ChatModuleProps) {
+export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [inputVal, setInputVal]       = useState('');
   const [isCopiedId, setIsCopiedId]   = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [recentsOpen, setRecentsOpen] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
   const [toast, setToast]             = useState<string | null>(null);
-  const [creativeDocId, setCreativeDocId] = useState<string | null>(null);
-  // 创意国度：直接建文档 → 开全屏编辑器
+  const [creativeDocId, setCreativeDocId]   = useState<string | null>(null);
+  const [createTeamOpen, setCreateTeamOpen]   = useState(false);
+  const [showFriends,    setShowFriends]       = useState(false);
+  const { friends } = useFriends();
+
+  const { teams }                                                  = useTeams();
+  const { selectedTeam, showPanel, members, selectTeam, clearTeam } = useTeamPanel(onTeamChange);
+  const { modelScrollRef, onMsDragStart, onMsDragMove, onMsDragEnd } = useModelScroll();
+
+  useEffect(() => {
+    const toggle = () => setShowFriends(v => !v);
+    window.addEventListener('gsyen-toggle-friends-panel', toggle);
+    return () => window.removeEventListener('gsyen-toggle-friends-panel', toggle);
+  }, []);
+
   const openCreativeKingdom = () => {
     const now = new Date().toISOString();
     const doc = { id: `canvas-${Date.now()}`, title: '无标题', content: '', type: 'doc' as const,
@@ -51,6 +67,9 @@ export default function ChatModule({ lang }: ChatModuleProps) {
 
   const { messages, sessions, currentSessionId, setMessages, saveChat, loadSession, deleteSession, newChat } =
     useChatSession(lang);
+
+  const handleLoadSession = (s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); };
+  const handleNewChat = () => { newChat(); clearTeam(); };
   const { isLoading, send } = useChatStream();
   const pendingCard = useRef<ActionCard | null>(null);
 
@@ -62,27 +81,6 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     if (isAtBottom.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const modelScrollRef = useRef<HTMLDivElement>(null);
-  const isDragging     = useRef(false);
-  const dragStartX     = useRef(0);
-  const dragScrollLeft = useRef(0);
-  const onMsDragStart = (e: React.MouseEvent) => {
-    const el = modelScrollRef.current; if (!el) return;
-    isDragging.current   = true;
-    dragStartX.current   = e.pageX - el.offsetLeft;
-    dragScrollLeft.current = el.scrollLeft;
-    el.style.cursor = 'grabbing';
-  };
-  const onMsDragMove = (e: React.MouseEvent) => {
-    if (!isDragging.current || !modelScrollRef.current) return;
-    e.preventDefault();
-    modelScrollRef.current.scrollLeft =
-      dragScrollLeft.current - (e.pageX - modelScrollRef.current.offsetLeft - dragStartX.current);
-  };
-  const onMsDragEnd = () => {
-    isDragging.current = false;
-    if (modelScrollRef.current) modelScrollRef.current.style.cursor = 'grab';
-  };
   const handleSend = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
@@ -94,32 +92,25 @@ export default function ChatModule({ lang }: ChatModuleProps) {
     };
     const history = [...messages, userMsg];
 
-    // 1. Save user message to session immediately
     saveChat(history, selectedModel);
     setInputVal('');
 
     const aiId   = `ai-${Date.now()}`;
     const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // 2. Show AI placeholder bubble right away
     setMessages([...history, { id: aiId, role: 'model', content: '▍', timestamp: aiTime }]);
 
     await send({
       text, model: selectedModel, history: messages, lang,
-      // onToken: display only — no session write to avoid hundreds of upsert calls
       onToken: (partial) => {
         setMessages([...history, {
           id: aiId, role: 'model', content: partial, timestamp: aiTime,
-          card: pendingCard.current ?? undefined,   // 卡片挂载后不被覆盖
+          card: pendingCard.current ?? undefined,
         }]);
       },
-      // onDone: single session write at end of stream
       onActionCard: (card) => {
         pendingCard.current = card;
-        // 实时更新聊天气泡（卡片挂载到当前 AI 消息）
-        setMessages(prev => prev.map(m =>
-          m.id === aiId ? { ...m, card } : m
-        ));
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, card } : m));
       },
       onDone: (full) => {
         const card = pendingCard.current ?? undefined;
@@ -177,7 +168,7 @@ export default function ChatModule({ lang }: ChatModuleProps) {
           <button onClick={() => setSidebarOpen(o => !o)} className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all ${sidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'text-[#1A1A1A]/70'}`}>
             <PanelLeft className="w-4 h-4" />
           </button>
-          <button onClick={newChat} className="flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all text-[10px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">
+          <button onClick={handleNewChat} className="flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all text-[10px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">
             <Plus className="w-3 h-3" /><span>NEW</span>
           </button>
           <button onClick={openCreativeKingdom}
@@ -205,11 +196,9 @@ export default function ChatModule({ lang }: ChatModuleProps) {
         </div>
       </div>
 
-
-      {/* Body: sidebar + chat */}
+      {/* Body: sidebar + chat + team panel */}
       <div className="flex-grow flex flex-col md:flex-row min-h-0">
 
-        {/* Sidebar */}
         <ChatSidebar
           lang={lang}
           open={sidebarOpen}
@@ -217,12 +206,13 @@ export default function ChatModule({ lang }: ChatModuleProps) {
           setRecentsOpen={setRecentsOpen}
           sessions={sessions}
           currentSessionId={currentSessionId}
-          loadSession={loadSession}
+          loadSession={handleLoadSession}
           deleteSession={deleteSession}
-          onNewChat={newChat}
-          teams={[]}
-          onSelectTeam={() => {}}
-          onCreateTeam={() => {}}
+          onNewChat={handleNewChat}
+          teams={teams}
+          selectedTeamId={selectedTeam?.id}
+          onSelectTeam={(t) => selectTeam(t as any)}
+          onCreateTeam={() => setCreateTeamOpen(true)}
         />
 
         {/* Chat panel */}
@@ -232,19 +222,16 @@ export default function ChatModule({ lang }: ChatModuleProps) {
             isAtBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
           }} className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
 
-            {/* Empty state */}
             {messages.length === 0 && !isLoading && (
               <ChatEmptyState lang={lang} inputVal={inputVal} setInputVal={setInputVal} onSend={handleSend} />
             )}
 
-            {/* Message stream */}
             <AnimatePresence initial={false}>
               {messages.map(msg => (
                 <ChatMessageBubble key={msg.id} msg={msg} lang={lang} isCopiedId={isCopiedId} onCopy={handleCopy} />
               ))}
             </AnimatePresence>
 
-            {/* Loading indicator */}
             {isLoading && (
               <div className="flex gap-3 max-w-3xl">
                 <div className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1A1A1A] text-[#F9F8F6] shrink-0 mt-1">
@@ -283,11 +270,22 @@ export default function ChatModule({ lang }: ChatModuleProps) {
             </form>
           </div>
         </div>
+
+        {/* Right panel: team members or friends */}
+        {showPanel && selectedTeam
+          ? <TeamMembersPanel team={selectedTeam} members={members} onClose={clearTeam} />
+          : showFriends && <FriendsPanel friends={friends} onClose={() => setShowFriends(false)} />
+        }
       </div>
     </div>
     {creativeDocId && (
       <CanvasEditorContent docId={creativeDocId} onClose={() => setCreativeDocId(null)} />
     )}
+    <ChatCreateTeamModal
+      open={createTeamOpen}
+      zh={lang === 'zh'}
+      onClose={() => setCreateTeamOpen(false)}
+    />
     </>
   );
 }

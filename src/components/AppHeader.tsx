@@ -1,5 +1,5 @@
 import React, { ComponentType, useState, useEffect } from 'react';
-import { Sparkles, Mail, Globe } from 'lucide-react';
+import { Sparkles, Mail, Globe, Users, User } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 import VintageCar from './VintageCar';
@@ -110,10 +110,11 @@ interface AppHeaderProps {
   activeSpace: ActiveSpace;
   setActiveSpace: (s: ActiveSpace) => void;
   onMemberClick?: () => void;
+  activeTeam?: boolean;
 }
 
 /** 顶部导航栏 + 移动端横向标签条 */
-export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick }: AppHeaderProps) {
+export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
   const [compact, setCompact] = useState(window.innerWidth < 1100);
   const [showAbout, setShowAbout] = useState(false);
@@ -216,9 +217,24 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           {user ? (
             /* 已登录：邮箱缩写 + 等级徽章 + 登出 */
             <>
-              <span className="px-2 py-1.5 text-[9px] font-bold tracking-wider uppercase text-[#1A1A1A]/50 whitespace-nowrap shrink-0 font-mono">
-                {user.email?.split('@')[0]}
-              </span>
+              {activeTeam ? (
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('gsyen-toggle-team-panel'))}
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-[9px] font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A]/80 whitespace-nowrap shrink-0 font-mono transition-colors"
+                  title="团队成员"
+                >
+                  <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  {user.email?.split('@')[0]}
+                </button>
+              ) : (
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('gsyen-toggle-friends-panel'))}
+                  className="flex items-center gap-1.5 px-2 py-1.5 text-[9px] font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A]/80 whitespace-nowrap shrink-0 font-mono transition-colors"
+                >
+                  <User className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  {user.email?.split('@')[0]}
+                </button>
+              )}
               <TierBadge tier={tier} onClick={onMemberClick} />
               <button
                 onClick={signOut}

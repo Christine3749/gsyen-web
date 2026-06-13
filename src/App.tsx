@@ -17,17 +17,20 @@ import AppHeader, { ActiveSpace } from './components/AppHeader';
 import BrandLab, { type BrandTab } from './components/brand/BrandLab';
 import { FullscreenFade } from './components/FullscreenFade';
 import { supabase } from './auth/supabaseClient';
+import { useTeams } from './hooks/useTeams';
 
 /**
  * App — 工作坊外壳：语言/落地页/当前空间，外加顶栏导航与空间路由。
  * Brand Lab（标识设计器）已抽到 components/brand/BrandLab；各业务模块各自管自己的状态。
  */
 export default function App() {
+  useTeams(); // 登录后立即预取团队数据，所有子模块拿缓存秒出
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
   const isElectron = !!(window as any).electronAPI?.isElectron;
   const [showLanding, setShowLanding] = useState(!isElectron);
   const [activeSpace, setActiveSpace] = useState<ActiveSpace>('chat');
   const [brandTab, setBrandTab] = useState<BrandTab | undefined>(undefined);
+  const [activeTeam, setActiveTeam] = useState(false);
 
   const handleMemberClick = () => {
     setActiveSpace('brand');
@@ -53,7 +56,7 @@ export default function App() {
         {showLanding && <LandingHero lang={lang} onEnter={() => setShowLanding(false)} />}
       </AnimatePresence>
 
-      <AppHeader lang={lang} setLang={setLang} activeSpace={activeSpace} setActiveSpace={handleSpaceChange} onMemberClick={handleMemberClick} />
+      <AppHeader lang={lang} setLang={setLang} activeSpace={activeSpace} setActiveSpace={handleSpaceChange} onMemberClick={handleMemberClick} activeTeam={activeTeam} />
       <FullscreenFade />
 
       {activeSpace === 'brand' ? (
@@ -61,7 +64,7 @@ export default function App() {
       ) : (
         <main className="flex-grow flex flex-col justify-between bg-[#F9F8F6] min-h-0">
           <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
-            {activeSpace === 'chat' && <ChatModule lang={lang} />}
+            {activeSpace === 'chat' && <ChatModule lang={lang} onTeamChange={setActiveTeam} />}
             {activeSpace === 'mail' && <div className="h-full overflow-hidden"><MailModule lang={lang} /></div>}
             {activeSpace === 'schedule' && <div className="h-full overflow-hidden"><KanbanModule lang={lang} /></div>}
             {activeSpace === 'calendar' && <div className="h-full overflow-hidden"><ScheduleModule lang={lang} /></div>}
