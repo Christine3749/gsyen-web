@@ -179,6 +179,13 @@ export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Pro
         </button>
       </div>
 
+      {/* 无团队提示 */}
+      {teams.length === 0 && (
+        <div className="px-6 pb-2 shrink-0">
+          <p className="text-[12px] text-[#9AA0A6] font-sans">还没有团队，点击上方「+ 开团」创建第一个</p>
+        </div>
+      )}
+
       {/* 团队切换 avatar + 操作按钮 */}
       <div className="flex items-center gap-3 px-6 pb-4 shrink-0 flex-wrap">
         {teams.map(t => {
@@ -209,25 +216,12 @@ export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Pro
       </div>
 
       {/* 主内容 */}
-      {selected ? (
+      {selected && (
         <BrandTeamDetail
           team={selected} members={members} currentUserId={user.id}
           onLeave={() => leaveOrDisband(false)}
           onDisband={() => leaveOrDisband(true)}
         />
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-[#F8F9FA] to-[#EFEFEF]">
-          <Plus className="w-16 h-16 text-[#DADCE0]" strokeWidth={1.5} />
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-[16px] font-medium text-[#202124]">创建第一个团队</p>
-            <p className="text-[13px] text-[#5F6368]">点击下方"开团"开始协作</p>
-          </div>
-          <button onClick={() => { setModal('create'); setError(null); }}
-            className="mt-3 px-6 py-2.5 rounded-full text-[13px] font-medium bg-[#1A73E8] text-white hover:bg-[#1557B0] transition-all flex items-center gap-1.5">
-            <Plus className="w-4 h-4" strokeWidth={2} />
-            开团
-          </button>
-        </div>
       )}
 
       {/* 开团 Modal */}
