@@ -59,7 +59,7 @@ export default function MailListView({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="bg-white border border-[#1A1A1A]/10 rounded-none overflow-hidden"
+      className="bg-white rounded-none overflow-hidden"
     >
       {/* Toolbar */}
       <div className="p-3 bg-neutral-50/50 border-b border-[#1A1A1A]/10 flex flex-wrap items-center justify-between gap-3 text-xs">

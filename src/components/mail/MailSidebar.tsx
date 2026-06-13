@@ -38,7 +38,7 @@ export default function MailSidebar({
 
   return (
     <div
-      className={`bg-white border border-[#1A1A1A]/10 p-2 space-y-1 rounded-none transition-all duration-300 ease-in-out overflow-hidden shrink-0 flex flex-col ${
+      className={`bg-[#F9F8F6] p-2 space-y-1 rounded-none transition-all duration-300 ease-in-out overflow-hidden shrink-0 flex flex-col ${
         isSidebarCollapsed ? 'w-full md:w-[64px]' : 'w-full md:w-[200px]'
       }`}
     >
