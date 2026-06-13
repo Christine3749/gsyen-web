@@ -24,6 +24,7 @@ export default function BrandMemberProfile({ lang }: Props) {
   const [firstName, setFirstName] = useState<string>(meta.first_name ?? '');
   const [lastName,  setLastName]  = useState<string>(meta.last_name  ?? '');
   const [username,  setUsername]  = useState<string>(meta.username   ?? '');
+  const [phone,     setPhone]     = useState<string>(meta.phone      ?? '');
 
   const isUnverified = tier === 'free_unverified' || (!emailVerified && !!user);
   const provider = user?.app_metadata?.provider ?? meta.provider ?? 'email';
@@ -43,7 +44,7 @@ export default function BrandMemberProfile({ lang }: Props) {
 
   const handleSave = async () => {
     setSaving(true);
-    await supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName, username } });
+    await supabase.auth.updateUser({ data: { first_name: firstName, last_name: lastName, username, phone } });
     setSaving(false); setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -100,6 +101,9 @@ export default function BrandMemberProfile({ lang }: Props) {
         </FormRow>
         <FormRow label={zh ? '名' : 'First name'} sub={zh ? 'First name' : undefined} last={false}>
           <input className={INP} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder={zh ? '名' : 'First name'} />
+        </FormRow>
+        <FormRow label={zh ? '手机号' : 'Phone'} sub={zh ? '用于账户安全验证' : 'Used for account security'} last={false}>
+          <input className={INP} value={phone} onChange={e => setPhone(e.target.value)} placeholder={zh ? '+86 138 0000 0000' : '+1 (555) 000-0000'} />
         </FormRow>
         <FormRow label={zh ? '主邮箱' : 'Primary email'} sub={zh ? '用于账户通知与登录' : 'Used for account notifications'} last={false}>
           <div className="flex items-center gap-2 px-3 py-2 border border-[#DADCE0] bg-[#F8F9FA] text-[13px] font-sans text-[#5F6368] rounded-sm">

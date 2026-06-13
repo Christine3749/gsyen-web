@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import BrandMemberProfile from './BrandMemberProfile';
 import BrandMemberPerms from './BrandMemberPerms';
 import BrandMemberPlans from './BrandMemberPlans';
+import { useAuth } from '../../auth/useAuth';
 
 type Section = 'profile' | 'security' | 'perms' | 'plans';
 
@@ -18,7 +19,17 @@ const GROUPS: { key: 'account' | 'member'; zh: string; en: string }[] = [
 
 export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
   const [active, setActive] = useState<Section>('profile');
+  const [showPlans, setShowPlans] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { tier } = useAuth();
+  const zh = lang === 'zh';
+  const TIER_LABEL: Record<string, string> = {
+    free_unverified: zh ? '免费（未验证）' : 'Free (Unverified)',
+    free:            zh ? '免费版'         : 'Free',
+    pro_month:       zh ? 'Pro 月付'       : 'Pro Monthly',
+    pro_year:        zh ? 'Pro 年付'       : 'Pro Yearly',
+    enterprise:      zh ? '企业版'         : 'Enterprise',
+  };
 
   const scrollTo = (id: Section) => {
     const el = document.getElementById(`member-${id}`);
@@ -86,8 +97,32 @@ export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
           </section>
           <div className="border-t border-[#1A1A1A]/6" />
           <section id="member-plans">
-            <BrandMemberPlans lang={lang} />
+            <div className="mb-7">
+              <p className="text-[10px] font-mono font-bold tracking-[0.28em] uppercase text-[#1A1A1A]">
+                {zh ? '会员方案' : 'Membership'}
+              </p>
+              <p className="text-[9px] font-mono text-[#1A1A1A]/38 mt-1 tracking-wide">
+                {zh ? '穹弯算筹 · 按量计费' : 'Compute credits · Pay as you go'}
+              </p>
+            </div>
+            <div className="bg-white border border-[#DADCE0] px-6 py-5 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-mono font-bold text-[#1A1A1A] tracking-wide mb-1">
+                  {zh ? '当前方案' : 'Current Plan'}
+                </p>
+                <p className="text-[13px] font-sans text-[#202124]">
+                  {TIER_LABEL[tier ?? ''] ?? (zh ? '免费版' : 'Free')}
+                </p>
+              </div>
+              {(!tier || tier === 'free' || tier === 'free_unverified') && (
+                <button onClick={() => setShowPlans(true)}
+                  className="px-4 py-1.5 text-[10px] font-mono font-bold tracking-widest uppercase bg-[#1A1A1A] text-[#F9F8F6] hover:bg-[#1A1A1A]/80 transition-colors rounded-none">
+                  {zh ? '升级会员 →' : 'Upgrade →'}
+                </button>
+              )}
+            </div>
           </section>
+          {showPlans && <BrandMemberPlans lang={lang} onClose={() => setShowPlans(false)} />}
         </div>
 
       </div>

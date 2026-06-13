@@ -41,7 +41,9 @@ const CONTAINER_VARIANTS = {
 
 type PlanName = 'FREE' | 'PRO' | 'ENTERPRISE';
 
-export default function BrandMemberPlans({ lang }: { lang: 'zh' | 'en' }) {
+interface PlansProps { lang: 'zh' | 'en'; onClose?: () => void }
+
+export default function BrandMemberPlans({ lang, onClose }: PlansProps) {
   const [billing, setBilling]     = useState<'month' | 'year'>('month');
   const [selected, setSelected]   = useState<PlanName>('PRO');
   const [showPayment, setShowPayment] = useState(false);
@@ -52,10 +54,17 @@ export default function BrandMemberPlans({ lang }: { lang: 'zh' | 'en' }) {
   const isPro  = tier === 'pro_month' || tier === 'pro_year';
   const isEnt  = tier === 'enterprise';
 
-  return (
+  const inner = (
     <div>
-      <h2 className="text-[17px] font-mono font-bold text-[#1A1A1A] mb-1">会员方案</h2>
-      <p className="text-[10px] font-mono text-[#1A1A1A]/40 tracking-wide mb-7">穹弯算筹 · 按量计费</p>
+      <div className="flex items-start justify-between mb-7">
+        <div>
+          <h2 className="text-[17px] font-mono font-bold text-[#1A1A1A] mb-1">会员方案</h2>
+          <p className="text-[10px] font-mono text-[#1A1A1A]/40 tracking-wide">穹弯算筹 · 按量计费</p>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="text-[#1A1A1A]/30 hover:text-[#1A1A1A] text-lg leading-none transition-colors mt-1">✕</button>
+        )}
+      </div>
 
       <div className="flex items-center border border-[#1A1A1A]/10 mb-8 w-fit">
         <button onClick={() => setBilling('month')}
@@ -92,6 +101,19 @@ export default function BrandMemberPlans({ lang }: { lang: 'zh' | 'en' }) {
       {showPayment && <PaymentModal billing={billing} onClose={() => setShowPayment(false)} />}
     </div>
   );
+
+  if (onClose) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1A1A]/40 backdrop-blur-sm"
+        onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="bg-[#F9F8F6] max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto p-10 shadow-2xl">
+          {inner}
+        </div>
+      </div>
+    );
+  }
+
+  return inner;
 }
 
 interface PlanCardProps {
