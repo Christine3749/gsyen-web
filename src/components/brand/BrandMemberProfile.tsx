@@ -31,7 +31,8 @@ export default function BrandMemberProfile({ lang }: Props) {
   const handleResend = async () => {
     if (!user?.email || sending || cooldown > 0) return;
     setSending(true);
-    await supabase.auth.resend({ type: 'signup', email: user.email });
+    const { error } = await supabase!.auth.signInWithOtp({ email: user.email, options: { shouldCreateUser: false } });
+    if (error) { console.error('[OTP]', error.message); setSending(false); return; }
     setSending(false); setSent(true);
     let t = 60; setCooldown(t);
     const iv = setInterval(() => {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
-import { initializeUserData, resetPasswordForEmail, signInWithEmail, signUpWithEmail, signInWithOAuth, signOut } from './authService';
+import { initializeUserData, resetPasswordForEmail, signInWithEmail, signUpWithEmail, signInWithOAuth, signOut, upgradeTierToFree } from './authService';
 import type { AuthState, OAuthProvider, UserTier, LoginProvider } from '../types/auth';
 
 const DEFAULT_AUTH_STATE: AuthState = {
@@ -81,6 +81,14 @@ export function useAuth() {
       }));
 
       if (user) {
+        // 检测魔法链接验证回调（type=magiclink），升级 tier
+        const hash = window.location.hash;
+        const isMagicLink = hash.includes('type=magiclink') || hash.includes('type=email');
+        if (isMagicLink) {
+          window.history.replaceState(null, '', window.location.pathname);
+          upgradeTierToFree(user.id).catch(() => {});
+        }
+
         initializeUserData(user.id, user.user_metadata?.provider ?? 'email')
           .then((tier) => {
             setState(s => s.user?.id === user.id ? { ...s, tier, emailVerified: tier !== 'free_unverified' && tier !== null } : s);
