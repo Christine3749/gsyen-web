@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useAuth } from '../../auth/useAuth';
+import PaymentModal from './PaymentModal';
 
 interface Feature { label: string; included: boolean }
 
@@ -46,6 +47,7 @@ type PlanName = 'FREE' | 'PRO' | 'ENTERPRISE';
 export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
   const [billing, setBilling] = useState<'month' | 'year'>('month');
   const [selected, setSelected] = useState<PlanName>('PRO');
+  const [showPayment, setShowPayment] = useState(false);
   const { tier } = useAuth();
 
   const proMonthly = billing === 'year' ? 158 : 198;
@@ -128,6 +130,7 @@ export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
           cta={isPro ? (lang === 'zh' ? '当前方案' : 'Current Plan') : (lang === 'zh' ? '立即升级' : 'Upgrade Now')}
           ctaDisabled={isPro}
           ctaVariant="primary"
+          onCtaClick={() => !isPro && setShowPayment(true)}
         />
 
         <PlanCard
@@ -145,6 +148,10 @@ export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
           onCtaClick={() => window.open('mailto:hello@gsyen.com')}
         />
       </motion.div>
+
+      {showPayment && (
+        <PaymentModal billing={billing} onClose={() => setShowPayment(false)} />
+      )}
     </div>
   );
 }
