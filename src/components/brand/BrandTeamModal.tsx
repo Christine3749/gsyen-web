@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { TrendingUp, Heart, Zap, Globe } from 'lucide-react';
+import { TrendingUp, Heart, Zap, Globe, Mic, Layers } from 'lucide-react';
 
 type TeamType = '成约' | '伙伴' | '行动' | '聚集';
 
-const TYPES: { key: TeamType; icon: React.ElementType; desc: string; color: string; bg: string }[] = [
+const TYPES: { key: TeamType; icon: React.ElementType; desc: string; color: string; bg: string; disabled?: boolean }[] = [
   { key: '成约', icon: TrendingUp, desc: '成交推进，客户跟进', color: '#1A73E8', bg: '#E8F0FE' },
   { key: '伙伴', icon: Heart,      desc: '长期合作，战略协同', color: '#137333', bg: '#E6F4EA' },
   { key: '行动', icon: Zap,        desc: '短期任务，作战小队', color: '#B05E00', bg: '#FEF7E0' },
   { key: '聚集', icon: Globe,      desc: '兴趣社群，同频连接', color: '#9334E6', bg: '#F3E8FD' },
+  { key: '语音' as TeamType, icon: Mic,    desc: '实时语音协作空间', color: '#9AA0A6', bg: '#F1F3F4', disabled: true },
+  { key: '模块' as TeamType, icon: Layers, desc: '多工具集成工作台', color: '#9AA0A6', bg: '#F1F3F4', disabled: true },
 ];
 
 interface Props {
@@ -37,16 +39,25 @@ export default function BrandTeamModal({ busy, error, onClose, onConfirm }: Prop
             const Icon = t.icon;
             const active = type === t.key;
             return (
-              <button key={t.key} onClick={() => setType(t.key)}
-                className="flex items-start gap-3 p-3 rounded-xl border transition-all text-left"
+              <button key={t.key}
+                onClick={() => !t.disabled && setType(t.key)}
+                disabled={t.disabled}
+                className={`flex items-start gap-3 p-3 rounded-xl border transition-all text-left relative ${t.disabled ? 'cursor-not-allowed opacity-55' : ''}`}
                 style={{ borderColor: active ? t.color : '#DADCE0', borderWidth: active ? 2 : 1 }}>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                   style={{ background: t.bg }}>
                   <Icon className="w-4 h-4" style={{ color: t.color }} strokeWidth={1.5} />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-sans font-semibold leading-none mb-1"
-                    style={{ color: active ? t.color : '#202124' }}>{t.key}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <p className="text-[12px] font-sans font-semibold leading-none"
+                      style={{ color: active ? t.color : t.disabled ? '#9AA0A6' : '#202124' }}>{t.key}</p>
+                    {t.disabled && (
+                      <span className="text-[8px] font-mono font-bold tracking-wide uppercase px-1.5 py-0.5 rounded bg-[#F1F3F4] text-[#9AA0A6] leading-none">
+                        待开发
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[10px] font-sans text-[#9AA0A6] leading-snug">{t.desc}</p>
                 </div>
               </button>
