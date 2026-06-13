@@ -22,6 +22,12 @@ export type MenuSpec = { id: MenuId; label: string; items: (MenuItem | '---')[] 
 //   Border — 仅用于分层，对比度控制在最低可见阈值
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type Palette = {
+  bg: string; chrome: string; fg: string; menuFg: string; menuFgHover: string;
+  menuBg: string; menuHover: string; menuBorder: string; menuSep: string;
+  border: string; accent: string; dim: string;
+};
+
 export const DARK: Palette = {
   bg:          '#1A1A1A',  // 写作区背景 = chrome 背景，完全统一，消除色带
   chrome:      '#1A1A1A',  // 标题栏 / 菜单栏，与 bg 相同
@@ -51,7 +57,6 @@ export const LIGHT: Palette = {
   accent:      '#1A6ECC',  // 唯一彩色：蓝（比 dark 饱和度略高）
   dim:         '#AAAAAA',  // 辅助信息
 };
-export type Palette = typeof DARK;
 
 export const TITLE_H  = 32;
 export const MENU_H   = 28;

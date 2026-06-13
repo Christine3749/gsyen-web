@@ -9,7 +9,7 @@ interface Params {
   mode: EditorMode; dark: boolean; tw: boolean;
   focusMode: FocusMode; lineLen: LineLen; font: FontChoice;
   docType: 'doc' | 'canvas' | 'nodes';
-  setMode:      (m: EditorMode) => void;
+  setMode:      React.Dispatch<React.SetStateAction<EditorMode>>;
   setDark:      (v: (p: boolean) => boolean) => void;
   setTw:        (v: (p: boolean) => boolean) => void;
   setFocusMode: (m: FocusMode | ((p: FocusMode) => FocusMode)) => void;

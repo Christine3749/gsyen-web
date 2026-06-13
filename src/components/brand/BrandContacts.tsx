@@ -3,6 +3,7 @@
  */
 import { useState } from 'react';
 import { Users, Phone, Mail } from 'lucide-react';
+import BrandTeam from './BrandTeam';
 
 interface Props { lang: 'zh' | 'en' }
 
@@ -46,12 +47,13 @@ const AVATAR_COLORS = [
   'bg-[#9334E6]', 'bg-[#D93025]', 'bg-[#0097A7]',
 ];
 
-type Filter = ContactType | 'all';
+type Filter = ContactType | 'all' | 'team';
 const FILTERS: { key: Filter; zh: string; en: string }[] = [
   { key: 'all',      zh: '全部',   en: 'All'      },
   { key: 'client',   zh: '客户',   en: 'Clients'  },
   { key: 'supplier', zh: '供应商', en: 'Suppliers' },
-  { key: 'partner',  zh: '合作方', en: 'Partners' },
+  { key: 'partner',  zh: '合作方', en: 'Partners'  },
+  { key: 'team',     zh: '团队',   en: 'Teams'    },
 ];
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
@@ -117,11 +119,12 @@ function ContactRow({ c, lang }: { c: Contact; lang: 'zh' | 'en' }) {
 
 export default function BrandContacts({ lang }: Props) {
   const zh = lang === 'zh';
-  const [filter, setFilter] = useState<Filter>('all');
-  const [search, setSearch] = useState('');
+  const [filter,        setFilter]        = useState<Filter>('all');
+  const [search,        setSearch]        = useState('');
+  const [pendingCreate, setPendingCreate] = useState(false);
 
   const filtered = DEMO_CONTACTS.filter(c => {
-    const matchType = filter === 'all' || c.type === filter;
+    const matchType = filter === 'all' || filter === 'team' || c.type === filter;
     const q = search.toLowerCase();
     const matchSearch = !q || c.name.includes(q) || c.company.includes(q) || c.location.includes(q);
     return matchType && matchSearch;
@@ -141,8 +144,14 @@ export default function BrandContacts({ lang }: Props) {
         <StatCard label={zh ? '合作伙伴' : 'Partners'} value={String(partners)} icon={Mail} />
       </div>
 
-      {/* 筛选 chips + 搜索 */}
-      <div className="flex items-center gap-2 px-6 pb-4 shrink-0">
+      {/* 开团按钮 + 筛选 chips + 搜索 */}
+      <div className="flex items-center gap-2 px-6 pb-4 shrink-0 flex-wrap">
+        <button
+          onClick={() => { setFilter('team'); setPendingCreate(true); }}
+          className="px-3 py-1.5 text-[10px] font-mono font-bold tracking-widest uppercase rounded-none bg-[#1A1A1A] text-[#F9F8F6] hover:bg-[#1A1A1A]/80 transition-colors shrink-0">
+          ＋ {zh ? '开团' : 'New Team'}
+        </button>
+        <div className="w-px h-4 bg-[#DADCE0] mx-1 shrink-0" />
         {FILTERS.map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)}
             className={`px-3 py-1 rounded-full text-[12px] font-sans font-medium transition-all ${
@@ -153,36 +162,45 @@ export default function BrandContacts({ lang }: Props) {
             {zh ? f.zh : f.en}
           </button>
         ))}
-        <input
-          type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder={zh ? '搜索联系人…' : 'Search contacts…'}
-          className="ml-auto px-3 py-1 rounded-full text-[12px] font-sans border border-[#DADCE0] bg-white text-[#202124] placeholder-[#9AA0A6] focus:outline-none focus:border-[#1A73E8] w-44"
-        />
+        {filter !== 'team' && (
+          <input
+            type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={zh ? '搜索联系人…' : 'Search contacts…'}
+            className="ml-auto px-3 py-1 rounded-full text-[12px] font-sans border border-[#DADCE0] bg-white text-[#202124] placeholder-[#9AA0A6] focus:outline-none focus:border-[#1A73E8] w-44"
+          />
+        )}
       </div>
 
-      {/* 表格 */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
-        <div className="bg-white rounded-lg border border-[#DADCE0] overflow-hidden">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-[#E8EAED] bg-[#F8F9FA]">
-                <th className="py-3 pl-6 pr-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '联系人' : 'Contact'}</th>
-                <th className="py-3 px-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '位置' : 'Location'}</th>
-                <th className="py-3 px-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '联系方式' : 'Contact Info'}</th>
-                <th className="py-3 px-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '类型' : 'Type'}</th>
-                <th className="py-3 pl-3 pr-6 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '状态' : 'Status'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="py-12 text-center text-[13px] text-[#9AA0A6] font-sans">{zh ? '暂无联系人' : 'No contacts found'}</td></tr>
-              ) : (
-                filtered.map(c => <ContactRow key={c.id} c={c} lang={lang} />)
-              )}
-            </tbody>
-          </table>
+      {/* 内容区 */}
+      {filter === 'team' ? (
+        <BrandTeam
+          pendingCreate={pendingCreate}
+          onPendingCreateHandled={() => setPendingCreate(false)}
+        />
+      ) : (
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="bg-white rounded-lg border border-[#DADCE0] overflow-hidden">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-[#E8EAED] bg-[#F8F9FA]">
+                  <th className="py-3 pl-6 pr-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '联系人' : 'Contact'}</th>
+                  <th className="py-3 px-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '位置' : 'Location'}</th>
+                  <th className="py-3 px-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '联系方式' : 'Contact Info'}</th>
+                  <th className="py-3 px-3 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '类型' : 'Type'}</th>
+                  <th className="py-3 pl-3 pr-6 text-left text-[11px] font-semibold text-[#5F6368] uppercase tracking-wider font-sans">{zh ? '状态' : 'Status'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={5} className="py-12 text-center text-[13px] text-[#9AA0A6] font-sans">{zh ? '暂无联系人' : 'No contacts found'}</td></tr>
+                ) : (
+                  filtered.map(c => <ContactRow key={c.id} c={c} lang={lang} />)
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

@@ -79,6 +79,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
     const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     await chatSend({
       text: userMsg.content, model: 'ethan', history: existingMsgs, lang,
+      onToken: () => {},
       onDone: (full) => {
         const done = [...history, { id: aiId, role: 'model' as const, content: full, timestamp: aiTime }];
         chatSessionStore.upsert(activeSessionId, done, 'ethan');

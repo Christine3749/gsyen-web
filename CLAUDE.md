@@ -84,6 +84,45 @@
 3. 会员系统（下一个大模块）
 4. 考虑合并 server.ts 和 api/chat.ts 的重复 SYSTEM_PROMPT 和 MODEL_ROUTES
 
+## Ethan 的编码习惯问题（2026-06-13 审计，需改进）
+
+### 1. 类型定义顺序：先用后定（循环引用）
+`CanvasEditorTypes.ts` 里 `DARK: Palette` 写在 `type Palette` 之前，造成循环引用编译报错。
+**习惯**：先写常量，后补类型，容易出现"先用后定义"。
+**改法**：类型定义永远放文件顶部，常量/值放后面。
+
+### 2. 新增 CanvasType 值后忘记同步 Record
+`CanvasType` 加了 `'nodes'` 分支，但 `canvasHandler.ts` 的 `Record<CanvasType, string>` 没跟着补。
+**习惯**：扩展联合类型时只改了声明，没有搜索全局依赖。
+**改法**：改联合类型后立即跑 `tsc --noEmit`，让编译器帮你找遗漏。
+
+### 3. 复制粘贴 style 对象产生重复 key
+`CanvasStatsPanel.tsx` 同一个 style 对象里出现两次 `borderRadius`、`padding`、`textAlign`。
+**习惯**：快速迭代时直接追加属性，没有检查是否已存在同名 key（JS 不报错，TS strict 才报）。
+**改法**：修改 inline style 时先找到原始属性再改值，不要追加。
+
+### 4. 组件扩展接口后忘记满足必填参数
+`KanbanModule.tsx` 调用 `chatSend` 缺少 `onToken`（必填）。
+**习惯**：接口加了必填字段，调用方没同步更新，靠运行时发现而非编译时。
+**改法**：接口改动后立即跑 `tsc`，不要等到"跑起来再说"。
+
+### 5. import 遗漏（使用未引入的图标/组件）
+`BrandTeam.tsx` 用了 `Shield` 图标但没 import。
+**习惯**：快速写 JSX 时先写用法，忘记回头补 import。
+**改法**：IDE 自动 import 开起来；没有 IDE 提示时，新用一个符号就立刻加到 import 行。
+
+### 6. setMode 参数类型过窄
+`useCanvasMenus.ts` 把 `setMode` 类型声明为 `(m: EditorMode) => void`，
+但实际传入的是函数式更新 `m => ...`，两者不兼容。
+**习惯**：声明 setter 类型时没有用 `React.Dispatch<React.SetStateAction<T>>`，手写了更窄的版本。
+**改法**：来自 `useState` 的 setter 一律用 `Dispatch<SetStateAction<T>>` 类型，不要手写。
+
+### 总结
+- **核心问题**：快速开发期间不跑 `tsc`，靠视觉/运行时发现问题，技术债积累到审计时才暴露。
+- **铁律**：每次提交前跑一次 `npx tsc --noEmit`，0 错误才 commit。
+
+---
+
 ## 缈缈知识库权限规划（未来）
 > 当前状态：完全开放，暂不做权限控制。
 

@@ -50,7 +50,7 @@ function makeDoc(text: string, type: CanvasType): CanvasDoc {
 
 // ─── Card builder ─────────────────────────────────────────────────────────────
 
-const TYPE_LABEL: Record<CanvasType, string> = { doc: '文档', canvas: '画板' };
+const TYPE_LABEL: Record<CanvasType, string> = { doc: '文档', canvas: '画板', nodes: '节点' };
 
 function buildCard(action: ActionCard['action'], doc: CanvasDoc): ActionCard {
   const wordCount = doc.content.trim().split(/\s+/).filter(Boolean).length;

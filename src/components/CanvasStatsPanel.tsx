@@ -76,10 +76,9 @@ export function CanvasStatsPanel(props: Props) {
         <input type="number" value={goal}
           onChange={e => setGoal(Math.max(1, Number(e.target.value)))}
           onClick={e => e.stopPropagation()}
-          style={{ width: 72, padding: '4px 10px', borderRadius: 8, textAlign: 'center',
+          style={{ width: 72, padding: '4px 10px', borderRadius: 4, textAlign: 'center' as const,
             border: `0.5px solid ${P.border}`, background: dark ? '#1A1A1A' : '#F8F8F8',
-            color: P.fg, fontFamily: SYS_FONT, fontSize: 14, outline: 'none',
-            borderRadius: 4 }} />
+            color: P.fg, fontFamily: SYS_FONT, fontSize: 14, outline: 'none' }} />
         <span style={{ fontFamily: SYS_FONT, fontSize: 14, color: P.fg }}>Words</span>
       </div>
     </div>

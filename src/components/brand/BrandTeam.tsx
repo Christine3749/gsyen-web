@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Users, Plus, User, RefreshCw } from 'lucide-react';
+import { Users, Plus, User, RefreshCw, Shield } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/useAuth';
 import BrandTeamDetail, { type MemberItem } from './BrandTeamDetail';
+import BrandTeamModal from './BrandTeamModal';
 
 export interface TeamItem {
   id:          string;
   name:        string;
+  type?:       string;
   owner_id:    string;
   invite_code: string;
   seat_limit:  number;
@@ -37,17 +39,25 @@ function StatCard({ label, value, icon: Icon, iconBg = 'bg-[#E8F0FE]', iconColor
   );
 }
 
-export default function BrandTeam() {
+interface Props {
+  pendingCreate?:           boolean;
+  onPendingCreateHandled?:  () => void;
+}
+
+export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Props) {
   const { user, loading: authLoading } = useAuth();
   const [teams,     setTeams]     = useState<TeamItem[]>([]);
   const [selected,  setSelected]  = useState<TeamItem | null>(null);
   const [members,   setMembers]   = useState<MemberItem[]>([]);
   const [modal,     setModal]     = useState<Modal>('none');
-  const [inputName, setInputName] = useState('');
   const [inputCode, setInputCode] = useState('');
   const [busy,      setBusy]      = useState(false);
   const [error,     setError]     = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (pendingCreate) { setModal('create'); onPendingCreateHandled?.(); }
+  }, [pendingCreate]);
 
   const loadTeams = useCallback(async () => {
     if (!supabase || !user) return;
@@ -85,20 +95,20 @@ export default function BrandTeam() {
   useEffect(() => { if (user) loadTeams(); }, [user, loadTeams]);
   useEffect(() => { if (selected) loadMembers(selected.id); }, [selected, loadMembers]);
 
-  async function createTeam() {
-    if (!supabase || !user || !inputName.trim()) return;
+  async function createTeam(name: string, type: string) {
+    if (!supabase || !user) return;
     setBusy(true); setError(null);
     const { data: team, error: e1 } = await supabase
       .from('gsyen_teams')
-      .insert({ name: inputName.trim(), owner_id: user.id })
+      .insert({ name, type, owner_id: user.id })
       .select()
       .single();
     if (e1 || !team) { setError(e1?.message ?? '创建失败'); setBusy(false); return; }
     const { error: e2 } = await supabase
       .from('gsyen_team_members')
       .insert({ team_id: team.id, user_id: user.id, role: 'owner' });
-    if (e2) { setError('创建团队成功，但添加成员失败'); setBusy(false); return; }
-    setBusy(false); setInputName(''); setModal('none');
+    if (e2) { setError('创建成功，但加入失败'); setBusy(false); return; }
+    setBusy(false); setModal('none');
     await loadTeams();
     setSelected({ ...team, role: 'owner' });
   }
@@ -220,21 +230,24 @@ export default function BrandTeam() {
         </div>
       )}
 
-      {/* 开团 / 加入 Modal */}
-      {modal !== 'none' && (
+      {/* 开团 Modal */}
+      {modal === 'create' && (
+        <BrandTeamModal busy={busy} error={error}
+          onClose={() => { setModal('none'); setError(null); }}
+          onConfirm={createTeam} />
+      )}
+
+      {/* 加入 Modal */}
+      {modal === 'join' && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50"
           onClick={() => setModal('none')}>
           <div className="bg-white rounded-2xl border border-[#DADCE0] px-6 py-5 w-80 flex flex-col gap-4"
             onClick={e => e.stopPropagation()}>
-            <p className="text-[13px] font-sans font-semibold text-[#202124]">
-              {modal === 'create' ? '创建团队' : '加入团队'}
-            </p>
-            <input autoFocus
-              value={modal === 'create' ? inputName : inputCode}
-              onChange={e => modal === 'create' ? setInputName(e.target.value) : setInputCode(e.target.value)}
-              placeholder={modal === 'create' ? '团队名称…' : '粘贴邀请码…'}
+            <p className="text-[13px] font-sans font-semibold text-[#202124]">加入团队</p>
+            <input autoFocus value={inputCode} onChange={e => setInputCode(e.target.value)}
+              placeholder="粘贴邀请码…"
               className="border border-[#DADCE0] rounded-lg px-3 py-2 text-[13px] font-sans text-[#202124] placeholder:text-[#9AA0A6] outline-none focus:border-[#1A73E8] transition-colors"
-              onKeyDown={e => e.key === 'Enter' && (modal === 'create' ? createTeam() : joinTeam())}
+              onKeyDown={e => e.key === 'Enter' && joinTeam()}
             />
             {error && <p className="text-[12px] font-sans text-[#D93025]">{error}</p>}
             <div className="flex justify-end gap-2">
@@ -242,9 +255,9 @@ export default function BrandTeam() {
                 className="px-4 py-2 rounded-full text-[12px] font-sans text-[#5F6368] hover:bg-[#F1F3F4] transition-all">
                 取消
               </button>
-              <button onClick={modal === 'create' ? createTeam : joinTeam} disabled={busy}
+              <button onClick={joinTeam} disabled={busy}
                 className="px-4 py-2 rounded-full text-[12px] font-sans font-medium bg-[#1A73E8] text-white hover:bg-[#1557B0] disabled:opacity-40 transition-all">
-                {busy ? '…' : modal === 'create' ? '创建' : '加入'}
+                {busy ? '…' : '加入'}
               </button>
             </div>
           </div>
