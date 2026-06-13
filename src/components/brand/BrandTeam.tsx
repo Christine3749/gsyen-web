@@ -191,34 +191,25 @@ export default function BrandTeam({ pendingCreate, onPendingCreateHandled }: Pro
         </div>
       )}
 
-      {/* 团队切换 avatar + 操作按钮 */}
-      <div className="flex items-center gap-3 px-6 pb-4 shrink-0 flex-wrap">
-        {teams.map(t => {
-          const color = TEAM_COLORS[t.id.charCodeAt(0) % TEAM_COLORS.length];
-          return (
-            <button key={t.id} onClick={() => setSelected(t)}
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all ${color} ${
-                selected?.id === t.id
-                  ? 'ring-2 ring-offset-2 ring-[#1A73E8]'
-                  : 'opacity-75 hover:opacity-100'
-              }`}
-              title={t.name}>
-              {t.name[0].toUpperCase()}
-            </button>
-          );
-        })}
-        <div className="ml-auto flex gap-2">
-          <button onClick={() => { setModal('join'); setError(null); }}
-            className="px-3 py-1 rounded-full text-[12px] font-sans font-medium bg-white border border-[#DADCE0] text-[#5F6368] hover:bg-[#F1F3F4] transition-all">
-            加入
-          </button>
-          <button onClick={() => { setModal('create'); setError(null); }}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-sans font-medium bg-[#1A73E8] text-white hover:bg-[#1557B0] transition-all">
-            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-            开团
-          </button>
+      {/* 团队切换 avatar */}
+      {teams.length > 0 && (
+        <div className="flex items-center gap-3 px-6 pb-4 shrink-0 flex-wrap">
+          {teams.map(t => {
+            const color = TEAM_COLORS[t.id.charCodeAt(0) % TEAM_COLORS.length];
+            return (
+              <button key={t.id} onClick={() => setSelected(t)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all ${color} ${
+                  selected?.id === t.id
+                    ? 'ring-2 ring-offset-2 ring-[#1A73E8]'
+                    : 'opacity-75 hover:opacity-100'
+                }`}
+                title={t.name}>
+                {t.name[0].toUpperCase()}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      )}
 
       {/* 主内容 */}
       {selected && (
