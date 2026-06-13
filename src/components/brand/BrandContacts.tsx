@@ -148,8 +148,8 @@ export default function BrandContacts({ lang }: Props) {
       <div className="flex items-center gap-2 px-6 pb-4 shrink-0 flex-wrap">
         <button
           onClick={() => { setFilter('team'); setPendingCreate(true); }}
-          className="px-3 py-1.5 text-[10px] font-mono font-bold tracking-widest uppercase rounded-none bg-[#1A1A1A] text-[#F9F8F6] hover:bg-[#1A1A1A]/80 transition-colors shrink-0">
-          ＋ {zh ? '开团' : 'New Team'}
+          className="flex items-center gap-1 px-3 py-1 rounded-full text-[12px] font-sans font-medium bg-[#1A73E8] text-white hover:bg-[#1557B0] transition-all shrink-0">
+          + {zh ? '开团' : 'New Team'}
         </button>
         <div className="w-px h-4 bg-[#DADCE0] mx-1 shrink-0" />
         {FILTERS.map(f => (
