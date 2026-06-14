@@ -99,12 +99,12 @@
      ----------------------------------------------------------
      该设计采用极小字号，强调密度与精致感。
      ---------------------------------------------------------- */
-  --text-2xs:  9px;     /* 页眉副标题、极小标注 */
-  --text-xs:   12px;    /* 导航标签、章节标题、按钮文字 */
-  --text-2xs-label: 10px; /* 最小标签文字 */
-  --text-label: 11px;   /* 标准标签、元数据 */
-  --text-11:   13px;    /* 卡片正文 */
-  --text-sm:   14px;    /* 标准正文 (text-xs in Tailwind) */
+  --text-2xs:       9px;   /* 页眉副标题、极小标注 */
+  --text-2xs-label: 10px;  /* 最小标签文字 */
+  --text-label:     11px;  /* 标准标签、元数据 */
+  --text-xs:        12px;  /* 导航标签、章节标题、按钮文字 */
+  --text-11:        13px;  /* 卡片正文 */
+  --text-sm:        14px;  /* 标准正文 */
 
   /* ----------------------------------------------------------
      LETTER SPACING — 字间距体系
@@ -132,6 +132,16 @@
      ---------------------------------------------------------- */
   --animate-fadeIn:  fadeIn 0.18s ease-out both;
   --animate-scaleUp: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 紧凑字体模式 — 每档 -2px，恢复原始精致小字号 */
+html[data-font="compact"] {
+  --text-2xs:       7.5px;
+  --text-2xs-label: 8px;
+  --text-label:     9px;
+  --text-xs:        10px;
+  --text-11:        11px;
+  --text-sm:        12px;
 }
 
 @keyframes gsyen-breathe {

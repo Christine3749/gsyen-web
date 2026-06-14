@@ -4,6 +4,11 @@ import * as Sentry from '@sentry/electron/renderer';
 import App from './App.tsx';
 import './index.css';
 
+// 同步应用字体偏好，避免首屏闪烁
+if (localStorage.getItem('gsyen_font_size') === 'compact') {
+  document.documentElement.setAttribute('data-font', 'compact');
+}
+
 Sentry.init({
   dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
 });

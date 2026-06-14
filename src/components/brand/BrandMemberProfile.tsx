@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../auth/useAuth';
 import { supabase } from '../../auth/supabaseClient';
+import { useFontSize } from '../../hooks/useFontSize';
 
 const PROVIDER_LABEL: Record<string, string> = {
   google: 'Google',
@@ -27,6 +28,7 @@ export default function BrandMemberProfile({ lang }: Props) {
   const [phone,        setPhone]       = useState<string>(meta.phone         ?? '');
   const [phoneCountry, setPhoneCountry] = useState<string>(meta.phone_country ?? '+86');
 
+  const { size: fontSize, setSize: setFontSize } = useFontSize();
   const isUnverified = tier === 'free_unverified' || (!emailVerified && !!user);
   const provider = user?.app_metadata?.provider ?? meta.provider ?? 'email';
 
@@ -155,13 +157,44 @@ export default function BrandMemberProfile({ lang }: Props) {
       <p className="text-[8px] font-mono font-bold tracking-[0.28em] uppercase text-[#1A1A1A]/30 mb-3">
         {zh ? '账号身份' : 'Account identities'}
       </p>
-      <div className="bg-white border border-[#DADCE0]">
+      <div className="bg-white border border-[#DADCE0] mb-6">
         <FormRow label={PROVIDER_LABEL[provider] ?? provider} sub={zh ? '当前登录方式' : 'Connected login method'} last>
           <div className="flex items-center gap-2">
             <span className="text-[8px] font-mono px-2 py-0.5 border border-[#DADCE0] text-[#5F6368] uppercase tracking-widest rounded-sm">
               {PROVIDER_LABEL[provider] ?? provider}
             </span>
             <span className="text-[13px] font-sans text-[#5F6368]">{user?.email ?? '—'}</span>
+          </div>
+        </FormRow>
+      </div>
+
+      {/* Display preferences */}
+      <p className="text-[8px] font-mono font-bold tracking-[0.28em] uppercase text-[#1A1A1A]/30 mb-3">
+        {zh ? '界面偏好' : 'Display preferences'}
+      </p>
+      <div className="bg-white border border-[#DADCE0]">
+        <FormRow label={zh ? '界面字体' : 'Font size'} sub={zh ? '影响全局字号，立即生效' : 'Applies globally, takes effect immediately'} last>
+          <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40 w-fit">
+            <button
+              onClick={() => setFontSize('normal')}
+              className={`px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest rounded-none transition-colors ${
+                fontSize === 'normal'
+                  ? 'bg-[#1A1A1A] text-white'
+                  : 'text-[#1A1A1A]/60 hover:bg-[#1A1A1A]/5'
+              }`}
+            >
+              {zh ? '正常' : 'Normal'}
+            </button>
+            <button
+              onClick={() => setFontSize('compact')}
+              className={`px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest rounded-none transition-colors ${
+                fontSize === 'compact'
+                  ? 'bg-[#1A1A1A] text-white'
+                  : 'text-[#1A1A1A]/60 hover:bg-[#1A1A1A]/5'
+              }`}
+            >
+              {zh ? '紧凑' : 'Compact'}
+            </button>
           </div>
         </FormRow>
       </div>
