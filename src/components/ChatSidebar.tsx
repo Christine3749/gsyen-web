@@ -89,18 +89,6 @@ export function ChatSidebar({
           </div>
         </button>
 
-        {/* Default Session — 永久置顶，对应 currentSessionId===null 态 */}
-        <div onClick={onNewChat}
-          className={`group flex items-start gap-2.5 p-3 border cursor-pointer transition-all ${currentSessionId === null ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
-          <div className="flex-1 min-w-0 space-y-1">
-            <p className="fs-md font-sans text-[#1A1A1A]/80 leading-snug">Default Message</p>
-            <div className="flex items-center gap-2">
-              <span className="fs-2xs font-mono text-[#1A1A1A]/30 uppercase">{new Date().toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
-              <span className="fs-2xs font-mono text-[#1A1A1A]/25 uppercase">ETHAN</span>
-            </div>
-          </div>
-        </div>
-
         <div className={`overflow-y-auto space-y-1.5 pr-0.5 transition-all duration-200 ${recentsOpen ? 'flex-1' : 'hidden'}`}>
           {sessions.length === 0 ? (
             <div className="py-10 text-center space-y-2">
