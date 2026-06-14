@@ -198,17 +198,6 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
               <h2 className="fs-md font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">{lang === 'zh' ? '往来' : 'Recents'}</h2>
               <span className="fs-2xs font-mono text-[#1A1A1A]/25">{sessions.length}</span>
             </div>
-            {/* default 入口 — 与 session 条目完全一致 */}
-            <div onClick={() => setActiveSessionId('default')}
-              className={`group flex items-start gap-2.5 p-3 border cursor-pointer transition-all ${activeSessionId === 'default' ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
-              <div className="flex-1 min-w-0 space-y-1">
-                <p className="fs-md font-sans text-[#1A1A1A]/80 leading-snug">Default Message</p>
-                <div className="flex items-center gap-2">
-                  <span className="fs-2xs font-mono text-[#1A1A1A]/30 uppercase">{new Date().toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
-                  <span className="fs-2xs font-mono text-[#1A1A1A]/25 uppercase">ETHAN</span>
-                </div>
-              </div>
-            </div>
             <div className="overflow-y-auto space-y-1.5 pr-0.5 flex-1">
               {sessions.length === 0 ? (
                 <div className="py-8 text-center space-y-2">
