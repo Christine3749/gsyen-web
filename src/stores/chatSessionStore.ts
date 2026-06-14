@@ -63,8 +63,17 @@ function _subscribeRealtime(uid: string) {
 
 supabase?.auth.onAuthStateChange((_ev, session) => {
   _uid = session?.user?.id ?? null;
-  if (_uid) { _pull(_uid); _subscribeRealtime(_uid); }
-  else { _rt?.unsubscribe(); _rt = null; }
+  if (_uid) {
+    if (_ev === 'SIGNED_IN') window.dispatchEvent(new CustomEvent('gsyen-user-signed-in'));
+    _pull(_uid);
+    _subscribeRealtime(_uid);
+  } else {
+    _rt?.unsubscribe();
+    _rt = null;
+    localStorage.removeItem(SESSIONS_KEY);
+    localStorage.removeItem(CURRENT_CHAT_KEY);
+    window.dispatchEvent(new CustomEvent('chat-sessions-updated'));
+  }
 });
 
 export const chatSessionStore = {
@@ -92,8 +101,10 @@ export const chatSessionStore = {
     };
     if (idx >= 0) all[idx] = record; else all.unshift(record);
     const sorted = all.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sorted));
-    _upsert(record);
+    if (_uid) {
+      localStorage.setItem(SESSIONS_KEY, JSON.stringify(sorted));
+      _upsert(record);
+    }
     return sorted;
   },
 
@@ -120,6 +131,7 @@ export const chatSessionStore = {
   },
 
   saveCurrentChat(msgs: ChatMessage[]): void {
+    if (!_uid) return;
     localStorage.setItem(CURRENT_CHAT_KEY, JSON.stringify(msgs));
   },
 

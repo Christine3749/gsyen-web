@@ -32,6 +32,7 @@ import { FriendsPanel } from './FriendsPanel';
 import { ChatCreateTeamModal } from './ChatCreateTeamModal';
 import { useFriends } from '../hooks/useFriends';
 import { canvasStore } from '../stores/canvasStore';
+import { ChatSavePrompt, useChatSavePrompt } from './ChatSavePrompt';
 
 interface ChatModuleProps { lang: 'zh' | 'en'; onTeamChange?: (active: boolean) => void }
 
@@ -46,6 +47,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [createTeamOpen, setCreateTeamOpen]   = useState(false);
   const [showFriends,    setShowFriends]       = useState(false);
   const { friends } = useFriends();
+  const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
 
   const { teams }                                                  = useTeams();
   const { selectedTeam, showPanel, members, selectTeam, clearTeam } = useTeamPanel(onTeamChange);
@@ -290,6 +292,8 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
       zh={lang === 'zh'}
       onClose={() => setCreateTeamOpen(false)}
     />
+    {savePrompt && <ChatSavePrompt onSave={() => { saveChat(messages, selectedModel); dismissSavePrompt(); }}
+      onDiscard={() => { handleNewChat(); dismissSavePrompt(); }} />}
     </>
   );
 }
