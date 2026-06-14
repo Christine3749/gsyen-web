@@ -236,7 +236,7 @@ export default function BrandHold({ lang }: { lang: 'zh' | 'en' }) {
           {zh ? '新增' : 'New'}
         </button>
         <div className="w-px h-4 bg-[#DADCE0] mx-1 shrink-0" />
-        <button onClick={() => setFilterCat('all')}
+        <button onClick={() => { setFilterCat('all'); setFilterStatus('all'); }}
           className={`px-3 py-1 rounded-full fs-base font-sans font-medium transition-all ${filterCat === 'all' && filterStatus === 'all' ? 'bg-[#1A73E8] text-white' : 'bg-white border border-[#DADCE0] text-[#5F6368] hover:bg-[#F1F3F4]'}`}>
           {zh ? '全部' : 'All'}
         </button>
