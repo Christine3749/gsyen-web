@@ -71,7 +71,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
 
   const handleLoadSession = (s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); };
-  const handleNewChat = () => { newChat(); clearTeam(); };
+  const handleNewChat = () => { newChat(selectedModel); clearTeam(); };
   const handleSelectTeam = (team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);
