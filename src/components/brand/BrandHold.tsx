@@ -121,12 +121,16 @@ function AddModal({ lang, onClose, onSave }: {
 
   const submit = () => {
     if (!name.trim()) return;
+    const parsedPrice = price    === '' ? undefined : Number(price);
+    const parsedQty   = quantity === '' ? undefined : Number(quantity);
+    if (parsedPrice !== undefined && (!Number.isFinite(parsedPrice) || parsedPrice < 0)) return;
+    if (parsedQty   !== undefined && (!Number.isInteger(parsedQty)  || parsedQty   < 0)) return;
     onSave({
       id: crypto.randomUUID(), name: name.trim(), category, status,
-      brand:    brand    || undefined,
-      price:    price    ? Number(price)    : undefined,
-      quantity: quantity ? Number(quantity) : undefined,
-      notes:    notes    || undefined,
+      brand:    brand || undefined,
+      price:    parsedPrice,
+      quantity: parsedQty,
+      notes:    notes || undefined,
       purchaseDate: new Date().toISOString().split('T')[0],
     });
     onClose();
@@ -216,8 +220,10 @@ export default function BrandHold({ lang }: { lang: 'zh' | 'en' }) {
   const owned      = items.filter(i => i.status === 'owned');
   const totalValue = owned.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
   const wishCount  = items.filter(i => i.status === 'wishlist').length;
+  const now        = Date.now();
   const expiring   = items.filter(i => i.expiryDate &&
-    new Date(i.expiryDate) < new Date(Date.now() + 30 * 86400_000)).length;
+    new Date(i.expiryDate).getTime() >= now &&
+    new Date(i.expiryDate).getTime() <  now + 30 * 86400_000).length;
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[#F8F9FA]">

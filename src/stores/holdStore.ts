@@ -62,9 +62,10 @@ let _rt: any = null;
 
 async function _upsert(item: HoldItem) {
   if (!supabase || !_uid) return;
-  await supabase.from('gsyen_hold').upsert(
+  const { error } = await supabase.from('gsyen_hold').upsert(
     { id: item.id, user_id: _uid, data: item, updated_at: new Date().toISOString() }
   );
+  if (error) return;
   addSyncedId(item.id);
 }
 
@@ -72,7 +73,8 @@ async function _delete(id: string) {
   if (!supabase || !_uid) return;
   _pendingDeletes.add(id);
   try {
-    await supabase.from('gsyen_hold').delete().eq('id', id).eq('user_id', _uid);
+    const { error } = await supabase.from('gsyen_hold').delete().eq('id', id).eq('user_id', _uid);
+    if (error) return;
   } finally {
     _pendingDeletes.delete(id);
   }
@@ -107,7 +109,10 @@ function _subscribeRealtime(uid: string) {
 supabase?.auth.onAuthStateChange((_ev, session) => {
   const newUid = session?.user?.id ?? null;
   if (newUid && newUid !== _uid) {
-    _uid = newUid; _pull(_uid); _subscribeRealtime(_uid);
+    _rt?.unsubscribe(); _rt = null;
+    localStorage.removeItem(LS_KEY); localStorage.removeItem(SYNCED_KEY);
+    _pendingDeletes.clear();
+    _uid = newUid; void _pull(_uid); _subscribeRealtime(_uid);
   } else if (!newUid && _uid) {
     _uid = null; _rt?.unsubscribe(); _rt = null;
     localStorage.removeItem(LS_KEY); localStorage.removeItem(SYNCED_KEY);
