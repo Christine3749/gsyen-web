@@ -136,8 +136,13 @@
 
 /* 紧凑模式 */
 html[data-font="compact"] body { zoom: 0.85; }
-/* 近视模式 */
-html[data-font="large"] body   { zoom: 1.15; }
+/* 近视模式 — zoom 放大 + 强制抗锯齿使笔画清晰 */
+html[data-font="large"] body {
+  zoom: 1.15;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
 
 @keyframes gsyen-breathe {
   0%, 100% { opacity: 1; }
