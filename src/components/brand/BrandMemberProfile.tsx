@@ -184,8 +184,8 @@ export default function BrandMemberProfile({ lang }: Props) {
                 }`}
               >
                 {zh
-                  ? v === 'compact' ? '紧凑' : v === 'normal' ? '正常' : '近视'
-                  : v === 'compact' ? 'Compact' : v === 'normal' ? 'Normal' : 'Large'}
+                  ? v === 'compact' ? '紧凑' : v === 'normal' ? '正常' : '舒适'
+                  : v === 'compact' ? 'Compact' : v === 'normal' ? 'Normal' : 'Comfort'}
               </button>
             ))}
           </div>
