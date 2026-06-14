@@ -192,8 +192,8 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
       <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
 
         {/* 往来侧边栏 */}
-        <aside className={`shrink-0 flex flex-col border-r border-[#1A1A1A]/10 bg-[#F4F2EE] transition-all duration-300 overflow-hidden ${sidebarOpen ? 'w-[320px] p-6 opacity-100' : 'w-0 p-0 opacity-0 pointer-events-none'}`}>
-          <div className="flex flex-col h-full min-w-[272px] gap-4">
+        <aside className={`shrink-0 flex flex-col border-r border-[#1A1A1A]/10 bg-[#F4F2EE] transition-all duration-300 overflow-hidden ${sidebarOpen ? 'w-[240px] 2xl:w-[320px] p-6 opacity-100' : 'w-0 p-0 opacity-0 pointer-events-none'}`}>
+          <div className="flex flex-col h-full min-w-[208px] 2xl:min-w-[272px] gap-4">
             <div className="flex items-center justify-between w-full">
               <h2 className="text-[11px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">{lang === 'zh' ? '往来' : 'Recents'}</h2>
               <span className="text-[8px] font-mono text-[#1A1A1A]/25">{sessions.length}</span>

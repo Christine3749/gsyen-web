@@ -1,0 +1,154 @@
+import { useRef, useEffect } from 'react';
+import type { FontSize } from '../../hooks/useFontSize';
+
+interface Props {
+  value: FontSize;
+  onChange: (v: FontSize) => void;
+  zh: boolean;
+  isSmallScreen: boolean;
+  isShortScreen: boolean;
+}
+
+const OPTIONS: FontSize[] = ['compact', 'normal', 'large', 'ji'];
+
+const ZH: Record<FontSize, string> = { compact: '紧凑', normal: '正常', large: '舒适', ji: '极' };
+const EN: Record<FontSize, string> = { compact: 'Compact', normal: 'Normal', large: 'Comfort', ji: 'Ultra' };
+
+// 直接操控 html[data-font]，不经 React state，实现零延迟悬停预览
+function applyDataFont(v: FontSize) {
+  const el = document.documentElement;
+  if (v === 'normal') el.removeAttribute('data-font');
+  else el.setAttribute('data-font', v);
+}
+
+export function FontSizePicker({ value, onChange, zh, isSmallScreen, isShortScreen }: Props) {
+  const pickerRef  = useRef<HTMLDivElement>(null);
+  const sliderRef  = useRef<HTMLDivElement>(null);
+  const hoverRef   = useRef<HTMLDivElement>(null);
+  const labels     = zh ? ZH : EN;
+
+  // slider 跟随 committed value
+  function syncSlider(idx: number) {
+    if (!pickerRef.current || !sliderRef.current) return;
+    const pr   = pickerRef.current.getBoundingClientRect();
+    const btns = pickerRef.current.querySelectorAll<HTMLElement>('[data-pbtn]');
+    const btn  = btns[idx];
+    if (!btn) return;
+    const br = btn.getBoundingClientRect();
+    sliderRef.current.style.left  = `${br.left - pr.left - 3}px`;
+    sliderRef.current.style.width = `${br.width}px`;
+  }
+
+  function syncHover(idx: number | null) {
+    if (!pickerRef.current || !hoverRef.current) return;
+    if (idx === null) { hoverRef.current.style.opacity = '0'; return; }
+    const pr   = pickerRef.current.getBoundingClientRect();
+    const btns = pickerRef.current.querySelectorAll<HTMLElement>('[data-pbtn]');
+    const btn  = btns[idx];
+    if (!btn) return;
+    const br = btn.getBoundingClientRect();
+    hoverRef.current.style.left    = `${br.left - pr.left - 3}px`;
+    hoverRef.current.style.width   = `${br.width}px`;
+    hoverRef.current.style.opacity = '1';
+  }
+
+  useEffect(() => {
+    const idx = OPTIONS.indexOf(value);
+    const t = setTimeout(() => syncSlider(idx), 40);
+    return () => clearTimeout(t);
+  }, [value]);
+
+  useEffect(() => {
+    const onResize = () => syncSlider(OPTIONS.indexOf(value));
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [value]);
+
+  const handleEnter = (i: number) => {
+    const v = OPTIONS[i];
+    if (v === 'ji' && isSmallScreen) return;
+    syncHover(i);
+    applyDataFont(v);
+  };
+
+  const handleLeave = () => {
+    syncHover(null);
+    applyDataFont(value); // 还原至已确认档位
+  };
+
+  const handleClick = (i: number) => {
+    const v = OPTIONS[i];
+    if (v === 'ji' && isSmallScreen) return;
+    onChange(v);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div
+        ref={pickerRef}
+        className="relative inline-flex items-center border border-[#1A1A1A]/12 p-[3px] bg-[#F9F8F6]/50 w-fit"
+        onMouseLeave={handleLeave}
+      >
+        {/* 滑动黑色 active 块 */}
+        <div
+          ref={sliderRef}
+          className="absolute top-[3px] bottom-[3px] bg-[#1A1A1A] pointer-events-none"
+          style={{ transition: 'left 240ms cubic-bezier(0.4,0,0.2,1), width 240ms cubic-bezier(0.4,0,0.2,1)' }}
+        />
+        {/* 悬停幽灵块 */}
+        <div
+          ref={hoverRef}
+          className="absolute top-[3px] bottom-[3px] bg-[#1A1A1A]/6 pointer-events-none opacity-0"
+          style={{ transition: 'left 160ms cubic-bezier(0.4,0,0.2,1), width 160ms cubic-bezier(0.4,0,0.2,1), opacity 120ms ease' }}
+        />
+
+        {OPTIONS.map((v, i) => {
+          const isActive    = v === value;
+          const isDisabled  = v === 'ji' && isSmallScreen;
+          const isWarn      = v === 'large' && isShortScreen;
+          const title =
+            v === 'ji'
+              ? zh
+                ? isSmallScreen ? '屏幕不足，建议 27 寸以上使用' : '极大字号，适合演示 / 辅助场景'
+                : isSmallScreen ? 'Screen too small — best on 27"+ displays' : 'Maximum — great for large screens or presentations'
+              : v === 'large' && isWarn
+              ? zh ? '屏幕高度较短，内容区偏紧' : 'Short screen — content may be cramped'
+              : undefined;
+
+          return (
+            <button
+              key={v}
+              data-pbtn
+              onMouseEnter={() => handleEnter(i)}
+              onClick={() => handleClick(i)}
+              title={title}
+              className={[
+                'relative z-10 px-[18px] py-[7px]',
+                'text-[10px] font-mono font-bold tracking-widest uppercase',
+                'border-none bg-transparent rounded-none',
+                'transition-colors duration-[180ms]',
+                isDisabled  ? 'opacity-25 cursor-not-allowed text-[#1A1A1A]/40'
+                : isActive  ? 'text-[#F9F8F6] cursor-default'
+                : isWarn    ? 'text-amber-500/70 cursor-pointer'
+                :              'text-[#1A1A1A]/45 cursor-pointer hover:text-[#1A1A1A]/75',
+              ].join(' ')}
+            >
+              {labels[v]}
+            </button>
+          );
+        })}
+      </div>
+
+      {value === 'ji' && (
+        <p className="text-[9px] font-mono text-[#1A1A1A]/40 tracking-wide">
+          {zh ? '极档放大 130%，适合大屏 / 演示 / 视力辅助' : 'Ultra scales to 130% — ideal for large displays or accessibility'}
+        </p>
+      )}
+      {value === 'large' && isShortScreen && (
+        <p className="text-[9px] font-mono text-amber-500/60 tracking-wide">
+          {zh ? '当前屏幕高度较短，建议使用紧凑档' : 'Short screen — try compact for more content space'}
+        </p>
+      )}
+    </div>
+  );
+}

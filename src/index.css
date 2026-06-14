@@ -134,11 +134,17 @@
   --animate-scaleUp: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 紧凑模式 */
-html[data-font="compact"] body { zoom: 0.85; }
-/* 近视模式 — zoom 放大 + 强制抗锯齿使笔画清晰 */
-html[data-font="large"] body {
+/* 字号档位 — zoom 挂在 html 层，vh/vw 单位随之缩放，h-screen 不会留白或溢出 */
+html { transition: zoom 180ms cubic-bezier(0.4, 0, 0.2, 1); }
+html[data-font="compact"] { zoom: 0.85; }
+html[data-font="large"] {
   zoom: 1.15;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+html[data-font="ji"] {
+  zoom: 1.30;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;

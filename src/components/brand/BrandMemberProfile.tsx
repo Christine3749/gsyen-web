@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../auth/useAuth';
 import { supabase } from '../../auth/supabaseClient';
 import { useFontSize } from '../../hooks/useFontSize';
+import { FontSizePicker } from './FontSizePicker';
 
 const PROVIDER_LABEL: Record<string, string> = {
   google: 'Google',
@@ -29,6 +30,8 @@ export default function BrandMemberProfile({ lang }: Props) {
   const [phoneCountry, setPhoneCountry] = useState<string>(meta.phone_country ?? '+86');
 
   const { size: fontSize, setSize: setFontSize } = useFontSize();
+  const isShortScreen = window.screen.height <= 800;   // 13寸 768p 等短屏
+  const isSmallScreen = window.screen.width < 1600 || isShortScreen;
   const isUnverified = tier === 'free_unverified' || (!emailVerified && !!user);
   const provider = user?.app_metadata?.provider ?? meta.provider ?? 'email';
 
@@ -168,27 +171,19 @@ export default function BrandMemberProfile({ lang }: Props) {
         </FormRow>
       </div>
 
-      {/* Display preferences */}
+      {/* 界面偏好 */}
       <p className="text-[8px] font-mono font-bold tracking-[0.28em] uppercase text-[#1A1A1A]/30 mb-3">
         {zh ? '界面偏好' : 'Display preferences'}
       </p>
       <div className="bg-white border border-[#DADCE0]">
-        <FormRow label={zh ? '界面字体' : 'Font size'} sub={zh ? '影响全局字号，立即生效' : 'Applies globally, takes effect immediately'} last>
-          <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40 w-fit">
-            {(['compact', 'normal', 'large'] as const).map(v => (
-              <button
-                key={v}
-                onClick={() => setFontSize(v)}
-                className={`px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest rounded-none transition-colors ${
-                  fontSize === v ? 'bg-[#1A1A1A] text-white' : 'text-[#1A1A1A]/60 hover:bg-[#1A1A1A]/5'
-                }`}
-              >
-                {zh
-                  ? v === 'compact' ? '紧凑' : v === 'normal' ? '正常' : '舒适'
-                  : v === 'compact' ? 'Compact' : v === 'normal' ? 'Normal' : 'Comfort'}
-              </button>
-            ))}
-          </div>
+        <FormRow label={zh ? '界面字体' : 'Font size'} sub={zh ? '悬停预览，点击确认' : 'Hover to preview, click to confirm'} last>
+          <FontSizePicker
+            value={fontSize}
+            onChange={setFontSize}
+            zh={zh}
+            isSmallScreen={isSmallScreen}
+            isShortScreen={isShortScreen}
+          />
         </FormRow>
       </div>
     </div>

@@ -6,7 +6,7 @@ import './index.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
-if (_savedFont === 'compact' || _savedFont === 'large') {
+if (_savedFont === 'ji' || _savedFont === 'compact' || _savedFont === 'large') {
   document.documentElement.setAttribute('data-font', _savedFont);
 }
 

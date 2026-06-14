@@ -76,8 +76,8 @@ export function ChatSidebar({
   const { api, phase, version, pct } = useUpdater();
 
   return (
-    <aside className={`bg-[#F4F2EE] border-[#1A1A1A]/10 flex flex-col justify-between transition-all duration-300 overflow-hidden shrink-0 ${open ? 'w-full md:w-[320px] p-6 border-r opacity-100' : 'w-0 p-0 border-r-0 opacity-0 pointer-events-none'}`}>
-      <div className="flex flex-col h-full min-w-[272px] gap-4">
+    <aside className={`bg-[#F4F2EE] border-[#1A1A1A]/10 flex flex-col justify-between transition-all duration-300 overflow-hidden shrink-0 ${open ? 'w-full md:w-[240px] 2xl:w-[320px] p-6 border-r opacity-100' : 'w-0 p-0 border-r-0 opacity-0 pointer-events-none'}`}>
+      <div className="flex flex-col h-full min-w-[208px] 2xl:min-w-[272px] gap-4">
         <button onClick={() => setRecentsOpen(o => !o)} className="flex items-center justify-between w-full group">
           <h2 className="text-[11px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 group-hover:text-[#1A1A1A] transition-colors">
             {lang === 'zh' ? '往来' : 'Recents'}

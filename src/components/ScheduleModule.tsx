@@ -172,7 +172,7 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
 
         {/* Sidebar */}
         <aside className={`bg-white border-[#1A1A1A]/10 rounded-none shadow-sm flex flex-col shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-          isSidebarOpen ? 'w-full lg:w-[280px] p-4 border opacity-100' : 'w-0 lg:w-0 p-0 border-transparent opacity-0 pointer-events-none'
+          isSidebarOpen ? 'w-full lg:w-[240px] 2xl:w-[280px] p-4 border opacity-100' : 'w-0 lg:w-0 p-0 border-transparent opacity-0 pointer-events-none'
         }`}>
             <ScheduleSidebar
               lang={lang}
