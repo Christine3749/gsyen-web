@@ -62,7 +62,7 @@ const IOSIcon = () => (
 );
 
 const WINDOWS_OSS    = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Windows.exe';
-const MAC_OSS        = 'https://gsyen-releases.oss-cn-shenzhen.aliyuncs.com/GSYEN-Setup-Mac-arm64.dmg';
+const MAC_OSS        = 'https://github.com/Christine2031/gsyen-web/releases/latest/download/GSYEN-Setup-Mac-arm64.dmg';
 const WINDOWS_GITHUB = 'https://github.com/Christine2031/gsyen-web/releases/latest';
 const GITHUB_URL     = 'https://github.com/Christine2031/gsyen-web';
 const YOUTUBE_URL    = 'https://www.youtube.com/@iSgsyenTt';
