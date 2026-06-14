@@ -205,6 +205,16 @@ function createWindow() {
     },
   });
 
+  // 生产模式从 file:// 加载，向 Cloud Run 发请求时 Origin 为 null，
+  // CORS 会被拒绝导致 session 无法恢复。拦截请求补上正确的 Origin。
+  win.webContents.session.webRequest.onBeforeSendHeaders(
+    { urls: ['https://gsyen-api-*.run.app/*'] },
+    (details, callback) => {
+      details.requestHeaders['Origin'] = 'https://gsyen.com';
+      callback({ requestHeaders: details.requestHeaders });
+    }
+  );
+
   if (isDev) {
     win.loadURL('http://127.0.0.1:5173');
   } else {
