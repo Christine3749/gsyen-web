@@ -207,10 +207,14 @@ function createWindow() {
 
   // 生产模式从 file:// 加载，向 Cloud Run 发请求时 Origin 为 null，
   // CORS 会被拒绝导致 session 无法恢复。拦截请求补上正确的 Origin。
+  // 注意：Chrome URL pattern 的 * 只能放在 host 最前（*.run.app），
+  // 不能放中间（gsyen-api-*.run.app 非法 → main 进程抛异常 → 白屏）。
   win.webContents.session.webRequest.onBeforeSendHeaders(
-    { urls: ['https://gsyen-api-*.run.app/*'] },
+    { urls: ['https://*.run.app/*'] },
     (details, callback) => {
-      details.requestHeaders['Origin'] = 'https://gsyen.com';
+      if (details.url.includes('gsyen-api')) {
+        details.requestHeaders['Origin'] = 'https://gsyen.com';
+      }
       callback({ requestHeaders: details.requestHeaders });
     }
   );
