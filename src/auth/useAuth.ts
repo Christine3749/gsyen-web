@@ -24,7 +24,10 @@ export function useAuth() {
     (window.location.hash.includes('type=magiclink') || window.location.hash.includes('type=email'))
   );
 
-  // Effect 1: Boot — 优先从 HttpOnly cookie (gsyen_rt) 恢复 session
+  // Effect 1: Boot — 三段式恢复，按速度从快到慢
+  // 1. Supabase SDK 本地 session（内存/localStorage，< 50ms）→ 立即显示 UI
+  // 2. 若本地有效，后台异步同步 HttpOnly cookie，不阻塞 UI
+  // 3. 本地无 session，才去 Cloud Run（可能冷启动 2-5s）
   useEffect(() => {
     if (!supabase) {
       setState(s => ({ ...s, loading: false }));
@@ -35,29 +38,41 @@ export function useAuth() {
 
     (async () => {
       try {
-        // Step 1: try to restore from gsyen-api HttpOnly cookie
+        // Step 1: 本地 session（Supabase SDK 缓存，无需网络）
+        const { data: { session: local } } = await supabase.auth.getSession();
+        if (cancelled) return;
+
+        if (local?.user && local.access_token) {
+          // 立即显示用户，不等 Cloud Run
+          setState(s => ({ ...s, user: local.user, session: local, loading: false }));
+          // 后台：tier 异步加载
+          initializeUserData(local.user.id, local.user.user_metadata?.provider ?? 'email')
+            .then(tier => {
+              if (!cancelled) setState(s => s.user?.id === local.user.id
+                ? { ...s, tier, emailVerified: tier !== 'free_unverified' && tier !== null }
+                : s);
+            }).catch(() => {});
+          // 后台：同步 refresh_token 到 HttpOnly cookie
+          if (local.refresh_token) {
+            authProxy.saveSession(local.refresh_token).catch(() => {});
+          }
+          return;
+        }
+
+        // Step 2: 本地无 session — 尝试 HttpOnly cookie（Cloud Run，可能冷启动）
         const me = await authProxy.me();
         if (cancelled) return;
 
         if (me.ok) {
-          // Sets the in-memory session; triggers onAuthStateChange(SIGNED_IN)
           await supabase.auth.setSession({
-            access_token: me.access_token,
-            refresh_token: me.refresh_token,
+            access_token: me.access_token!,
+            refresh_token: me.refresh_token!,
           });
-          return; // onAuthStateChange handles the rest
+          return; // onAuthStateChange 接管
         }
 
-        // Step 2: no HttpOnly cookie — check URL hash (OAuth redirect)
-        // detectSessionInUrl:true means Supabase already processed it;
-        // getSession() returns the result.
-        const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-
-        if (!data.session) {
-          setState(s => ({ ...s, loading: false }));
-        }
-        // If session exists from URL hash, onAuthStateChange already fired
+        // Step 3: 无任何 session
+        if (!cancelled) setState(s => ({ ...s, loading: false }));
       } catch {
         if (!cancelled) setState(s => ({ ...s, loading: false }));
       }

@@ -153,21 +153,21 @@ export function ChatSidebar({
         {phase !== 'idle' && (
           <div className="shrink-0" style={{
             position: 'relative', width: '100%',
-            background: '#0C0C0C',
-            // 极细网格线 — 比点阵更精致
-            backgroundImage: 'linear-gradient(rgba(249,248,246,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(249,248,246,0.035) 1px, transparent 1px)',
+            background: '#070707',
+            backgroundImage: 'linear-gradient(rgba(249,248,246,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(249,248,246,0.022) 1px, transparent 1px)',
             backgroundSize: '20px 20px',
-            // 深度凹陷 + 向上压入侧边栏
-            boxShadow: 'inset 0 6px 16px rgba(0,0,0,0.7), inset 0 1px 0 rgba(0,0,0,0.5), 0 -3px 8px rgba(0,0,0,0.22)',
+            // 四向凹陷 — 完全无外阴影，全部向内
+            boxShadow: [
+              'inset 0 16px 40px rgba(0,0,0,1)',
+              'inset 5px 0 14px rgba(0,0,0,0.75)',
+              'inset -5px 0 14px rgba(0,0,0,0.75)',
+              'inset 0 -4px 12px rgba(0,0,0,0.5)',
+            ].join(', '),
           }}>
-            {/* 顶部渐变遮罩 — 把卡片"压"进侧边栏 */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 10,
-              background: 'linear-gradient(to bottom, rgba(244,242,238,0.12), transparent)',
+            {/* 顶部深渐变 — 模拟头顶光射进凹槽，越顶越黑 */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
               pointerEvents: 'none',
-            }} />
-            {/* amber 顶边缘光 */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.55) 30%, rgba(245,158,11,0.55) 70%, transparent)',
             }} />
             {/* L 形角标 — 2px，更建筑感 */}
             {(['tl','tr','bl','br'] as const).map(p => (
