@@ -10,10 +10,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'motion/react';
-import {
-  Sparkles, Send, Trash2,
-  MessageSquare, PanelLeft, Plus,
-} from 'lucide-react';
+import { Sparkles, MessageSquare, PanelLeft, Plus } from 'lucide-react';
 
 import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId, MODELS } from '../config/models';
@@ -33,6 +30,7 @@ import { ChatCreateTeamModal } from './ChatCreateTeamModal';
 import { useFriends } from '../hooks/useFriends';
 import { canvasStore } from '../stores/canvasStore';
 import { ChatSavePrompt, useChatSavePrompt } from './ChatSavePrompt';
+import { ChatInputBar } from './ChatInputBar';
 
 interface ChatModuleProps { lang: 'zh' | 'en'; onTeamChange?: (active: boolean) => void }
 
@@ -146,7 +144,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
         showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
       },
     });
-  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send]);
+  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send, currentTeamId]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -261,23 +259,9 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input bar */}
-          <div className={`shrink-0 p-4 border-t border-[#1A1A1A]/10 bg-white ${messages.length === 0 ? 'hidden' : ''}`}>
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(inputVal); }} className="flex items-center gap-2">
-              <button type="button" onClick={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }}
-                className="p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition-colors text-neutral-500 rounded-none shrink-0">
-                <Trash2 className="w-4 h-4" />
-              </button>
-              <input type="text"
-                placeholder={lang === 'zh' ? '向 Atelier AI 咨询任何品牌策划、符号创意、日程安排吧...' : 'Ask Atelier AI anything about brand, design, or schedules...'}
-                value={inputVal} onChange={e => setInputVal(e.target.value)}
-                className="flex-grow p-3 bg-[#F9F8F6] border border-[#1A1A1A]/15 focus:border-[#1A1A1A] focus:bg-white rounded-none outline-none font-sans text-xs text-[#1A1A1A]" />
-              <button type="submit" disabled={!inputVal.trim()}
-                className="p-3 bg-[#1A1A1A] text-white disabled:bg-[#1A1A1A]/10 disabled:text-neutral-300 transition-colors rounded-none shrink-0 border border-[#1A1A1A]">
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
+          <ChatInputBar lang={lang} inputVal={inputVal} hidden={messages.length === 0}
+            onInputChange={setInputVal} onSend={handleSend}
+            onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }} />
         </div>
 
         {/* Right panel: team members or friends */}
