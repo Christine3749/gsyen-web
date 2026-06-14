@@ -7,23 +7,24 @@ interface UseChatSessionReturn {
   messages: ChatMessage[];
   sessions: StoredSession[];
   currentSessionId: string | null;
+  currentTeamId: string | null;
   setMessages: (msgs: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
   saveChat: (msgs: ChatMessage[], model: ModelId) => void;
   loadSession: (session: StoredSession) => void;
   deleteSession: (id: string) => void;
   newChat: () => void;
+  openTeamSession: (teamId: string) => void;
 }
 
 export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
   const [messages, setMessagesState] = useState<ChatMessage[]>([]);
   const [sessions, setSessions] = useState<StoredSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [currentTeamId, setCurrentTeamId] = useState<string | null>(null);
 
-  // Ref keeps the session ID readable synchronously inside async callbacks,
-  // avoiding stale closure bugs during streaming (onToken fires hundreds of times).
-  const sessionIdRef = useRef<string | null>(null);
+  const sessionIdRef  = useRef<string | null>(null);
+  const teamIdRef     = useRef<string | null>(null);
 
-  // Boot: load persisted chat + session list
   useEffect(() => {
     setSessions(chatSessionStore.loadAll());
     const saved = chatSessionStore.loadCurrentChat();
@@ -35,7 +36,6 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
-  // Realtime cross-device sync: another device wrote → store dispatches event → re-load sessions
   useEffect(() => {
     const handler = () => setSessions(chatSessionStore.loadAll());
     window.addEventListener('chat-sessions-updated', handler);
@@ -50,21 +50,23 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     setMessagesState(msgs);
     chatSessionStore.saveCurrentChat(msgs);
     if (msgs.some(m => m.role === 'user')) {
-      // Use ref for synchronous read — state would be stale inside async loops
       if (!sessionIdRef.current) {
         sessionIdRef.current = crypto.randomUUID();
         setCurrentSessionId(sessionIdRef.current);
       }
-      const updated = chatSessionStore.upsert(sessionIdRef.current, msgs, model);
+      const updated = chatSessionStore.upsert(
+        sessionIdRef.current, msgs, model, teamIdRef.current ?? undefined
+      );
       setSessions(updated);
     }
-  // Empty deps intentional: all reads go through ref or stable store
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadSession = useCallback((session: StoredSession) => {
     sessionIdRef.current = session.id;
+    teamIdRef.current    = session.teamId ?? null;
     setCurrentSessionId(session.id);
+    setCurrentTeamId(session.teamId ?? null);
     setMessagesState(session.messages);
     chatSessionStore.saveCurrentChat(session.messages);
   }, []);
@@ -74,7 +76,9 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     setSessions(updated);
     if (sessionIdRef.current === id) {
       sessionIdRef.current = null;
+      teamIdRef.current    = null;
       setCurrentSessionId(null);
+      setCurrentTeamId(null);
       setMessagesState([defaultGreeting(lang)]);
       chatSessionStore.clearCurrentChat();
     }
@@ -82,12 +86,38 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
 
   const newChat = useCallback(() => {
     sessionIdRef.current = null;
+    teamIdRef.current    = null;
     setCurrentSessionId(null);
+    setCurrentTeamId(null);
     setMessagesState([]);
     chatSessionStore.clearCurrentChat();
   }, []);
 
-  return { messages, sessions, currentSessionId, setMessages, saveChat, loadSession, deleteSession, newChat };
+  const openTeamSession = useCallback((teamId: string) => {
+    const existing = chatSessionStore.findTeamSession(teamId);
+    if (existing) {
+      sessionIdRef.current = existing.id;
+      teamIdRef.current    = teamId;
+      setCurrentSessionId(existing.id);
+      setCurrentTeamId(teamId);
+      const msgs = existing.messages.length > 0 ? existing.messages : [defaultGreeting(lang)];
+      setMessagesState(msgs);
+      chatSessionStore.saveCurrentChat(msgs);
+    } else {
+      // New team session — id assigned on first message
+      sessionIdRef.current = null;
+      teamIdRef.current    = teamId;
+      setCurrentSessionId(null);
+      setCurrentTeamId(teamId);
+      setMessagesState([defaultGreeting(lang)]);
+      chatSessionStore.clearCurrentChat();
+    }
+  }, [lang]);
+
+  return {
+    messages, sessions, currentSessionId, currentTeamId,
+    setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession,
+  };
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

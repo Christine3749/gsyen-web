@@ -65,11 +65,15 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setCreativeDocId(doc.id);
   };
 
-  const { messages, sessions, currentSessionId, setMessages, saveChat, loadSession, deleteSession, newChat } =
+  const { messages, sessions, currentSessionId, currentTeamId, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
     useChatSession(lang);
 
   const handleLoadSession = (s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); };
   const handleNewChat = () => { newChat(); clearTeam(); };
+  const handleSelectTeam = (team: Parameters<typeof selectTeam>[0]) => {
+    selectTeam(team);
+    openTeamSession(team.id);
+  };
   const { isLoading, send } = useChatStream();
   const pendingCard = useRef<ActionCard | null>(null);
 
@@ -211,7 +215,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
           onNewChat={handleNewChat}
           teams={teams}
           selectedTeamId={selectedTeam?.id}
-          onSelectTeam={(t) => selectTeam(t as any)}
+          onSelectTeam={(t) => handleSelectTeam(t as any)}
           onCreateTeam={() => setCreateTeamOpen(true)}
         />
 

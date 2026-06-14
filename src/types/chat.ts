@@ -25,4 +25,5 @@ export interface StoredSession {
   model:     string;
   messages:  ChatMessage[];
   updatedAt: string;
+  teamId?:   string;
 }

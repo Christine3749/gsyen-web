@@ -114,7 +114,10 @@ export function ChatSidebar({
                 <p className="fs-md font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2">{s.title}</p>
                 <div className="flex items-center gap-2">
                   <span className="fs-2xs font-mono text-[#1A1A1A]/30 uppercase">{new Date(s.updatedAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
-                  <span className="fs-2xs font-mono text-[#1A1A1A]/25 uppercase">{s.model}</span>
+                  {s.teamId
+                    ? <span className="fs-2xs font-mono text-[#1A6ECC]/60 uppercase">· team</span>
+                    : <span className="fs-2xs font-mono text-[#1A1A1A]/25 uppercase">{s.model}</span>
+                  }
                 </div>
               </div>
               <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} className="opacity-0 group-hover:opacity-100 shrink-0 p-0.5 hover:text-red-500 text-[#1A1A1A]/30 transition-all">

@@ -8,13 +8,13 @@ const CURRENT_CHAT_KEY = 'atelier_ai_chat';
 let _uid: string | null = null;
 
 async function _upsert(s: StoredSession) {
-  if (!supabase || !_uid) { console.warn('[sync] _upsert skipped: no supabase or uid', { supabase: !!supabase, uid: _uid }); return; }
+  if (!supabase || !_uid) return;
   const { error } = await supabase.from('gsyen_chat_sessions').upsert({
     id: s.id, user_id: _uid, title: s.title, model: s.model,
     messages: s.messages, updated_at: new Date(s.updatedAt).getTime(),
+    team_id: s.teamId ?? null,
   });
   if (error) console.error('[sync] _upsert error', error);
-  else console.log('[sync] _upsert ok', s.id);
 }
 
 async function _removeRemote(id: string) {
@@ -23,20 +23,23 @@ async function _removeRemote(id: string) {
 }
 
 async function _pull(userId: string) {
-  if (!supabase) { console.warn('[sync] _pull skipped: no supabase'); return; }
+  if (!supabase) return;
+  // No user_id filter — RLS returns own sessions + team sessions the user can see
   const { data, error } = await supabase.from('gsyen_chat_sessions')
-    .select('*').eq('user_id', userId).order('updated_at', { ascending: false });
+    .select('*').order('updated_at', { ascending: false }).limit(200);
   if (error) { console.error('[sync] _pull error', error); return; }
-  console.log('[sync] _pull got', data?.length, 'rows');
   if (!data) return;
   const remote: StoredSession[] = data.map((r: any) => ({
     id: r.id, title: r.title, model: r.model,
-    messages: r.messages ?? [], updatedAt: new Date(r.updated_at).toISOString(),
+    messages: r.messages ?? [],
+    updatedAt: new Date(r.updated_at).toISOString(),
+    teamId: r.team_id ?? undefined,
   }));
-  const local    = chatSessionStore.loadAll();
-  const remIds   = new Set(remote.map(s => s.id));
-  const UUID_RE  = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const localOnly = local.filter(s => !remIds.has(s.id) && UUID_RE.test(s.id));
+  const local   = chatSessionStore.loadAll();
+  const remIds  = new Set(remote.map(s => s.id));
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  // Only push personal sessions that haven't synced yet — never push team sessions
+  const localOnly = local.filter(s => !remIds.has(s.id) && UUID_RE.test(s.id) && !s.teamId);
   for (const s of localOnly) await _upsert(s);
   const merged = [...remote, ...localOnly].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(merged));
@@ -48,10 +51,11 @@ let _rt: any = null;
 
 function _subscribeRealtime(uid: string) {
   _rt?.unsubscribe();
+  // Subscribe to both own sessions and team sessions (RLS handles row visibility)
   _rt = supabase!
     .channel(`gsyen_chat_sessions:${uid}`)
     .on('postgres_changes',
-      { event: '*', schema: 'public', table: 'gsyen_chat_sessions', filter: `user_id=eq.${uid}` },
+      { event: '*', schema: 'public', table: 'gsyen_chat_sessions' },
       () => _pull(uid)
     )
     .subscribe();
@@ -75,18 +79,27 @@ export const chatSessionStore = {
   },
 
   /** Insert or update a session, re-sorts by updatedAt desc */
-  upsert(id: string, msgs: ChatMessage[], model: string): StoredSession[] {
+  upsert(id: string, msgs: ChatMessage[], model: string, teamId?: string): StoredSession[] {
     const firstUser = msgs.find(m => m.role === 'user');
     const raw = firstUser?.content ?? '';
     const title = raw.length > 36 ? raw.slice(0, 36) + '…' : raw || '新对话';
     const all = this.loadAll();
     const idx = all.findIndex(s => s.id === id);
-    const record: StoredSession = { id, title, model, messages: msgs, updatedAt: new Date().toISOString() };
+    const record: StoredSession = {
+      id, title, model, messages: msgs,
+      updatedAt: new Date().toISOString(),
+      teamId,
+    };
     if (idx >= 0) all[idx] = record; else all.unshift(record);
     const sorted = all.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     localStorage.setItem(SESSIONS_KEY, JSON.stringify(sorted));
     _upsert(record);
     return sorted;
+  },
+
+  /** Find existing team session by teamId */
+  findTeamSession(teamId: string): StoredSession | null {
+    return this.loadAll().find(s => s.teamId === teamId) ?? null;
   },
 
   delete(id: string): StoredSession[] {
