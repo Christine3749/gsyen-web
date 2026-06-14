@@ -3,6 +3,7 @@ import PasswordGeneratorPanel from './PasswordGeneratorPanel';
 import CredentialAddForm from './CredentialAddForm';
 import CredentialTable from './CredentialTable';
 import { CredentialRow, LOCAL_STORAGE_KEY, defaultCredentials } from './passwordVault';
+import { vaultStore } from '../stores/vaultStore';
 
 interface PasswordModuleProps {
   lang: 'zh' | 'en';
@@ -48,11 +49,7 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
   }, []);
 
   const handleDelete = useCallback((id: string) => {
-    setCredentials((prev) => {
-      const updated = prev.filter((c) => c.id !== id);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    vaultStore.remove(id);
   }, []);
 
   return (
