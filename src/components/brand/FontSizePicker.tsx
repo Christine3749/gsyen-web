@@ -13,12 +13,8 @@ const OPTIONS: FontSize[] = ['compact', 'normal', 'large', 'ji'];
 const ZH: Record<FontSize, string> = { compact: '紧凑', normal: '正常', large: '舒适', ji: '极' };
 const EN: Record<FontSize, string> = { compact: 'Compact', normal: 'Normal', large: 'Comfort', ji: 'Ultra' };
 
-// instant=true: 跳过 zoom transition（悬停预览，避免闪烁）
-// instant=false: 恢复 CSS 动画（点击确认时播放 180ms 过渡）
-function applyDataFont(v: FontSize, instant: boolean) {
+function applyDataFont(v: FontSize) {
   const el = document.documentElement;
-  if (instant) el.style.setProperty('transition', 'zoom 0ms');
-  else el.style.removeProperty('transition');
   if (v === 'normal') el.removeAttribute('data-font');
   else el.setAttribute('data-font', v);
 }
@@ -68,16 +64,15 @@ export function FontSizePicker({ value, onChange, zh, isShortScreen }: Props) {
 
   const handleEnter = (i: number) => {
     syncHover(i);
-    applyDataFont(OPTIONS[i], true);  // instant — no zoom flicker on hover
+    applyDataFont(OPTIONS[i]);
   };
 
   const handleLeave = () => {
     syncHover(null);
-    applyDataFont(value, true);  // instant restore to committed value
+    applyDataFont(value);
   };
 
   const handleClick = (i: number) => {
-    document.documentElement.style.removeProperty('transition');  // restore CSS 180ms for commit animation
     onChange(OPTIONS[i]);
   };
 

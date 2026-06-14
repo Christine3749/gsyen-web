@@ -135,7 +135,6 @@
 }
 
 /* 字号档位 — zoom 挂在 html 层，vh/vw 单位随之缩放，h-screen 不会留白或溢出 */
-html { transition: zoom 180ms cubic-bezier(0.4, 0, 0.2, 1); }
 html[data-font="compact"] { zoom: 0.85; }
 html[data-font="large"] {
   zoom: 1.15;
