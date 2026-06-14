@@ -74,6 +74,7 @@ export function ChatSidebar({
   teams = [], selectedTeamId, onSelectTeam, onCreateTeam,
 }: ChatSidebarProps) {
   const { api, phase, version, pct } = useUpdater();
+  const [teamsOpen, setTeamsOpen] = useState(false);
 
   return (
     <aside className={`bg-[#F4F2EE] border-[#1A1A1A]/10 flex flex-col justify-between transition-all duration-300 overflow-hidden shrink-0 ${open ? 'w-full md:w-[240px] 2xl:w-[320px] p-6 border-r opacity-100' : 'w-0 p-0 border-r-0 opacity-0 pointer-events-none'}`}>
@@ -124,30 +125,33 @@ export function ChatSidebar({
         </div>
 
         {/* 团队列表 */}
-        {recentsOpen && (
-          <div className="pt-2 border-t border-[#1A1A1A]/10 space-y-0.5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="fs-xs font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/40">
-                {lang === 'zh' ? '我的团队' : 'Teams'} · {teams.length}
-              </span>
-            </div>
-            {teams.map(t => {
-              const active = selectedTeamId === t.id;
-              return (
-                <button key={t.id} onClick={() => onSelectTeam?.(t)}
-                  className={`group flex items-start gap-2.5 p-3 w-full border cursor-pointer transition-all text-left ${active ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
-                  <Users className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${active ? 'text-[#1A1A1A]/70' : 'text-[#1A1A1A]/25 group-hover:text-[#1A1A1A]/50'}`} strokeWidth={1.5} />
-                  <span className="fs-md font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2 flex-1">{t.name}</span>
-                </button>
-              );
-            })}
-            <button onClick={() => onCreateTeam?.()}
-              className="flex items-center gap-1.5 w-full px-3 py-2 mt-1 fs-sm font-mono font-bold tracking-widest uppercase border border-[#1A1A1A]/12 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-all text-[#1A1A1A]/40 rounded-none">
-              <Plus className="w-3 h-3" />
-              {lang === 'zh' ? '开团' : 'New Team'}
-            </button>
-          </div>
-        )}
+        <div className="pt-2 border-t border-[#1A1A1A]/10 space-y-0.5 shrink-0">
+          <button onClick={() => setTeamsOpen(o => !o)} className="flex items-center justify-between w-full mb-2 group">
+            <span className="fs-xs font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/40 group-hover:text-[#1A1A1A]/70 transition-colors">
+              {lang === 'zh' ? '我的团队' : 'Teams'} · {teams.length}
+            </span>
+            <span className={`text-[#1A1A1A]/30 fs-sm transition-transform duration-200 ${teamsOpen ? 'rotate-90' : ''}`}>›</span>
+          </button>
+          {teamsOpen && (
+            <>
+              {teams.map(t => {
+                const active = selectedTeamId === t.id;
+                return (
+                  <button key={t.id} onClick={() => onSelectTeam?.(t)}
+                    className={`group flex items-start gap-2.5 p-3 w-full border cursor-pointer transition-all text-left ${active ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
+                    <Users className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${active ? 'text-[#1A1A1A]/70' : 'text-[#1A1A1A]/25 group-hover:text-[#1A1A1A]/50'}`} strokeWidth={1.5} />
+                    <span className="fs-md font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2 flex-1">{t.name}</span>
+                  </button>
+                );
+              })}
+              <button onClick={() => onCreateTeam?.()}
+                className="flex items-center gap-1.5 w-full px-3 py-2 mt-1 fs-sm font-mono font-bold tracking-widest uppercase border border-[#1A1A1A]/12 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-all text-[#1A1A1A]/40 rounded-none">
+                <Plus className="w-3 h-3" />
+                {lang === 'zh' ? '开团' : 'New Team'}
+              </button>
+            </>
+          )}
+        </div>
 
         {/* 底部：有更新时显示更新卡，否则显示存储状态 */}
         {phase !== 'idle' && (

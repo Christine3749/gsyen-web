@@ -52,7 +52,7 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     if (msgs.some(m => m.role === 'user')) {
       // Use ref for synchronous read — state would be stale inside async loops
       if (!sessionIdRef.current) {
-        sessionIdRef.current = `session-${Date.now()}`;
+        sessionIdRef.current = crypto.randomUUID();
         setCurrentSessionId(sessionIdRef.current);
       }
       const updated = chatSessionStore.upsert(sessionIdRef.current, msgs, model);
