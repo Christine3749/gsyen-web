@@ -135,8 +135,8 @@
 }
 
 /* ── 字号档位 CSS 变量 ─────────────────────────────────────────────────────
-   组件用 text-(--fs-sm) 等引用，切档只改变量，布局/间距/颜色全不变。
-   zoom 已完全移除，h-screen 天然铺满视口。
+   组件用 .fs-sm 等直接 CSS 类引用，绕过 Tailwind v4 对 text-(--var) 的
+   color/size 歧义解析问题。切档只改变量，布局/间距/颜色全不变。
    ────────────────────────────────────────────────────────────────────── */
 :root {
   --fs-2xs:  8px;
@@ -174,6 +174,15 @@ html[data-font="ji"] {
   --fs-body: 15px;
   --fs-lg:   16px;
 }
+
+/* 字号工具类 — 直接定义避免 Tailwind v4 text-(--var) 的 color/size 歧义 */
+.fs-2xs  { font-size: var(--fs-2xs);  }
+.fs-xs   { font-size: var(--fs-xs);   }
+.fs-sm   { font-size: var(--fs-sm);   }
+.fs-md   { font-size: var(--fs-md);   }
+.fs-base { font-size: var(--fs-base); }
+.fs-body { font-size: var(--fs-body); }
+.fs-lg   { font-size: var(--fs-lg);   }
 
 @keyframes gsyen-breathe {
   0%, 100% { opacity: 1; }
