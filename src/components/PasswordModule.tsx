@@ -25,9 +25,7 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
       try { setCredentials(JSON.parse(saved)); return; }
       catch (e) { console.error(e); }
     }
-    const seed = defaultCredentials(lang);
-    setCredentials(seed);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(seed));
+    setCredentials(defaultCredentials(lang));
   }, [lang]);
 
   // 与 vaultStore 双向同步——VAULT 卡片的增删会触发此事件
@@ -41,11 +39,7 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
   }, []);
 
   const handleAdd = useCallback((row: CredentialRow) => {
-    setCredentials((prev) => {
-      const updated = [row, ...prev];
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    vaultStore.add(row);
   }, []);
 
   const handleDelete = useCallback((id: string) => {

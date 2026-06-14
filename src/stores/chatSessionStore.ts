@@ -1,8 +1,18 @@
 import { ChatMessage, StoredSession } from '../types/chat';
 import { supabase } from '../lib/supabase';
 
-const SESSIONS_KEY    = 'gsyen_chat_sessions_v1';
+const SESSIONS_KEY     = 'gsyen_chat_sessions_v1';
 const CURRENT_CHAT_KEY = 'atelier_ai_chat';
+const SYNCED_KEY       = 'gsyen_chat_synced_ids';
+
+function getSyncedIds(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(SYNCED_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function addSyncedId(id: string) {
+  const ids = getSyncedIds(); ids.add(id);
+  localStorage.setItem(SYNCED_KEY, JSON.stringify([...ids]));
+}
 
 // ── Supabase 双写 ─────────────────────────────────────────────────────────────
 let _uid: string | null = null;
@@ -15,6 +25,7 @@ async function _upsert(s: StoredSession) {
     team_id: s.teamId ?? null,
   });
   if (error) console.error('[sync] _upsert error', error);
+  else addSyncedId(s.id);
 }
 
 async function _removeRemote(id: string) {
@@ -36,11 +47,12 @@ async function _pull(userId: string) {
     teamId: r.team_id ?? undefined,
   }));
   const local   = chatSessionStore.loadAll();
-  const remIds  = new Set(remote.map(s => s.id));
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  // Only push personal sessions that haven't synced yet — never push team sessions
-  const localOnly = local.filter(s => !remIds.has(s.id) && UUID_RE.test(s.id) && !s.teamId);
+  const remIds     = new Set(remote.map(s => s.id));
+  const UUID_RE    = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const syncedIds  = getSyncedIds();
+  const localOnly  = local.filter(s => !remIds.has(s.id) && UUID_RE.test(s.id) && !s.teamId && !syncedIds.has(s.id));
   for (const s of localOnly) await _upsert(s);
+  for (const s of remote) addSyncedId(s.id);
   const merged = [...remote, ...localOnly].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(merged));
   window.dispatchEvent(new CustomEvent('chat-sessions-updated'));
@@ -72,6 +84,7 @@ supabase?.auth.onAuthStateChange((_ev, session) => {
     _rt = null;
     localStorage.removeItem(SESSIONS_KEY);
     localStorage.removeItem(CURRENT_CHAT_KEY);
+    localStorage.removeItem(SYNCED_KEY);
     window.dispatchEvent(new CustomEvent('chat-sessions-updated'));
   }
 });

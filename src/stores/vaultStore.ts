@@ -1,6 +1,16 @@
 import { CredentialRow, LOCAL_STORAGE_KEY } from '../components/passwordVault';
 import { supabase } from '../lib/supabase';
 
+const SYNCED_KEY = 'gsyen_vault_synced_ids';
+function getSyncedIds(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(SYNCED_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function addSyncedId(id: string) {
+  const ids = getSyncedIds(); ids.add(id);
+  localStorage.setItem(SYNCED_KEY, JSON.stringify([...ids]));
+}
+
 function load(): CredentialRow[] {
   const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (saved) { try { return JSON.parse(saved); } catch {} }
@@ -16,6 +26,7 @@ export const vaultStore = {
   getAll: (): CredentialRow[] => load(),
 
   add(row: CredentialRow) {
+    if (!_uid) return;
     save([row, ...load()]);
     void _upsert(row);
   },
@@ -26,6 +37,7 @@ export const vaultStore = {
   },
 
   update(id: string, patch: Partial<CredentialRow>) {
+    if (!_uid) return;
     const rows = load().map(r => r.id === id ? { ...r, ...patch } : r);
     save(rows);
     const updated = rows.find(r => r.id === id);
@@ -44,6 +56,7 @@ async function _upsert(row: CredentialRow) {
   await supabase.from('gsyen_vault').upsert(
     { id: row.id, user_id: _uid, data: row, updated_at: new Date().toISOString() }
   );
+  addSyncedId(row.id);
 }
 
 async function _delete(id: string) {
@@ -63,10 +76,12 @@ async function _pull(userId: string) {
   const remote: CredentialRow[] = data
     .map((r: any) => r.data as CredentialRow)
     .filter(r => !_pendingDeletes.has(r.id));
-  const local     = load();
-  const remIds    = new Set(remote.map(r => r.id));
-  const localOnly = local.filter(r => !remIds.has(r.id));
+  const local      = load();
+  const remIds     = new Set(remote.map(r => r.id));
+  const syncedIds  = getSyncedIds();
+  const localOnly  = local.filter(r => !remIds.has(r.id) && !syncedIds.has(r.id));
   for (const row of localOnly) await _upsert(row);
+  for (const r of remote) addSyncedId(r.id);
   save([...remote, ...localOnly]);
 }
 
@@ -84,5 +99,11 @@ function _subscribeRealtime(uid: string) {
 supabase?.auth.onAuthStateChange((_ev, session) => {
   _uid = session?.user?.id ?? null;
   if (_uid) { _pull(_uid); _subscribeRealtime(_uid); }
-  else { _rt?.unsubscribe(); _rt = null; }
+  else {
+    _rt?.unsubscribe();
+    _rt = null;
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem(SYNCED_KEY);
+    window.dispatchEvent(new Event('vault-updated'));
+  }
 });
