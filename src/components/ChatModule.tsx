@@ -71,7 +71,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
 
   const handleLoadSession = (s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); };
-  const handleNewChat = () => { newChat(); clearTeam(); };
+  const handleNewChat = () => { newChat(selectedModel); clearTeam(); };
   const handleSelectTeam = (team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);
@@ -100,6 +100,9 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
 
     saveChat(history, selectedModel);
     setInputVal('');
+
+    // 团队 session：只有 @缈缈 才触发 AI
+    if (currentTeamId && !/^@缈缈|^@miaomiao/i.test(text.trimStart())) return;
 
     const aiId   = `ai-${Date.now()}`;
     const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -261,7 +264,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
           {/* Input bar */}
           <div className={`shrink-0 p-4 border-t border-[#1A1A1A]/10 bg-white ${messages.length === 0 ? 'hidden' : ''}`}>
             <form onSubmit={(e) => { e.preventDefault(); handleSend(inputVal); }} className="flex items-center gap-2">
-              <button type="button" onClick={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(); }}
+              <button type="button" onClick={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }}
                 className="p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition-colors text-neutral-500 rounded-none shrink-0">
                 <Trash2 className="w-4 h-4" />
               </button>
