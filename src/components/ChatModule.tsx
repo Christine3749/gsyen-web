@@ -101,6 +101,9 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     saveChat(history, selectedModel);
     setInputVal('');
 
+    // 团队 session：只存消息，不自动调 AI；只有 @缈缈 才触发
+    if (currentTeamId && !/^@缈缈|^@miaomiao/i.test(text.trimStart())) return;
+
     const aiId   = `ai-${Date.now()}`;
     const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
