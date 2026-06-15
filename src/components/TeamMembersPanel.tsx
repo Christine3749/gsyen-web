@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, User, Copy, Check } from 'lucide-react';
 import { TeamItem, TeamMember } from '../hooks/useTeams';
 
@@ -10,11 +10,18 @@ interface Props {
 
 export function TeamMembersPanel({ team, members, onClose }: Props) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<number>();
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   const copyCode = () => {
-    navigator.clipboard.writeText(team.invite_code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    navigator.clipboard.writeText(team.invite_code)
+      .then(() => {
+        setCopied(true);
+        timerRef.current = window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   };
 
   return (

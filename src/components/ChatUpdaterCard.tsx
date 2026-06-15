@@ -16,9 +16,15 @@ function _initUpdater() {
   _registered = true;
   const api = (window as any).electronAPI?.updater;
   if (!api) return;
-  api.onAvailable((i: any) => { _cache = { ..._cache, version: i.version ?? '', phase: 'downloading' }; _notify(); });
-  api.onProgress((p: any) => { _cache = { ..._cache, pct: Math.round(p.percent ?? 0) }; _notify(); });
-  api.onDownloaded((i: any) => { _cache = { version: i.version ?? '', pct: 100, phase: 'ready' }; _notify(); });
+  const isMac = navigator.platform.startsWith('Mac');
+  api.onAvailable((i: any) => {
+    _cache = { ..._cache, version: i.version ?? '', phase: isMac ? 'ready' : 'downloading' };
+    _notify();
+  });
+  if (!isMac) {
+    api.onProgress((p: any) => { _cache = { ..._cache, pct: Math.round(p.percent ?? 0) }; _notify(); });
+    api.onDownloaded((i: any) => { _cache = { version: i.version ?? '', pct: 100, phase: 'ready' }; _notify(); });
+  }
 }
 
 function useUpdater() {

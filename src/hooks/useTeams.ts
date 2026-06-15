@@ -115,25 +115,16 @@ export async function loadTeamMembers(teamId: string): Promise<TeamMember[]> {
   return (data as TeamMember[]) ?? [];
 }
 
-// ── 通过邀请码加入团队 ────────────────────────────────────────
+// ── 通过邀请码加入团队（SECURITY DEFINER RPC，绕过 RLS）────────
 export async function joinTeam(userId: string, inviteCode: string): Promise<{ ok: boolean; error?: string }> {
   if (!supabase) return { ok: false, error: '未连接数据库' };
-  const { data: team } = await supabase
-    .from('gsyen_teams')
-    .select('id')
-    .eq('invite_code', inviteCode.toUpperCase().trim())
-    .maybeSingle();
-  if (!team) return { ok: false, error: '邀请码无效' };
-  const { count } = await supabase
-    .from('gsyen_team_members')
-    .select('*', { count: 'exact', head: true })
-    .eq('team_id', team.id)
-    .eq('user_id', userId);
-  if ((count ?? 0) > 0) return { ok: false, error: '已在该团队中' };
-  const { error } = await supabase
-    .from('gsyen_team_members')
-    .insert({ team_id: team.id, user_id: userId, role: 'member' });
+  const { data, error } = await supabase.rpc('join_team_by_invite_code', {
+    p_invite_code: inviteCode,
+    p_user_id: userId,
+  });
   if (error) return { ok: false, error: error.message };
+  if (data === 'invalid_code')   return { ok: false, error: '邀请码无效' };
+  if (data === 'already_member') return { ok: false, error: '已在该团队中' };
   _invalidateTeams();
   await _fetch(userId);
   return { ok: true };

@@ -121,7 +121,8 @@ export function ChatSidebar({
                   {lang === 'zh' ? '开团' : 'New'}
                 </button>
                 <button onClick={() => { setJoinOpen(true); setJoinCode(''); setJoinError(''); }}
-                  className="flex items-center gap-1.5 flex-1 px-3 py-2 fs-sm font-mono font-bold tracking-widest uppercase border border-[#1A1A1A]/12 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-all text-[#1A1A1A]/40 rounded-none">
+                  disabled={!user}
+                  className="flex items-center gap-1.5 flex-1 px-3 py-2 fs-sm font-mono font-bold tracking-widest uppercase border border-[#1A1A1A]/12 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-all text-[#1A1A1A]/40 rounded-none disabled:opacity-30 disabled:pointer-events-none">
                   <User className="w-3 h-3" />
                   {lang === 'zh' ? '加入' : 'Join'}
                 </button>
