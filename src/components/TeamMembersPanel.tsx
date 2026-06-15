@@ -1,4 +1,5 @@
-import { X, User } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, User, Copy, Check } from 'lucide-react';
 import { TeamItem, TeamMember } from '../hooks/useTeams';
 
 interface Props {
@@ -8,6 +9,21 @@ interface Props {
 }
 
 export function TeamMembersPanel({ team, members, onClose }: Props) {
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<number>();
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  const copyCode = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    navigator.clipboard.writeText(team.invite_code)
+      .then(() => {
+        setCopied(true);
+        timerRef.current = window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
+  };
+
   return (
     <aside className="w-[200px] shrink-0 flex flex-col border-l border-[#1A1A1A]/8 bg-[#F4F2EE]">
 
@@ -26,6 +42,20 @@ export function TeamMembersPanel({ team, members, onClose }: Props) {
           <X className="w-3 h-3" strokeWidth={1.5} />
         </button>
       </div>
+
+      {/* 邀请码（仅团长可见）*/}
+      {team.role === 'owner' && (
+        <div className="mx-4 mt-3 mb-1 p-2.5 border border-[#1A1A1A]/10 bg-white/60 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="fs-2xs font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/30 mb-0.5">邀请码</p>
+            <p className="fs-xs font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/70">{team.invite_code}</p>
+          </div>
+          <button onClick={copyCode} aria-label="复制邀请码"
+            className="shrink-0 p-1.5 border border-[#1A1A1A]/10 hover:bg-[#1A1A1A] hover:text-white transition-all text-[#1A1A1A]/40 rounded-none">
+            {copied ? <Check className="w-3 h-3 text-emerald-500" strokeWidth={1.5} /> : <Copy className="w-3 h-3" strokeWidth={1.5} />}
+          </button>
+        </div>
+      )}
 
       {/* 成员数 label */}
       <div className="px-4 pt-3 pb-1">
