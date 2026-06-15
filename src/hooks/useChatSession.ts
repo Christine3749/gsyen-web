@@ -26,10 +26,22 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
   const teamIdRef     = useRef<string | null>(null);
 
   useEffect(() => {
-    setSessions(chatSessionStore.loadAll());
+    const allSessions = chatSessionStore.loadAll();
+    setSessions(allSessions);
     const saved = chatSessionStore.loadCurrentChat();
     if (saved.length > 0) {
       setMessagesState(saved);
+      // 刷新后恢复 sessionIdRef，防止 save prompt 触发时新建重复 session
+      const lastUserMsg = [...saved].reverse().find(m => m.role === 'user');
+      if (lastUserMsg) {
+        const match = allSessions.find(s => s.messages.some(m => m.id === lastUserMsg.id));
+        if (match) {
+          sessionIdRef.current = match.id;
+          teamIdRef.current    = match.teamId ?? null;
+          setCurrentSessionId(match.id);
+          setCurrentTeamId(match.teamId ?? null);
+        }
+      }
     } else {
       setMessagesState([defaultGreeting(lang)]);
     }
