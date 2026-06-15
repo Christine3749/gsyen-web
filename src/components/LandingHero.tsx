@@ -61,7 +61,7 @@ const IOSIcon = () => (
   </svg>
 );
 
-const R2_BASE        = 'https://4dceba8f9d03d121208467416a73c948.r2.cloudflarestorage.com/gsyen-releases';
+const R2_BASE        = 'https://pub-e31e040936184655b82ef435a00e4676.r2.dev';
 const WINDOWS_R2     = `${R2_BASE}/GSYEN-Setup-Windows.exe`;
 const MAC_R2_ARM64   = `${R2_BASE}/GSYEN-Setup-Mac-arm64.dmg`;
 const MAC_R2_X64     = `${R2_BASE}/GSYEN-Setup-Mac-x64.dmg`;
