@@ -120,7 +120,6 @@ export async function joinTeam(userId: string, inviteCode: string): Promise<{ ok
   if (!supabase) return { ok: false, error: '未连接数据库' };
   const { data, error } = await supabase.rpc('join_team_by_invite_code', {
     p_invite_code: inviteCode,
-    p_user_id: userId,
   });
   if (error) return { ok: false, error: error.message };
   if (data === 'invalid_code')   return { ok: false, error: '邀请码无效' };

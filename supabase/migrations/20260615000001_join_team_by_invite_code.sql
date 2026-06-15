@@ -1,7 +1,9 @@
 -- RPC: join_team_by_invite_code
 -- SECURITY DEFINER bypasses RLS so any authenticated user can look up a team
 -- by invite code and self-insert into gsyen_team_members as 'member'.
-CREATE OR REPLACE FUNCTION join_team_by_invite_code(p_invite_code TEXT, p_user_id UUID)
+-- Uses auth.uid() directly to prevent privilege escalation (no p_user_id param).
+-- Atomic INSERT ... ON CONFLICT eliminates the COUNT/INSERT race condition.
+CREATE OR REPLACE FUNCTION join_team_by_invite_code(p_invite_code TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -9,7 +11,6 @@ SET search_path = public
 AS $$
 DECLARE
   v_team_id UUID;
-  v_count   INT;
 BEGIN
   SELECT id INTO v_team_id
   FROM gsyen_teams
@@ -19,16 +20,13 @@ BEGIN
     RETURN 'invalid_code';
   END IF;
 
-  SELECT COUNT(*) INTO v_count
-  FROM gsyen_team_members
-  WHERE team_id = v_team_id AND user_id = p_user_id;
+  INSERT INTO gsyen_team_members (team_id, user_id, role)
+  VALUES (v_team_id, auth.uid(), 'member')
+  ON CONFLICT (team_id, user_id) DO NOTHING;
 
-  IF v_count > 0 THEN
+  IF NOT FOUND THEN
     RETURN 'already_member';
   END IF;
-
-  INSERT INTO gsyen_team_members (team_id, user_id, role)
-  VALUES (v_team_id, p_user_id, 'member');
 
   RETURN 'ok';
 END;
