@@ -7,8 +7,8 @@ const EN_SLOGAN = 'TELL ME YOUR HEART';
 const ZH_OFFSETS = [0, 300, 600, 1900, 2200, 2500, 2800];
 const EN_INTERVAL = 90;
 
-// wait for all page motion animations to settle before typing begins (~1.5s)
-const START_DELAY = 1500;
+const CURSOR_APPEAR = 2600; // silence after page settles — cursor blinks alone here
+const START_DELAY   = 3200; // typing begins after cursor has blinked ~2-3 times
 
 export function useTypewriter(zh: boolean) {
   const fullSlogan = zh ? ZH_SLOGAN : EN_SLOGAN;
@@ -21,8 +21,7 @@ export function useTypewriter(zh: boolean) {
 
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    // cursor blinks in just before typing
-    timers.push(setTimeout(() => setShowCursor(true), START_DELAY - 120));
+    timers.push(setTimeout(() => setShowCursor(true), CURSOR_APPEAR));
 
     fullSlogan.split('').forEach((_, i) => {
       const offset = zh ? ZH_OFFSETS[i] : i * EN_INTERVAL;
