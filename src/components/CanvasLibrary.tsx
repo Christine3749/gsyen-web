@@ -75,9 +75,10 @@ export function CanvasLibrary({ open, P }: Props) {
           />
         )}
 
-        {/* Header */}
+        {/* Header — z-index:25 确保在 Chrome overlay(z:20) 之上，不被遮挡 */}
         <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 12px', borderBottom: `0.5px solid ${P.border}`, flexShrink: 0 }}>
+          padding: '0 12px', borderBottom: `0.5px solid ${P.border}`, flexShrink: 0,
+          position: 'relative', zIndex: 25 }}>
           <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', fontFamily: SYS_FONT,
             color: P.fg, textTransform: 'uppercase' }}>Library</span>
           <button onClick={handleAddClick} title="添加文件夹"

@@ -226,7 +226,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
       onClick={() => setActiveMenu(null)} onMouseMove={handleMouseMove}>
 
       {/* Content — 三个面板常驻 DOM，display 切换避免重复挂载卸载 */}
-      <div style={{ position:'absolute', inset:0, paddingTop:CHROME_H, paddingBottom:0, overflow:'hidden' }}>
+      <div style={{ position:'absolute', inset:0, paddingTop:CHROME_H + 1, paddingBottom:0, overflow:'hidden' }}>
         {/* Doc — three-pane: Library | DocList | Editor */}
         <div style={{ display: docType === 'doc' ? 'flex' : 'none', width:'100%', height:'100%' }}>
           <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
