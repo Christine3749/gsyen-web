@@ -70,7 +70,7 @@ function _elPickFolderViaInput(): Promise<FolderSource | null> {
     const input = document.createElement('input');
     input.type = 'file';
     (input as any).webkitdirectory = true;
-    input.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+    input.style.cssText = 'position:fixed;top:-100px;left:-100px;width:1px;height:1px;opacity:0';
     document.body.appendChild(input);
 
     const cleanup = () => { try { document.body.removeChild(input); } catch {} };

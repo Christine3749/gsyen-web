@@ -3,8 +3,7 @@
  * Electron：input ref 直接 click（不走动态 createElement，保留用户激活链）
  * Web：showDirectoryPicker via fsAdapter
  */
-import { useRef } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { fsAdapter } from '../hooks/useFileSystem';
 import { SYS_FONT } from './CanvasEditorTypes';
