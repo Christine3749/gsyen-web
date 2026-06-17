@@ -1,10 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/facts", "destination": "/facts.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "redirects": [
+    { "source": "/branch", "destination": "https://branch.gsyen.com", "permanent": false }
   ]
 }

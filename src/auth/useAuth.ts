@@ -7,6 +7,7 @@ import {
   signOut, upgradeTierToFree,
 } from './authService';
 import type { AuthState, OAuthProvider, UserTier, LoginProvider } from '../types/auth';
+import type { ServerUser } from './getServerUser';
 
 const DEFAULT_AUTH_STATE: AuthState = {
   user: null, session: null, tier: null,
@@ -229,3 +230,32 @@ export function useAuth() {
 }
 
 export type UseAuthReturn = ReturnType<typeof useAuth>;
+
+// ── SSR 水合（仅 Next.js ClientRoot 调用）────────────────────────────────────
+// 在 ClientRoot render 阶段同步执行，早于 useEffect/_boot，
+// 将服务端已验证的用户写入单例，彻底消除 flash。
+let _serverHydrated = false;
+
+export function hydrateAuthFromServer(user: ServerUser | null): void {
+  if (_serverHydrated || _currentUid) return; // 幂等，已有 session 则跳过
+  _serverHydrated = true;
+
+  if (!user) {
+    // 服务端确认未登录：清快照，直接展示登录态
+    _clearSnap();
+    _store = { ...DEFAULT_AUTH_STATE, loading: false, justVerified: false };
+    return;
+  }
+
+  const tier = (user.tier as UserTier) ?? null;
+  _writeSnap({ uid: user.id, email: user.email, tier, ev: user.emailVerified, provider: null });
+  _store = {
+    ...DEFAULT_AUTH_STATE,
+    justVerified: false,
+    user: { id: user.id, email: user.email, user_metadata: {}, app_metadata: {}, aud: '' } as any,
+    tier,
+    emailVerified: user.emailVerified,
+    loginProvider: null,
+    loading: false, // 服务端已确认，无需等待网络
+  };
+}
