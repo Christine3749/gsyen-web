@@ -175,11 +175,12 @@ function _boot() {
         return;
       }
 
-      // Step 2: 无本地 session → 尝试 HttpOnly cookie，最多重试 3 次（对抗冷启动/抖动）
+      // Step 2: 无本地 session → 尝试 HttpOnly cookie
+      // 401 = session 确认失效，立即处理；网络/5xx = 临时故障，最多重试 3 次
       let me: Awaited<ReturnType<typeof authProxy.me>> = { ok: false };
       for (let i = 0; i < 3; i++) {
         me = await authProxy.me();
-        if (me.ok) break;
+        if (me.ok || me.status === 401) break; // 401 不重试
         if (i < 2) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
       }
       if (_currentUid) return; // 等待期间已手动登录
@@ -187,10 +188,14 @@ function _boot() {
         await supabase.auth.setSession({ access_token: me.access_token!, refresh_token: me.refresh_token! });
         return; // onAuthStateChange 接管
       }
-
-      // 三次均失败：session 真的过期，清快照还原未登录态
-      _clearSnap();
-      _set({ ...DEFAULT_AUTH_STATE, loading: false, justVerified: false });
+      if (me.status === 401) {
+        // session 确认过期：清快照，还原未登录态
+        _clearSnap();
+        _set({ ...DEFAULT_AUTH_STATE, loading: false, justVerified: false });
+      } else {
+        // 网络/服务器故障：保留快照，用户维持乐观登录态，下次操作时自然处理
+        _set({ loading: false });
+      }
     } catch {
       _set({ loading: false });
     }
