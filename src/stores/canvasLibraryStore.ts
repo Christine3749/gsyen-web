@@ -58,10 +58,14 @@ export const libraryStore = {
   async addFolder() {
     const src = await fsAdapter.pickFolder();
     if (!src) return;
+    libraryStore.addFolderSource(src);
+  },
+
+  addFolderSource(src: FolderSource) {
     const folders = [src, ..._s.folders.filter(f => f.id !== src.id)];
     _saveElectronPaths(folders);
     _set({ folders });
-    await libraryStore.selectFolder(src);
+    libraryStore.selectFolder(src);
   },
 
   removeFolder(id: string) {

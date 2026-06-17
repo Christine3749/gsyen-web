@@ -1,12 +1,15 @@
 /**
  * CanvasLibrary — 三栏布局左栏：文件夹树
- * 支持 Web (File System Access API) 和 Electron (fs IPC)。
+ * Electron：input ref 直接 click（不走动态 createElement，保留用户激活链）
+ * Web：showDirectoryPicker via fsAdapter
  */
+import { useRef } from 'react';
 import { useState } from 'react';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { fsAdapter } from '../hooks/useFileSystem';
 import { SYS_FONT } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
+import type { FolderSource } from '../hooks/useFileSystem';
 
 interface Props { open: boolean; P: Palette; dark: boolean; }
 
@@ -24,9 +27,35 @@ const EmptyFolderIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
+const isElectron = !!(window as any).electronAPI?.isElectron;
+
 export function CanvasLibrary({ open, P }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddClick = () => {
+    if (isElectron) {
+      inputRef.current?.click();
+    } else {
+      libraryStore.addFolder();
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+    const firstPath: string = (files[0] as any).path ?? '';
+    if (!firstPath) return;
+    const sep   = firstPath.includes('/') ? '/' : '\\';
+    const parts = firstPath.split(sep);
+    parts.pop(); // 去掉文件名，得到文件夹路径
+    const folderPath = parts.join(sep);
+    const folderName = parts[parts.length - 1] || folderPath;
+    const src: FolderSource = { id: folderPath, name: folderName, path: folderPath, env: 'electron' };
+    libraryStore.addFolderSource(src);
+    e.target.value = ''; // 允许重复选同一个文件夹
+  };
 
   return (
     <div style={{ width: open ? 148 : 0, overflow: 'hidden', flexShrink: 0,
@@ -35,12 +64,24 @@ export function CanvasLibrary({ open, P }: Props) {
       display: 'flex', flexDirection: 'column' }}>
       <div style={{ width: 148, height: '100%', display: 'flex', flexDirection: 'column' }}>
 
+        {/* Electron 文件夹选择器：静态 input，保留用户激活链 */}
+        {isElectron && (
+          <input
+            ref={inputRef}
+            type="file"
+            // @ts-ignore — webkitdirectory 是 Electron/Chrome 扩展属性
+            webkitdirectory=""
+            style={{ position: 'absolute', width: 0, height: 0, opacity: 0, overflow: 'hidden' }}
+            onChange={handleInputChange}
+          />
+        )}
+
         {/* Header */}
         <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0 12px', borderBottom: `0.5px solid ${P.border}`, flexShrink: 0 }}>
           <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', fontFamily: SYS_FONT,
             color: P.fg, textTransform: 'uppercase' }}>Library</span>
-          <button onClick={() => libraryStore.addFolder()} title="添加文件夹"
+          <button onClick={handleAddClick} title="添加文件夹"
             style={{ fontSize: 18, lineHeight: 1, color: P.menuFg, background: 'transparent',
               border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: SYS_FONT }}>+</button>
         </div>
