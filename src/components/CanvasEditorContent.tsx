@@ -24,6 +24,7 @@ import { CanvasLibrary } from './CanvasLibrary';
 import { CanvasDocList } from './CanvasDocList';
 import type { FileEntry } from '../hooks/useFileSystem';
 import { fsAdapter } from '../hooks/useFileSystem';
+import { libraryStore } from '../stores/canvasLibraryStore';
 
 interface Props { docId: string | undefined; onClose: () => void; }
 
@@ -108,9 +109,31 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const onFsFileSelect = useCallback((entry: FileEntry, text: string) => {
     setActiveFsFile(entry);
     setContent(text);
-    setTitle(entry.name.replace(/\.md$/, ''));
+    setTitle(entry.name.replace(/\.(md|txt|excalidraw|canvas)$/i, ''));
+    if (/\.excalidraw$/i.test(entry.name))   setDocType('canvas');
+    else if (/\.canvas$/i.test(entry.name))  setDocType('nodes');
+    else                                     setDocType('doc');
     if (docId) canvasStore.update(docId, { content: text });
   }, [docId]);
+
+  const handleCreateFile = useCallback(async (type: 'doc' | 'canvas' | 'nodes') => {
+    const folder = libraryStore.get().selectedFolder;
+    if (!folder) return;
+    const ext = type === 'doc' ? '.md' : type === 'canvas' ? '.excalidraw' : '.canvas';
+    const name = `Untitled-${Date.now()}${ext}`;
+    const path = `${folder.path ?? folder.name}/${name}`;
+    const content = type === 'doc' ? ''
+      : type === 'canvas'
+        ? JSON.stringify({ type: 'excalidraw', version: 2, source: 'gsyen', elements: [], appState: { viewBackgroundColor: '#ffffff' }, files: {} })
+        : JSON.stringify({ nodes: [], edges: [] });
+    const entry: FileEntry = { name, path, isMarkdown: false };
+    await fsAdapter.writeFile(entry, content);
+    await libraryStore.selectFolder(folder);
+    setDocType(type === 'canvas' ? 'canvas' : type === 'nodes' ? 'nodes' : 'doc');
+    setActiveFsFile(entry);
+    setContent(content);
+    setTitle('Untitled');
+  }, []);
 
   /* ── extensions ── */
   const extensions = useMemo(() => [
@@ -168,18 +191,8 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
   const { exportMd, importFile, printDoc } = useCanvasFileOps({ title, content, onTitleChange, onContent, setActiveMenu });
 
-  const toggleDocType = useCallback(() => {
-    const cycle = ['doc', 'canvas', 'nodes'] as const;
-    const next = cycle[(cycle.indexOf(docType as typeof cycle[number]) + 1) % cycle.length];
-    setDocType(next);
-    if (docId) canvasStore.update(docId, { type: next });
-    setActiveMenu(null);
-    // 切换到 canvas/nodes 时立即显示 chrome
-    if (next !== 'doc') setChromeVisible(true);
-  }, [docType, docId, setActiveMenu]);
-
   /* ── menus ── */
-  const menus = useCanvasMenus({ words, chars, readMin, mode, dark, tw, focusMode, lineLen, font, docType, setMode, setDark, setTw, setFocusMode, setLineLen, setFontSize, setFont, setActiveMenu, wrap, importFile, exportMd, printDoc, toggleDocType, onClose });
+  const menus = useCanvasMenus({ words, chars, readMin, mode, dark, tw, focusMode, lineLen, font, docType, setMode, setDark, setTw, setFocusMode, setLineLen, setFontSize, setFont, setActiveMenu, wrap, importFile, exportMd, printDoc, createFile: handleCreateFile, onClose });
 
   /* ── panes ── */
   const padStyle = { maxWidth: LINE_W[lineLen], width: '100%', margin: '0 auto', padding: '48px 32px 128px' };
@@ -255,7 +268,6 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           setTitleEdit={setTitleEdit} titleInputRef={titleInputRef}
           menus={menus} activeMenu={activeMenu} setActiveMenu={setActiveMenu}
           mode={mode} setMode={setMode} docType={docType}
-          setDocType={(t) => { setDocType(t); if (docId) canvasStore.update(docId, { type: t }); setActiveMenu(null); }}
           onAddCard={() => nodeEditorRef.current?.addCard()}
           onClose={onClose}
           sidebarOpen={sidebarOpen} onSidebarToggle={() => setSidebarOpen(o => !o)}

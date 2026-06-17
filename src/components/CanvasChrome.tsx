@@ -4,7 +4,7 @@
  */
 import { useRef } from 'react';
 import { Dropdown } from './CanvasEditorUI';
-import { WinCtrlButton, SidebarIcon, DocIcon, DrawIcon, NodeIcon, PreviewIcon } from '../gsyen-designer';
+import { WinCtrlButton, SidebarIcon, PreviewIcon } from '../gsyen-designer';
 import { useIsMaximized } from '../hooks/useIsMaximized';
 import {
   Palette, MenuSpec, MenuId, EditorMode,
@@ -24,7 +24,6 @@ interface Props {
   mode:        EditorMode;
   setMode:     (m: EditorMode | ((p: EditorMode) => EditorMode)) => void;
   docType:     'doc' | 'canvas' | 'nodes';
-  setDocType:  (t: 'doc' | 'canvas' | 'nodes') => void;
   onAddCard?:  () => void;
   onClose:         () => void;
   sidebarOpen:     boolean;
@@ -39,7 +38,7 @@ interface Props {
 export function CanvasChrome({
   title, titleEdit, onTitleChange, setTitleEdit, titleInputRef,
   menus, activeMenu, setActiveMenu, mode, setMode, docType,
-  setDocType, onAddCard, onClose,
+  onAddCard, onClose,
   sidebarOpen, onSidebarToggle,
   P, dark, onMouseEnter, menuBarRef,
 }: Props) {
@@ -84,28 +83,6 @@ export function CanvasChrome({
               {title || '无标题'}.md&nbsp;— GSYEN Writer
             </span>
           )}
-        </div>
-
-        {/* Mode switcher — 3 icons always visible */}
-        <div onClick={stopProp} style={{ display:'flex', alignItems:'center', gap:2, marginRight:6,
-          ...(isElectron ? { WebkitAppRegion:'no-drag' } as React.CSSProperties : {}) }}>
-          {(['doc','canvas','nodes'] as const).map(type => {
-            const active = docType === type;
-            const Icon = type === 'doc' ? DocIcon : type === 'canvas' ? DrawIcon : NodeIcon;
-            const label = type === 'doc' ? 'Document' : type === 'canvas' ? 'Whiteboard' : 'Node Canvas';
-            return (
-              <button key={type} title={label}
-                onClick={() => { if (!active) setDocType(type); }}
-                style={{ width:26, height:22, display:'flex', alignItems:'center', justifyContent:'center',
-                  border:'none', borderRadius:4, cursor: active ? 'default' : 'pointer',
-                  background: active ? (dark ? '#3a3a3a' : '#E0E0E0') : 'transparent',
-                  color: active ? P.accent : P.menuFg, transition:'all 0.15s' }}
-                onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = P.menuFgHover; }}
-                onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = P.menuFg; }}>
-                <Icon />
-              </button>
-            );
-          })}
         </div>
 
         {/* 窗口控制：Windows 全三键；Mac 只保留 close（返回 Chat），min/max 用原生红绿灯 */}

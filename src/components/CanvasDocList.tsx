@@ -8,6 +8,7 @@ import { fsAdapter } from '../hooks/useFileSystem';
 import type { FileEntry } from '../hooks/useFileSystem';
 import { SYS_FONT } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
+import { DocIcon, DrawIcon, NodeIcon } from '../gsyen-designer';
 
 interface Props { open: boolean; onFileSelect: (e: FileEntry, c: string) => void; P: Palette; }
 
@@ -19,15 +20,11 @@ function relativeDate(ts?: number): string {
   return new Date(ts).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
 }
 
-const DocIcon = ({ color }: { color: string }) => (
-  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke={color}
-    strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-    <rect x="2" y="1" width="9" height="11" rx="1.5" />
-    <line x1="4" y1="4.5" x2="9" y2="4.5" />
-    <line x1="4" y1="6.5" x2="9" y2="6.5" />
-    <line x1="4" y1="8.5" x2="7" y2="8.5" />
-  </svg>
-);
+function fileIcon(name: string) {
+  if (/\.excalidraw$/i.test(name)) return DrawIcon;
+  if (/\.canvas$/i.test(name))     return NodeIcon;
+  return DocIcon;
+}
 
 export function CanvasDocList({ open, onFileSelect, P }: Props) {
   const { selectedFolder, files, selectedFile, loading } = useLibraryStore();
@@ -115,7 +112,9 @@ export function CanvasDocList({ open, onFileSelect, P }: Props) {
                   borderLeft: active ? '2px solid #55AAFF' : '2px solid transparent',
                   background: active ? `${P.fg}0A` : hovered ? `${P.fg}06` : 'transparent',
                   transition: 'background 0.12s' }}>
-                <DocIcon color={active ? P.fg : P.menuFg} />
+                <span style={{ color: active ? P.fg : P.menuFg, display:'flex', flexShrink:0 }}>
+                  {(() => { const Icon = fileIcon(file.name); return <Icon />; })()}
+                </span>
                 <span style={{ flex: 1, fontSize: 12, color: active ? P.fg : P.menuFg,
                   fontWeight: active ? 500 : 400, fontFamily: SYS_FONT,
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

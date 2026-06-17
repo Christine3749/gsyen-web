@@ -43,7 +43,7 @@ async function _webReadDir(src: FolderSource): Promise<FileEntry[]> {
   const out: FileEntry[] = [];
   for await (const [name, h] of (src.handle as any).entries()) {
     if (h.kind !== 'file') continue;
-    if (!/\.(md|txt)$/i.test(name)) continue;
+    if (!/\.(md|txt|excalidraw|canvas)$/i.test(name)) continue;
     const f = await h.getFile();
     out.push({ name, path: name, handle: h, isMarkdown: /\.md$/i.test(name), lastModified: f.lastModified });
   }
@@ -85,7 +85,7 @@ async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
     const entries: { name: string; lastModified: number; isDir: boolean }[] =
       await api?.readDir?.(src.path) ?? [];
     return entries
-      .filter(e => !e.isDir && /\.(md|txt)$/i.test(e.name))
+      .filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas)$/i.test(e.name))
       .map(e => ({
         name: e.name,
         path: `${src.path}/${e.name}`,
