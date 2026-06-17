@@ -147,7 +147,7 @@ export function CanvasLibrary({ open, P }: Props) {
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}06`}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
           <span style={{ fontSize: 16, lineHeight: 1, marginTop: -1 }}>+</span>
-          <span>添加文件夹</span>
+          <span>Add to Library</span>
         </button>
 
       </div>
