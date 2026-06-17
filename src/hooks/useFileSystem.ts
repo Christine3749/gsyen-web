@@ -61,42 +61,21 @@ async function _webWriteFile(e: FileEntry, content: string): Promise<void> {
   await w.write(content); await w.close();
 }
 
-// ── Electron: <input webkitdirectory> 选文件夹，IPC 读写文件 ─────────────────
-// 用原生 HTML input 弹出文件夹选择框，Electron 里 File.path 是绝对路径，
-// 不需要 dialog.showOpenDialog IPC，彻底规避兼容问题。
+// ── Electron: dialog.showOpenDialog IPC 选文件夹 ─────────────────────────────
+// 走主进程 dialog，弹出原生 "Select Folder" 对话框（非 Upload）。
 
-function _elPickFolderViaInput(): Promise<FolderSource | null> {
-  return new Promise(resolve => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    (input as any).webkitdirectory = true;
-    input.style.cssText = 'position:fixed;top:-100px;left:-100px;width:1px;height:1px;opacity:0';
-    document.body.appendChild(input);
-
-    const cleanup = () => { try { document.body.removeChild(input); } catch {} };
-
-    input.onchange = () => {
-      cleanup();
-      const files = input.files;
-      if (!files || files.length === 0) { resolve(null); return; }
-      const firstPath: string = (files[0] as any).path ?? '';
-      if (!firstPath) { resolve(null); return; }
-      const sep   = firstPath.includes('/') ? '/' : '\\';
-      const parts = firstPath.split(sep);
-      parts.pop(); // 去掉文件名，得到文件夹路径
-      const folderPath = parts.join(sep);
-      const folderName = parts[parts.length - 1] || folderPath;
-      resolve({ id: folderPath, name: folderName, path: folderPath, env: 'electron' });
-    };
-
-    // 用户取消选择
-    window.addEventListener('focus', function onFocus() {
-      window.removeEventListener('focus', onFocus);
-      setTimeout(() => { if (!input.files?.length) { cleanup(); resolve(null); } }, 500);
-    }, { once: true });
-
-    input.click();
-  });
+async function _elPickFolderViaDialog(): Promise<FolderSource | null> {
+  const api = (window as any).electronAPI;
+  try {
+    const r = await api?.showOpenDialog?.({ properties: ['openDirectory'] });
+    if (!r || r.canceled || !r.filePaths?.[0]) return null;
+    const p = r.filePaths[0];
+    const name = p.split(/[\\/]/).pop() ?? p;
+    return { id: p, name, path: p, env: 'electron' };
+  } catch (e) {
+    console.error('[fsAdapter] showOpenDialog IPC error:', e);
+    return null;
+  }
 }
 
 async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
@@ -138,7 +117,7 @@ async function _elWriteFile(e: FileEntry, content: string): Promise<void> {
 
 export const fsAdapter = {
   env:        _isElectron ? 'electron' : 'web' as 'electron' | 'web',
-  pickFolder: _isElectron ? _elPickFolderViaInput : _webPickFolder,
+  pickFolder: _isElectron ? _elPickFolderViaDialog : _webPickFolder,
   readDir:    _isElectron ? _elReadDir            : _webReadDir,
   readFile:   _isElectron ? _elReadFile           : _webReadFile,
   writeFile:  _isElectron ? _elWriteFile          : _webWriteFile,

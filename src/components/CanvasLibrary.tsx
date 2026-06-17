@@ -1,14 +1,12 @@
 /**
  * CanvasLibrary — 三栏布局左栏：文件夹树
- * Electron：input ref 直接 click（不走动态 createElement，保留用户激活链）
- * Web：showDirectoryPicker via fsAdapter
+ * 选文件夹走 fsAdapter.pickFolder()（Electron: dialog.showOpenDialog IPC；Web: showDirectoryPicker）
  */
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { fsAdapter } from '../hooks/useFileSystem';
 import { SYS_FONT } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
-import type { FolderSource } from '../hooks/useFileSystem';
 
 interface Props { open: boolean; P: Palette; dark: boolean; }
 
@@ -26,35 +24,11 @@ const EmptyFolderIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-const isElectron = !!(window as any).electronAPI?.isElectron;
-
 export function CanvasLibrary({ open, P }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleAddClick = () => {
-    if (isElectron) {
-      inputRef.current?.click();
-    } else {
-      libraryStore.addFolder();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
-    const firstPath: string = (files[0] as any).path ?? '';
-    if (!firstPath) return;
-    const sep   = firstPath.includes('/') ? '/' : '\\';
-    const parts = firstPath.split(sep);
-    parts.pop(); // 去掉文件名，得到文件夹路径
-    const folderPath = parts.join(sep);
-    const folderName = parts[parts.length - 1] || folderPath;
-    const src: FolderSource = { id: folderPath, name: folderName, path: folderPath, env: 'electron' };
-    libraryStore.addFolderSource(src);
-    e.target.value = ''; // 允许重复选同一个文件夹
-  };
+  const handleAddClick = () => libraryStore.addFolder();
 
   return (
     <div style={{ width: open ? 148 : 0, overflow: 'hidden', flexShrink: 0,
@@ -62,18 +36,6 @@ export function CanvasLibrary({ open, P }: Props) {
       background: P.chrome, borderRight: `0.5px solid ${P.border}`,
       display: 'flex', flexDirection: 'column' }}>
       <div style={{ width: 148, height: '100%', display: 'flex', flexDirection: 'column' }}>
-
-        {/* Electron 文件夹选择器：静态 input，保留用户激活链 */}
-        {isElectron && (
-          <input
-            ref={inputRef}
-            type="file"
-            // @ts-ignore — webkitdirectory 是 Electron/Chrome 扩展属性
-            webkitdirectory=""
-            style={{ position: 'fixed', top: '-100px', left: '-100px', width: '1px', height: '1px', opacity: 0 }}
-            onChange={handleInputChange}
-          />
-        )}
 
         {/* Folder list */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
