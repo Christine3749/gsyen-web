@@ -2,12 +2,13 @@
  * ipc-library-fs — Canvas Library 文件系统 IPC handlers
  * 注册 fs:showOpenDialog / fs:readDir / fs:readFile / fs:writeFile
  */
-const { dialog } = require('electron');
+const { dialog, BrowserWindow } = require('electron');
 const fs   = require('fs');
 const path = require('path');
 
 module.exports = function registerLibraryFsHandlers(ipcMain) {
-  ipcMain.handle('fs:showOpenDialog', async (_e, opts) => dialog.showOpenDialog(opts));
+  ipcMain.handle('fs:showOpenDialog', async (e, opts) =>
+    dialog.showOpenDialog(BrowserWindow.fromWebContents(e.sender), opts));
 
   ipcMain.handle('fs:readDir', (_e, dirPath) => {
     try {
