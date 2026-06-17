@@ -101,7 +101,7 @@ export function CanvasDocList({ open, onFileSelect, P }: Props) {
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ padding: '8px 12px', cursor: 'pointer',
                   borderBottom: `0.5px solid ${P.border}`,
-                  borderLeft: active ? `2px solid ${P.accent}` : '2px solid transparent',
+                  borderLeft: active ? `2px solid #55AAFF` : '2px solid transparent',
                   background: active ? `${P.fg}0A` : hovered ? `${P.fg}06` : 'transparent',
                   transition: 'background 0.12s' }}>
                 <div style={{ fontSize: 12, color: P.fg, fontWeight: active ? 500 : 400,
