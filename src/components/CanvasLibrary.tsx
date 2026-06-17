@@ -75,15 +75,12 @@ export function CanvasLibrary({ open, P }: Props) {
           />
         )}
 
-        {/* Header — z-index:25 确保在 Chrome overlay(z:20) 之上，不被遮挡 */}
-        <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        {/* Header */}
+        <div style={{ height: 32, display: 'flex', alignItems: 'center',
           padding: '0 12px', borderBottom: `0.5px solid ${P.border}`, flexShrink: 0,
           position: 'relative', zIndex: 25 }}>
           <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', fontFamily: SYS_FONT,
             color: P.fg, textTransform: 'uppercase' }}>Library</span>
-          <button onClick={handleAddClick} title="添加文件夹"
-            style={{ fontSize: 18, lineHeight: 1, color: P.menuFg, background: 'transparent',
-              border: 'none', cursor: 'pointer', padding: '0 2px', fontFamily: SYS_FONT }}>+</button>
         </div>
 
         {/* Folder list */}
@@ -138,6 +135,20 @@ export function CanvasLibrary({ open, P }: Props) {
             </div>
           )}
         </div>
+
+        {/* Bottom — iA Writer 风格：+ 添加文件夹 钉在底部 */}
+        <button onClick={handleAddClick}
+          style={{ height: 36, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '0 12px', flexShrink: 0, width: '100%', textAlign: 'left',
+            borderTop: `0.5px solid ${P.border}`, background: 'transparent',
+            border: 'none', borderTop: `0.5px solid ${P.border}`,
+            cursor: 'pointer', fontFamily: SYS_FONT, fontSize: 12, color: P.menuFg,
+            transition: 'background 0.12s' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}06`}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+          <span style={{ fontSize: 16, lineHeight: 1, marginTop: -1 }}>+</span>
+          <span>添加文件夹</span>
+        </button>
 
       </div>
     </div>
