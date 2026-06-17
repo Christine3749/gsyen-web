@@ -217,11 +217,8 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           {/* 竖线 */}
           <div className="w-px h-3.5 bg-[#1A1A1A]/15 shrink-0" />
 
-          {authLoading ? (
-            /* auth 初始化中：空占位，不闪登录按钮 */
-            <div className="w-[120px] h-6" />
-          ) : user ? (
-            /* 已登录：邮箱缩写 + 等级徽章 + 登出 */
+          {user ? (
+            /* 已登录（含快照预渲染）：邮箱缩写 + 等级徽章 + 登出 */
             <>
               {activeTeam ? (
                 <button
@@ -249,8 +246,11 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
                 {lang === 'zh' ? '登出' : 'SIGN OUT'}
               </button>
             </>
+          ) : authLoading ? (
+            /* 快照不存在且仍在初始化：空占位防闪 */
+            <div className="w-[120px] h-6" />
           ) : (
-            /* 未登录：登录 + 注册 */
+            /* 确认未登录：登录 + 注册 */
             <>
               <button
                 onClick={() => setAuthModal('login')}

@@ -33,11 +33,32 @@ function clearTier(uid: string) {
   try { localStorage.removeItem(TIER_KEY(uid)); } catch {}
 }
 
+// ── User snapshot (optimistic hydration) ──────────────────────────────────────
+// 存非敏感展示信息，token 不在此处。刷新页面时同步读取，零延迟渲染。
+const SNAP_KEY = 'gsyen_user_snap';
+interface UserSnap { uid: string; email: string; tier: UserTier | null; ev: boolean; provider: LoginProvider | null; }
+function _readSnap(): UserSnap | null {
+  try { const r = localStorage.getItem(SNAP_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+}
+function _writeSnap(s: UserSnap) { try { localStorage.setItem(SNAP_KEY, JSON.stringify(s)); } catch {} }
+function _clearSnap()             { try { localStorage.removeItem(SNAP_KEY); }               catch {} }
+
 // ── Singleton store ───────────────────────────────────────────────────────────
 // 所有 useAuth() 调用共享同一份状态，boot/listener 只初始化一次。
 interface AuthStore extends AuthState { justVerified: boolean; }
 
-let _store: AuthStore = { ...DEFAULT_AUTH_STATE, justVerified: false };
+const _snap = _readSnap();
+let _store: AuthStore = {
+  ...DEFAULT_AUTH_STATE,
+  justVerified: false,
+  ...(_snap ? {
+    // 快照用户：仅含展示字段，onAuthStateChange 触发后替换为真实 User 对象
+    user:          { id: _snap.uid, email: _snap.email, user_metadata: {}, app_metadata: {}, aud: '' } as any,
+    tier:          _snap.tier,
+    emailVerified: _snap.ev,
+    loginProvider: _snap.provider,
+  } : {}),
+};
 let _initialized = false;
 let _currentUid: string | null = null;
 const _listeners = new Set<(s: AuthStore) => void>();
@@ -62,18 +83,20 @@ function _initListener() {
     if (_event === 'SIGNED_OUT' || !user) {
       if (_currentUid) clearTier(_currentUid);
       _currentUid = null;
+      _clearSnap();
       _set({ ...DEFAULT_AUTH_STATE, loading: false, justVerified: false });
       return;
     }
 
     const prevUid = _currentUid;
     _currentUid = user.id;
+    const provider = (user.user_metadata?.provider ?? null) as LoginProvider | null;
 
     if (session?.refresh_token) authProxy.saveSession(session.refresh_token).catch(() => {});
 
     // TOKEN_REFRESHED：同一用户只更新 session/user，不重置 tier/emailVerified（防闪烁）
     if (_event === 'TOKEN_REFRESHED' && prevUid === user.id) {
-      _set({ user, session, loginProvider: (user.user_metadata?.provider ?? null) as LoginProvider | null });
+      _set({ user, session, loginProvider: provider });
       return;
     }
 
@@ -82,10 +105,12 @@ function _initListener() {
       user, session,
       tier: cached?.tier ?? null,
       emailVerified: cached?.ev ?? false,
-      loginProvider: (user.user_metadata?.provider ?? null) as LoginProvider | null,
+      loginProvider: provider,
       loading: false,
       isPasswordRecovery: _event === 'PASSWORD_RECOVERY',
     });
+    // 立即写快照（使用缓存 tier），tier 加载后再更新一次
+    _writeSnap({ uid: user.id, email: user.email ?? '', tier: cached?.tier ?? null, ev: cached?.ev ?? false, provider });
 
     // 魔法链接验证：升级 tier
     if (_magicLinkOnLoad && !_magicLinkHandled) {
@@ -94,7 +119,10 @@ function _initListener() {
       upgradeTierToFree(user.id)
         .then(() => {
           writeTier(user.id, 'free');
-          if (_store.user?.id === user.id) _set({ tier: 'free', emailVerified: true, justVerified: true });
+          if (_store.user?.id === user.id) {
+            _set({ tier: 'free', emailVerified: true, justVerified: true });
+            _writeSnap({ uid: user.id, email: user.email ?? '', tier: 'free', ev: true, provider });
+          }
         })
         .catch(() => {});
       return;
@@ -104,8 +132,11 @@ function _initListener() {
       initializeUserData(user.id, user.user_metadata?.provider ?? 'email')
         .then(tier => {
           if (tier) writeTier(user.id, tier);
-          if (_store.user?.id === user.id)
-            _set({ tier, emailVerified: tier !== 'free_unverified' && tier !== null });
+          if (_store.user?.id === user.id) {
+            const ev = tier !== 'free_unverified' && tier !== null;
+            _set({ tier, emailVerified: ev });
+            _writeSnap({ uid: user.id, email: user.email ?? '', tier, ev, provider });
+          }
         });
     }
   });
@@ -144,15 +175,22 @@ function _boot() {
         return;
       }
 
-      // Step 2: 无本地 session → 尝试 HttpOnly cookie（仅此一次，不再 ×N）
-      const me = await authProxy.me();
+      // Step 2: 无本地 session → 尝试 HttpOnly cookie，最多重试 3 次（对抗冷启动/抖动）
+      let me: Awaited<ReturnType<typeof authProxy.me>> = { ok: false };
+      for (let i = 0; i < 3; i++) {
+        me = await authProxy.me();
+        if (me.ok) break;
+        if (i < 2) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+      }
       if (_currentUid) return; // 等待期间已手动登录
       if (me.ok) {
         await supabase.auth.setSession({ access_token: me.access_token!, refresh_token: me.refresh_token! });
         return; // onAuthStateChange 接管
       }
 
-      _set({ loading: false });
+      // 三次均失败：session 真的过期，清快照还原未登录态
+      _clearSnap();
+      _set({ ...DEFAULT_AUTH_STATE, loading: false, justVerified: false });
     } catch {
       _set({ loading: false });
     }
