@@ -55,6 +55,10 @@ export const libraryStore = {
     return () => _listeners.delete(fn);
   },
 
+  clearFolder() {
+    _set({ selectedFolder: null, files: [], selectedFile: null });
+  },
+
   async addFolder() {
     const src = await fsAdapter.pickFolder();
     if (!src) return;
