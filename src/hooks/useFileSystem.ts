@@ -62,11 +62,19 @@ async function _webWriteFile(e: FileEntry, content: string): Promise<void> {
 
 async function _elPickFolder(): Promise<FolderSource | null> {
   const api = (window as any).electronAPI;
-  if (!api?.showOpenDialog) return null;
-  const r = await api.showOpenDialog({ properties: ['openDirectory'] });
-  if (r.canceled || !r.filePaths[0]) return null;
-  const p = r.filePaths[0];
-  return { id: p, name: p.split(/[\\/]/).pop() ?? p, path: p, env: 'electron' };
+  if (!api?.showOpenDialog) {
+    console.error('[fsAdapter] showOpenDialog not found on electronAPI');
+    return null;
+  }
+  try {
+    const r = await api.showOpenDialog({ properties: ['openDirectory'] });
+    if (!r || r.canceled || !r.filePaths?.[0]) return null;
+    const p = r.filePaths[0];
+    return { id: p, name: p.split(/[\\/]/).pop() ?? p, path: p, env: 'electron' };
+  } catch (e) {
+    console.error('[fsAdapter] showOpenDialog IPC error:', e);
+    return null;
+  }
 }
 
 async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
