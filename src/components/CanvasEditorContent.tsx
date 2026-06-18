@@ -285,13 +285,17 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   /* ── menus ── */
   const menus = useCanvasMenus({ words, chars, readMin, mode, dark, tw, focusMode, lineLen, font, docType, setMode, setDark, setTw, setFocusMode, setLineLen, setFontSize, setFont, setActiveMenu, wrap, importFile, exportMd, printDoc, createFile: handleCreateFile, onClose });
 
+  const SIDEBAR_EASE = '0.22s cubic-bezier(0.4,0,0.2,1)';
   const chromeStyle: React.CSSProperties = {
     position: 'absolute', top: 0, left: panelLeft, right: 0, zIndex: 20,
     transform: chromeVisible ? 'translateY(0)' : `translateY(-${CHROME_H + 4}px)`,
     opacity:   chromeVisible ? 1 : 0,
-    transition: chromeVisible
-      ? 'transform 0.24s cubic-bezier(0.16,1,0.3,1),opacity 0.18s ease'
-      : 'transform 0.3s cubic-bezier(0.55,0,1,0.45),opacity 0.22s ease',
+    transition: [
+      `left ${SIDEBAR_EASE}`,
+      chromeVisible
+        ? 'transform 0.24s cubic-bezier(0.16,1,0.3,1),opacity 0.18s ease'
+        : 'transform 0.3s cubic-bezier(0.55,0,1,0.45),opacity 0.22s ease',
+    ].join(','),
     pointerEvents: chromeVisible ? 'auto' : 'none',
   };
 
@@ -362,7 +366,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           z-index 低于 Chrome(20)，Chrome 可见时被覆盖；Chrome 隐藏后此条成为唯一 drag 区域 */}
       {isElectron && (
         <div style={{ position: 'absolute', top: 0, left: panelLeft, right: 0,
-          height: TITLE_H, zIndex: 5,
+          height: TITLE_H, zIndex: 5, transition: `left ${SIDEBAR_EASE}`,
           WebkitAppRegion: 'drag', pointerEvents: 'none' } as React.CSSProperties} />
       )}
 

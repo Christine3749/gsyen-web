@@ -57,7 +57,8 @@ export function CanvasChrome({
 
       {/* ══ Row 1: Title bar ══════════════════════════════════════════════════ */}
       <div style={{ height: TITLE_H, background: P.chrome, display: 'flex', alignItems: 'center',
-        paddingLeft: isMac && !maximized && !fullscreen && !sidebarOpen ? 70 : 0, ...drag }}>
+        paddingLeft: isMac && !maximized && !fullscreen && !sidebarOpen ? 70 : 0,
+        transition: 'padding-left 0.22s cubic-bezier(0.4,0,0.2,1)', ...drag }}>
 
         {/* [□] sidebar toggle */}
         <button onClick={e => { e.stopPropagation(); onSidebarToggle(); }}
