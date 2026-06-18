@@ -216,15 +216,6 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     };
     window.addEventListener('canvas-updated', sync);
     return () => window.removeEventListener('canvas-updated', sync);
-          {docType === 'nodes' && (
-            <button onClick={() => nodeEditorRef.current?.addCard()}
-              style={{ position:'absolute', top: CHROME_H + 10, right: 12, zIndex: 15,
-                background: P.accent, color:'#fff', border:'none', borderRadius: 6,
-                padding:'5px 14px', fontSize: 12, fontFamily: SYS_FONT, fontWeight: 500,
-                cursor:'pointer', letterSpacing:'0.01em', boxShadow:'0 2px 8px rgba(0,0,0,0.18)' }}>
-              + Card
-            </button>
-          )}
   }, [docId]);
 
   useEffect(() => {
@@ -291,9 +282,10 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
         <div style={{ flex: 1, position: 'relative', minWidth: 0, height: '100%' }}>
           {/* Doc */}
           <div style={{ display: docType === 'doc' ? 'flex' : 'none',
-            position: 'absolute', inset: 0, paddingTop: CHROME_H + 1,
-            opacity: editorFade, transition: 'opacity 0.13s ease' }}>
-            {mode === 'split' ? <>{EditorPane}{PreviewPane}</> : mode === 'preview' ? PreviewPane : EditorPane}
+            position: 'absolute', inset: 0 }}>
+            <CanvasWriterPane content={content} onContent={onContent} extensions={extensions}
+              P={P} mode={mode} fontFamily={fontFamily} fontSize={fontSize} dark={dark}
+              lineLen={lineLen} editorFade={editorFade} editorRef={editorRef} />
           </div>
           {/* Image */}
           <div style={{ display: docType === 'image' ? 'flex' : 'none',
@@ -325,6 +317,15 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
               display: 'flex' }}>
               <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
             </div>
+          )}
+          {docType === 'nodes' && (
+            <button onClick={() => nodeEditorRef.current?.addCard()}
+              style={{ position:'absolute', top: CHROME_H + 10, right: 12, zIndex: 15,
+                background: P.accent, color:'#fff', border:'none', borderRadius: 6,
+                padding:'5px 14px', fontSize: 12, fontFamily: SYS_FONT, fontWeight: 500,
+                cursor:'pointer', letterSpacing:'0.01em', boxShadow:'0 2px 8px rgba(0,0,0,0.18)' }}>
+              + Card
+            </button>
           )}
         </div>
       </div>
