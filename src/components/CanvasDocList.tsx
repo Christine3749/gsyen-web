@@ -59,14 +59,10 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
   const isLoading    = inSub ? navLoading : loading;
   const shown        = open;
 
-  // increment every time the list content changes → CSS animation re-triggers via key
-  const listVersionRef = useRef(0);
-  const prevFilesRef   = useRef(displayFiles);
-  if (prevFilesRef.current !== displayFiles) {
-    prevFilesRef.current = displayFiles;
-    listVersionRef.current += 1;
-  }
-  const listKey = listVersionRef.current;
+  // 只对「新出现」的 path 播入场动画，已存在的 path 不重建 DOM
+  const knownPathsRef = useRef(new Set<string>());
+  const newPaths = new Set(displayFiles.map(f => f.path).filter(p => !knownPathsRef.current.has(p)));
+  displayFiles.forEach(f => knownPathsRef.current.add(f.path));
 
   const handleSelect = useCallback(async (file: FileEntry) => {
     libraryStore.setSelectedFile(file);
@@ -142,15 +138,15 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
             </div>
           )}
 
-          {displayFiles.map((entry, idx) => {
+          {displayFiles.map((entry) => {
             const active  = !entry.isDirectory && selectedFile?.path === entry.path;
             const hovered = hoveredPath === entry.path;
             const bg = active ? `${P.fg}0A` : hovered ? `${P.fg}06` : 'transparent';
-            const enterDelay = `${Math.min(idx, 20) * 22}ms`;
+            const isNew = newPaths.has(entry.path);
 
             if (entry.isDirectory) {
               return (
-                <div key={`${listKey}-${entry.path}`} className="gs-list-item"
+                <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                   onClick={() => handleDirClick(entry)}
                   onMouseEnter={() => setHoveredPath(entry.path)}
                   onMouseLeave={() => setHoveredPath(null)}
@@ -158,8 +154,7 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
                     padding: '0 10px 0 12px', height: 36, cursor: 'pointer',
                     borderBottom: `0.5px solid ${P.border}`,
                     borderLeft: '2px solid transparent',
-                    background: bg, transition: 'background 0.12s',
-                    animationDelay: enterDelay }}>
+                    background: bg, transition: 'background 0.12s' }}>
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                     stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
                     style={{ color: P.menuFg, flexShrink: 0 }}>
@@ -179,7 +174,7 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
 
             const Icon = fileIcon(entry.name);
             return (
-              <div key={`${listKey}-${entry.path}`} className="gs-list-item"
+              <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => handleSelect(entry)}
                 onMouseEnter={() => { setHoveredPath(entry.path); _prefetchFile(entry); }}
                 onMouseLeave={() => setHoveredPath(null)}
@@ -187,8 +182,7 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
                   padding: '8px 10px 8px 12px', cursor: 'pointer',
                   borderBottom: `0.5px solid ${P.border}`,
                   borderLeft: active ? '2px solid #55AAFF' : '2px solid transparent',
-                  background: bg, transition: 'background 0.12s', minHeight: 44,
-                  animationDelay: enterDelay }}>
+                  background: bg, transition: 'background 0.12s', minHeight: 44 }}>
                 <span style={{ color: active ? P.fg : P.menuFg, display: 'flex', flexShrink: 0, marginTop: 1 }}>
                   <Icon />
                 </span>
