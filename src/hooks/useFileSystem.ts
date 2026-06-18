@@ -108,8 +108,9 @@ async function _elPickFolderViaDialog(): Promise<FolderSource | null> {
   try {
     const r = await api?.showOpenDialog?.({ properties: ['openDirectory'] });
     if (!r || r.canceled || !r.filePaths?.[0]) return null;
-    const p = r.filePaths[0];
-    const name = p.split(/[\\/]/).pop() ?? p;
+    const p = r.filePaths[0].replace(/[\\/]+$/, ''); // 去掉末尾反斜杠（Windows 路径常见）
+    const name = p.split(/[\\/]/).pop() || p;        // || 而非 ??，空字符串也回退到 p
+    if (!name.trim()) return null;                   // 彻底兜底
     return { id: p, name, path: p, env: 'electron' };
   } catch (e) {
     console.error('[fsAdapter] showOpenDialog IPC error:', e);
@@ -121,7 +122,7 @@ type RawEntry = { name: string; lastModified: number; isDir: boolean; preview?: 
 
 function _entriesToFileEntries(basePath: string, entries: RawEntry[]): FileEntry[] {
   const dirs: FileEntry[] = entries
-    .filter(e => e.isDir && !e.name.startsWith('.'))
+    .filter(e => e.isDir && !e.name.startsWith('.') && !e.name.startsWith('$'))
     .map(e => ({ name: e.name, path: `${basePath}/${e.name}`,
       isMarkdown: false, isDirectory: true, lastModified: e.lastModified, preview: '' }))
     .sort((a, b) => a.name.localeCompare(b.name));

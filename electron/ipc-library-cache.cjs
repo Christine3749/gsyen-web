@@ -36,7 +36,7 @@ async function _scanFolder(folderPath, onUpdate) {
     // Phase 1: withFileTypes 一次调用拿 isDirectory，无需 statSync（大文件夹快很多）
     const dirents = fs.readdirSync(folderPath, { withFileTypes: true });
     const raw = dirents
-      .filter(d => !d.name.startsWith('.'))
+      .filter(d => !d.name.startsWith('.') && !d.name.startsWith('$'))
       .map(d => ({ name: d.name, lastModified: 0, isDir: d.isDirectory(), preview: '' }));
 
     _cache.set(folderPath, raw);

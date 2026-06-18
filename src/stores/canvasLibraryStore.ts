@@ -100,6 +100,7 @@ export const libraryStore = {
   },
 
   addFolderSource(src: FolderSource) {
+    if (!src.name?.trim() || !src.path?.trim() || src.path.trim().length < 3) return;
     const folders = [src, ..._s.folders.filter(f => f.id !== src.id)];
     _savePaths(folders);
     _set({ folders });
