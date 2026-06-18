@@ -33,32 +33,41 @@ async function _scanFolder(folderPath, onUpdate) {
   _scanning.add(folderPath);
 
   try {
-    // Phase 1: 读目录元数据（sync，极快）
-    const raw = fs.readdirSync(folderPath).map(name => {
-      try {
-        const st = fs.statSync(path.join(folderPath, name));
-        return { name, lastModified: st.mtimeMs, isDir: st.isDirectory(), preview: '' };
-      } catch { return null; }
-    }).filter(Boolean);
+    // Phase 1: withFileTypes 一次调用拿 isDirectory，无需 statSync（大文件夹快很多）
+    const dirents = fs.readdirSync(folderPath, { withFileTypes: true });
+    const raw = dirents
+      .filter(d => !d.name.startsWith('.'))
+      .map(d => ({ name: d.name, lastModified: 0, isDir: d.isDirectory(), preview: '' }));
 
     _cache.set(folderPath, raw);
-    onUpdate(folderPath, raw);   // 立刻把文件列表推给渲染层
+    onUpdate(folderPath, raw);   // 立刻推给渲染层，先显示列表
 
-    // Phase 2: 分批读预览（限并发，不打满 CPU）
+    // Phase 2: 补 mtime + 预览（只针对文本文件，分批避免卡主进程）
     const textFiles = raw.filter(e => !e.isDir && /\.(md|txt)$/i.test(e.name));
     for (let i = 0; i < textFiles.length; i += BATCH_SIZE) {
       const batch = textFiles.slice(i, i + BATCH_SIZE);
       await Promise.all(batch.map(e =>
         new Promise(resolve => {
-          // setImmediate 让 Electron 主循环有机会响应其他 IPC
           setImmediate(() => {
-            e.preview = _readPreviewSync(path.join(folderPath, e.name));
+            try {
+              const fp = path.join(folderPath, e.name);
+              e.lastModified = fs.statSync(fp).mtimeMs;
+              e.preview = _readPreviewSync(fp);
+            } catch {}
             resolve();
           });
         })
       ));
-      onUpdate(folderPath, raw); // 每批完成推一次更新
+      onUpdate(folderPath, raw);
     }
+
+    // Phase 3: 补其余文件（excalidraw/canvas）的 mtime，用于排序
+    const otherFiles = raw.filter(e => !e.isDir && /\.(excalidraw|canvas)$/i.test(e.name));
+    for (const e of otherFiles) {
+      try { e.lastModified = fs.statSync(path.join(folderPath, e.name)).mtimeMs; } catch {}
+    }
+    if (otherFiles.length > 0) onUpdate(folderPath, raw);
+
   } catch (err) {
     console.error('[library-cache] scan failed:', folderPath, err?.message);
   } finally {
