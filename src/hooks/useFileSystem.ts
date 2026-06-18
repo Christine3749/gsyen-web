@@ -1,29 +1,55 @@
 /**
  * useFileSystem — Web (File System Access API) / Electron (fs IPC) 统一抽象层
  * 上层组件只调用 fsAdapter，平台差异完全隔离在此文件内。
- *
- * Electron 文件夹选择：用 <input webkitdirectory> 原生控件，不走 IPC，
- * 彻底规避 dialog.showOpenDialog 在 file:// 协议下的兼容问题。
- * 文件读写仍走 IPC（main.cjs fs:readFile / fs:writeFile）。
  */
 
 export interface FileEntry {
   name:          string;
   path:          string;
-  handle?:       FileSystemFileHandle; // Web FSA
+  handle?:       FileSystemFileHandle;
+  dirHandle?:    FileSystemDirectoryHandle; // Web FSA subdirectory handle
   isMarkdown:    boolean;
+  isDirectory?:  boolean;
   lastModified?: number;
+  preview?:      string;
 }
 
 export interface FolderSource {
-  id:      string;                      // Electron = path; Web = name+ts
+  id:      string;
   name:    string;
-  path?:   string;                      // Electron 绝对路径
-  handle?: FileSystemDirectoryHandle;   // Web FSA
+  path?:   string;
+  handle?: FileSystemDirectoryHandle;
   env:     'web' | 'electron';
 }
 
 const _isElectron = !!(window as any).electronAPI?.isElectron;
+
+// ── Electron: preview first line, max 512 bytes ───────────────────────────────
+
+async function _elReadPreview(path: string): Promise<string> {
+  try {
+    const url = 'file:///' + path.replace(/\\/g, '/');
+    const response = await fetch(url);
+    if (!response.ok || !response.body) return '';
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    while (total < 512) {
+      const { done, value } = await reader.read();
+      if (done || !value) break;
+      chunks.push(value);
+      total += value.length;
+    }
+    reader.cancel().catch(() => {});
+    const text = new TextDecoder().decode(
+      chunks.reduce((a, b) => { const m = new Uint8Array(a.length + b.length); m.set(a); m.set(b, a.length); return m; }, new Uint8Array(0))
+    );
+    return text.split('\n')
+      .map(l => l.replace(/^[#>\s*\-–—]+/, '').trim())
+      .find(l => l.length > 2)
+      ?.slice(0, 80) ?? '';
+  } catch { return ''; }
+}
 
 // ── Web: File System Access API ───────────────────────────────────────────────
 
@@ -42,12 +68,26 @@ async function _webReadDir(src: FolderSource): Promise<FileEntry[]> {
   if (!src.handle) return [];
   const out: FileEntry[] = [];
   for await (const [name, h] of (src.handle as any).entries()) {
-    if (h.kind !== 'file') continue;
+    if (h.kind === 'directory') {
+      out.push({ name, path: name, isMarkdown: false, isDirectory: true, dirHandle: h });
+      continue;
+    }
     if (!/\.(md|txt|excalidraw|canvas)$/i.test(name)) continue;
     const f = await h.getFile();
-    out.push({ name, path: name, handle: h, isMarkdown: /\.md$/i.test(name), lastModified: f.lastModified });
+    let preview = '';
+    if (/\.(md|txt)$/i.test(name)) {
+      const text = await f.slice(0, 512).text();
+      preview = text.split('\n')
+        .map((l: string) => l.replace(/^[#>\s*\-–—]+/, '').trim())
+        .find((l: string) => l.length > 2)
+        ?.slice(0, 80) ?? '';
+    }
+    out.push({ name, path: name, handle: h, isMarkdown: /\.md$/i.test(name), lastModified: f.lastModified, preview });
   }
-  return out.sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
+  return out.sort((a, b) => {
+    if (!!a.isDirectory !== !!b.isDirectory) return a.isDirectory ? -1 : 1;
+    return (b.lastModified ?? 0) - (a.lastModified ?? 0);
+  });
 }
 
 async function _webReadFile(e: FileEntry): Promise<string> {
@@ -61,8 +101,7 @@ async function _webWriteFile(e: FileEntry, content: string): Promise<void> {
   await w.write(content); await w.close();
 }
 
-// ── Electron: dialog.showOpenDialog IPC 选文件夹 ─────────────────────────────
-// 走主进程 dialog，弹出原生 "Select Folder" 对话框（非 Upload）。
+// ── Electron ──────────────────────────────────────────────────────────────────
 
 async function _elPickFolderViaDialog(): Promise<FolderSource | null> {
   const api = (window as any).electronAPI;
@@ -84,27 +123,39 @@ async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
   try {
     const entries: { name: string; lastModified: number; isDir: boolean }[] =
       await api?.readDir?.(src.path) ?? [];
-    return entries
-      .filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas)$/i.test(e.name))
+
+    const dirs: FileEntry[] = entries
+      .filter(e => e.isDir && !e.name.startsWith('.'))
       .map(e => ({
         name: e.name,
         path: `${src.path}/${e.name}`,
-        isMarkdown: /\.md$/i.test(e.name),
+        isMarkdown: false,
+        isDirectory: true,
         lastModified: e.lastModified,
       }))
-      .sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const textFiles = entries.filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas)$/i.test(e.name));
+    const files = await Promise.all(
+      textFiles.map(async e => {
+        const path = `${src.path}/${e.name}`;
+        const preview = /\.(md|txt)$/i.test(e.name) ? await _elReadPreview(path) : '';
+        return { name: e.name, path, isMarkdown: /\.md$/i.test(e.name), lastModified: e.lastModified, preview };
+      })
+    );
+    files.sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
+
+    return [...dirs, ...files];
   } catch { return []; }
 }
 
 async function _elReadFile(e: FileEntry): Promise<string> {
   if (!e.path) return '';
   try {
-    // 优先用 fetch file:// URL（无需 IPC）
     const url = 'file:///' + e.path.replace(/\\/g, '/');
     const r = await fetch(url);
     if (r.ok) return r.text();
   } catch {}
-  // 回退到 IPC
   return (window as any).electronAPI?.readFile?.(e.path) ?? '';
 }
 
@@ -118,7 +169,7 @@ async function _elWriteFile(e: FileEntry, content: string): Promise<void> {
 export const fsAdapter = {
   env:        _isElectron ? 'electron' : 'web' as 'electron' | 'web',
   pickFolder: _isElectron ? _elPickFolderViaDialog : _webPickFolder,
-  readDir:    _isElectron ? _elReadDir            : _webReadDir,
-  readFile:   _isElectron ? _elReadFile           : _webReadFile,
-  writeFile:  _isElectron ? _elWriteFile          : _webWriteFile,
+  readDir:    _isElectron ? _elReadDir             : _webReadDir,
+  readFile:   _isElectron ? _elReadFile            : _webReadFile,
+  writeFile:  _isElectron ? _elWriteFile           : _webWriteFile,
 };

@@ -1,6 +1,6 @@
 /**
- * CanvasChrome — CANVAS 编辑器顶部 Chrome（标题栏 + 菜单栏）
- * 由 CanvasEditorContent 控制显隐动画，本组件只负责渲染。
+ * CanvasChrome — 编辑区顶栏（iA Writer 精确复刻）
+ * Library/DocList 头部已移入各自面板，Chrome 只负责编辑区
  */
 import { useRef } from 'react';
 import { Dropdown } from './CanvasEditorUI';
@@ -12,28 +12,24 @@ import {
 } from './CanvasEditorTypes';
 
 interface Props {
-  /* title bar */
   title: string; titleEdit: boolean;
   onTitleChange: (v: string) => void;
   setTitleEdit:  (v: boolean) => void;
   titleInputRef: React.RefObject<HTMLInputElement>;
-  /* menu bar */
-  menus:       MenuSpec[];
-  activeMenu:  MenuId;
+  menus:         MenuSpec[];
+  activeMenu:    MenuId;
   setActiveMenu: (v: MenuId | ((p: MenuId) => MenuId)) => void;
-  mode:        EditorMode;
-  setMode:     (m: EditorMode | ((p: EditorMode) => EditorMode)) => void;
-  docType:     'doc' | 'canvas' | 'nodes';
-  onAddCard?:  () => void;
-  onClose:         () => void;
-  sidebarOpen:     boolean;
-  onSidebarToggle: () => void;
-  /* style */
+  mode:          EditorMode;
+  setMode:       (m: EditorMode | ((p: EditorMode) => EditorMode)) => void;
+  docType:       'doc' | 'canvas' | 'nodes';
+  onAddCard?:    () => void;
+  onClose:       () => void;
+  sidebarOpen:    boolean;
+  onSidebarToggle:() => void;
   P: Palette; dark: boolean;
   onMouseEnter: () => void;
-  menuBarRef:  React.RefObject<HTMLDivElement>;
+  menuBarRef:   React.RefObject<HTMLDivElement>;
 }
-
 
 export function CanvasChrome({
   title, titleEdit, onTitleChange, setTitleEdit, titleInputRef,
@@ -42,25 +38,31 @@ export function CanvasChrome({
   sidebarOpen, onSidebarToggle,
   P, dark, onMouseEnter, menuBarRef,
 }: Props) {
-
-  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
+  const stopProp  = (e: React.MouseEvent) => e.stopPropagation();
   const maximized = useIsMaximized();
+
+  const nodrag = isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {};
+  const drag   = isElectron ? { WebkitAppRegion: 'drag'    } as React.CSSProperties : {};
+
+  const iconBtn: React.CSSProperties = {
+    padding: 4, background: 'transparent', border: 'none', cursor: 'pointer',
+    color: P.dim, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    ...nodrag,
+  };
 
   return (
     <div onMouseEnter={onMouseEnter}>
-      {/* ─ Title bar ─ */}
-      <div style={{ height: TITLE_H, background: P.chrome,
-        display: 'flex', alignItems: 'center',
-        paddingLeft: isMac ? 70 : 0,
-        ...(isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : {}) }}>
 
-        {/* Sidebar icon */}
+      {/* ══ Row 1: Title bar ══════════════════════════════════════════════════ */}
+      <div style={{ height: TITLE_H, background: P.chrome, display: 'flex', alignItems: 'center',
+        paddingLeft: isMac ? 70 : 0, ...drag }}>
+
+        {/* [□] sidebar toggle */}
         <button onClick={e => { e.stopPropagation(); onSidebarToggle(); }}
           style={{ width: 42, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: sidebarOpen ? P.menuFgHover : P.menuFg,
             background: sidebarOpen ? `${P.fg}0A` : 'transparent',
-            border: 'none', cursor: 'pointer', flexShrink: 0,
-            ...(isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}) }}
+            border: 'none', cursor: 'pointer', flexShrink: 0, ...nodrag }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.menuFgHover}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = sidebarOpen ? P.menuFgHover : P.menuFg}>
           <SidebarIcon />
@@ -73,56 +75,49 @@ export function CanvasChrome({
               onBlur={() => setTitleEdit(false)}
               onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setTitleEdit(false); }}
               style={{ background: 'transparent', border: 'none', outline: 'none', fontFamily: SYS_FONT,
-                fontSize: 13, color: P.fg, textAlign: 'center', width: '100%', maxWidth: 440,
-                ...(isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}) }} />
+                fontSize: 13, color: P.fg, textAlign: 'center', width: '100%', maxWidth: 440, ...nodrag }} />
           ) : (
             <span title="双击编辑标题" onDoubleClick={() => setTitleEdit(true)}
-              style={{ fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500, color: P.menuFg, userSelect: 'none',
-                letterSpacing: '0.01em', cursor: 'text', maxWidth: 440,
+              style={{ fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500, color: P.menuFg,
+                userSelect: 'none', letterSpacing: '0.01em', cursor: 'text', maxWidth: 440,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {title || '无标题'}.md&nbsp;— GSYEN Writer
             </span>
           )}
         </div>
 
-        {/* 窗口控制：Windows 全三键；Mac 只保留 close（返回 Chat），min/max 用原生红绿灯 */}
-        <div className="flex items-center"
-          style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {}}>
+        {/* Window controls */}
+        <div className="flex items-center" style={nodrag}>
           {!isMac && <WinCtrlButton action="minimize" dark={dark} onClick={() => isElectron && (window as any).electronAPI.window.minimize()} title="Minimize" />}
           {!isMac && <WinCtrlButton action="maximize" dark={dark} maximized={maximized} onClick={() => isElectron && (window as any).electronAPI.window.maximize()} title={maximized ? 'Restore' : 'Maximize'} />}
           <WinCtrlButton action="close" dark={dark} onClick={onClose} title="退回 Chat  Esc" />
         </div>
       </div>
 
-      {/* ─ Menu/action bar ─ */}
+      {/* ══ Row 2: Menu bar ═══════════════════════════════════════════════════ */}
       {docType === 'doc' && (
         <div ref={menuBarRef} onClick={stopProp}
-          style={{ height: MENU_H, background: P.chrome, borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}`,
-            display: 'flex', alignItems: 'stretch' }}>
-          <div className="flex items-stretch" style={{ flex: 1 }}>
-            {menus.map(menu => (
-              <div key={menu.id as string} style={{ position: 'relative' }}>
-                <button style={{
-                  height: '100%', padding: '0 11px', fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500,
-                  color: activeMenu === menu.id ? P.menuFgHover : P.menuFg,
-                  background: activeMenu === menu.id ? (dark ? '#2E2A2A' : '#E2E2E2') : 'transparent',
-                  border: 'none', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
-                }}
+          style={{ height: MENU_H, background: P.chrome, display: 'flex', alignItems: 'stretch',
+            borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}` }}>
+          {menus.map(menu => (
+            <div key={menu.id as string} style={{ position: 'relative' }}>
+              <button style={{ height: '100%', padding: '0 11px', fontFamily: SYS_FONT, fontSize: 14,
+                fontWeight: 500, color: activeMenu === menu.id ? P.menuFgHover : P.menuFg,
+                background: activeMenu === menu.id ? (dark ? '#2E2A2A' : '#E2E2E2') : 'transparent',
+                border: 'none', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
                 onMouseEnter={e => { if (activeMenu !== null) setActiveMenu(menu.id); (e.currentTarget as HTMLElement).style.color = P.menuFgHover; }}
                 onMouseLeave={e => { if (activeMenu !== menu.id) (e.currentTarget as HTMLElement).style.color = P.menuFg; }}
                 onClick={e => { e.stopPropagation(); setActiveMenu(a => a === menu.id ? null : menu.id); }}>
-                  {menu.label}
-                </button>
-                {activeMenu === menu.id && <Dropdown items={menu.items} P={P} dark={dark} />}
-              </div>
-            ))}
-          </div>
-
+                {menu.label}
+              </button>
+              {activeMenu === menu.id && <Dropdown items={menu.items} P={P} dark={dark} />}
+            </div>
+          ))}
           {/* ▷ preview toggle */}
           <button title="Preview (Ctrl+P)" onClick={() => setMode(m => m === 'preview' ? 'write' : 'preview')}
             style={{ width: 40, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: mode !== 'write' ? P.accent : P.menuFg, background: 'transparent', border: 'none',
-              cursor: 'pointer', transition: 'color 0.1s' }}
+              color: mode !== 'write' ? P.accent : P.menuFg, background: 'transparent',
+              border: 'none', cursor: 'pointer', transition: 'color 0.1s', marginLeft: 'auto' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.menuFgHover}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = mode !== 'write' ? P.accent : P.menuFg}>
             <PreviewIcon />
@@ -130,11 +125,12 @@ export function CanvasChrome({
         </div>
       )}
 
-      {/* ─ Non-doc action bar ─ */}
+      {/* ══ Non-doc action bar ════════════════════════════════════════════════ */}
       {docType !== 'doc' && (
         <div onClick={stopProp}
           style={{ height: MENU_H, background: P.chrome,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' }}>
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px',
+            borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}` }}>
           <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
             {docType === 'canvas' ? 'Whiteboard · Excalidraw' : 'Node Canvas · 拖拽连线，双击编辑'}
           </span>
