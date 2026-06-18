@@ -2,7 +2,7 @@
  * CanvasLibrary — 左栏文件夹列表（header 已移至 CanvasChrome）
  * 只负责：folder list + Add to Library popup + 底部按钮
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { SYS_FONT, TITLE_H } from './CanvasEditorTypes';
@@ -49,12 +49,31 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [ctxFolder, setCtxFolder] = useState<{ id: string; x: number; y: number } | null>(null);
-
   // 只对「新出现」的 id 播入场动画，已存在的 id 不重建 DOM
   const knownIdsRef = useRef(new Set<string>());
   const newIds = new Set(folders.map(f => f.id).filter(id => !knownIdsRef.current.has(id)));
   folders.forEach(f => knownIdsRef.current.add(f.id));
+
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; folder: FolderSource } | null>(null);
+
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const close = () => setCtxMenu(null);
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [ctxMenu]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, folder: FolderSource) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({ x: e.clientX, y: e.clientY, folder });
+  }, []);
+
+  const handleRemove = useCallback((folder: FolderSource) => {
+    setCtxMenu(null);
+    libraryStore.removeFolder(folder.id);
+  }, []);
+
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupY, setPopupY] = useState(0);
   const [popupX, setPopupX] = useState(0);
@@ -72,14 +91,6 @@ export function CanvasLibrary({ open, P, dark }: Props) {
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, [popupOpen]);
-
-  // 右键菜单：点外部关闭
-  useEffect(() => {
-    if (!ctxFolder) return;
-    const fn = () => setCtxFolder(null);
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, [ctxFolder]);
 
   const handleToggle = () => {
     if (!popupOpen && triggerRef.current) {
@@ -147,7 +158,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
             return (
               <div key={folder.id} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => libraryStore.selectFolder(folder)}
-                onContextMenu={e => { e.preventDefault(); setCtxFolder({ id: folder.id, x: e.clientX, y: e.clientY }); }}
+                onContextMenu={(e) => handleContextMenu(e, folder)}
                 onMouseEnter={() => setHoveredId(folder.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28,
@@ -197,21 +208,21 @@ export function CanvasLibrary({ open, P, dark }: Props) {
       <div ref={popupRef}
         style={{ position: 'fixed', left: popupX, top: popupY, width: 'max-content', zIndex: 9999,
           transform: popupOpen ? 'translateY(-100%) scale(1)' : 'translateY(calc(-100% + 6px)) scale(0.97)',
-          background: dark ? '#2A2A2A' : '#FFFFFF', borderRadius: 6,
+          background: P.chrome, borderRadius: 6,
           boxShadow: `0 8px 32px rgba(0,0,0,${dark ? 0.5 : 0.18}), 0 2px 8px rgba(0,0,0,${dark ? 0.3 : 0.08})`,
           opacity: popupOpen ? 1 : 0, pointerEvents: popupOpen ? 'auto' : 'none',
           transition: 'opacity 0.15s ease, transform 0.15s ease',
-          overflow: 'hidden', padding: '6px 0' }}>
+          overflow: 'hidden', padding: '4px 0' }}>
         {[
           { label: 'Add files to the Library',  action: handleAddFiles  },
           { label: 'Add folder to the Library', action: handleAddFolder },
         ].map(({ label, action }) => (
           <button key={label} onClick={action}
-            style={{ width: '100%', padding: '10px 18px', textAlign: 'left',
+            style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
               background: 'transparent', border: 'none', cursor: 'pointer', display: 'block',
-              fontSize: 14, fontFamily: SYS_FONT, color: dark ? '#CCCCCC' : '#1A1A1A',
-              whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
+              fontSize: 13, fontFamily: SYS_FONT, color: P.menuFg,
+              whiteSpace: 'nowrap' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
             {label}
           </button>
@@ -220,27 +231,23 @@ export function CanvasLibrary({ open, P, dark }: Props) {
       document.body
     )}
 
-    {/* ─ 右键上下文菜单 — portal 挂 body ─ */}
-    {ctxFolder && createPortal(
+    {ctxMenu && createPortal(
       <div onMouseDown={e => e.stopPropagation()}
-        style={{ position: 'fixed', left: ctxFolder.x, top: ctxFolder.y, zIndex: 9999,
-          background: dark ? '#2C2C2C' : '#FFFFFF', borderRadius: 8, padding: '5px 0',
-          boxShadow: dark
-            ? '0 12px 40px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
-            : '0 4px 6px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.12)',
-          minWidth: 180 }}>
-        <button
-          onClick={() => { libraryStore.removeFolder(ctxFolder.id); setCtxFolder(null); }}
-          style={{ width: '100%', padding: '10px 20px', textAlign: 'left', background: 'transparent',
-            border: 'none', cursor: 'default', fontSize: 13, fontFamily: SYS_FONT, fontWeight: 400,
-            color: dark ? '#CCCCCC' : '#1A1A1A', whiteSpace: 'nowrap', letterSpacing: 'normal' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
+        style={{ position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999,
+          background: P.chrome, borderRadius: 6, padding: '4px 0',
+          boxShadow: `0 4px 20px rgba(0,0,0,${dark ? 0.45 : 0.14})`,
+          minWidth: 160, fontFamily: SYS_FONT }}>
+        <button onClick={() => handleRemove(ctxMenu.folder)}
+          style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: 13, color: P.menuFg, fontFamily: SYS_FONT }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-          Remove from Library
+          从 Library 移除
         </button>
       </div>,
       document.body
     )}
-  </>
-);
+    </>
+  );
 }
