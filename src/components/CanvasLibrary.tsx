@@ -138,23 +138,25 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
         {/* ─ Popup ─ */}
         <div ref={popupRef}
-          style={{ position: 'absolute', bottom: 36, left: 0, width: '100%', zIndex: 200,
-            background: P.chrome, borderRadius: 8,
-            boxShadow: `0 4px 24px rgba(0,0,0,${dark ? 0.45 : 0.14})`,
-            maxHeight: popupOpen ? '200px' : '0px',
+          style={{ position: 'absolute', bottom: 44, left: 8, right: 8, zIndex: 200,
+            background: dark ? '#2A2A2A' : '#FFFFFF',
+            borderRadius: 12,
+            boxShadow: `0 8px 32px rgba(0,0,0,${dark ? 0.5 : 0.18}), 0 2px 8px rgba(0,0,0,${dark ? 0.3 : 0.08})`,
             opacity: popupOpen ? 1 : 0,
+            transform: popupOpen ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.97)',
             pointerEvents: popupOpen ? 'auto' : 'none',
-            transition: 'max-height 0.22s cubic-bezier(0.4,0,0.2,1), opacity 0.15s ease',
-            overflow: 'hidden' }}>
+            transition: 'opacity 0.15s ease, transform 0.15s ease',
+            overflow: 'hidden', padding: '6px 0' }}>
             {[
               { label: 'Add files to the Library',  action: handleAddFiles  },
               { label: 'Add folder to the Library', action: handleAddFolder },
             ].map(({ label, action }) => (
               <button key={label} onClick={action}
-                style={{ width: '100%', padding: '10px 14px', textAlign: 'left',
+                style={{ width: '100%', padding: '10px 18px', textAlign: 'left',
                   background: 'transparent', border: 'none', cursor: 'pointer', display: 'block',
-                  fontSize: 13, fontFamily: SYS_FONT, color: P.fg, whiteSpace: 'nowrap' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
+                  fontSize: 14, fontFamily: SYS_FONT, color: dark ? '#CCCCCC' : '#1A1A1A',
+                  whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                 {label}
               </button>
