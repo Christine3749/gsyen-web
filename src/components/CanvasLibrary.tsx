@@ -2,7 +2,7 @@
  * CanvasLibrary — 左栏文件夹列表（header 已移至 CanvasChrome）
  * 只负责：folder list + Add to Library popup + 底部按钮
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { SYS_FONT, TITLE_H, MENU_H, isElectron } from './CanvasEditorTypes';
@@ -56,6 +56,26 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   const newIds = new Set(folders.map(f => f.id).filter(id => !knownIdsRef.current.has(id)));
   folders.forEach(f => knownIdsRef.current.add(f.id));
 
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; folder: FolderSource } | null>(null);
+
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const close = () => setCtxMenu(null);
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [ctxMenu]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, folder: FolderSource) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({ x: e.clientX, y: e.clientY, folder });
+  }, []);
+
+  const handleRemove = useCallback((folder: FolderSource) => {
+    setCtxMenu(null);
+    libraryStore.removeFolder(folder.id);
+  }, []);
+
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupBottom, setPopupBottom] = useState(0);
   const popupRef  = useRef<HTMLDivElement>(null);
@@ -89,6 +109,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   };
 
   return (
+    <>
     <div style={{ width: open ? libW : 0, overflow: 'hidden', flexShrink: 0,
       transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
       background: P.chrome, borderRight: `0.5px solid ${P.border}`,
@@ -129,6 +150,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
             return (
               <div key={folder.id} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => libraryStore.selectFolder(folder)}
+                onContextMenu={(e) => handleContextMenu(e, folder)}
                 onMouseEnter={() => setHoveredId(folder.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28,
@@ -200,5 +222,24 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
       </div>
     </div>
+
+    {ctxMenu && createPortal(
+      <div onMouseDown={e => e.stopPropagation()}
+        style={{ position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999,
+          background: P.chrome, borderRadius: 6, padding: '4px 0',
+          boxShadow: `0 4px 20px rgba(0,0,0,${dark ? 0.45 : 0.14})`,
+          minWidth: 160, fontFamily: SYS_FONT }}>
+        <button onClick={() => handleRemove(ctxMenu.folder)}
+          style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: 13, color: P.menuFg, fontFamily: SYS_FONT }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+          从 Library 移除
+        </button>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }

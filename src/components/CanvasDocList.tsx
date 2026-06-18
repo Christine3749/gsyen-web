@@ -250,8 +250,8 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
         <button onClick={() => handleDelete(ctxMenu.entry)}
           style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
             background: 'transparent', border: 'none', cursor: 'pointer',
-            fontSize: 13, color: '#E05252', fontFamily: SYS_FONT }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(224,82,82,0.08)'}
+            fontSize: 13, color: P.menuFg, fontFamily: SYS_FONT }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
           移到废纸篓
         </button>
