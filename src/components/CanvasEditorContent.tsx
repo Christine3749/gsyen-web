@@ -186,6 +186,14 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     ...(tw ? [typewriterExt()] : []),
   ], [dark, focusMode, tw, fontSize, fontFamily]);
 
+  /* ── 修复存量脏数据：type 未存或错存为 'doc' 时写回正确值 ── */
+  useEffect(() => {
+    if (!docId || !stored) return;
+    const storedType = stored.type ?? 'doc';
+    if (storedType !== docType) canvasStore.update(docId, { type: docType });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 仅 mount 时执行一次
+
   /* ── sync + keyboard ── */
   useEffect(() => {
     const sync = () => { const d = docId ? canvasStore.getById(docId) : null; if (d) { setTitle(d.title); setContent(d.content); } };
