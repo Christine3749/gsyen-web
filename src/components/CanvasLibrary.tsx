@@ -51,11 +51,11 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // track folder list changes to re-trigger entrance animation
-  const folderKeyRef  = useRef(0);
-  const prevFolders   = useRef(folders);
-  if (prevFolders.current !== folders) { prevFolders.current = folders; folderKeyRef.current += 1; }
-  const folderKey = folderKeyRef.current;
+  // 只对「新出现」的 id 播入场动画，已存在的 id 不重建 DOM
+  const knownIdsRef = useRef(new Set<string>());
+  const newIds = new Set(folders.map(f => f.id).filter(id => !knownIdsRef.current.has(id)));
+  folders.forEach(f => knownIdsRef.current.add(f.id));
+
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupBottom, setPopupBottom] = useState(0);
   const popupRef  = useRef<HTMLDivElement>(null);
@@ -122,11 +122,12 @@ export function CanvasLibrary({ open, P, dark }: Props) {
               ))}
             </div>
           )}
-          {folders.map((folder, idx) => {
+          {folders.map((folder) => {
             const isActive  = selectedFolder?.id === folder.id;
             const isHovered = hoveredId === folder.id;
+            const isNew     = newIds.has(folder.id);
             return (
-              <div key={`${folderKey}-${folder.id}`} className="gs-list-item"
+              <div key={folder.id} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => libraryStore.selectFolder(folder)}
                 onMouseEnter={() => setHoveredId(folder.id)}
                 onMouseLeave={() => setHoveredId(null)}
@@ -135,8 +136,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
                   borderRadius: 4, fontFamily: SYS_FONT,
                   fontWeight: 500, color: isActive ? P.fg : P.menuFg,
                   background: isActive ? `${P.fg}12` : isHovered ? `${P.fg}06` : 'transparent',
-                  transition: 'background 0.12s',
-                  animationDelay: `${idx * 30}ms` }}>
+                  transition: 'background 0.12s' }}>
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H10.5C11.33 3.5 12 4.17 12 5v5c0 .83-.67 1.5-1.5 1.5h-8C1.67 11.5 1 10.83 1 10V3.5z"/>
