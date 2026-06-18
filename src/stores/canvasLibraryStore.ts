@@ -12,6 +12,11 @@ const EL_SELECTED_KEY = 'gsyen_library_selected';
 // readDir 结果缓存：folderSource.id → FileEntry[]
 const _dirCache = new Map<string, FileEntry[]>();
 
+// 路径归一化：统一正斜杠 + 去尾部斜杠（防止同一文件夹因路径格式不同被重复添加）
+function _normPath(p: string): string {
+  return p.replace(/\\/g, '/').replace(/\/$/, '');
+}
+
 interface LibraryState {
   folders:        FolderSource[];
   selectedFolder: FolderSource | null;
@@ -40,7 +45,16 @@ function _restoreElectronPaths() {
   try {
     const saved: { id: string; name: string; path: string }[] =
       JSON.parse(localStorage.getItem(EL_PATHS_KEY) ?? '[]');
-    const folders: FolderSource[] = saved.map(p => ({ ...p, env: 'electron' as const }));
+    const seen = new Set<string>();
+    const folders: FolderSource[] = saved
+      .filter(p => p.name?.trim() && p.path?.trim() && p.path.trim().length > 2)  // 过滤脏数据
+      .map(p => ({ ...p, env: 'electron' as const }))      // 保留原始路径，不做修改
+      .filter(f => {
+        const key = _normPath(f.path!);                    // normalize 只用于去重比较
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     const selectedId = localStorage.getItem(EL_SELECTED_KEY);
     const selectedFolder = selectedId ? (folders.find(f => f.id === selectedId) ?? null) : null;
     _set({ folders, selectedFolder });
@@ -52,7 +66,9 @@ _restoreElectronPaths();
 function _savePaths(folders: FolderSource[]) {
   if (fsAdapter.env !== 'electron') return;
   localStorage.setItem(EL_PATHS_KEY, JSON.stringify(
-    folders.map(f => ({ id: f.id, name: f.name, path: f.path ?? '' }))
+    folders
+      .filter(f => f.name?.trim() && f.path?.trim() && f.path.trim().length > 2)
+      .map(f => ({ id: f.id, name: f.name, path: f.path ?? '' }))
   ));
 }
 
@@ -79,7 +95,12 @@ export const libraryStore = {
   },
 
   addFolderSource(src: FolderSource) {
-    const folders = [src, ..._s.folders.filter(f => f.id !== src.id)];
+    if (!src.name?.trim() || !src.path?.trim()) return;
+    const normKey = src.path ? _normPath(src.path) : src.id;
+    const folders = [src, ..._s.folders.filter(f => {
+      const key = f.path ? _normPath(f.path) : f.id;
+      return key !== normKey;
+    })];
     _savePaths(folders);
     _set({ folders });
     libraryStore.selectFolder(src);

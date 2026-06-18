@@ -2,10 +2,28 @@
  * CanvasDocList — 中栏文件列表（header/Sort By Date 已移至 CanvasChrome）
  * 只负责：子文件夹 + 文件列表渲染，导航通过 libraryStore.pushNav
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { fsAdapter } from '../hooks/useFileSystem';
 import type { FileEntry } from '../hooks/useFileSystem';
+
+// ── 悬停预加载缓存（最多 40 条，LRU by insertion order）──────────────────────
+const _MAX_CACHE = 40;
+const _prefetchCache = new Map<string, string>();
+
+function _prefetchFile(file: FileEntry) {
+  if (!file.path || _prefetchCache.has(file.path)) return;
+  fsAdapter.readFile(file).then(text => {
+    if (_prefetchCache.size >= _MAX_CACHE) {
+      _prefetchCache.delete(_prefetchCache.keys().next().value!);
+    }
+    _prefetchCache.set(file.path!, text);
+  }).catch(() => {});
+}
+
+export function invalidatePrefetch(path: string) {
+  _prefetchCache.delete(path);
+}
 import { SYS_FONT, TITLE_H, MENU_H } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
 import { DocIcon, DrawIcon, NodeIcon } from '../gsyen-designer';
@@ -27,6 +45,9 @@ function fileIcon(name: string) {
   return DocIcon;
 }
 
+// widths for skeleton rows — vary to look natural
+const SKEL_WIDTHS = ['72%', '58%', '80%', '64%', '50%'];
+
 export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
   const { selectedFolder, files, navStack, navFiles, navLoading, loading, selectedFile } = useLibraryStore();
   const currentName = navStack.length > 0 ? navStack[navStack.length - 1].name : (selectedFolder?.name ?? '');
@@ -38,9 +59,19 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
   const isLoading    = inSub ? navLoading : loading;
   const shown        = open;
 
+  // increment every time the list content changes → CSS animation re-triggers via key
+  const listVersionRef = useRef(0);
+  const prevFilesRef   = useRef(displayFiles);
+  if (prevFilesRef.current !== displayFiles) {
+    prevFilesRef.current = displayFiles;
+    listVersionRef.current += 1;
+  }
+  const listKey = listVersionRef.current;
+
   const handleSelect = useCallback(async (file: FileEntry) => {
     libraryStore.setSelectedFile(file);
-    const content = await fsAdapter.readFile(file);
+    const cached = file.path ? _prefetchCache.get(file.path) : undefined;
+    const content = cached !== undefined ? cached : await fsAdapter.readFile(file);
     onFileSelect(file, content);
   }, [onFileSelect]);
 
@@ -96,27 +127,39 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
 
         {/* ─ File + Dir list ─ */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
-          {isLoading && (
-            <div style={{ padding: '12px', fontSize: 11, color: P.dim, fontFamily: SYS_FONT }}>
-              读取中...
+          {isLoading && displayFiles.length === 0 && (
+            <div style={{ padding: '6px 0' }}>
+              {SKEL_WIDTHS.map((w, i) => (
+                <div key={i} style={{ padding: '9px 12px', borderBottom: `0.5px solid ${P.border}` }}>
+                  <div className="gs-skeleton"
+                    style={{ height: 11, width: w, background: P.fg,
+                      animationDelay: `${i * 120}ms`, marginBottom: 5 }} />
+                  <div className="gs-skeleton"
+                    style={{ height: 9, width: '45%', background: P.fg,
+                      animationDelay: `${i * 120 + 60}ms` }} />
+                </div>
+              ))}
             </div>
           )}
 
-          {displayFiles.map(entry => {
+          {displayFiles.map((entry, idx) => {
             const active  = !entry.isDirectory && selectedFile?.path === entry.path;
             const hovered = hoveredPath === entry.path;
             const bg = active ? `${P.fg}0A` : hovered ? `${P.fg}06` : 'transparent';
+            const enterDelay = `${Math.min(idx, 20) * 22}ms`;
 
             if (entry.isDirectory) {
               return (
-                <div key={entry.path} onClick={() => handleDirClick(entry)}
+                <div key={`${listKey}-${entry.path}`} className="gs-list-item"
+                  onClick={() => handleDirClick(entry)}
                   onMouseEnter={() => setHoveredPath(entry.path)}
                   onMouseLeave={() => setHoveredPath(null)}
                   style={{ display: 'flex', alignItems: 'center', gap: 8,
                     padding: '0 10px 0 12px', height: 36, cursor: 'pointer',
                     borderBottom: `0.5px solid ${P.border}`,
                     borderLeft: '2px solid transparent',
-                    background: bg, transition: 'background 0.12s' }}>
+                    background: bg, transition: 'background 0.12s',
+                    animationDelay: enterDelay }}>
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                     stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
                     style={{ color: P.menuFg, flexShrink: 0 }}>
@@ -136,14 +179,16 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
 
             const Icon = fileIcon(entry.name);
             return (
-              <div key={entry.path} onClick={() => handleSelect(entry)}
-                onMouseEnter={() => setHoveredPath(entry.path)}
+              <div key={`${listKey}-${entry.path}`} className="gs-list-item"
+                onClick={() => handleSelect(entry)}
+                onMouseEnter={() => { setHoveredPath(entry.path); _prefetchFile(entry); }}
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
                   padding: '8px 10px 8px 12px', cursor: 'pointer',
                   borderBottom: `0.5px solid ${P.border}`,
                   borderLeft: active ? '2px solid #55AAFF' : '2px solid transparent',
-                  background: bg, transition: 'background 0.12s', minHeight: 44 }}>
+                  background: bg, transition: 'background 0.12s', minHeight: 44,
+                  animationDelay: enterDelay }}>
                 <span style={{ color: active ? P.fg : P.menuFg, display: 'flex', flexShrink: 0, marginTop: 1 }}>
                   <Icon />
                 </span>

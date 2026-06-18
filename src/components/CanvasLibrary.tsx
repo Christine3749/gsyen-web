@@ -3,6 +3,7 @@
  * 只负责：folder list + Add to Library popup + 底部按钮
  */
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { SYS_FONT, TITLE_H } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
@@ -42,10 +43,19 @@ async function pickFiles(): Promise<FolderSource[]> {
   } catch { return []; }
 }
 
+const LIB_SKEL_WIDTHS = ['68%', '52%', '76%'];
+
 export function CanvasLibrary({ open, P, dark }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [ctxFolder, setCtxFolder] = useState<{ id: string; x: number; y: number } | null>(null);
+
+  // track folder list changes to re-trigger entrance animation
+  const folderKeyRef  = useRef(0);
+  const prevFolders   = useRef(folders);
+  if (prevFolders.current !== folders) { prevFolders.current = folders; folderKeyRef.current += 1; }
+  const folderKey = folderKeyRef.current;
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupY, setPopupY] = useState(0);
   const [popupX, setPopupX] = useState(0);
@@ -64,6 +74,14 @@ export function CanvasLibrary({ open, P, dark }: Props) {
     return () => document.removeEventListener('mousedown', fn);
   }, [popupOpen]);
 
+  // 右键菜单：点外部关闭
+  useEffect(() => {
+    if (!ctxFolder) return;
+    const fn = () => setCtxFolder(null);
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, [ctxFolder]);
+
   const handleToggle = () => {
     if (!popupOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
@@ -81,6 +99,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   };
 
   return (
+    <>
     <div style={{ width: open ? libW : 0, overflow: 'hidden', flexShrink: 0,
       transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
       background: P.chrome, borderRight: `0.5px solid ${P.border}`,
@@ -107,11 +126,28 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
         {/* ─ Folder list ─ */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
-          {folders.map(folder => {
+          {loading && folders.length === 0 && (
+            <div style={{ padding: '4px 0' }}>
+              {LIB_SKEL_WIDTHS.map((w, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8,
+                  height: 28, padding: '0 10px', margin: '0 4px' }}>
+                  <div className="gs-skeleton"
+                    style={{ width: 13, height: 13, flexShrink: 0, background: P.fg,
+                      animationDelay: `${i * 150}ms` }} />
+                  <div className="gs-skeleton"
+                    style={{ height: 10, width: w, background: P.fg,
+                      animationDelay: `${i * 150 + 75}ms` }} />
+                </div>
+              ))}
+            </div>
+          )}
+          {folders.map((folder, idx) => {
             const isActive  = selectedFolder?.id === folder.id;
             const isHovered = hoveredId === folder.id;
             return (
-              <div key={folder.id} onClick={() => libraryStore.selectFolder(folder)}
+              <div key={`${folderKey}-${folder.id}`} className="gs-list-item"
+                onClick={() => libraryStore.selectFolder(folder)}
+                onContextMenu={e => { e.preventDefault(); setCtxFolder({ id: folder.id, x: e.clientX, y: e.clientY }); }}
                 onMouseEnter={() => setHoveredId(folder.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28,
@@ -119,7 +155,8 @@ export function CanvasLibrary({ open, P, dark }: Props) {
                   borderRadius: 4, fontFamily: SYS_FONT,
                   fontWeight: 500, color: isActive ? P.fg : P.menuFg,
                   background: isActive ? `${P.fg}12` : isHovered ? `${P.fg}06` : 'transparent',
-                  transition: 'background 0.12s' }}>
+                  transition: 'background 0.12s',
+                  animationDelay: `${idx * 30}ms` }}>
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H10.5C11.33 3.5 12 4.17 12 5v5c0 .83-.67 1.5-1.5 1.5h-8C1.67 11.5 1 10.83 1 10V3.5z"/>
@@ -138,39 +175,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
               </div>
             );
           })}
-          {loading && (
-            <div style={{ padding: '8px 12px', fontSize: 11, color: P.dim, fontFamily: SYS_FONT }}>
-              读取中...
-            </div>
-          )}
         </div>
-
-        {/* ─ Popup ─ */}
-        <div ref={popupRef}
-          style={{ position: 'fixed', left: popupX, top: popupY, width: 'max-content', zIndex: 200,
-            transform: popupOpen ? 'translateY(-100%) scale(1)' : 'translateY(calc(-100% + 6px)) scale(0.97)',
-            background: dark ? '#2A2A2A' : '#FFFFFF',
-            borderRadius: 6,
-            boxShadow: `0 8px 32px rgba(0,0,0,${dark ? 0.5 : 0.18}), 0 2px 8px rgba(0,0,0,${dark ? 0.3 : 0.08})`,
-            opacity: popupOpen ? 1 : 0,
-            pointerEvents: popupOpen ? 'auto' : 'none',
-            transition: 'opacity 0.15s ease, transform 0.15s ease',
-            overflow: 'hidden', padding: '6px 0' }}>
-            {[
-              { label: 'Add files to the Library',  action: handleAddFiles  },
-              { label: 'Add folder to the Library', action: handleAddFolder },
-            ].map(({ label, action }) => (
-              <button key={label} onClick={action}
-                style={{ width: '100%', padding: '10px 18px', textAlign: 'left',
-                  background: 'transparent', border: 'none', cursor: 'pointer', display: 'block',
-                  fontSize: 14, fontFamily: SYS_FONT, color: dark ? '#CCCCCC' : '#1A1A1A',
-                  whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                {label}
-              </button>
-            ))}
-          </div>
 
         {/* ─ Bottom trigger ─ */}
         <button ref={triggerRef} onClick={handleToggle}
@@ -187,5 +192,56 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
       </div>
     </div>
-  );
+
+    {/* ─ Popup — portal 挂 body，彻底跳出 overflow:hidden 父容器 ─ */}
+    {createPortal(
+      <div ref={popupRef}
+        style={{ position: 'fixed', left: popupX, top: popupY, width: 'max-content', zIndex: 9999,
+          transform: popupOpen ? 'translateY(-100%) scale(1)' : 'translateY(calc(-100% + 6px)) scale(0.97)',
+          background: dark ? '#2A2A2A' : '#FFFFFF', borderRadius: 6,
+          boxShadow: `0 8px 32px rgba(0,0,0,${dark ? 0.5 : 0.18}), 0 2px 8px rgba(0,0,0,${dark ? 0.3 : 0.08})`,
+          opacity: popupOpen ? 1 : 0, pointerEvents: popupOpen ? 'auto' : 'none',
+          transition: 'opacity 0.15s ease, transform 0.15s ease',
+          overflow: 'hidden', padding: '6px 0' }}>
+        {[
+          { label: 'Add files to the Library',  action: handleAddFiles  },
+          { label: 'Add folder to the Library', action: handleAddFolder },
+        ].map(({ label, action }) => (
+          <button key={label} onClick={action}
+            style={{ width: '100%', padding: '10px 18px', textAlign: 'left',
+              background: 'transparent', border: 'none', cursor: 'pointer', display: 'block',
+              fontSize: 14, fontFamily: SYS_FONT, color: dark ? '#CCCCCC' : '#1A1A1A',
+              whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+            {label}
+          </button>
+        ))}
+      </div>,
+      document.body
+    )}
+
+    {/* ─ 右键上下文菜单 — portal 挂 body ─ */}
+    {ctxFolder && createPortal(
+      <div onMouseDown={e => e.stopPropagation()}
+        style={{ position: 'fixed', left: ctxFolder.x, top: ctxFolder.y, zIndex: 9999,
+          background: dark ? '#2C2C2C' : '#FFFFFF', borderRadius: 8, padding: '5px 0',
+          boxShadow: dark
+            ? '0 12px 40px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
+            : '0 4px 6px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.12)',
+          minWidth: 180 }}>
+        <button
+          onClick={() => { libraryStore.removeFolder(ctxFolder.id); setCtxFolder(null); }}
+          style={{ width: '100%', padding: '10px 20px', textAlign: 'left', background: 'transparent',
+            border: 'none', cursor: 'default', fontSize: 13, fontFamily: SYS_FONT, fontWeight: 400,
+            color: dark ? '#CCCCCC' : '#1A1A1A', whiteSpace: 'nowrap', letterSpacing: 'normal' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+          Remove from Library
+        </button>
+      </div>,
+      document.body
+    )}
+  </>
+);
 }
