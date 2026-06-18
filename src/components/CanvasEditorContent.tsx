@@ -57,7 +57,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
   const { libW, doclistW } = useCanvasPanelWidths();
   const { selectedFolder } = useLibraryStore();
-  const panelLeft = docType === 'doc' && sidebarOpen ? libW + doclistW : 0;
+  const panelLeft = sidebarOpen ? libW + doclistW : 0;
 
   const P          = dark ? DARK : LIGHT;
   const fontFamily = font === 'mono'
@@ -224,29 +224,44 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     <div className="fixed inset-0 z-50" style={{ background:P.bg, color:P.fg, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       onClick={() => setActiveMenu(null)} onMouseMove={handleMouseMove}>
 
-      {/* Content — 三个面板常驻 DOM，display 切换避免重复挂载卸载 */}
-      <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
-        {/* Doc — three-pane: Library | DocList | Editor */}
-        <div style={{ display: docType === 'doc' ? 'flex' : 'none', width:'100%', height:'100%' }}>
-          <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
-          <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
-            onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
-          <CanvasWriterPane content={content} onContent={onContent} extensions={extensions}
-            P={P} mode={mode} fontFamily={fontFamily} fontSize={fontSize} dark={dark}
-            lineLen={lineLen} editorFade={editorFade} editorRef={editorRef} />
+      {/* Content — sidebar 全模式可用，三个内容面板常驻 DOM display 切换 */}
+      <div style={{ position:'absolute', inset:0, overflow:'hidden', display:'flex' }}>
+        {/* Sidebar — all modes */}
+        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
+        <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
+          onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
+
+        {/* Main area */}
+        <div style={{ flex:1, position:'relative', overflow:'hidden', height:'100%' }}>
+          {/* Doc write pane */}
+          <div style={{ display: docType === 'doc' ? 'flex' : 'none', width:'100%', height:'100%' }}>
+            <CanvasWriterPane content={content} onContent={onContent} extensions={extensions}
+              P={P} mode={mode} fontFamily={fontFamily} fontSize={fontSize} dark={dark}
+              lineLen={lineLen} editorFade={editorFade} editorRef={editorRef} />
+          </div>
+          {/* Whiteboard */}
+          {docId && (
+            <div style={{ display: docType === 'canvas' ? 'block' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H + 1 }}>
+              <CanvasDrawEditor docId={docId} dark={dark} />
+            </div>
+          )}
+          {/* Node Canvas */}
+          {docId && (
+            <div style={{ display: docType === 'nodes' ? 'flex' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H + 1 }}>
+              <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
+            </div>
+          )}
+          {/* Floating + Card button — top-right of canvas area */}
+          {docType === 'nodes' && (
+            <button onClick={() => nodeEditorRef.current?.addCard()}
+              style={{ position:'absolute', top: CHROME_H + 10, right: 12, zIndex: 15,
+                background: P.accent, color:'#fff', border:'none', borderRadius: 6,
+                padding:'5px 14px', fontSize: 12, fontFamily: SYS_FONT, fontWeight: 500,
+                cursor:'pointer', letterSpacing:'0.01em', boxShadow:'0 2px 8px rgba(0,0,0,0.18)' }}>
+              + Card
+            </button>
+          )}
         </div>
-        {/* Whiteboard */}
-        {docId && (
-          <div style={{ display: docType === 'canvas' ? 'block' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H + 1 }}>
-            <CanvasDrawEditor docId={docId} dark={dark} />
-          </div>
-        )}
-        {/* Node Canvas */}
-        {docId && (
-          <div style={{ display: docType === 'nodes' ? 'flex' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H + 1 }}>
-            <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
-          </div>
-        )}
       </div>
 
       {/* 持久拖拽条 — Chrome 自动隐藏后仍允许移动窗口
@@ -263,7 +278,6 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           setTitleEdit={setTitleEdit} titleInputRef={titleInputRef}
           menus={menus} activeMenu={activeMenu} setActiveMenu={setActiveMenu}
           mode={mode} setMode={setMode} docType={docType}
-          onAddCard={() => nodeEditorRef.current?.addCard()}
           onClose={onClose}
           sidebarOpen={sidebarOpen} onSidebarToggle={() => setSidebarOpen(o => !o)}
           P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef} />
