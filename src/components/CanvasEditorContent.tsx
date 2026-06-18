@@ -269,7 +269,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
         {/* Doc — three-pane: Library | DocList | Editor */}
         <div style={{ display: docType === 'doc' ? 'flex' : 'none', width:'100%', height:'100%' }}>
           <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
-          <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P}
+          <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
             onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
           <div style={{ flex: 1, display: 'flex', minWidth: 0, paddingTop: CHROME_H + 1,
             opacity: editorFade, transition: 'opacity 0.13s ease' }}>

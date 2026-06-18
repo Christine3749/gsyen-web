@@ -185,7 +185,10 @@ export function CanvasLibrary({ open, P, dark }: Props) {
             style={{ position: 'fixed', left: 0, width: 'auto', minWidth: libW, zIndex: 9999,
               bottom: popupBottom,
               background: P.chrome, borderRadius: 8,
-              boxShadow: `0 4px 24px rgba(0,0,0,${dark ? 0.45 : 0.14})`,
+              boxShadow: dark
+                ? '0 4px 6px rgba(0,0,0,0.35), 0 12px 32px rgba(0,0,0,0.55)'
+                : '0 4px 6px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.12)',
+              border: `0.5px solid ${P.border}`,
               opacity: popupOpen ? 1 : 0,
               transform: popupOpen ? 'translateY(0)' : 'translateY(6px)',
               pointerEvents: popupOpen ? 'auto' : 'none',
@@ -226,14 +229,17 @@ export function CanvasLibrary({ open, P, dark }: Props) {
     {ctxMenu && createPortal(
       <div onMouseDown={e => e.stopPropagation()}
         style={{ position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999,
-          background: P.chrome, borderRadius: 6, padding: '4px 0',
-          boxShadow: `0 4px 20px rgba(0,0,0,${dark ? 0.45 : 0.14})`,
-          minWidth: 160, fontFamily: SYS_FONT }}>
+          background: P.chrome, borderRadius: 8, padding: '4px 0',
+          boxShadow: dark
+            ? '0 4px 6px rgba(0,0,0,0.35), 0 12px 32px rgba(0,0,0,0.55)'
+            : '0 4px 6px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.12)',
+          border: `0.5px solid ${P.border}`,
+          minWidth: 180, fontFamily: SYS_FONT }}>
         <button onClick={() => handleRemove(ctxMenu.folder)}
-          style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
+          style={{ width: '100%', padding: '10px 20px', textAlign: 'left',
             background: 'transparent', border: 'none', cursor: 'pointer',
-            fontSize: 13, color: P.menuFg, fontFamily: SYS_FONT }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
+            fontSize: 13, color: P.menuFg, fontFamily: SYS_FONT, display: 'block', whiteSpace: 'nowrap' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}08`}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
           从 Library 移除
         </button>

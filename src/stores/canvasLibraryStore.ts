@@ -129,6 +129,17 @@ export const libraryStore = {
 
   setSelectedFile(file: FileEntry | null) { _set({ selectedFile: file }); },
 
+  /** 重命名后立刻更新列表，不等 readDir 重扫 */
+  optimisticRenameFile(oldPath: string, newPath: string, newName: string) {
+    const update = (f: FileEntry): FileEntry =>
+      f.path === oldPath ? { ...f, path: newPath, name: newName } : f;
+    _set({
+      files:        _s.files.map(update),
+      navFiles:     _s.navFiles.map(update),
+      selectedFile: _s.selectedFile?.path === oldPath ? update(_s.selectedFile) : _s.selectedFile,
+    });
+  },
+
   /** 删除文件后立刻从列表移除，不等 readDir 重扫 */
   optimisticRemoveFile(filePath: string) {
     const keep = (f: FileEntry) => f.path !== filePath;
