@@ -147,7 +147,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
         {/* ─ Popup ─ */}
         <div ref={popupRef}
-          style={{ position: 'fixed', left: popupX, top: popupY, minWidth: 220, zIndex: 200,
+          style={{ position: 'fixed', left: popupX, top: popupY, width: 'max-content', zIndex: 200,
             transform: popupOpen ? 'translateY(-100%) scale(1)' : 'translateY(calc(-100% + 6px)) scale(0.97)',
             background: dark ? '#2A2A2A' : '#FFFFFF',
             borderRadius: 6,
