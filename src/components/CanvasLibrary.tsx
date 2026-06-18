@@ -3,8 +3,9 @@
  * 只负责：folder list + Add to Library popup + 底部按钮
  */
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
-import { SYS_FONT, TITLE_H } from './CanvasEditorTypes';
+import { SYS_FONT, TITLE_H, MENU_H, isElectron } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
 import type { FolderSource } from '../hooks/useFileSystem';
 import { useCanvasPanelWidths } from '../hooks/useCanvasPanelWidths';
@@ -44,12 +45,12 @@ async function pickFiles(): Promise<FolderSource[]> {
 
 export function CanvasLibrary({ open, P, dark }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
+
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
-  const [popupY, setPopupY] = useState(0);
-  const [popupX, setPopupX] = useState(0);
-  const popupRef   = useRef<HTMLDivElement>(null);
+  const [popupBottom, setPopupBottom] = useState(0);
+  const popupRef  = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -67,8 +68,7 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   const handleToggle = () => {
     if (!popupOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setPopupX(rect.left + 8);
-      setPopupY(rect.top);
+      setPopupBottom(window.innerHeight - rect.top);
     }
     setPopupOpen(o => !o);
   };
@@ -85,24 +85,16 @@ export function CanvasLibrary({ open, P, dark }: Props) {
       transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
       background: P.chrome, borderRight: `0.5px solid ${P.border}`,
       display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      <div style={{ width: libW, height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      <div style={{ width: libW, height: '100%', display: 'flex', flexDirection: 'column' }}>
 
         {/* ─ Header ─ */}
-        <div style={{ height: TITLE_H, flexShrink: 0, display: 'flex', alignItems: 'center',
-          padding: '0 4px 0 10px' }}>
-          <span style={{ flex: 1, fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
+        <div style={{ height: TITLE_H, flexShrink: 0 }} />
+        <div style={{ height: MENU_H, flexShrink: 0, display: 'flex', alignItems: 'center',
+          padding: '0 10px' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
             fontFamily: SYS_FONT, color: P.dim, textTransform: 'uppercase', userSelect: 'none' }}>
             Library
           </span>
-          <button onClick={() => {}} title="Settings"
-            style={{ padding: 4, background: 'transparent', border: 'none', cursor: 'pointer',
-              color: P.menuFg, display: 'flex', alignItems: 'center' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18.6 9.6L20.9 10.4L20.9 13.6L18.6 14.4L17.4 16.5L17.8 18.9L15.1 20.5L13.2 18.9L10.8 18.9L8.9 20.5L6.2 18.9L6.6 16.5L5.4 14.4L3.1 13.6L3.1 10.4L5.4 9.6L6.6 7.5L6.2 5.1L8.9 3.5L10.8 5.1L13.2 5.1L15.1 3.5L17.8 5.1L17.4 7.5Z"/>
-              <circle cx="12" cy="12" r="3.5"/>
-            </svg>
-          </button>
         </div>
 
         {/* ─ Folder list ─ */}
@@ -145,32 +137,33 @@ export function CanvasLibrary({ open, P, dark }: Props) {
           )}
         </div>
 
-        {/* ─ Popup ─ */}
-        <div ref={popupRef}
-          style={{ position: 'fixed', left: popupX, top: popupY, width: 'max-content', zIndex: 200,
-            transform: popupOpen ? 'translateY(-100%) scale(1)' : 'translateY(calc(-100% + 6px)) scale(0.97)',
-            background: dark ? '#2A2A2A' : '#FFFFFF',
-            borderRadius: 6,
-            boxShadow: `0 8px 32px rgba(0,0,0,${dark ? 0.5 : 0.18}), 0 2px 8px rgba(0,0,0,${dark ? 0.3 : 0.08})`,
-            opacity: popupOpen ? 1 : 0,
-            pointerEvents: popupOpen ? 'auto' : 'none',
-            transition: 'opacity 0.15s ease, transform 0.15s ease',
-            overflow: 'hidden', padding: '6px 0' }}>
+        {/* ─ Popup (portal → 直接挂 body，彻底跳出所有父容器) ─ */}
+        {createPortal(
+          <div ref={popupRef}
+            style={{ position: 'fixed', left: 0, width: 'auto', minWidth: libW, zIndex: 9999,
+              bottom: popupBottom,
+              background: P.chrome, borderRadius: 8,
+              boxShadow: `0 4px 24px rgba(0,0,0,${dark ? 0.45 : 0.14})`,
+              opacity: popupOpen ? 1 : 0,
+              transform: popupOpen ? 'translateY(0)' : 'translateY(6px)',
+              pointerEvents: popupOpen ? 'auto' : 'none',
+              transition: 'opacity 0.18s ease, transform 0.18s cubic-bezier(0.2,0,0,1)' }}>
             {[
               { label: 'Add files to the Library',  action: handleAddFiles  },
               { label: 'Add folder to the Library', action: handleAddFolder },
             ].map(({ label, action }) => (
               <button key={label} onClick={action}
-                style={{ width: '100%', padding: '10px 18px', textAlign: 'left',
+                style={{ width: '100%', padding: '10px 14px', textAlign: 'left',
                   background: 'transparent', border: 'none', cursor: 'pointer', display: 'block',
-                  fontSize: 14, fontFamily: SYS_FONT, color: dark ? '#CCCCCC' : '#1A1A1A',
-                  whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
+                  fontSize: 13, fontFamily: SYS_FONT, color: P.fg, whiteSpace: 'nowrap' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${P.fg}09`}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                 {label}
               </button>
             ))}
-          </div>
+          </div>,
+          document.body
+        )}
 
         {/* ─ Bottom trigger ─ */}
         <button ref={triggerRef} onClick={handleToggle}
