@@ -141,6 +141,8 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
         : /\.(docx|xlsx|pptx)$/i.test(entry.name)         ? 'office' as const
         : 'doc' as const;
       setDocType(newType);
+      if (newType === 'canvas') setCanvasEverActive(true);
+      if (newType === 'nodes')  setNodesEverActive(true);
       if (docId) canvasStore.update(docId, { content: text, type: newType });
       setEditorFade(1);
     }, 80);

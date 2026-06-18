@@ -128,9 +128,10 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
     if (activeFolderPath === prevFolderPathRef.current) return;
     prevFolderPathRef.current = activeFolderPath;
     knownPathsRef.current = new Set();
-    setListOpacity(0.35);
+    setListOpacity(0);
+    const t = setTimeout(() => setListOpacity(1), 50);
+    return () => clearTimeout(t);
   }, [activeFolderPath]);
-  useEffect(() => { if (displayFiles.length > 0) setListOpacity(1); }, [displayFiles]);
   const newPaths = new Set(displayFiles.map(f => f.path).filter(p => !knownPathsRef.current.has(p)));
   displayFiles.forEach(f => knownPathsRef.current.add(f.path));
 
@@ -210,7 +211,8 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
         </div>
 
         {/* ─ List ─ */}
-        <div style={{ flex: 1, overflowY: 'auto', opacity: listOpacity, transition: 'opacity 0.18s ease' }}>
+        <div style={{ flex: 1, overflowY: 'auto', opacity: listOpacity,
+          transition: listOpacity === 0 ? 'none' : 'opacity 0.5s ease' }}>
           {isLoading && displayFiles.length === 0 && (
             <div style={{ padding: '6px 0' }}>
               {SKEL_WIDTHS.map((w, i) => (
