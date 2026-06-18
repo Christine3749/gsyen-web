@@ -47,6 +47,8 @@ export function CanvasLibrary({ open, P, dark }: Props) {
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
+  const [popupY, setPopupY] = useState(0);
+  const [popupX, setPopupX] = useState(0);
   const popupRef   = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -62,7 +64,14 @@ export function CanvasLibrary({ open, P, dark }: Props) {
     return () => document.removeEventListener('mousedown', fn);
   }, [popupOpen]);
 
-  const handleToggle = () => setPopupOpen(o => !o);
+  const handleToggle = () => {
+    if (!popupOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPopupX(rect.left + 8);
+      setPopupY(rect.top);
+    }
+    setPopupOpen(o => !o);
+  };
 
   const handleAddFolder = () => { setPopupOpen(false); libraryStore.addFolder(); };
   const handleAddFiles  = async () => {
@@ -138,12 +147,12 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
         {/* ─ Popup ─ */}
         <div ref={popupRef}
-          style={{ position: 'absolute', bottom: 44, left: 8, minWidth: 220, zIndex: 200,
+          style={{ position: 'fixed', left: popupX, top: popupY, minWidth: 220, zIndex: 200,
+            transform: popupOpen ? 'translateY(-100%) scale(1)' : 'translateY(calc(-100% + 6px)) scale(0.97)',
             background: dark ? '#2A2A2A' : '#FFFFFF',
             borderRadius: 6,
             boxShadow: `0 8px 32px rgba(0,0,0,${dark ? 0.5 : 0.18}), 0 2px 8px rgba(0,0,0,${dark ? 0.3 : 0.08})`,
             opacity: popupOpen ? 1 : 0,
-            transform: popupOpen ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.97)',
             pointerEvents: popupOpen ? 'auto' : 'none',
             transition: 'opacity 0.15s ease, transform 0.15s ease',
             overflow: 'hidden', padding: '6px 0' }}>
