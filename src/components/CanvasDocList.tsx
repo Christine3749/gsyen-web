@@ -251,7 +251,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                 onMouseLeave={() => { pvTimer.current && clearTimeout(pvTimer.current); setPreview(null); setHoveredPath(null); }}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
                   padding: '8px 10px 8px 12px', cursor: 'pointer',
-                  borderLeft: active ? '2px solid #55AAFF' : '2px solid transparent',
+                  borderLeft: active ? '3px solid #55AAFF' : '3px solid transparent',
                   background: bg, transition: 'background 0.12s', minHeight: 44 }}>
                 <span style={{ color: active ? P.fg : P.menuFg, display: 'flex', flexShrink: 0, marginTop: 1 }}>
                   <Icon />
