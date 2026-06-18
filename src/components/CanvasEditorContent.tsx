@@ -74,7 +74,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
   const { libW, doclistW } = useCanvasPanelWidths();
   const { selectedFolder } = useLibraryStore();
-  const panelLeft = (docType === 'doc' || docType === 'image' || docType === 'office') && sidebarOpen ? libW + doclistW : 0;
+  const panelLeft = sidebarOpen ? libW + doclistW : 0;
 
   const P          = dark ? DARK : LIGHT;
   const fontFamily = font === 'mono'
@@ -310,32 +310,47 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
       style={{ background:P.bg, color:P.fg, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       onClick={() => setActiveMenu(null)} onMouseMove={handleMouseMove}>
 
-      {/* Content — 三个面板常驻 DOM，display 切换避免重复挂载卸载 */}
-      <div style={{ position:'absolute', inset:0, overflow:'hidden' }}>
-        {/* Doc / Image / Office — three-pane: Library | DocList | Content */}
-        <div style={{ display: (docType === 'doc' || docType === 'image' || docType === 'office') ? 'flex' : 'none', width:'100%', height:'100%' }}>
-          <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
-          <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
-            onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
-          <div style={{ flex: 1, display: 'flex', minWidth: 0, paddingTop: CHROME_H + 1,
+      {/* Content — Library/DocList 常驻外层，所有模式都可用侧栏 */}
+      <div style={{ position:'absolute', inset:0, overflow:'hidden', display:'flex' }}>
+        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
+        <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
+          onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
+
+        {/* 右侧内容区 — 所有模式共享，display 切换避免重复挂载 */}
+        <div style={{ flex: 1, position: 'relative', minWidth: 0, height: '100%' }}>
+          {/* Doc */}
+          <div style={{ display: docType === 'doc' ? 'flex' : 'none',
+            position: 'absolute', inset: 0, paddingTop: CHROME_H + 1,
             opacity: editorFade, transition: 'opacity 0.13s ease' }}>
-            {docType === 'image' && activeFsFile && <ImageViewer entry={activeFsFile} P={P} />}
-            {docType === 'office' && activeFsFile && <OfficeViewer entry={activeFsFile} P={P} />}
-            {docType === 'doc' && (mode === 'split' ? <>{EditorPane}{PreviewPane}</> : mode === 'preview' ? PreviewPane : EditorPane)}
+            {mode === 'split' ? <>{EditorPane}{PreviewPane}</> : mode === 'preview' ? PreviewPane : EditorPane}
           </div>
+          {/* Image */}
+          <div style={{ display: docType === 'image' ? 'flex' : 'none',
+            position: 'absolute', inset: 0, paddingTop: CHROME_H + 1,
+            opacity: editorFade, transition: 'opacity 0.13s ease' }}>
+            {activeFsFile && <ImageViewer entry={activeFsFile} P={P} />}
+          </div>
+          {/* Office */}
+          <div style={{ display: docType === 'office' ? 'flex' : 'none',
+            position: 'absolute', inset: 0, paddingTop: CHROME_H + 1,
+            opacity: editorFade, transition: 'opacity 0.13s ease' }}>
+            {activeFsFile && <OfficeViewer entry={activeFsFile} P={P} />}
+          </div>
+          {/* Whiteboard */}
+          {docId && (
+            <div style={{ display: docType === 'canvas' ? 'block' : 'none',
+              position: 'absolute', inset: 0, paddingTop: CHROME_H + 1 }}>
+              <CanvasDrawEditor docId={docId} dark={dark} />
+            </div>
+          )}
+          {/* Node Canvas */}
+          {docId && (
+            <div style={{ display: docType === 'nodes' ? 'flex' : 'none',
+              position: 'absolute', inset: 0, paddingTop: CHROME_H + 1 }}>
+              <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
+            </div>
+          )}
         </div>
-        {/* Whiteboard */}
-        {docId && (
-          <div style={{ display: docType === 'canvas' ? 'block' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H + 1 }}>
-            <CanvasDrawEditor docId={docId} dark={dark} />
-          </div>
-        )}
-        {/* Node Canvas */}
-        {docId && (
-          <div style={{ display: docType === 'nodes' ? 'flex' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H + 1 }}>
-            <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
-          </div>
-        )}
       </div>
 
       {/* 持久拖拽条 — Chrome 自动隐藏后仍允许移动窗口
