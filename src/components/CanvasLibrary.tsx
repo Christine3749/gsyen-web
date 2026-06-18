@@ -116,25 +116,26 @@ export function CanvasLibrary({ open, P, dark, onSettings }: Props) {
       <div style={{ width: libW, height: '100%', display: 'flex', flexDirection: 'column' }}>
 
         {/* ─ Header ─ */}
-        <div style={{ height: TITLE_H, flexShrink: 0 }} />
-        <div style={{ height: MENU_H, flexShrink: 0, display: 'flex', alignItems: 'center',
-          padding: '0 4px 0 10px' }}>
-          <span style={{ flex: 1, fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
-            fontFamily: SYS_FONT, color: P.dim, textTransform: 'uppercase', userSelect: 'none' }}>
-            Library
-          </span>
+        <div style={{ height: TITLE_H, flexShrink: 0, display: 'flex', alignItems: 'center',
+          justifyContent: 'flex-end', padding: '0 4px' }}>
           <button onClick={onSettings} title="Settings"
-            style={{ padding: 5, background: 'transparent', border: 'none', cursor: 'pointer',
-              color: P.dim, display: 'flex', alignItems: 'center', borderRadius: 4,
-              flexShrink: 0 }}
+            style={{ padding: '6px 6px', background: 'transparent', border: 'none', cursor: 'pointer',
+              color: P.menuFg, display: 'flex', alignItems: 'center', borderRadius: 4, flexShrink: 0 }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.fg}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = P.dim}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = P.menuFg}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
             </svg>
           </button>
+        </div>
+        <div style={{ height: MENU_H, flexShrink: 0, display: 'flex', alignItems: 'center',
+          padding: '0 10px' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
+            fontFamily: SYS_FONT, color: P.dim, textTransform: 'uppercase', userSelect: 'none' }}>
+            Library
+          </span>
         </div>
 
         {/* ─ Folder list ─ */}
