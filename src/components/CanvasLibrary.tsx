@@ -120,7 +120,7 @@ export function CanvasLibrary({ open, P, dark, onSettings }: Props) {
         <div style={{ height: TITLE_H, flexShrink: 0, display: 'flex', alignItems: 'center',
           padding: '0 4px 0 10px' }}>
           <span style={{ flex: 1, fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
-            fontFamily: SYS_FONT, color: P.dim, textTransform: 'uppercase', userSelect: 'none' }}>
+            fontFamily: SYS_FONT, color: P.menuFg, textTransform: 'uppercase', userSelect: 'none' }}>
             Library
           </span>
           <button onClick={onSettings} title="Settings"
