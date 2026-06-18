@@ -136,13 +136,13 @@ async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
       .sort((a, b) => a.name.localeCompare(b.name));
 
     const textFiles = entries.filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas)$/i.test(e.name));
-    const files = await Promise.all(
-      textFiles.map(async e => {
-        const path = `${src.path}/${e.name}`;
-        const preview = /\.(md|txt)$/i.test(e.name) ? await _elReadPreview(path) : '';
-        return { name: e.name, path, isMarkdown: /\.md$/i.test(e.name), lastModified: e.lastModified, preview };
-      })
-    );
+    const files: FileEntry[] = textFiles.map(e => ({
+      name: e.name,
+      path: `${src.path}/${e.name}`,
+      isMarkdown: /\.md$/i.test(e.name),
+      lastModified: e.lastModified,
+      preview: '',
+    }));
     files.sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
 
     return [...dirs, ...files];
@@ -166,10 +166,27 @@ async function _elWriteFile(e: FileEntry, content: string): Promise<void> {
 
 // ── 统一接口 ──────────────────────────────────────────────────────────────────
 
+async function _webReadPreview(e: FileEntry): Promise<string> {
+  if (!e.handle) return '';
+  try {
+    const f = await (e.handle as FileSystemFileHandle).getFile();
+    const text = await f.slice(0, 512).text();
+    return text.split('\n')
+      .map((l: string) => l.replace(/^[#>\s*\-–—]+/, '').trim())
+      .find((l: string) => l.length > 2)
+      ?.slice(0, 80) ?? '';
+  } catch { return ''; }
+}
+
+async function _elReadPreviewEntry(e: FileEntry): Promise<string> {
+  return e.path ? _elReadPreview(e.path) : '';
+}
+
 export const fsAdapter = {
-  env:        _isElectron ? 'electron' : 'web' as 'electron' | 'web',
-  pickFolder: _isElectron ? _elPickFolderViaDialog : _webPickFolder,
-  readDir:    _isElectron ? _elReadDir             : _webReadDir,
-  readFile:   _isElectron ? _elReadFile            : _webReadFile,
-  writeFile:  _isElectron ? _elWriteFile           : _webWriteFile,
+  env:         _isElectron ? 'electron' : 'web' as 'electron' | 'web',
+  pickFolder:  _isElectron ? _elPickFolderViaDialog : _webPickFolder,
+  readDir:     _isElectron ? _elReadDir             : _webReadDir,
+  readFile:    _isElectron ? _elReadFile            : _webReadFile,
+  writeFile:   _isElectron ? _elWriteFile           : _webWriteFile,
+  readPreview: _isElectron ? _elReadPreviewEntry    : _webReadPreview,
 };

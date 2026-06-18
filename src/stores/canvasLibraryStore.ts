@@ -9,6 +9,23 @@ import { useState, useEffect } from 'react';
 const EL_PATHS_KEY    = 'gsyen_library_paths';
 const EL_SELECTED_KEY = 'gsyen_library_selected';
 
+// 预览缓存：path → preview，避免重复读同一文件
+const _previewCache = new Map<string, string>();
+
+async function _loadPreviews(folderId: string, files: FileEntry[], stateKey: 'files' | 'navFiles') {
+  for (const f of files) {
+    if (f.isDirectory || !f.path || !/\.(md|txt)$/i.test(f.name)) continue;
+    if (_s.selectedFolder?.id !== folderId) return;
+    let preview = _previewCache.get(f.path);
+    if (preview === undefined) {
+      preview = await fsAdapter.readPreview(f);
+      _previewCache.set(f.path, preview);
+    }
+    if (_s.selectedFolder?.id !== folderId) return;
+    _set({ [stateKey]: _s[stateKey].map(x => x.path === f.path ? { ...x, preview } : x) });
+  }
+}
+
 interface LibraryState {
   folders:        FolderSource[];
   selectedFolder: FolderSource | null;
@@ -92,6 +109,7 @@ export const libraryStore = {
     try {
       const files = await fsAdapter.readDir(src);
       _set({ files, loading: false });
+      _loadPreviews(src.id, files, 'files');
     } catch {
       _set({ loading: false });
     }
@@ -107,6 +125,7 @@ export const libraryStore = {
     try {
       const navFiles = await fsAdapter.readDir(src);
       _set({ navFiles, navLoading: false });
+      _loadPreviews(_s.selectedFolder?.id ?? '', navFiles, 'navFiles');
     } catch { _set({ navLoading: false }); }
   },
 
@@ -120,6 +139,7 @@ export const libraryStore = {
       try {
         const navFiles = await fsAdapter.readDir(navStack[navStack.length - 1]);
         _set({ navFiles, navLoading: false });
+        _loadPreviews(_s.selectedFolder?.id ?? '', navFiles, 'navFiles');
       } catch { _set({ navLoading: false }); }
     }
   },
