@@ -21,7 +21,7 @@ import ReactMarkdown from 'react-markdown';
 import { MermaidBlock } from './MermaidBlock';
 import { CanvasStatsPill } from './CanvasStatsPill';
 import { CanvasLibrary } from './CanvasLibrary';
-import { CanvasDocList } from './CanvasDocList';
+import { CanvasDocList, invalidatePrefetch } from './CanvasDocList';
 import type { FileEntry } from '../hooks/useFileSystem';
 import { fsAdapter } from '../hooks/useFileSystem';
 import { libraryStore, useLibraryStore } from '../stores/canvasLibraryStore';
@@ -46,6 +46,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const [titleEdit,     setTitleEdit]     = useState(false);
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
   const [activeFsFile,  setActiveFsFile]  = useState<FileEntry | null>(null);
+  const [editorFade,    setEditorFade]    = useState(1);
 
   const [activeMenu, _setActiveMenu] = useState<MenuId>(null);
   const activeMenuRef  = useRef<MenuId>(null);
@@ -108,17 +109,21 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const onTitleChange = useCallback((v: string) => { setTitle(v); save(v, content); }, [content, save]);
   const onContent     = useCallback((v: string) => {
     setContent(v); save(title, v);
-    if (activeFsFile) fsAdapter.writeFile(activeFsFile, v).catch(() => {});
+    if (activeFsFile) { fsAdapter.writeFile(activeFsFile, v).catch(() => {}); if (activeFsFile.path) invalidatePrefetch(activeFsFile.path); }
   }, [title, save, activeFsFile]);
 
   const onFsFileSelect = useCallback((entry: FileEntry, text: string) => {
-    setActiveFsFile(entry);
-    setContent(text);
-    setTitle(entry.name.replace(/\.(md|txt|excalidraw|canvas)$/i, ''));
-    if (/\.excalidraw$/i.test(entry.name))   setDocType('canvas');
-    else if (/\.canvas$/i.test(entry.name))  setDocType('nodes');
-    else                                     setDocType('doc');
-    if (docId) canvasStore.update(docId, { content: text });
+    setEditorFade(0);
+    setTimeout(() => {
+      setActiveFsFile(entry);
+      setContent(text);
+      setTitle(entry.name.replace(/\.(md|txt|excalidraw|canvas)$/i, ''));
+      if (/\.excalidraw$/i.test(entry.name))   setDocType('canvas');
+      else if (/\.canvas$/i.test(entry.name))  setDocType('nodes');
+      else                                     setDocType('doc');
+      if (docId) canvasStore.update(docId, { content: text });
+      setEditorFade(1);
+    }, 80);
   }, [docId]);
 
   const handleCreateFile = useCallback(async (type: 'doc' | 'canvas' | 'nodes') => {
@@ -258,7 +263,8 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
           <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P}
             onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
-          <div style={{ flex: 1, display: 'flex', minWidth: 0, paddingTop: CHROME_H + 1 }}>
+          <div style={{ flex: 1, display: 'flex', minWidth: 0, paddingTop: CHROME_H + 1,
+            opacity: editorFade, transition: 'opacity 0.13s ease' }}>
             {mode === 'split' ? <>{EditorPane}{PreviewPane}</> : mode === 'preview' ? PreviewPane : EditorPane}
           </div>
         </div>

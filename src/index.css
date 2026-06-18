@@ -272,3 +272,20 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid #F9F8F6;
   box-shadow: 0 0 0 1px #1A1A1A;
 }
+
+/* ── Library panel animations ──────────────────────────────── */
+@keyframes gs-fadeUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+@keyframes gs-shimmer {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 0.55; }
+}
+.gs-list-item {
+  animation: gs-fadeUp 0.18s ease both;
+}
+.gs-skeleton {
+  border-radius: 4px;
+  animation: gs-shimmer 1.4s ease-in-out infinite;
+}

@@ -43,11 +43,19 @@ async function pickFiles(): Promise<FolderSource[]> {
   } catch { return []; }
 }
 
+const LIB_SKEL_WIDTHS = ['68%', '52%', '76%'];
+
 export function CanvasLibrary({ open, P, dark }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
 
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  // track folder list changes to re-trigger entrance animation
+  const folderKeyRef  = useRef(0);
+  const prevFolders   = useRef(folders);
+  if (prevFolders.current !== folders) { prevFolders.current = folders; folderKeyRef.current += 1; }
+  const folderKey = folderKeyRef.current;
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupBottom, setPopupBottom] = useState(0);
   const popupRef  = useRef<HTMLDivElement>(null);
@@ -99,11 +107,27 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
         {/* ─ Folder list ─ */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
-          {folders.map(folder => {
+          {loading && folders.length === 0 && (
+            <div style={{ padding: '4px 0' }}>
+              {LIB_SKEL_WIDTHS.map((w, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8,
+                  height: 28, padding: '0 10px', margin: '0 4px' }}>
+                  <div className="gs-skeleton"
+                    style={{ width: 13, height: 13, flexShrink: 0, background: P.fg,
+                      animationDelay: `${i * 150}ms` }} />
+                  <div className="gs-skeleton"
+                    style={{ height: 10, width: w, background: P.fg,
+                      animationDelay: `${i * 150 + 75}ms` }} />
+                </div>
+              ))}
+            </div>
+          )}
+          {folders.map((folder, idx) => {
             const isActive  = selectedFolder?.id === folder.id;
             const isHovered = hoveredId === folder.id;
             return (
-              <div key={folder.id} onClick={() => libraryStore.selectFolder(folder)}
+              <div key={`${folderKey}-${folder.id}`} className="gs-list-item"
+                onClick={() => libraryStore.selectFolder(folder)}
                 onMouseEnter={() => setHoveredId(folder.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, height: 28,
@@ -111,7 +135,8 @@ export function CanvasLibrary({ open, P, dark }: Props) {
                   borderRadius: 4, fontFamily: SYS_FONT,
                   fontWeight: 500, color: isActive ? P.fg : P.menuFg,
                   background: isActive ? `${P.fg}12` : isHovered ? `${P.fg}06` : 'transparent',
-                  transition: 'background 0.12s' }}>
+                  transition: 'background 0.12s',
+                  animationDelay: `${idx * 30}ms` }}>
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H10.5C11.33 3.5 12 4.17 12 5v5c0 .83-.67 1.5-1.5 1.5h-8C1.67 11.5 1 10.83 1 10V3.5z"/>
@@ -130,11 +155,6 @@ export function CanvasLibrary({ open, P, dark }: Props) {
               </div>
             );
           })}
-          {loading && (
-            <div style={{ padding: '8px 12px', fontSize: 11, color: P.dim, fontFamily: SYS_FONT }}>
-              读取中...
-            </div>
-          )}
         </div>
 
         {/* ─ Popup (portal → 直接挂 body，彻底跳出所有父容器) ─ */}
