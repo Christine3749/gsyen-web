@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('library:cache-update', h);
       return () => ipcRenderer.removeListener('library:cache-update', h);
     },
+    delete: (filePath) => ipcRenderer.invoke('library:delete', filePath),
   },
   isElectron: true,
   platform: process.platform,

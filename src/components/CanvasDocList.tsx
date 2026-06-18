@@ -2,7 +2,8 @@
  * CanvasDocList — 中栏文件列表（header/Sort By Date 已移至 CanvasChrome）
  * 只负责：子文件夹 + 文件列表渲染，导航通过 libraryStore.pushNav
  */
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { fsAdapter } from '../hooks/useFileSystem';
 import type { FileEntry } from '../hooks/useFileSystem';
@@ -53,6 +54,29 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
   const currentName = navStack.length > 0 ? navStack[navStack.length - 1].name : (selectedFolder?.name ?? '');
   const { doclistW } = useCanvasPanelWidths();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; entry: FileEntry } | null>(null);
+
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const close = () => setCtxMenu(null);
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [ctxMenu]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, entry: FileEntry) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({ x: e.clientX, y: e.clientY, entry });
+  }, []);
+
+  const handleDelete = useCallback(async (entry: FileEntry) => {
+    setCtxMenu(null);
+    const ok = await fsAdapter.deleteFile(entry);
+    if (ok) {
+      libraryStore.optimisticRemoveFile(entry.path);
+      if (entry.path) invalidatePrefetch(entry.path);
+    }
+  }, []);
 
   const inSub        = navStack.length > 0;
   const displayFiles = inSub ? navFiles : files;
@@ -79,6 +103,7 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
   }, []);
 
   return (
+    <>
     <div style={{ width: shown ? doclistW : 0, overflow: 'hidden', flexShrink: 0,
       transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
       borderRight: `0.5px solid ${P.border}`, display: 'flex', flexDirection: 'column',
@@ -148,6 +173,7 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
               return (
                 <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                   onClick={() => handleDirClick(entry)}
+                  onContextMenu={(e) => handleContextMenu(e, entry)}
                   onMouseEnter={() => setHoveredPath(entry.path)}
                   onMouseLeave={() => setHoveredPath(null)}
                   style={{ display: 'flex', alignItems: 'center', gap: 8,
@@ -176,6 +202,7 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
             return (
               <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => handleSelect(entry)}
+                onContextMenu={(e) => handleContextMenu(e, entry)}
                 onMouseEnter={() => { setHoveredPath(entry.path); _prefetchFile(entry); }}
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -212,5 +239,25 @@ export function CanvasDocList({ open, onFileSelect, P, onBack, onNew }: Props) {
 
       </div>
     </div>
+
+    {ctxMenu && createPortal(
+
+      <div onMouseDown={e => e.stopPropagation()}
+        style={{ position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999,
+          background: P.chrome, borderRadius: 6, padding: '4px 0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+          minWidth: 160, fontFamily: SYS_FONT }}>
+        <button onClick={() => handleDelete(ctxMenu.entry)}
+          style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: 13, color: '#E05252', fontFamily: SYS_FONT }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(224,82,82,0.08)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+          移到废纸篓
+        </button>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }

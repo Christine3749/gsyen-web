@@ -169,6 +169,12 @@ async function _elWriteFile(e: FileEntry, content: string): Promise<void> {
   await (window as any).electronAPI?.writeFile?.(e.path, content);
 }
 
+async function _elDeleteFile(e: FileEntry): Promise<boolean> {
+  if (!e.path) return false;
+  const r = await (window as any).electronAPI?.library?.delete?.(e.path);
+  return r?.ok ?? false;
+}
+
 // ── 统一接口 ──────────────────────────────────────────────────────────────────
 
 async function _webReadPreview(e: FileEntry): Promise<string> {
@@ -194,4 +200,5 @@ export const fsAdapter = {
   readFile:    _isElectron ? _elReadFile            : _webReadFile,
   writeFile:   _isElectron ? _elWriteFile           : _webWriteFile,
   readPreview: _isElectron ? _elReadPreviewEntry    : _webReadPreview,
+  deleteFile:  _isElectron ? _elDeleteFile          : async () => false,
 };
