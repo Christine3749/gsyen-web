@@ -303,7 +303,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
       {/* Content — Library/DocList 常驻外层，所有模式都可用侧栏 */}
       <div style={{ position:'absolute', inset:0, overflow:'hidden', display:'flex' }}>
-        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
+        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} onSettings={() => setSettingsOpen(true)} />
         <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
           onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
 
@@ -373,7 +373,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           setTitleEdit={setTitleEdit} titleInputRef={titleInputRef}
           menus={menus} activeMenu={activeMenu} setActiveMenu={setActiveMenu}
           mode={mode} setMode={setMode} docType={docType}
-          onClose={onClose} onSettings={() => setSettingsOpen(true)}
+          onClose={onClose}
           sidebarOpen={sidebarOpen} onSidebarToggle={() => setSidebarOpen(o => !o)}
           P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef} />
       </div>
