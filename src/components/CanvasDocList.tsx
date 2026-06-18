@@ -107,6 +107,19 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
   const isLoading    = inSub ? navLoading : loading;
 
   const knownPathsRef = useRef(new Set<string>());
+
+  // 文件夹切换 cross-fade：切换时 dim，新内容到达后恢复
+  const [listOpacity, setListOpacity] = useState(1);
+  const activeFolderPath = inSub ? (navStack[navStack.length - 1]?.path ?? '') : (selectedFolder?.path ?? '');
+  const prevFolderPathRef = useRef(activeFolderPath);
+  useEffect(() => {
+    if (activeFolderPath === prevFolderPathRef.current) return;
+    prevFolderPathRef.current = activeFolderPath;
+    knownPathsRef.current = new Set();
+    setListOpacity(0.35);
+  }, [activeFolderPath]);
+  useEffect(() => { if (displayFiles.length > 0) setListOpacity(1); }, [displayFiles]);
+
   const newPaths = new Set(displayFiles.map(f => f.path).filter(p => !knownPathsRef.current.has(p)));
   displayFiles.forEach(f => knownPathsRef.current.add(f.path));
 
@@ -178,7 +191,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
         </div>
 
         {/* ─ List ─ */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', opacity: listOpacity, transition: 'opacity 0.18s ease' }}>
           {isLoading && displayFiles.length === 0 && (
             <div style={{ padding: '6px 0' }}>
               {SKEL_WIDTHS.map((w, i) => (

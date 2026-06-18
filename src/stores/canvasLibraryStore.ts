@@ -118,7 +118,8 @@ export const libraryStore = {
 
   async selectFolder(src: FolderSource) {
     if (fsAdapter.env === 'electron') localStorage.setItem(EL_SELECTED_KEY, src.id);
-    _set({ selectedFolder: src, loading: true, files: [], selectedFile: null, navStack: [], navFiles: [] });
+    // 不清空 files，保留旧内容直到新内容到达，消除切换时的白光闪烁
+    _set({ selectedFolder: src, loading: true, selectedFile: null, navStack: [], navFiles: [] });
     try {
       const files = await fsAdapter.readDir(src);
       _set({ files, loading: false });
