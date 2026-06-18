@@ -148,7 +148,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
       defaultValue={entry.isDirectory ? entry.name : entry.name.replace(/\.[^.]+$/, '')}
       style={{ flex: 1, fontSize: 13, fontFamily: SYS_FONT, background: 'transparent',
         border: 'none', borderBottom: `1px solid ${P.fg}40`, outline: 'none',
-        color: P.fg, padding: 0, minWidth: 0 }}
+        color: P.fg, padding: 0, minWidth: 0, caretColor: '#55AAFF' }}
       onBlur={e => handleConfirmRename(entry, e.currentTarget.value)}
       onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') setRenamingPath(null); }}
       onClick={e => e.stopPropagation()} />
@@ -200,7 +200,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
           {isLoading && displayFiles.length === 0 && (
             <div style={{ padding: '6px 0' }}>
               {SKEL_WIDTHS.map((w, i) => (
-                <div key={i} style={{ padding: '9px 12px', borderBottom: `0.5px solid ${P.border}` }}>
+                <div key={i} style={{ padding: '9px 12px' }}>
                   <div className="gs-skeleton" style={{ height: 11, width: w, background: P.fg, animationDelay: `${i*120}ms`, marginBottom: 5 }} />
                   <div className="gs-skeleton" style={{ height: 9, width: '45%', background: P.fg, animationDelay: `${i*120+60}ms` }} />
                 </div>
@@ -223,7 +223,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ display: 'flex', alignItems: 'center', gap: 8,
                   padding: '0 10px 0 12px', height: 36, cursor: 'pointer',
-                  borderBottom: `0.5px solid ${P.border}`, borderLeft: '2px solid transparent',
+                  borderBottom: '0.5px solid transparent', borderLeft: '2px solid transparent',
                   background: bg, transition: 'background 0.12s' }}>
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -254,7 +254,6 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
                   padding: '8px 10px 8px 12px', cursor: 'pointer',
-                  borderBottom: `0.5px solid ${P.border}`,
                   borderLeft: active ? '2px solid #55AAFF' : '2px solid transparent',
                   background: bg, transition: 'background 0.12s', minHeight: 44 }}>
                 <span style={{ color: active ? P.fg : P.menuFg, display: 'flex', flexShrink: 0, marginTop: 1 }}>
