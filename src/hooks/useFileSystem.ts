@@ -165,15 +165,10 @@ async function _elWriteFile(e: FileEntry, content: string): Promise<void> {
   await (window as any).electronAPI?.writeFile?.(e.path, content);
 }
 
-async function _elDeleteEntry(e: FileEntry): Promise<boolean> {
+async function _elDeleteFile(e: FileEntry): Promise<boolean> {
   if (!e.path) return false;
-  return (window as any).electronAPI?.deleteEntry?.(e.path) ?? false;
-}
-
-async function _webDeleteEntry(e: FileEntry, parentHandle?: FileSystemDirectoryHandle): Promise<boolean> {
-  if (!parentHandle) return false;
-  try { await (parentHandle as any).removeEntry(e.name, { recursive: true }); return true; }
-  catch { return false; }
+  const r = await (window as any).electronAPI?.library?.delete?.(e.path);
+  return r?.ok ?? false;
 }
 
 // ── 统一接口 ──────────────────────────────────────────────────────────────────
@@ -184,7 +179,5 @@ export const fsAdapter = {
   readDir:     _isElectron ? _elReadDir             : _webReadDir,
   readFile:    _isElectron ? _elReadFile            : _webReadFile,
   writeFile:   _isElectron ? _elWriteFile           : _webWriteFile,
-  deleteEntry: _isElectron
-    ? (e: FileEntry) => _elDeleteEntry(e)
-    : (e: FileEntry, parentHandle?: FileSystemDirectoryHandle) => _webDeleteEntry(e, parentHandle),
+  deleteFile:  _isElectron ? _elDeleteFile : async () => false,
 };

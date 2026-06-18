@@ -3,10 +3,10 @@
  * 只负责：子文件夹 + 文件列表渲染，导航通过 libraryStore.pushNav
  */
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import { fsAdapter } from '../hooks/useFileSystem';
 import type { FileEntry } from '../hooks/useFileSystem';
-import { createPortal } from 'react-dom';
 
 // ── 悬停预加载缓存（最多 40 条，LRU by insertion order）──────────────────────
 const _MAX_CACHE = 40;
@@ -54,23 +54,29 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
   const currentName = navStack.length > 0 ? navStack[navStack.length - 1].name : (selectedFolder?.name ?? '');
   const { doclistW } = useCanvasPanelWidths();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
-  const [ctxEntry, setCtxEntry] = useState<{ entry: FileEntry; x: number; y: number } | null>(null);
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; entry: FileEntry } | null>(null);
 
   useEffect(() => {
-    if (!ctxEntry) return;
-    const fn = () => setCtxEntry(null);
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, [ctxEntry]);
+    if (!ctxMenu) return;
+    const close = () => setCtxMenu(null);
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [ctxMenu]);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, entry: FileEntry) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({ x: e.clientX, y: e.clientY, entry });
+  }, []);
 
   const handleDelete = useCallback(async (entry: FileEntry) => {
-    setCtxEntry(null);
-    const { navStack: stack, selectedFolder } = libraryStore.get();
-    const parentSrc = stack.length > 0 ? stack[stack.length - 1] : selectedFolder;
-    await fsAdapter.deleteEntry(entry, parentSrc?.handle as FileSystemDirectoryHandle | undefined);
-    if (selectedFile?.path === entry.path) libraryStore.setSelectedFile(null);
-    await libraryStore.refreshCurrent();
-  }, [selectedFile]);
+    setCtxMenu(null);
+    const ok = await fsAdapter.deleteFile(entry);
+    if (ok) {
+      libraryStore.optimisticRemoveFile(entry.path);
+      if (entry.path) invalidatePrefetch(entry.path);
+    }
+  }, []);
 
   const inSub        = navStack.length > 0;
   const displayFiles = inSub ? navFiles : files;
@@ -167,7 +173,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
               return (
                 <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                   onClick={() => handleDirClick(entry)}
-                  onContextMenu={e => { e.preventDefault(); setCtxEntry({ entry, x: e.clientX, y: e.clientY }); }}
+                  onContextMenu={(e) => handleContextMenu(e, entry)}
                   onMouseEnter={() => setHoveredPath(entry.path)}
                   onMouseLeave={() => setHoveredPath(null)}
                   style={{ display: 'flex', alignItems: 'center', gap: 8,
@@ -196,7 +202,11 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
             return (
               <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => handleSelect(entry)}
+<<<<<<< HEAD
                 onContextMenu={e => { e.preventDefault(); setCtxEntry({ entry, x: e.clientX, y: e.clientY }); }}
+=======
+                onContextMenu={(e) => handleContextMenu(e, entry)}
+>>>>>>> 3fba748 (feat(library): 右键删除文件/文件夹（移到废纸篓）)
                 onMouseEnter={() => { setHoveredPath(entry.path); _prefetchFile(entry); }}
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -234,23 +244,19 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
       </div>
     </div>
 
-    {ctxEntry && createPortal(
+    {ctxMenu && createPortal(
       <div onMouseDown={e => e.stopPropagation()}
-        style={{ position: 'fixed', left: ctxEntry.x, top: ctxEntry.y, zIndex: 9999,
-          background: dark ? '#2C2C2C' : '#FFFFFF', borderRadius: 8, padding: '5px 0',
-          boxShadow: dark
-            ? '0 12px 40px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
-            : '0 4px 6px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.12)',
-          minWidth: 180 }}>
-        <button
-          onClick={() => handleDelete(ctxEntry.entry)}
-          style={{ width: '100%', padding: '10px 20px', textAlign: 'left',
-            background: 'transparent', border: 'none', cursor: 'default',
-            fontSize: 13, fontFamily: SYS_FONT, fontWeight: 400,
-            color: dark ? '#CCCCCC' : '#1A1A1A', whiteSpace: 'nowrap', letterSpacing: 'normal' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}
+        style={{ position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999,
+          background: P.chrome, borderRadius: 6, padding: '4px 0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+          minWidth: 160, fontFamily: SYS_FONT }}>
+        <button onClick={() => handleDelete(ctxMenu.entry)}
+          style={{ width: '100%', padding: '7px 14px', textAlign: 'left',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: 13, color: '#E05252', fontFamily: SYS_FONT }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(224,82,82,0.08)'}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-          {ctxEntry.entry.isDirectory ? '删除文件夹' : '删除文件'}
+          移到废纸篓
         </button>
       </div>,
       document.body

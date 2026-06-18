@@ -135,6 +135,26 @@ export const libraryStore = {
 
   setSelectedFile(file: FileEntry | null) { _set({ selectedFile: file }); },
 
+  /** 删除文件后立刻从列表移除，不等 readDir 重扫 */
+  optimisticRemoveFile(filePath: string) {
+    const keep = (f: FileEntry) => f.path !== filePath;
+    _set({
+      files:    _s.files.filter(keep),
+      navFiles: _s.navFiles.filter(keep),
+      selectedFile: _s.selectedFile?.path === filePath ? null : _s.selectedFile,
+    });
+  },
+
+  /** 新建文件后立刻乐观插入列表顶部，不等 readDir 重扫 */
+  optimisticAddFile(entry: FileEntry) {
+    if (_s.navStack.length > 0) {
+      _set({ navFiles: [entry, ..._s.navFiles] });
+    } else {
+      _set({ files: [entry, ..._s.files] });
+    }
+  },
+
+
   // ── DocList 子目录导航 ──────────────────────────────────────────────────────
 
   async pushNav(src: FolderSource) {

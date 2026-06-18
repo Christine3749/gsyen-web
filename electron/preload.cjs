@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('library:folderChanged', h);
       return () => ipcRenderer.removeListener('library:folderChanged', h);
     },
+    delete: (filePath) => ipcRenderer.invoke('library:delete', filePath),
   },
   isElectron: true,
   platform: process.platform,
@@ -69,5 +70,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
   readDir:        (dirPath)        => ipcRenderer.invoke('fs:readDir',        dirPath),
   readFile:       (filePath)       => ipcRenderer.invoke('fs:readFile',       filePath),
   writeFile:      (filePath, text) => ipcRenderer.invoke('fs:writeFile',      filePath, text),
-  deleteEntry:    (entryPath)      => ipcRenderer.invoke('fs:deleteEntry',    entryPath),
 });

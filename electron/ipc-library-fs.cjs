@@ -2,9 +2,10 @@
  * ipc-library-fs — Canvas Library 菜单 + 文件系统 IPC handlers
  * 注册 library:showMenu / fs:showOpenDialog / fs:readDir / fs:readFile / fs:writeFile
  */
-const { dialog, BrowserWindow, Menu } = require('electron');
-const fs   = require('fs');
-const path = require('path');
+const { dialog, BrowserWindow, Menu, shell } = require('electron');
+const fs        = require('fs');
+const path      = require('path');
+const libCache  = require('./ipc-library-cache.cjs');
 
 let _watcher    = null;
 let _watchTimer = null;
@@ -69,7 +70,14 @@ module.exports = function registerLibraryFsHandlers(ipcMain) {
     try { fs.writeFileSync(filePath, text, 'utf8'); return true; } catch { return false; }
   });
 
-  ipcMain.handle('fs:deleteEntry', (_e, entryPath) => {
-    try { fs.rmSync(entryPath, { recursive: true, force: true }); return true; } catch { return false; }
+  // 移到废纸篓（文件 + 目录均支持）
+  ipcMain.handle('library:delete', async (_e, filePath) => {
+    try {
+      if (!path.isAbsolute(filePath)) return { ok: false, error: 'not absolute path' };
+      await shell.trashItem(filePath);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e?.message ?? String(e) };
+    }
   });
 };
