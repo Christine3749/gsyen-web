@@ -166,9 +166,9 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
           <button onClick={onBack}
             style={{ padding: '6px 6px', background: 'transparent', border: 'none', cursor: 'pointer',
               color: P.menuFg, display: 'flex', alignItems: 'center' }}>
-            <svg width="7" height="11" viewBox="0 0 7 11" fill="none" stroke="currentColor"
-              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 1L1 5.5L6 10"/>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor"
+              strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 1L1 6l5 5M1 6h15"/>
             </svg>
           </button>
           <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: P.menuFg, fontFamily: SYS_FONT,

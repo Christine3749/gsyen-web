@@ -22,10 +22,13 @@ import { CanvasLibrary } from './CanvasLibrary';
 import { CanvasDocList, invalidatePrefetch } from './CanvasDocList';
 import type { FileEntry } from '../hooks/useFileSystem';
 import { fsAdapter } from '../hooks/useFileSystem';
-import { libraryStore, useLibraryStore } from '../stores/canvasLibraryStore';
+import { libraryStore } from '../stores/canvasLibraryStore';
 import { useCanvasPanelWidths } from '../hooks/useCanvasPanelWidths';
 import { ImageViewer } from './ImageViewer';
 import { OfficeViewer } from './OfficeViewer';
+import { canvasPrefsStore } from '../stores/canvasPrefsStore';
+import type { CanvasPrefs } from '../stores/canvasPrefsStore';
+import { CanvasSettings } from './CanvasSettings';
 
 interface Props { docId: string | undefined; onClose: () => void; }
 
@@ -40,16 +43,17 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const [title,         setTitle]         = useState(stored?.title   ?? '');
   const [content,       setContent]       = useState(stored?.content ?? '');
   const [mode,          setMode]          = useState<EditorMode>('write');
-  const [dark,          setDark]          = useState(false);
-  const [tw,            setTw]            = useState(false);
-  const [focusMode,     setFocusMode]     = useState<FocusMode>('off');
+  const [dark,          setDark]          = useState(canvasPrefsStore.get().dark);
+  const [tw,            setTw]            = useState(canvasPrefsStore.get().tw);
+  const [focusMode,     setFocusMode]     = useState<FocusMode>(canvasPrefsStore.get().focusMode);
   const [docType,       setDocType]       = useState<'doc'|'canvas'|'nodes'|'image'|'office'>(() => _infer(stored));
   const [chromeVisible, setChromeVisible] = useState(true);
-  const [lineLen,       setLineLen]       = useState<LineLen>(72);
-  const [fontSize,      setFontSize]      = useState(17);
-  const [font,          setFont]          = useState<FontChoice>('mono');
+  const [lineLen,       setLineLen]       = useState<LineLen>(canvasPrefsStore.get().lineLen);
+  const [fontSize,      setFontSize]      = useState(canvasPrefsStore.get().fontSize);
+  const [font,          setFont]          = useState<FontChoice>(canvasPrefsStore.get().font);
   const [titleEdit,     setTitleEdit]     = useState(false);
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
+  const [settingsOpen,  setSettingsOpen]  = useState(false);
   const [activeFsFile,  setActiveFsFile]  = useState<FileEntry | null>(null);
   const [editorFade,       setEditorFade]       = useState(1);
   const [canvasEverActive, setCanvasEverActive] = useState(docType === 'canvas');
@@ -66,7 +70,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const titleInputRef  = useRef<HTMLInputElement>(null);
 
   const { libW, doclistW } = useCanvasPanelWidths();
-  const { selectedFolder } = useLibraryStore();
+  const SIDEBAR_EASE = '0.22s cubic-bezier(0.4,0,0.2,1)';
   const panelLeft = sidebarOpen ? libW + doclistW : 0;
 
   const P          = dark ? DARK : LIGHT;
@@ -133,18 +137,14 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
   const handleCreateFile = useCallback(async (type: 'doc' | 'canvas' | 'nodes') => {
     const { selectedFolder, navStack } = libraryStore.get();
-    const folder = navStack.length > 0 ? navStack[navStack.length - 1] : selectedFolder;
-    if (!folder) return;
+    const folder = navStack.length > 0 ? navStack[navStack.length - 1] : selectedFolder; if (!folder) return;
     const ext = type === 'doc' ? '.md' : type === 'canvas' ? '.excalidraw' : '.canvas';
-    const name = `Untitled-${Date.now()}${ext}`;
-    const path = `${folder.path ?? folder.name}/${name}`;
-    const content = type === 'doc' ? ''
-      : type === 'canvas'
-        ? JSON.stringify({ type: 'excalidraw', version: 2, source: 'gsyen', elements: [], appState: { viewBackgroundColor: '#ffffff' }, files: {} })
-        : JSON.stringify({ nodes: [], edges: [] });
+    const name = `Untitled-${Date.now()}${ext}`; const path = `${folder.path ?? folder.name}/${name}`;
+    const content = type === 'doc' ? '' : type === 'canvas'
+      ? JSON.stringify({ type: 'excalidraw', version: 2, source: 'gsyen', elements: [], appState: { viewBackgroundColor: '#ffffff' }, files: {} })
+      : JSON.stringify({ nodes: [], edges: [] });
     const entry: FileEntry = { name, path, isMarkdown: false };
-    await fsAdapter.writeFile(entry, content);
-    await libraryStore.refreshCurrent();
+    await fsAdapter.writeFile(entry, content); await libraryStore.refreshCurrent();
     setDocType(type === 'canvas' ? 'canvas' : type === 'nodes' ? 'nodes' : 'doc');
     if (type === 'canvas') setCanvasEverActive(true); if (type === 'nodes') setNodesEverActive(true);
     setActiveFsFile(entry); setContent(content); setTitle('Untitled');
@@ -153,6 +153,10 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const handleDocListBack = useCallback(async () => {
     const { navStack } = libraryStore.get();
     if (navStack.length > 0) await libraryStore.popNav(); else libraryStore.clearFolder();
+  }, []);
+
+  const handlePrefsChange = useCallback((p: Partial<CanvasPrefs>) => {
+    canvasPrefsStore.set(p); if(p.dark!==undefined)setDark(p.dark); if(p.font!==undefined)setFont(p.font as FontChoice); if(p.fontSize!==undefined)setFontSize(p.fontSize); if(p.lineLen!==undefined)setLineLen(p.lineLen as LineLen); if(p.focusMode!==undefined)setFocusMode(p.focusMode as FocusMode); if(p.tw!==undefined)setTw(p.tw);
   }, []);
 
   /* ── extensions ── */
@@ -179,14 +183,12 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
       if (e.key === 'Escape') { if (titleEdit) { setTitleEdit(false); return; } if (activeMenuRef.current) { setActiveMenu(null); return; } onClose(); return; }
       const mod = e.metaKey || e.ctrlKey; if (!mod) return;
       if (!e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setMode(m => m === 'preview' ? 'write' : 'preview'); }
-      if ( e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setMode(m => m === 'split'   ? 'write' : 'split');   }
-      if ( e.shiftKey && e.key.toLowerCase() === 't') { e.preventDefault(); setTw(v => !v); }
-      if ( e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); setFocusMode(m => m === 'off' ? 'paragraph' : m === 'paragraph' ? 'sentence' : 'off'); }
-      if (e.key === '=' || e.key === '+') { e.preventDefault(); setFontSize(s => Math.min(24, s + 1)); }
-      if (e.key === '-')                  { e.preventDefault(); setFontSize(s => Math.max(13, s - 1)); }
+      if (e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setMode(m => m === 'split' ? 'write' : 'split'); }
+      if (e.shiftKey && e.key.toLowerCase() === 't') { e.preventDefault(); setTw(v => !v); }
+      if (e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); setFocusMode(m => m === 'off' ? 'paragraph' : m === 'paragraph' ? 'sentence' : 'off'); }
+      if (e.key === '=' || e.key === '+') { e.preventDefault(); setFontSize(s => Math.min(24, s + 1)); } if (e.key === '-') { e.preventDefault(); setFontSize(s => Math.max(13, s - 1)); }
     };
-    window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
+    window.addEventListener('keydown', fn); return () => window.removeEventListener('keydown', fn);
   }, [onClose, setActiveMenu, titleEdit]);
 
   useEffect(() => {
@@ -218,9 +220,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     position: 'absolute', top: 0, left: panelLeft, right: 0, zIndex: 20,
     transform: chromeVisible ? 'translateY(0)' : `translateY(-${CHROME_H + 4}px)`,
     opacity:   chromeVisible ? 1 : 0,
-    transition: chromeVisible
-      ? 'transform 0.24s cubic-bezier(0.16,1,0.3,1),opacity 0.18s ease'
-      : 'transform 0.3s cubic-bezier(0.55,0,1,0.45),opacity 0.22s ease',
+    transition: `left ${SIDEBAR_EASE},${chromeVisible ? 'transform 0.24s cubic-bezier(0.16,1,0.3,1),opacity 0.18s ease' : 'transform 0.3s cubic-bezier(0.55,0,1,0.45),opacity 0.22s ease'}`,
     pointerEvents: chromeVisible ? 'auto' : 'none',
   };
 
@@ -230,7 +230,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
       <div style={{ position:'absolute', inset:0, overflow:'hidden', display:'flex' }}>
         {/* Sidebar — all modes */}
-        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} />
+        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} onSettings={() => setSettingsOpen(true)} />
         <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
           onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
 
@@ -292,6 +292,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
       <div style={{ position:'absolute', top:0, left:0, right:0, height:8, zIndex:30, pointerEvents: chromeVisible ? 'none' : 'auto' }} onMouseEnter={showChrome} />
 
       {docType === 'doc' && <CanvasStatsPill words={words} chars={chars} sentences={sentences} readSec={readSec} P={P} dark={dark} />}
+      {settingsOpen && <CanvasSettings prefs={canvasPrefsStore.get()} onChange={handlePrefsChange} onClose={() => setSettingsOpen(false)} P={P} dark={dark} />}
     </div>,
     document.body
   );

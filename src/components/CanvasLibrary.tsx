@@ -5,12 +5,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
-import { SYS_FONT, TITLE_H } from './CanvasEditorTypes';
+import { SYS_FONT, TITLE_H, MENU_H } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
 import type { FolderSource } from '../hooks/useFileSystem';
 import { useCanvasPanelWidths } from '../hooks/useCanvasPanelWidths';
 
-interface Props { open: boolean; P: Palette; dark: boolean; }
+interface Props { open: boolean; P: Palette; dark: boolean; onSettings: () => void; }
 
 const CloudIcon = ({ color }: { color: string }) => (
   <svg width="14" height="10" viewBox="-0.5 3.5 25 17" fill="none" stroke={color}
@@ -45,7 +45,7 @@ async function pickFiles(): Promise<FolderSource[]> {
 
 const LIB_SKEL_WIDTHS = ['68%', '52%', '76%'];
 
-export function CanvasLibrary({ open, P, dark }: Props) {
+export function CanvasLibrary({ open, P, dark, onSettings }: Props) {
   const { folders, selectedFolder, loading } = useLibraryStore();
   const { libW } = useCanvasPanelWidths();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -118,20 +118,25 @@ export function CanvasLibrary({ open, P, dark }: Props) {
 
         {/* ─ Header ─ */}
         <div style={{ height: TITLE_H, flexShrink: 0, display: 'flex', alignItems: 'center',
-          padding: '0 4px 0 10px' }}>
-          <span style={{ flex: 1, fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
+          justifyContent: 'flex-end', padding: '0 4px' }}>
+          <button onClick={onSettings} title="Settings"
+            style={{ padding: '6px 6px', background: 'transparent', border: 'none', cursor: 'pointer',
+              color: P.menuFg, display: 'flex', alignItems: 'center', borderRadius: 4, flexShrink: 0 }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.fg}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = P.menuFg}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3.5"/>
+              <path d="M10.5 3.6L10.1 1.2L14.9 1.2L13.5 3.6L18.5 6.5L20.4 4.9L22.3 8.2L20 9.1L20 14.9L22.3 15.8L20.4 19.1L18.5 17.5L13.5 20.4L13.9 22.8L10.1 22.8L10.5 20.4L5.5 17.5L3.6 19.1L1.7 15.8L4 14.9L4 9.1L1.7 8.2L3.6 4.9L5.5 6.5Z"/>
+            </svg>
+          </button>
+        </div>
+        <div style={{ height: MENU_H, flexShrink: 0, display: 'flex', alignItems: 'center',
+          padding: '0 10px' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.09em',
             fontFamily: SYS_FONT, color: P.dim, textTransform: 'uppercase', userSelect: 'none' }}>
             Library
           </span>
-          <button onClick={() => {}} title="Settings"
-            style={{ padding: 4, background: 'transparent', border: 'none', cursor: 'pointer',
-              color: P.menuFg, display: 'flex', alignItems: 'center' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18.6 9.6L20.9 10.4L20.9 13.6L18.6 14.4L17.4 16.5L17.8 18.9L15.1 20.5L13.2 18.9L10.8 18.9L8.9 20.5L6.2 18.9L6.6 16.5L5.4 14.4L3.1 13.6L3.1 10.4L5.4 9.6L6.6 7.5L6.2 5.1L8.9 3.5L10.8 5.1L13.2 5.1L15.1 3.5L17.8 5.1L17.4 7.5Z"/>
-              <circle cx="12" cy="12" r="3.5"/>
-            </svg>
-          </button>
         </div>
 
         {/* ─ Folder list ─ */}
