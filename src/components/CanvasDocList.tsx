@@ -22,10 +22,8 @@ const _IMG_RE   = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i;
 
 function _prefetchFile(file: FileEntry) {
   if (!file.path || _prefetchCache.has(file.path) || _MEDIA_RE.test(file.name)) return;
-  fsAdapter.readFile(file).then(text => {
-    if (_prefetchCache.size >= _MAX_CACHE) _prefetchCache.delete(_prefetchCache.keys().next().value!);
-    _prefetchCache.set(file.path!, text);
-  }).catch(() => {});
+  if (_prefetchCache.size >= _MAX_CACHE) _prefetchCache.delete(_prefetchCache.keys().next().value!);
+  fsAdapter.readFile(file).then(text => _prefetchCache.set(file.path!, text)).catch(() => {});
 }
 
 export function invalidatePrefetch(path: string) { _prefetchCache.delete(path); }
@@ -33,16 +31,13 @@ export function invalidatePrefetch(path: string) { _prefetchCache.delete(path); 
 function relativeDate(ts?: number): string {
   if (!ts) return '';
   const diff = Date.now() - ts;
-  if (diff < 86_400_000)  return 'Today';
-  if (diff < 172_800_000) return 'Yesterday';
-  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return diff < 86_400_000 ? 'Today' : diff < 172_800_000 ? 'Yesterday' : new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function fileIcon(name: string) {
   if (/\.excalidraw$/i.test(name)) return DrawIcon;
-  if (/\.canvas$/i.test(name))     return NodeIcon;
-  if (_IMG_RE.test(name))          return ImageIcon;
-  return DocIcon;
+  if (/\.canvas$/i.test(name)) return NodeIcon;
+  return _IMG_RE.test(name) ? ImageIcon : DocIcon;
 }
 
 const SKEL_WIDTHS = ['72%', '58%', '80%', '64%', '50%'];
@@ -64,7 +59,9 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
   const [ctxMenu,      setCtxMenu]      = useState<{ x: number; y: number; entry: FileEntry } | null>(null);
   const [renamingPath, setRenamingPath] = useState<string | null>(null);
   const [preview,      setPreview]      = useState<{ x: number; y: number; text: string } | null>(null);
-  const pvTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pvTimer      = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectSeqRef = useRef(0);
+  const [listOpacity, setListOpacity] = useState(1);
 
   useEffect(() => {
     if (!ctxMenu) return;
@@ -113,19 +110,27 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
     fsAdapter.deleteFile(entry);
   }, []);
 
-  const inSub        = navStack.length > 0;
-  const displayFiles = inSub ? navFiles : files;
-  const isLoading    = inSub ? navLoading : loading;
+  const inSub = navStack.length > 0;
+  const displayFiles = inSub ? navFiles : files; const isLoading = inSub ? navLoading : loading;
+  const activeFolderPath = inSub ? navStack[navStack.length-1]?.id ?? '' : selectedFolder?.id ?? '';
 
   const knownPathsRef = useRef(new Set<string>());
   const newPaths = new Set(displayFiles.map(f => f.path).filter(p => !knownPathsRef.current.has(p)));
   displayFiles.forEach(f => knownPathsRef.current.add(f.path));
 
+  useEffect(() => {
+    knownPathsRef.current = new Set(); setListOpacity(0);
+    const t = setTimeout(() => setListOpacity(1), 50); return () => clearTimeout(t);
+  }, [activeFolderPath]);
+  useEffect(() => { if (displayFiles.length > 0) setListOpacity(1); }, [displayFiles]);
+
   const handleSelect = useCallback(async (file: FileEntry) => {
     libraryStore.setSelectedFile(file);
+    const seq = ++selectSeqRef.current;
     if (_MEDIA_RE.test(file.name)) { onFileSelect(file, ''); return; }
     const cached = file.path ? _prefetchCache.get(file.path) : undefined;
     const content = cached !== undefined ? cached : await fsAdapter.readFile(file);
+    if (seq !== selectSeqRef.current) return;
     onFileSelect(file, content);
   }, [onFileSelect]);
 
@@ -186,15 +191,14 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
           <span style={{ fontSize: 13, fontWeight: 500, color: P.menuFg, fontFamily: SYS_FONT, userSelect: 'none' }}>
             {sortSettings.sortBy === 'name' ? 'Sort By Name' : 'Sort By Date'}
           </span>
-          <svg width="8" height="5" viewBox="0 0 8 5" fill="none" stroke={P.menuFg}
-            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-            style={{ transform: sortSettings.newestOnTop ? 'none' : 'rotate(180deg)', transition: 'transform 0.2s' }}>
+          <svg width="8" height="5" viewBox="0 0 8 5" fill="none" stroke={P.menuFg} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: sortSettings.newestOnTop ? 'none' : 'rotate(180deg)', transition: 'transform 0.2s' }}>
             <path d="M1 1L4 4L7 1"/>
           </svg>
         </div>
 
         {/* ─ List ─ */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', opacity: listOpacity,
+          transition: listOpacity === 0 ? 'none' : 'opacity 0.5s ease' }}>
           {isLoading && displayFiles.length === 0 && SKEL_WIDTHS.map((w, i) => (
             <div key={i} style={{ padding: '9px 12px' }}>
               <div className="gs-skeleton" style={{ height: 11, width: w, background: P.fg, animationDelay: `${i*120}ms`, marginBottom: 5 }} />
@@ -219,9 +223,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                   padding: '0 10px 0 12px', height: 36, cursor: 'pointer',
                   borderLeft: '2px solid transparent',
                   background: bg, transition: 'background 0.12s' }}>
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
-                  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ color: P.menuFg, flexShrink: 0 }}>
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: P.menuFg, flexShrink: 0 }}>
                   <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H10.5C11.33 3.5 12 4.17 12 5v5c0 .83-.67 1.5-1.5 1.5h-8C1.67 11.5 1 10.83 1 10V3.5z"/>
                 </svg>
                 {renaming ? renameInput(entry) : (

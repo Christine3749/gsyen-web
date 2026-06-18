@@ -51,12 +51,15 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const [titleEdit,     setTitleEdit]     = useState(false);
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
   const [activeFsFile,  setActiveFsFile]  = useState<FileEntry | null>(null);
-  const [editorFade,    setEditorFade]    = useState(1);
+  const [editorFade,       setEditorFade]       = useState(1);
+  const [canvasEverActive, setCanvasEverActive] = useState(docType === 'canvas');
+  const [nodesEverActive,  setNodesEverActive]  = useState(docType === 'nodes');
 
   const [activeMenu, _setActiveMenu] = useState<MenuId>(null);
   const activeMenuRef  = useRef<MenuId>(null);
   const editorRef      = useRef<{ view: EditorView } | null>(null);
   const saveRef        = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fsSelectTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nodeEditorRef  = useRef<CanvasNodeEditorRef>(null);
   const menuBarRef     = useRef<HTMLDivElement>(null);
   const hideTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -116,16 +119,13 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   }, [title, save, activeFsFile]);
 
   const onFsFileSelect = useCallback((entry: FileEntry, text: string) => {
+    if (fsSelectTimer.current) clearTimeout(fsSelectTimer.current);
     setEditorFade(0);
-    setTimeout(() => {
-      setActiveFsFile(entry);
-      setContent(text);
-      setTitle(entry.name.replace(/\.[^.]+$/, ''));
-      if (/\.excalidraw$/i.test(entry.name))                             setDocType('canvas');
-      else if (/\.canvas$/i.test(entry.name))                           setDocType('nodes');
-      else if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(entry.name)) setDocType('image');
-      else if (/\.(docx|xlsx|pptx)$/i.test(entry.name))                setDocType('office');
-      else                                                              setDocType('doc');
+    fsSelectTimer.current = setTimeout(() => {
+      fsSelectTimer.current = null;
+      setActiveFsFile(entry); setContent(text); setTitle(entry.name.replace(/\.[^.]+$/, ''));
+      const t = /\.excalidraw$/i.test(entry.name)?'canvas':/\.canvas$/i.test(entry.name)?'nodes':/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(entry.name)?'image':/\.(docx|xlsx|pptx)$/i.test(entry.name)?'office':'doc';
+      setDocType(t); if(t==='canvas') setCanvasEverActive(true); if(t==='nodes') setNodesEverActive(true);
       if (docId && /\.(md|txt)$/i.test(entry.name)) canvasStore.update(docId, { content: text });
       setEditorFade(1);
     }, 80);
@@ -146,15 +146,13 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     await fsAdapter.writeFile(entry, content);
     await libraryStore.refreshCurrent();
     setDocType(type === 'canvas' ? 'canvas' : type === 'nodes' ? 'nodes' : 'doc');
-    setActiveFsFile(entry);
-    setContent(content);
-    setTitle('Untitled');
+    if (type === 'canvas') setCanvasEverActive(true); if (type === 'nodes') setNodesEverActive(true);
+    setActiveFsFile(entry); setContent(content); setTitle('Untitled');
   }, []);
 
   const handleDocListBack = useCallback(async () => {
     const { navStack } = libraryStore.get();
-    if (navStack.length > 0) await libraryStore.popNav();
-    else libraryStore.clearFolder();
+    if (navStack.length > 0) await libraryStore.popNav(); else libraryStore.clearFolder();
   }, []);
 
   /* ── extensions ── */
@@ -201,6 +199,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   useEffect(() => { if (titleEdit) titleInputRef.current?.select(); }, [titleEdit]);
 
   useEffect(() => { const t = setTimeout(() => editorRef.current?.view?.focus(), 80); return () => clearTimeout(t); }, []);
+  useEffect(() => { if (docType === 'canvas') setCanvasEverActive(true); if (docType === 'nodes') setNodesEverActive(true); }, [docType]);
 
   /* ── helpers ── */
   const wrap = useCallback((b: string, a: string) => {
@@ -242,12 +241,12 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
               P={P} mode={mode} fontFamily={fontFamily} fontSize={fontSize} dark={dark}
               lineLen={lineLen} editorFade={editorFade} editorRef={editorRef} />
           </div>
-          {docId && (
+          {docId && canvasEverActive && (
             <div style={{ visibility: docType === 'canvas' ? 'visible' : 'hidden', pointerEvents: docType === 'canvas' ? 'auto' : 'none', position: 'absolute', inset: 0, paddingTop: CHROME_H + 1 }}>
               <CanvasDrawEditor docId={docId} dark={dark} />
             </div>
           )}
-          {docId && (
+          {docId && nodesEverActive && (
             <div style={{ visibility: docType === 'nodes' ? 'visible' : 'hidden', pointerEvents: docType === 'nodes' ? 'auto' : 'none', position: 'absolute', inset: 0, paddingTop: CHROME_H + 1, display: 'flex' }}>
               <CanvasNodeEditor ref={nodeEditorRef} docId={docId} dark={dark} />
             </div>
