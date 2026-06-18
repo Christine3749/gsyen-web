@@ -188,7 +188,8 @@ ipcMain.handle('window:fullscreen', (e) => {
   if (w) toggleFullscreen(w);
 });
 ipcMain.handle('window:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
-ipcMain.handle('window:isMaximized', (e) => BrowserWindow.fromWebContents(e.sender)?.isMaximized() ?? false);
+ipcMain.handle('window:isMaximized',  (e) => BrowserWindow.fromWebContents(e.sender)?.isMaximized()  ?? false);
+ipcMain.handle('window:isFullscreen', (e) => BrowserWindow.fromWebContents(e.sender)?.isFullScreen() ?? false);
 
 // ── 窗口 ──────────────────────────────────────────────────────────────────────
 
@@ -249,6 +250,10 @@ function createWindow() {
     };
     win.on('enter-full-screen', onFsChange);
     win.on('leave-full-screen', onFsChange);
+
+    // 无论通过什么方式进入/退出全屏（绿色按钮 / IPC / 快捷键），都可靠通知渲染层
+    win.on('enter-full-screen', () => win.webContents.send('window:fullscreen-state', true));
+    win.on('leave-full-screen',  () => win.webContents.send('window:fullscreen-state', false));
   }
 
   // 关闭窗口 → 最小化到托盘，不退出

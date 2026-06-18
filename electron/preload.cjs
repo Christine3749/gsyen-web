@@ -15,7 +15,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     maximize:   () => ipcRenderer.invoke('window:maximize'),
     fullscreen: () => ipcRenderer.invoke('window:fullscreen'),
     close:      () => ipcRenderer.invoke('window:close'),
-    isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+    isMaximized:  () => ipcRenderer.invoke('window:isMaximized'),
+    isFullscreen: () => ipcRenderer.invoke('window:isFullscreen'),
+    onFullscreenState: (fn) => {
+      const h = (_e, v) => fn(v);
+      ipcRenderer.on('window:fullscreen-state', h);
+      return () => ipcRenderer.removeListener('window:fullscreen-state', h);
+    },
     // 监听最大化状态变化；返回取消订阅函数（多个组件可独立订阅，互不干扰）
     onMaximized: (fn) => {
       const h = (_e, v) => fn(v);

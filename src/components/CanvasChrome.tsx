@@ -6,6 +6,7 @@ import { useRef } from 'react';
 import { Dropdown } from './CanvasEditorUI';
 import { WinCtrlButton, SidebarIcon, PreviewIcon } from '../gsyen-designer';
 import { useIsMaximized } from '../hooks/useIsMaximized';
+import { useIsFullscreen } from '../hooks/useIsFullscreen';
 import {
   Palette, MenuSpec, MenuId, EditorMode,
   TITLE_H, MENU_H, SYS_FONT, isElectron, isMac,
@@ -39,7 +40,8 @@ export function CanvasChrome({
   P, dark, onMouseEnter, menuBarRef,
 }: Props) {
   const stopProp  = (e: React.MouseEvent) => e.stopPropagation();
-  const maximized = useIsMaximized();
+  const maximized   = useIsMaximized();
+  const fullscreen  = useIsFullscreen();
 
   const nodrag = isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {};
   const drag   = isElectron ? { WebkitAppRegion: 'drag'    } as React.CSSProperties : {};
@@ -55,7 +57,7 @@ export function CanvasChrome({
 
       {/* ══ Row 1: Title bar ══════════════════════════════════════════════════ */}
       <div style={{ height: TITLE_H, background: P.chrome, display: 'flex', alignItems: 'center',
-        paddingLeft: isMac ? 70 : 0, ...drag }}>
+        paddingLeft: isMac && !maximized && !fullscreen && !sidebarOpen ? 70 : 0, ...drag }}>
 
         {/* [□] sidebar toggle */}
         <button onClick={e => { e.stopPropagation(); onSidebarToggle(); }}

@@ -7,13 +7,13 @@ const fs   = require('fs');
 const path = require('path');
 
 module.exports = function registerLibraryFsHandlers(ipcMain) {
-  ipcMain.on('library:showMenu', (event) => {
+  ipcMain.on('library:showMenu', (event, pos) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) return;
     const b = win.getBounds();
-    const x = b.x;
-    const y = b.y + b.height;
-    console.log('[library:showMenu] getBounds:', b, '→ popup at x:', x, 'y:', y);
+    // pos 是渲染层传来的按钮相对视口坐标，转换为屏幕坐标
+    const x = b.x + (pos?.x ?? 0);
+    const y = b.y + (pos?.y ?? b.height);
     const send = (action) => { if (!event.sender.isDestroyed()) event.sender.send('library:menuResult', action); };
     Menu.buildFromTemplate([
       { label: 'Add files to the Library',  click: () => send('files')  },
