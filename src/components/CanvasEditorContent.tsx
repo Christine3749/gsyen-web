@@ -15,8 +15,11 @@ import { useCanvasMenus } from '../hooks/useCanvasMenus';
 import { useCanvasFileOps } from '../hooks/useCanvasFileOps';
 import type { EditorView } from '@codemirror/view';
 import { canvasStore } from '../stores/canvasStore';
+import { canvasPrefsStore } from '../stores/canvasPrefsStore';
+import type { CanvasPrefs } from '../stores/canvasPrefsStore';
 import { iaWriterTheme, focusModeExt, sentenceFocusExt, typewriterExt, baseExtensions } from '../hooks/useCanvasTheme';
 import { CanvasWriterPane } from './CanvasWriterPane';
+import { CanvasSettings } from './CanvasSettings';
 import { CanvasStatsPill } from './CanvasStatsPill';
 import { CanvasLibrary } from './CanvasLibrary';
 import { CanvasDocList, invalidatePrefetch } from './CanvasDocList';
@@ -34,10 +37,11 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
   const [title,         setTitle]         = useState(stored?.title   ?? '');
   const [content,       setContent]       = useState(stored?.content ?? '');
+  const _p = canvasPrefsStore.get();
   const [mode,          setMode]          = useState<EditorMode>('write');
-  const [dark,          setDark]          = useState(false);
-  const [tw,            setTw]            = useState(false);
-  const [focusMode,     setFocusMode]     = useState<FocusMode>('off');
+  const [dark,          setDark]          = useState(_p.dark);
+  const [tw,            setTw]            = useState(_p.tw);
+  const [focusMode,     setFocusMode]     = useState<FocusMode>(_p.focusMode);
   const [docType,       setDocType]       = useState<'doc'|'canvas'|'nodes'|'image'|'office'>(() => {
     if (stored?.type && stored.type !== 'doc') return stored.type;
     // 修复旧数据：type 未存或错存为 'doc'，从 content 推断
@@ -51,12 +55,13 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     }
     return stored?.type ?? 'doc';
   });
-  const [chromeVisible, setChromeVisible] = useState(true);
-  const [lineLen,       setLineLen]       = useState<LineLen>(72);
-  const [fontSize,      setFontSize]      = useState(17);
-  const [font,          setFont]          = useState<FontChoice>('mono');
-  const [titleEdit,     setTitleEdit]     = useState(false);
-  const [sidebarOpen,   setSidebarOpen]   = useState(false);
+  const [chromeVisible,  setChromeVisible]  = useState(true);
+  const [lineLen,        setLineLen]        = useState<LineLen>(_p.lineLen);
+  const [fontSize,       setFontSize]       = useState(_p.fontSize);
+  const [font,           setFont]           = useState<FontChoice>(_p.font);
+  const [titleEdit,      setTitleEdit]      = useState(false);
+  const [sidebarOpen,    setSidebarOpen]    = useState(false);
+  const [settingsOpen,   setSettingsOpen]   = useState(false);
   const [activeFsFile,  setActiveFsFile]  = useState<FileEntry | null>(null);
   const [editorFade,    setEditorFade]    = useState(1);
   // 懒加载：Excalidraw / React Flow 只在首次激活时 mount，避免打开 .md 时同时初始化两个重型库
@@ -257,6 +262,17 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
     if (docType === 'nodes')  setNodesEverActive(true);
   }, [docType]);
 
+  /* ── settings ── */
+  const handlePrefsChange = useCallback((patch: Partial<CanvasPrefs>) => {
+    canvasPrefsStore.set(patch);
+    if (patch.dark       !== undefined) setDark(patch.dark);
+    if (patch.font       !== undefined) setFont(patch.font as FontChoice);
+    if (patch.fontSize   !== undefined) setFontSize(patch.fontSize);
+    if (patch.lineLen    !== undefined) setLineLen(patch.lineLen as LineLen);
+    if (patch.focusMode  !== undefined) setFocusMode(patch.focusMode as FocusMode);
+    if (patch.tw         !== undefined) setTw(patch.tw);
+  }, []);
+
   /* ── helpers ── */
   const wrap = useCallback((b: string, a: string) => {
     const view = editorRef.current?.view; if (!view) return;
@@ -357,10 +373,16 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           setTitleEdit={setTitleEdit} titleInputRef={titleInputRef}
           menus={menus} activeMenu={activeMenu} setActiveMenu={setActiveMenu}
           mode={mode} setMode={setMode} docType={docType}
-          onClose={onClose}
+          onClose={onClose} onSettings={() => setSettingsOpen(true)}
           sidebarOpen={sidebarOpen} onSidebarToggle={() => setSidebarOpen(o => !o)}
           P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef} />
       </div>
+
+      {/* Settings panel */}
+      {settingsOpen && (
+        <CanvasSettings prefs={canvasPrefsStore.get()} onChange={handlePrefsChange}
+          onClose={() => setSettingsOpen(false)} P={P} dark={dark} />
+      )}
 
       {/* Hot zone */}
       <div style={{ position:'absolute', top:0, left:0, right:0, height:8, zIndex:30, pointerEvents: chromeVisible ? 'none' : 'auto' }} onMouseEnter={showChrome} />
