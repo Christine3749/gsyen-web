@@ -329,7 +329,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           <div style={{ display: docType === 'office' ? 'flex' : 'none',
             position: 'absolute', inset: 0, paddingTop: CHROME_H + 1,
             opacity: editorFade, transition: 'opacity 0.13s ease' }}>
-            {activeFsFile && <OfficeViewer entry={activeFsFile} P={P} />}
+            {activeFsFile && <OfficeViewer entry={activeFsFile} P={P} dark={dark} />}
           </div>
           {/* Whiteboard — 首次切换到 canvas 才 mount，之后 visibility:hidden 保活，消除重复初始化卡顿 */}
           {docId && canvasEverActive && (
