@@ -12,6 +12,7 @@ import type { Palette } from './CanvasEditorTypes';
 import { DocIcon, DrawIcon, NodeIcon } from '../gsyen-designer';
 import { useCanvasPanelWidths } from '../hooks/useCanvasPanelWidths';
 import { CanvasDocListMenu } from './CanvasDocListMenu';
+import { CanvasDocListPreview } from './CanvasDocListPreview';
 
 // ── 悬停预加载缓存（最多 40 条，LRU by insertion order）──────────────────────
 const _MAX_CACHE = 40;
@@ -59,6 +60,8 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
   const [hoveredPath,  setHoveredPath]  = useState<string | null>(null);
   const [ctxMenu,      setCtxMenu]      = useState<{ x: number; y: number; entry: FileEntry } | null>(null);
   const [renamingPath, setRenamingPath] = useState<string | null>(null);
+  const [preview,      setPreview]      = useState<{ x: number; y: number; text: string } | null>(null);
+  const pvTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!ctxMenu) return;
@@ -188,16 +191,12 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
 
         {/* ─ List ─ */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
-          {isLoading && displayFiles.length === 0 && (
-            <div style={{ padding: '6px 0' }}>
-              {SKEL_WIDTHS.map((w, i) => (
-                <div key={i} style={{ padding: '9px 12px', borderBottom: `0.5px solid ${P.border}` }}>
-                  <div className="gs-skeleton" style={{ height: 11, width: w, background: P.fg, animationDelay: `${i*120}ms`, marginBottom: 5 }} />
-                  <div className="gs-skeleton" style={{ height: 9, width: '45%', background: P.fg, animationDelay: `${i*120+60}ms` }} />
-                </div>
-              ))}
+          {isLoading && displayFiles.length === 0 && SKEL_WIDTHS.map((w, i) => (
+            <div key={i} style={{ padding: '9px 12px' }}>
+              <div className="gs-skeleton" style={{ height: 11, width: w, background: P.fg, animationDelay: `${i*120}ms`, marginBottom: 5 }} />
+              <div className="gs-skeleton" style={{ height: 9, width: '45%', background: P.fg, animationDelay: `${i*120+60}ms` }} />
             </div>
-          )}
+          ))}
 
           {displayFiles.map((entry) => {
             const active  = !entry.isDirectory && selectedFile?.path === entry.path;
@@ -214,7 +213,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                 onMouseLeave={() => setHoveredPath(null)}
                 style={{ display: 'flex', alignItems: 'center', gap: 8,
                   padding: '0 10px 0 12px', height: 36, cursor: 'pointer',
-                  borderBottom: `0.5px solid ${P.border}`, borderLeft: '2px solid transparent',
+                  borderLeft: '2px solid transparent',
                   background: bg, transition: 'background 0.12s' }}>
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none"
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -241,11 +240,17 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
               <div key={entry.path} className={isNew ? 'gs-list-item' : undefined}
                 onClick={() => !renaming && handleSelect(entry)}
                 onContextMenu={e => handleContextMenu(e, entry)}
-                onMouseEnter={() => { setHoveredPath(entry.path); _prefetchFile(entry); }}
-                onMouseLeave={() => setHoveredPath(null)}
+                onMouseEnter={(e) => {
+                  setHoveredPath(entry.path); _prefetchFile(entry);
+                  if (/\.(md|txt)$/i.test(entry.name)) {
+                    pvTimer.current && clearTimeout(pvTimer.current);
+                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    pvTimer.current = setTimeout(() => { const t = _prefetchCache.get(entry.path!); if (t) setPreview({ x: r.right + 8, y: r.top, text: t }); }, 180);
+                  }
+                }}
+                onMouseLeave={() => { pvTimer.current && clearTimeout(pvTimer.current); setPreview(null); setHoveredPath(null); }}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
                   padding: '8px 10px 8px 12px', cursor: 'pointer',
-                  borderBottom: `0.5px solid ${P.border}`,
                   borderLeft: active ? '2px solid #55AAFF' : '2px solid transparent',
                   background: bg, transition: 'background 0.12s', minHeight: 44 }}>
                 <span style={{ color: active ? P.fg : P.menuFg, display: 'flex', flexShrink: 0, marginTop: 1 }}>
@@ -266,13 +271,6 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                       </span>
                     )}
                   </div>
-                  {!renaming && entry.preview && (
-                    <div style={{ fontSize: 11, color: P.dim, fontFamily: SYS_FONT,
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      marginTop: 2, lineHeight: 1.4 }}>
-                      {entry.preview}
-                    </div>
-                  )}
                 </div>
               </div>
             );
@@ -282,6 +280,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
       </div>
     </div>
 
+    <CanvasDocListPreview pos={preview} P={P} dark={dark} />
     <CanvasDocListMenu ctxMenu={ctxMenu} P={P} dark={dark}
       sortSettings={sortSettings}
       onRename={handleRename}
