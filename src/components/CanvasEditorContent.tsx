@@ -248,15 +248,6 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           <div style={{ display: docType === 'office' ? 'flex' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H }}>
             {activeFsFile && <OfficeViewer entry={activeFsFile} P={P} dark={dark} />}
           </div>
-          {docType === 'nodes' && (
-            <button onClick={() => nodeEditorRef.current?.addCard()}
-              style={{ position:'absolute', top: CHROME_H + 10, right: 12, zIndex: 15,
-                background: P.accent, color:'#fff', border:'none', borderRadius: 6,
-                padding:'5px 14px', fontSize: 12, fontFamily: SYS_FONT, fontWeight: 500,
-                cursor:'pointer', letterSpacing:'0.01em', boxShadow:'0 2px 8px rgba(0,0,0,0.18)' }}>
-              + Card
-            </button>
-          )}
         </div>
       </div>
 

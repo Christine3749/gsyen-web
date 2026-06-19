@@ -1,15 +1,60 @@
-import { useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import {
-  ReactFlow, Background, Controls, MiniMap,
+  ReactFlow, Background, Panel, BackgroundVariant,
   addEdge, useNodesState, useEdgesState,
-  type Node, type Edge, type Connection,
+  type Node, type Edge, type Connection, type Viewport,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { useReactFlow } from '@xyflow/react';
 import { CanvasNodeCard, type CardData } from './CanvasNodeCard';
 import { canvasStore } from '../stores/canvasStore';
 
 const NODE_TYPES = { card: CanvasNodeCard };
 
+const EDGE_DEFAULTS = {
+  style: { stroke: 'rgba(0,0,0,0.18)', strokeWidth: 1.5 },
+  animated: false,
+};
+
+/* ── Right-side Obsidian-style controls (inside ReactFlow context) ── */
+function CanvasRightControls({ dark }: { dark: boolean }) {
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const bg  = dark ? '#1E1E1E' : '#FFFFFF';
+  const bdr = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  const sh  = dark ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.08)';
+  const ic  = dark ? '#888' : '#666';
+
+  const btn = (onClick: () => void, title: string, children: React.ReactNode) => (
+    <button title={title} onClick={onClick} style={{
+      width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: bg, border: `0.5px solid ${bdr}`, borderRadius: 8, cursor: 'pointer',
+      boxShadow: sh, color: ic, fontSize: 16, fontWeight: 400, transition: 'opacity 0.1s',
+    }}
+      onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+      onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+      {children}
+    </button>
+  );
+
+  return (
+    <Panel position="top-right" style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '14px 14px 0 0' }}>
+      {btn(() => zoomIn({ duration: 200 }), 'Zoom In',
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/>
+        </svg>)}
+      {btn(() => fitView({ duration: 300, padding: 0.15 }), 'Fit View',
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M1.5 4.5V2H4M10 2h2.5v2.5M12.5 9.5V12H10M4 12H1.5V9.5"/>
+        </svg>)}
+      {btn(() => zoomOut({ duration: 200 }), 'Zoom Out',
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <line x1="2" y1="7" x2="12" y2="7"/>
+        </svg>)}
+    </Panel>
+  );
+}
+
+/* ── Main editor ── */
 interface SavedGraph { nodes: Node[]; edges: Edge[] }
 
 function loadGraph(docId: string): SavedGraph {
@@ -29,7 +74,9 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, Props>(
     const initial = loadGraph(docId);
     const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
-    const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const saveTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const viewport   = useRef<Viewport>({ x: 0, y: 0, zoom: 1 });
+    const wrapRef    = useRef<HTMLDivElement>(null);
 
     const scheduleSave = useCallback((ns: Node[], es: Edge[]) => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -38,45 +85,61 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, Props>(
       }, 600);
     }, [docId]);
 
-    useEffect(() => { scheduleSave(nodes, edges); }, [nodes, edges, scheduleSave]);
+    const onConnect = useCallback((conn: Connection) =>
+      setEdges(es => addEdge({ ...conn, ...EDGE_DEFAULTS }, es)), [setEdges]);
 
-    const onConnect = useCallback((conn: Connection) => {
-      setEdges(es => addEdge({ ...conn, animated: false }, es));
-    }, [setEdges]);
-
-    const addCard = useCallback(() => {
+    const addCard = useCallback((pos?: { x: number; y: number }) => {
       const id = `card-${Date.now()}`;
-      setNodes(ns => [...ns, {
-        id, type: 'card',
-        position: { x: 80 + Math.random() * 240, y: 80 + Math.random() * 160 },
-        data: { text: '', color: '' } satisfies CardData,
-      }]);
-    }, [setNodes]);
+      setNodes(ns => {
+        const newNodes = [...ns, {
+          id, type: 'card',
+          position: pos ?? { x: 80 + Math.random() * 200, y: 80 + Math.random() * 120 },
+          data: { text: '', color: '', defaultEditing: true } satisfies CardData,
+        }];
+        scheduleSave(newNodes, edges);
+        return newNodes;
+      });
+    }, [setNodes, scheduleSave, edges]);
 
     useImperativeHandle(ref, () => ({ addCard }), [addCard]);
 
-    // CSS 变量注入 — 节点只读变量，不存 dark prop
-    const vars = dark
-      ? { '--cn-bg': '#242424', '--cn-fg': '#cccccc', '--cn-border': '#383838', '--cn-dim': '#666' }
-      : { '--cn-bg': '#ffffff', '--cn-fg': '#1a1a1a', '--cn-border': '#e0e0e0', '--cn-dim': '#aaa' };
+    /* Convert screen → flow position using tracked viewport */
+    const onDoubleClick = useCallback((e: React.MouseEvent) => {
+      if ((e.target as HTMLElement).closest('.react-flow__node')) return;
+      const rect = wrapRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const { x, y, zoom } = viewport.current;
+      addCard({
+        x: (e.clientX - rect.left - x) / zoom - 100,
+        y: (e.clientY - rect.top  - y) / zoom - 40,
+      });
+    }, [addCard]);
 
-    const bg  = dark ? '#1a1a1a' : '#f6f5f2';
-    const dot = dark ? '#2e2e2e' : '#dddbd5';
+    /* CSS vars — nodes read these for colours */
+    const vars = dark
+      ? { '--cn-bg': '#1E1E1E', '--cn-fg': '#CCCCCC', '--cn-border': '#383838', '--cn-dim': '#666' }
+      : { '--cn-bg': '#FFFFFF', '--cn-fg': '#1A1A1A', '--cn-border': 'rgba(0,0,0,0.1)', '--cn-dim': '#AAA' };
+
+    const bgColor  = dark ? '#1A1A1A' : '#F0EDE8';
+    const dotColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
 
     return (
-      <div style={{ width: '100%', height: '100%', background: bg, ...vars } as React.CSSProperties}>
+      <div ref={wrapRef} onDoubleClick={onDoubleClick}
+        style={{ width: '100%', height: '100%', background: bgColor, ...vars } as React.CSSProperties}>
         <ReactFlow
           nodes={nodes} edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
+          onNodesChange={e => { onNodesChange(e); scheduleSave(nodes, edges); }}
+          onEdgesChange={e => { onEdgesChange(e); scheduleSave(nodes, edges); }}
           onConnect={onConnect}
+          onMove={(_e, vp) => { viewport.current = vp; }}
           nodeTypes={NODE_TYPES}
+          defaultEdgeOptions={EDGE_DEFAULTS}
           colorMode={dark ? 'dark' : 'light'}
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          proOptions={{ hideAttribution: true }}
         >
-          <Background color={dot} gap={20} size={1.2} />
-          <Controls />
-          <MiniMap nodeStrokeWidth={3} zoomable pannable />
+          <Background variant={BackgroundVariant.Dots} color={dotColor} gap={24} size={1.5} />
+          <CanvasRightControls dark={dark} />
         </ReactFlow>
       </div>
     );

@@ -103,11 +103,12 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
     libraryStore.setSortSettings(patch);
   }, []);
 
-  const handleDelete = useCallback((entry: FileEntry) => {
+  const handleDelete = useCallback(async (entry: FileEntry) => {
     setCtxMenu(null);
     libraryStore.optimisticRemoveFile(entry.path);
     if (entry.path) invalidatePrefetch(entry.path);
-    fsAdapter.deleteFile(entry);
+    const ok = await fsAdapter.deleteFile(entry);
+    if (!ok) await libraryStore.refreshCurrent(); // rollback if trash failed
   }, []);
 
   const inSub = navStack.length > 0;
