@@ -75,9 +75,9 @@ function CanvasHint({ dark }: { dark: boolean }) {
   };
 
   return (
-    <Panel position="bottom-center" style={{ marginBottom: 14, pointerEvents: 'none', textAlign: 'center' }}>
+    <Panel position="bottom-center" style={{ pointerEvents: 'none', textAlign: 'center', paddingBottom: 16 }}>
       {hasMoved && (
-        <div style={{ ...txt, marginBottom: 4 }}>
+        <div style={{ ...txt, marginBottom: 5 }}>
           按 <kbd style={kbdStyle}>H</kbd> 回到中心
         </div>
       )}
@@ -99,7 +99,8 @@ interface InnerProps {
 function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect, addCard, dark }: InnerProps) {
   const { screenToFlowPosition } = useReactFlow();
 
-  const onPaneDoubleClick = useCallback((e: React.MouseEvent) => {
+  const onDblClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('.react-flow__node, .react-flow__edge, .react-flow__controls, .react-flow__panel')) return;
     const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
     addCard({ x: pos.x - 100, y: pos.y - 40 });
   }, [screenToFlowPosition, addCard]);
@@ -111,17 +112,25 @@ function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect
     : { '--cn-bg': '#FFFFFF', '--cn-fg': '#1A1A1A', '--cn-border': 'rgba(0,0,0,0.08)', '--cn-dim': '#AAA' };
 
   return (
-    <div style={{ width: '100%', height: '100%', background: bgColor, ...vars } as React.CSSProperties}>
+    <div onDoubleClick={onDblClick} style={{ width: '100%', height: '100%', background: bgColor, ...vars } as React.CSSProperties}>
+      {/* 覆盖 ReactFlow 默认 grab 光标：空白处用箭头，拖拽时用 grabbing */}
+      <style>{`
+        .react-flow__pane { cursor: default !important; }
+        .react-flow__pane.dragging { cursor: grabbing !important; }
+        .react-flow__node { cursor: default; }
+        .react-flow__node:hover .react-flow__handle { opacity: 0.6; }
+      `}</style>
       <ReactFlow
         nodes={nodes} edges={edges}
         onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onPaneDoubleClick={onPaneDoubleClick}
         nodeTypes={NODE_TYPES}
         defaultEdgeOptions={EDGE_DEFAULTS}
         colorMode={dark ? 'dark' : 'light'}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         proOptions={{ hideAttribution: true }}
+        panOnDrag={[1, 2]}
+        panOnScroll
       >
         <Background variant={BackgroundVariant.Dots} color={dotColor} gap={24} size={1.5} />
         <CanvasRightControls dark={dark} />
@@ -134,12 +143,77 @@ function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect
 /* ── Exported component ── */
 interface SavedGraph { nodes: Node[]; edges: Edge[] }
 
+/* ── Obsidian .canvas ↔ ReactFlow 双向互转（完整兼容）── */
+const SIDE: Record<string, string>   = { top: 't', right: 'r', bottom: 'b', left: 'l' };
+const SIDE_R: Record<string, string> = { t: 'top', r: 'right', b: 'bottom', l: 'left' };
+
+function obsidianNodeText(n: any): string {
+  if (n.type === 'file')  return `📎 ${n.file ?? ''}`;
+  if (n.type === 'link')  return `🔗 ${n.url ?? ''}`;
+  if (n.type === 'group') return `▣ ${n.label ?? 'Group'}`;
+  return n.text ?? '';
+}
+
+function fromObsidian(raw: any): SavedGraph {
+  const nodes: Node[] = (raw.nodes ?? []).map((n: any) => ({
+    id: n.id, type: 'card',
+    position: { x: n.x ?? 0, y: n.y ?? 0 },
+    style: n.width ? { width: n.width } : undefined,
+    data: {
+      text: obsidianNodeText(n),
+      color: n.color ?? '',
+      width: n.width ?? 250, height: n.height ?? 100,
+      _obs: n,                     // 原始节点存档，保证非 text 类型安全回写
+    },
+  }));
+  const edges: Edge[] = (raw.edges ?? []).map((e: any) => ({
+    id: e.id, source: e.fromNode, target: e.toNode,
+    sourceHandle: `src-${SIDE[e.fromSide] ?? 'r'}`,
+    targetHandle: `tgt-${SIDE[e.toSide] ?? 'l'}`,
+    label: e.label,
+    style: { ...EDGE_DEFAULTS.style, ...(e.color ? { stroke: e.color } : {}) },
+    data: { _obs: e },             // 原始边存档（保留 label / color / toEnd 等）
+  }));
+  return { nodes, edges };
+}
+
+function toObsidian(nodes: Node[], edges: Edge[]) {
+  return {
+    nodes: nodes.map(n => {
+      const d = n.data as CardData & { _obs?: any };
+      const x = Math.round(n.position.x);
+      const y = Math.round(n.position.y);
+      if (d._obs && d._obs.type !== 'text') {
+        // 非 text 节点（file / link / group）：只更新位置，其余原样保留
+        return { ...d._obs, x, y };
+      }
+      const obj: any = { id: n.id, type: 'text', x, y,
+        width: d.width ?? 250, height: d.height ?? 100, text: d.text ?? '' };
+      if (d.color) obj.color = d.color;
+      return obj;
+    }),
+    edges: edges.map(e => {
+      const obs = (e.data as any)?._obs ?? {};
+      return {
+        ...obs,                     // 保留 Obsidian 原有字段（label / color / toEnd 等）
+        id: e.id,
+        fromNode: e.source,
+        fromSide: SIDE_R[e.sourceHandle?.replace('src-', '') ?? 'r'] ?? 'right',
+        toNode: e.target,
+        toSide: SIDE_R[e.targetHandle?.replace('tgt-', '') ?? 'l'] ?? 'left',
+      };
+    }),
+  };
+}
+
 function loadGraph(docId: string): SavedGraph {
   try {
     const doc = canvasStore.getById(docId);
-    if (doc?.content) return JSON.parse(doc.content);
-  } catch { /* empty */ }
-  return { nodes: [], edges: [] };
+    if (!doc?.content) return { nodes: [], edges: [] };
+    const raw = JSON.parse(doc.content);
+    const isObsidian = Array.isArray(raw.nodes) && raw.nodes.length > 0 && 'x' in raw.nodes[0];
+    return isObsidian ? fromObsidian(raw) : fromObsidian(raw); // 统一走 Obsidian 路径
+  } catch { return { nodes: [], edges: [] }; }
 }
 
 export interface CanvasNodeEditorRef { addCard: () => void }
@@ -154,7 +228,7 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string;
     const scheduleSave = useCallback((ns: Node[], es: Edge[]) => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
-        canvasStore.update(docId, { content: JSON.stringify({ nodes: ns, edges: es }) });
+        canvasStore.update(docId, { content: JSON.stringify(toObsidian(ns, es)) });
       }, 600);
     }, [docId]);
 
@@ -167,7 +241,7 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string;
         const next = [...ns, {
           id, type: 'card',
           position: pos ?? { x: 80 + Math.random() * 200, y: 80 + Math.random() * 120 },
-          data: { text: '', color: '', defaultEditing: true } satisfies CardData,
+          data: { text: '', color: '', defaultEditing: true, width: 250, height: 100 } satisfies CardData,
         }];
         scheduleSave(next, edges);
         return next;
