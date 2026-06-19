@@ -43,9 +43,8 @@ export const CanvasNodeCard = memo(({ id, data, selected }: NodeProps) => {
     if (draft !== d.text) updateNodeData(id, { text: draft, defaultEditing: false });
   };
 
-  const pal      = PALETTE[d.color ?? ''];
-  const cardBg   = pal?.bg ?? 'var(--cn-bg)';
-  const accentDot = pal?.dot;
+  const pal    = PALETTE[d.color ?? ''];
+  const cardBg = pal?.bg ?? 'var(--cn-bg)';
 
   const sep: React.CSSProperties = { width: '0.5px', background: 'rgba(0,0,0,0.1)', margin: '3px 2px' };
 
@@ -134,15 +133,14 @@ export const CanvasNodeCard = memo(({ id, data, selected }: NodeProps) => {
       <div onDoubleClick={e => { e.stopPropagation(); setEditing(true); }}
         style={{
           background: cardBg, color: 'var(--cn-fg)',
-          border: selected ? '2px solid #4A9EFF' : '1px solid var(--cn-border)',
-          borderTop: accentDot ? `3px solid ${accentDot}` : selected ? '2px solid #4A9EFF' : '1px solid var(--cn-border)',
-          borderRadius: 10, padding: '12px 16px',
-          minWidth: 200, minHeight: 80, maxWidth: 360,
+          border: selected ? '1.5px solid #4A9EFF' : '1px solid rgba(0,0,0,0.07)',
+          borderRadius: 12, padding: '14px 18px',
+          minWidth: 220, minHeight: 80, maxWidth: 380,
           boxShadow: selected
-            ? '0 0 0 4px rgba(74,158,255,0.12), 0 4px 16px rgba(0,0,0,0.1)'
-            : '0 2px 10px rgba(0,0,0,0.06)',
+            ? '0 0 0 3px rgba(74,158,255,0.15), 0 8px 24px rgba(0,0,0,0.1)'
+            : '0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)',
           cursor: editing ? 'text' : 'default',
-          fontSize: 13.5, lineHeight: 1.7, fontFamily: 'inherit',
+          fontSize: 14, lineHeight: 1.75, fontFamily: 'inherit',
           position: 'relative',
           transition: 'box-shadow 0.15s, border-color 0.15s',
         }}>

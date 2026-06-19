@@ -56,7 +56,7 @@ export function CanvasChrome({
     <div onMouseEnter={onMouseEnter}>
 
       {/* ══ Row 1: Title bar ══════════════════════════════════════════════════ */}
-      <div style={{ height: TITLE_H, background: P.chrome, display: 'flex', alignItems: 'center',
+      <div style={{ height: TITLE_H, background: docType === 'nodes' ? (dark ? '#1A1A1A' : '#F0EDE8') : P.chrome, display: 'flex', alignItems: 'center',
         paddingLeft: isMac && !maximized && !fullscreen && !sidebarOpen ? 70 : 0,
         transition: 'padding-left 0.22s cubic-bezier(0.4,0,0.2,1)', ...drag }}>
 
@@ -84,7 +84,7 @@ export function CanvasChrome({
               style={{ fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500, color: P.menuFg,
                 userSelect: 'none', letterSpacing: '0.01em', cursor: 'text', maxWidth: 440,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {title || '无标题'}{docType === 'canvas' ? '.excalidraw' : docType === 'nodes' ? '.canvas' : docType === 'doc' ? '.md' : ''}&nbsp;— Gsyen Writer
+              {title || '无标题'}{docType === 'canvas' ? '.excalidraw' : docType === 'nodes' ? '.canvas' : docType === 'doc' ? '.md' : ''}&nbsp;— iG Writer
             </span>
           )}
         </div>
@@ -131,7 +131,7 @@ export function CanvasChrome({
       {/* ══ Non-doc action bar ════════════════════════════════════════════════ */}
       {(docType === 'canvas' || docType === 'nodes') && (
         <div onClick={stopProp}
-          style={{ height: MENU_H, background: P.chrome,
+          style={{ height: MENU_H, background: docType === 'nodes' ? (dark ? '#1A1A1A' : '#F0EDE8') : P.chrome,
             display: 'flex', alignItems: 'center', padding: '0 12px',
             borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}` }}>
           <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
