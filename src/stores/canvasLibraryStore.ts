@@ -1,9 +1,10 @@
 /**
  * canvasLibraryStore — Library + DocList 状态（包含子目录导航 + 排序设置）
  * 单例 + pub/sub，与 useAuth 同一模式。
+ * 预览由主进程 ipc-library-cache 负责，渲染层只订阅 cache-update 事件。
  */
 import type { FolderSource, FileEntry } from '../hooks/useFileSystem';
-import { fsAdapter } from '../hooks/useFileSystem';
+import { fsAdapter, _entriesToFileEntries } from '../hooks/useFileSystem';
 import { useState, useEffect } from 'react';
 
 const EL_PATHS_KEY    = 'gsyen_library_paths';
@@ -73,6 +74,35 @@ function _set(patch: Partial<LibraryState>) {
   _listeners.forEach(fn => fn(_s));
 }
 
+// ── 主进程缓存更新事件 ─────────────────────────────────────────────────────────
+// 当 ipc-library-cache 扫描完一批预览，把最新 entries 推过来，渲染层直接更新 state
+function _setupCacheListener() {
+  const api = (window as any).electronAPI;
+  if (!api?.library?.onCacheUpdate) return;
+  api.library.onCacheUpdate(({ folderPath, entries }: { folderPath: string; entries: any[] }) => {
+    const files = _entriesToFileEntries(folderPath, entries);
+    // 更新选中文件夹的列表
+    if (_s.selectedFolder?.path === folderPath) {
+      _set({ files, loading: false });
+    }
+    // 更新子目录导航的列表
+    const topNav = _s.navStack[_s.navStack.length - 1];
+    if (topNav?.path === folderPath) {
+      _set({ navFiles: files, navLoading: false });
+    }
+  });
+}
+_setupCacheListener();
+
+function _savePaths(folders: FolderSource[]) {
+  if (fsAdapter.env !== 'electron') return;
+  localStorage.setItem(EL_PATHS_KEY, JSON.stringify(
+    folders
+      .filter(f => f.name?.trim() && f.path?.trim() && f.path.trim().length > 2)
+      .map(f => ({ id: f.id, name: f.name, path: f.path ?? '' }))
+  ));
+}
+
 function _restoreElectronPaths() {
   if (fsAdapter.env !== 'electron') return;
   try {
@@ -91,19 +121,17 @@ function _restoreElectronPaths() {
     const selectedId = localStorage.getItem(EL_SELECTED_KEY);
     const selectedFolder = selectedId ? (folders.find(f => f.id === selectedId) ?? null) : null;
     _set({ folders, selectedFolder });
+
+    // 冷启动：把所有已存的文件夹路径交给主进程，后台扫描建缓存
+    const paths = folders.map(f => f.path).filter(Boolean) as string[];
+    if (paths.length > 0) {
+      (window as any).electronAPI?.library?.scanAll?.(paths);
+    }
+
     if (selectedFolder) libraryStore.selectFolder(selectedFolder);
   } catch {}
 }
 _restoreElectronPaths();
-
-function _savePaths(folders: FolderSource[]) {
-  if (fsAdapter.env !== 'electron') return;
-  localStorage.setItem(EL_PATHS_KEY, JSON.stringify(
-    folders
-      .filter(f => f.name?.trim() && f.path?.trim() && f.path.trim().length > 2)
-      .map(f => ({ id: f.id, name: f.name, path: f.path ?? '' }))
-  ));
-}
 
 export const libraryStore = {
   get: () => _s,
@@ -136,6 +164,8 @@ export const libraryStore = {
     })];
     _savePaths(folders);
     _set({ folders });
+    // 新增文件夹也加入扫描
+    if (src.path) (window as any).electronAPI?.library?.scanAll?.([src.path]);
     libraryStore.selectFolder(src);
   },
 
@@ -155,7 +185,7 @@ export const libraryStore = {
       (window as any).electronAPI?.library?.watchFolder?.(src.path);
       return;
     }
-    _set({ selectedFolder: src, loading: true, files: [], selectedFile: null, navStack: [], navFiles: [] });
+    _set({ selectedFolder: src, loading: true, selectedFile: null, navStack: [], navFiles: [] });
     try {
       const raw = await fsAdapter.readDir(src);
       _dirCache.set(src.id, raw);
@@ -168,7 +198,6 @@ export const libraryStore = {
 
   optimisticRemoveFile(filePath: string) {
     const keep = (f: FileEntry) => f.path !== filePath;
-    // 同步清理 _dirCache 原始数据
     for (const [k, v] of _dirCache) _dirCache.set(k, v.filter(keep));
     _set({
       files:    _s.files.filter(keep),
@@ -187,6 +216,7 @@ export const libraryStore = {
       selectedFile: _s.selectedFile?.path === oldPath ? update(_s.selectedFile) : _s.selectedFile,
     });
   },
+
 
   optimisticAddFile(entry: FileEntry) {
     if (_s.navStack.length > 0) {

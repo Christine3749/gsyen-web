@@ -7,10 +7,34 @@ const fs        = require('fs');
 const path      = require('path');
 const libCache  = require('./ipc-library-cache.cjs');
 
+
 let _watcher    = null;
 let _watchTimer = null;
 
 module.exports = function registerLibraryFsHandlers(ipcMain) {
+
+  // ── 缓存层：启动时批量扫描，之后从缓存读 ──────────────────────────────────
+
+  ipcMain.handle('library:scanAll', (e, paths) => {
+    const sender = e.sender;
+    for (const p of (paths ?? [])) {
+      libCache.startScan(p, (folderPath, entries) => {
+        if (!sender.isDestroyed())
+          sender.send('library:cache-update', { folderPath, entries });
+      });
+    }
+  });
+
+  ipcMain.handle('library:readDir', (e, folderPath) => {
+    const cached = libCache.getCache(folderPath);
+    if (cached) return cached;
+    const sender = e.sender;
+    libCache.startScan(folderPath, (fp, entries) => {
+      if (!sender.isDestroyed())
+        sender.send('library:cache-update', { folderPath: fp, entries });
+    });
+    return null;
+  });
 
   // ── fs.watch：监听当前选中文件夹，有变化推事件到渲染层 ─────────────────────
   ipcMain.on('library:watchFolder', (event, folderPath) => {
@@ -21,7 +45,7 @@ module.exports = function registerLibraryFsHandlers(ipcMain) {
         clearTimeout(_watchTimer);
         _watchTimer = setTimeout(() => {
           if (!event.sender.isDestroyed()) event.sender.send('library:folderChanged', folderPath);
-        }, 300); // 300ms debounce 防止重复触发
+        }, 300);
       });
       _watcher.on('error', () => { _watcher = null; });
     } catch {}
@@ -89,7 +113,7 @@ module.exports = function registerLibraryFsHandlers(ipcMain) {
     }
   });
 
-  // 在文件管理器中显示
+  // 在 Finder/Explorer 中显示
   ipcMain.handle('library:showInExplorer', (_e, filePath) => {
     try { shell.showItemInFolder(filePath); return true; } catch { return false; }
   });

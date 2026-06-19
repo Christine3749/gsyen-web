@@ -118,37 +118,41 @@ async function _elPickFolderViaDialog(): Promise<FolderSource | null> {
   }
 }
 
+type RawEntry = { name: string; lastModified: number; isDir: boolean; preview?: string };
+
+function _entriesToFileEntries(basePath: string, entries: RawEntry[]): FileEntry[] {
+  const dirs: FileEntry[] = entries
+    .filter(e => e.isDir && !e.name.startsWith('.') && !e.name.startsWith('$'))
+    .map(e => ({ name: e.name, path: `${basePath}/${e.name}`,
+      isMarkdown: false, isDirectory: true, lastModified: e.lastModified, preview: '' }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const files: FileEntry[] = entries
+    .filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas|jpg|jpeg|png|gif|webp|bmp|svg|docx|xlsx|pptx)$/i.test(e.name))
+    .map(e => ({ name: e.name, path: `${basePath}/${e.name}`,
+      isMarkdown: /\.md$/i.test(e.name), lastModified: e.lastModified, preview: e.preview ?? '' }))
+    .sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
+
+  return [...dirs, ...files];
+}
+
 async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
   const api = (window as any).electronAPI;
   if (!src.path) return [];
   try {
-    const entries: { name: string; lastModified: number; isDir: boolean }[] =
-      await api?.readDir?.(src.path) ?? [];
-
-    const dirs: FileEntry[] = entries
-      .filter(e => e.isDir && !e.name.startsWith('.') && !e.name.startsWith('$'))
-      .map(e => ({
-        name: e.name,
-        path: `${src.path}/${e.name}`,
-        isMarkdown: false,
-        isDirectory: true,
-        lastModified: e.lastModified,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    const textFiles = entries.filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas|jpg|jpeg|png|gif|webp|bmp|svg|docx|xlsx|pptx)$/i.test(e.name));
-    const files: FileEntry[] = textFiles.map(e => ({
-      name: e.name,
-      path: `${src.path}/${e.name}`,
-      isMarkdown: /\.md$/i.test(e.name),
-      lastModified: e.lastModified,
-      preview: '',
-    }));
-    files.sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
-
-    return [...dirs, ...files];
+    // 新缓存层（需重启 Electron 生效）
+    if (api?.library?.readDir) {
+      const entries: RawEntry[] | null = await api.library.readDir(src.path);
+      if (entries) return _entriesToFileEntries(src.path, entries);
+      return []; // null = 冷启动扫描中，等 cache-update 事件
+    }
+    // Fallback：旧版 Electron，直接读目录（无预览）
+    const raw: RawEntry[] = await api?.readDir?.(src.path) ?? [];
+    return _entriesToFileEntries(src.path, raw);
   } catch { return []; }
 }
+
+export { _entriesToFileEntries };
 
 async function _elReadFile(e: FileEntry): Promise<string> {
   if (!e.path) return '';
@@ -183,12 +187,29 @@ async function _elRenameFile(e: FileEntry, newName: string): Promise<{ ok: boole
 
 // ── 统一接口 ──────────────────────────────────────────────────────────────────
 
+async function _webReadPreview(e: FileEntry): Promise<string> {
+  if (!e.handle) return '';
+  try {
+    const f = await (e.handle as FileSystemFileHandle).getFile();
+    const text = await f.slice(0, 512).text();
+    return text.split('\n')
+      .map((l: string) => l.replace(/^[#>\s*\-–—]+/, '').trim())
+      .find((l: string) => l.length > 2)
+      ?.slice(0, 80) ?? '';
+  } catch { return ''; }
+}
+
+async function _elReadPreviewEntry(e: FileEntry): Promise<string> {
+  return e.path ? _elReadPreview(e.path) : '';
+}
+
 export const fsAdapter = {
   env:            _isElectron ? 'electron' : 'web' as 'electron' | 'web',
   pickFolder:     _isElectron ? _elPickFolderViaDialog : _webPickFolder,
   readDir:        _isElectron ? _elReadDir             : _webReadDir,
   readFile:       _isElectron ? _elReadFile            : _webReadFile,
   writeFile:      _isElectron ? _elWriteFile           : _webWriteFile,
+  readPreview:    _isElectron ? _elReadPreviewEntry    : _webReadPreview,
   deleteFile:     _isElectron ? _elDeleteFile          : async () => false,
   showInExplorer: _isElectron ? _elShowInExplorer      : () => {},
   renameFile:     _isElectron ? _elRenameFile          : async () => ({ ok: false as const }),

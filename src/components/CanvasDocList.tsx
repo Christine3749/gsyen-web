@@ -165,10 +165,12 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
         <div style={{ height: TITLE_H, flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 6px 0 4px' }}>
           <button onClick={onBack}
             style={{ padding: '6px 6px', background: 'transparent', border: 'none', cursor: 'pointer',
-              color: P.menuFg, display: 'flex', alignItems: 'center' }}>
-            <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor"
-              strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 1L1 6l5 5M1 6h15"/>
+              color: P.menuFg, display: 'flex', alignItems: 'center' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.fg}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = P.menuFg}>
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none" stroke="currentColor"
+              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 1L1 5l4 4M1 5h11"/>
             </svg>
           </button>
           <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: P.menuFg, fontFamily: SYS_FONT,
@@ -277,6 +279,13 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                       </span>
                     )}
                   </div>
+                  {!renaming && entry.preview && (
+                    <div style={{ fontSize: 11, color: P.dim, fontFamily: SYS_FONT,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      marginTop: 2, lineHeight: 1.4 }}>
+                      {entry.preview}
+                    </div>
+                  )}
                 </div>
               </div>
             );

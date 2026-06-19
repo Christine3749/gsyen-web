@@ -23,6 +23,7 @@ interface Props {
   mode:          EditorMode;
   setMode:       (m: EditorMode | ((p: EditorMode) => EditorMode)) => void;
   docType:       'doc' | 'canvas' | 'nodes' | 'image' | 'office';
+  onAddCard?:    () => void;
   onClose:       () => void;
   sidebarOpen:    boolean;
   onSidebarToggle:() => void;
@@ -128,7 +129,7 @@ export function CanvasChrome({
       )}
 
       {/* ══ Non-doc action bar ════════════════════════════════════════════════ */}
-      {docType !== 'doc' && (
+      {(docType === 'canvas' || docType === 'nodes') && (
         <div onClick={stopProp}
           style={{ height: MENU_H, background: P.chrome,
             display: 'flex', alignItems: 'center', padding: '0 12px',

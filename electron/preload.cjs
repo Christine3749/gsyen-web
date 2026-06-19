@@ -55,6 +55,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   library: {
     showMenu:      (pos)  => ipcRenderer.send('library:showMenu', pos),
     onMenuResult:  (fn)   => ipcRenderer.once('library:menuResult', (_e, action) => fn(action)),
+    scanAll:       (paths) => ipcRenderer.invoke('library:scanAll', paths),
+    readDir:       (p)    => ipcRenderer.invoke('library:readDir', p),
+    onCacheUpdate: (fn) => {
+      const h = (_e, data) => fn(data);
+      ipcRenderer.on('library:cache-update', h);
+      return () => ipcRenderer.removeListener('library:cache-update', h);
+    },
     watchFolder:   (path) => ipcRenderer.send('library:watchFolder', path),
     unwatchFolder: ()     => ipcRenderer.send('library:unwatchFolder'),
     onFolderChanged: (fn) => {
@@ -62,19 +69,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('library:folderChanged', h);
       return () => ipcRenderer.removeListener('library:folderChanged', h);
     },
-    delete:          (filePath)           => ipcRenderer.invoke('library:delete',          filePath),
-    showInExplorer:  (filePath)           => ipcRenderer.invoke('library:showInExplorer',  filePath),
-    rename:          (oldPath, newName)   => ipcRenderer.invoke('library:rename',          oldPath, newName),
+    delete:          (filePath)         => ipcRenderer.invoke('library:delete',         filePath),
+    showInExplorer:  (filePath)         => ipcRenderer.invoke('library:showInExplorer', filePath),
+    rename:          (oldPath, newName) => ipcRenderer.invoke('library:rename',         oldPath, newName),
   },
   docviewer: {
     parseOffice: (filePath) => ipcRenderer.invoke('docviewer:parseOffice', filePath),
   },
   isElectron: true,
   platform: process.platform,
-  showOpenDialog: (opts)           => ipcRenderer.invoke('fs:showOpenDialog', opts),
-  readDir:          (dirPath)            => ipcRenderer.invoke('fs:readDir',          dirPath),
-  readFile:         (filePath)           => ipcRenderer.invoke('fs:readFile',         filePath),
-  writeFile:        (filePath, text)     => ipcRenderer.invoke('fs:writeFile',        filePath, text),
-  readFileBuffer:   (filePath)           => ipcRenderer.invoke('fs:readFileBuffer',   filePath),
-  writeFileBuffer:  (filePath, base64)   => ipcRenderer.invoke('fs:writeFileBuffer',  filePath, base64),
+  showOpenDialog: (opts)               => ipcRenderer.invoke('fs:showOpenDialog', opts),
+  readDir:          (dirPath)          => ipcRenderer.invoke('fs:readDir',          dirPath),
+  readFile:         (filePath)         => ipcRenderer.invoke('fs:readFile',         filePath),
+  readFileBuffer:   (filePath)         => ipcRenderer.invoke('fs:readFileBuffer',   filePath),
+  writeFile:        (filePath, text)   => ipcRenderer.invoke('fs:writeFile',        filePath, text),
+  writeFileBuffer:  (filePath, base64) => ipcRenderer.invoke('fs:writeFileBuffer',  filePath, base64),
 });
