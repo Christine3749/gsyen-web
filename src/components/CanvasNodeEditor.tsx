@@ -1,4 +1,4 @@
-import { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import {
   ReactFlow, Background, Panel, BackgroundVariant,
   addEdge, useNodesState, useEdgesState,
@@ -50,6 +50,39 @@ function CanvasRightControls({ dark }: { dark: boolean }) {
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
           <line x1="2" y1="7" x2="12" y2="7"/>
         </svg>)}
+    </Panel>
+  );
+}
+
+/* ── Bottom hint + H key ── */
+function CanvasHint({ dark }: { dark: boolean }) {
+  const { fitView } = useReactFlow();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'h' || e.key === 'H') {
+        if ((e.target as HTMLElement).tagName === 'TEXTAREA') return;
+        if ((e.target as HTMLElement).tagName === 'INPUT') return;
+        fitView({ duration: 350, padding: 0.15 });
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fitView]);
+
+  return (
+    <Panel position="bottom-center" style={{ marginBottom: 14, pointerEvents: 'none' }}>
+      <span style={{
+        fontSize: 11, fontFamily: 'ui-monospace, monospace',
+        color: dark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
+        letterSpacing: '0.04em',
+      }}>
+        按 <kbd style={{
+          padding: '1px 5px', borderRadius: 4, fontSize: 10,
+          background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)',
+          border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.15)',
+          fontFamily: 'inherit',
+        }}>H</kbd> 回到中心 · 双击画布新建卡片
+      </span>
     </Panel>
   );
 }
@@ -140,6 +173,7 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, Props>(
         >
           <Background variant={BackgroundVariant.Dots} color={dotColor} gap={24} size={1.5} />
           <CanvasRightControls dark={dark} />
+          <CanvasHint dark={dark} />
         </ReactFlow>
       </div>
     );
