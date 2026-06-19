@@ -89,9 +89,8 @@ export function CanvasSettings({ prefs, onChange, onClose, P, dark }: Props) {
   return createPortal(
     <div onClick={onClose}
       style={{ position: 'fixed', inset: 0, zIndex: 200,
-        background: dark ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.25)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backdropFilter: 'blur(4px)' }}>
+        background: dark ? 'rgba(0,0,0,0.50)' : 'rgba(0,0,0,0.22)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
       <div onClick={e => e.stopPropagation()}
         style={{ width: 420, maxHeight: '80vh', overflowY: 'auto',

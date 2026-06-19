@@ -99,9 +99,10 @@ function XlsxView({ sheets, filePath, P, dark }: {
       width: max-content; min-width: 100%; }
     .gw-xl th { position: sticky; top: 0; background: ${dark ? '#252525' : '#EFEFEF'};
       font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
-      color: ${dark ? '#888' : '#666'}; z-index: 1; }
+      color: ${dark ? '#888' : '#666'}; z-index: 1; min-width: 80px; height: 26px; }
     .gw-xl th,.gw-xl td { border: 1px solid ${dark ? '#2E2E2E' : '#E0E0E0'};
-      padding: 5px 10px; text-align: left; white-space: nowrap; color: ${dark ? '#CCC' : '#1A1A1A'}; }
+      padding: 4px 10px; text-align: left; white-space: nowrap; color: ${dark ? '#CCC' : '#1A1A1A'};
+      min-width: 80px; height: 24px; }
     .gw-xl tr:nth-child(even) td { background: ${dark ? '#1E1E1E' : '#FAFAFA'}; }
     .gw-xl tr:hover td { background: ${dark ? '#2A2A2A' : '#F4F4F4'}; }
   `;

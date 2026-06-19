@@ -48,7 +48,7 @@ export function DocxEditor({ html, filePath, P, dark, onExit }: Props) {
     editorProps: { attributes: { spellcheck: 'false' } },
   });
 
-  useEffect(() => () => { editor?.destroy(); }, [editor]);
+  // TipTap v3 manages editor lifecycle internally — do NOT call destroy()
 
   const handleSave = useCallback(async () => {
     if (!editor) return;
