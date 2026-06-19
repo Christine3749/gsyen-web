@@ -23,12 +23,18 @@ export interface CardData extends Record<string, unknown> {
   connectionCount?: number;
   timestamp?:       string;
 
+  /* entity card extra */
+  statusNote?:      string;          // "3单 · ¥128,000" 等状态补充行
+
   /* connector card */
   connectorName?:   string;
   connectorType?:   ConnectorType;
   flowA?:           string;
   flowB?:           string;
-  flowLabel?:       string;
+  flowA2?:          string;          // 第二条 flow 起点
+  flowB2?:          string;          // 第二条 flow 终点
+  flowNote?:        string;          // "每次对话触发 · POST · stream"
+  flowBidirectional?: boolean;       // 是否显示"双向可见"
 
   /* Obsidian round-trip preservation */
   _obs?:            unknown;

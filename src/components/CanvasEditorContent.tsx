@@ -216,7 +216,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50" style={{ background: docType === 'nodes' ? (dark ? '#1A1A1A' : '#F0EDE8') : P.bg, color:P.fg, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+    <div className="fixed inset-0 z-50" style={{ background: docType === 'nodes' ? '#EEEDF6' : P.bg, color:P.fg, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       onClick={() => setActiveMenu(null)} onMouseMove={handleMouseMove}>
 
       <div style={{ position:'absolute', inset:0, overflow:'hidden', display:'flex' }}>
@@ -238,7 +238,7 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
             </div>
           )}
           {docId && nodesEverActive && (
-            <div style={{ visibility: docType === 'nodes' ? 'visible' : 'hidden', pointerEvents: docType === 'nodes' ? 'auto' : 'none', position: 'absolute', inset: 0, paddingTop: CHROME_H + 1, display: 'flex' }}>
+            <div style={{ visibility: docType === 'nodes' ? 'visible' : 'hidden', pointerEvents: docType === 'nodes' ? 'auto' : 'none', position: 'absolute', inset: 0, paddingTop: CHROME_H, display: 'flex' }}>
               <CanvasNodeEditor key={docId} ref={nodeEditorRef} docId={docId} dark={dark} />
             </div>
           )}

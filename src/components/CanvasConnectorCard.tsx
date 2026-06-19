@@ -1,10 +1,10 @@
 import { memo } from 'react';
-import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import type { CardData, ConnectorType } from './CanvasCardData';
 
 const CONN_LABEL: Record<ConnectorType, string> = {
-  calls: 'calls', imports: 'imports', routes: 'routes',
-  references: 'ref', custom: 'flow',
+  calls: 'CALLS', imports: 'IMPORTS', routes: 'ROUTES',
+  references: 'REF', custom: 'FLOW',
 };
 
 const SIDES = [
@@ -12,12 +12,47 @@ const SIDES = [
   { pos: Position.Bottom, id: 'b' }, { pos: Position.Left, id: 'l' },
 ];
 
+function FlowRow({ a, b }: { a: string; b: string }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 7,
+      padding: '5px 10px', background: 'rgba(0,0,0,0.025)',
+      borderRadius: 4, border: '0.5px solid rgba(0,0,0,0.07)',
+    }}>
+      <span style={{
+        fontSize: 11, fontWeight: 500, color: 'rgba(0,0,0,0.62)',
+        padding: '1px 6px', background: 'rgba(255,255,255,0.9)',
+        border: '0.5px solid rgba(0,0,0,0.10)', borderRadius: 3,
+        maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>{a}</span>
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="rgba(0,0,0,0.22)"
+        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M1 5h14M11 2l3 3-3 3"/>
+      </svg>
+      <span style={{
+        fontSize: 11, fontWeight: 500, color: 'rgba(0,0,0,0.62)',
+        padding: '1px 6px', background: 'rgba(255,255,255,0.9)',
+        border: '0.5px solid rgba(0,0,0,0.10)', borderRadius: 3,
+        maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>{b}</span>
+    </div>
+  );
+}
+
+const tbBtn: React.CSSProperties = {
+  width: 28, height: 28, display: 'flex', alignItems: 'center',
+  justifyContent: 'center', background: 'transparent', border: 'none',
+  borderRadius: 6, cursor: 'pointer',
+};
+
 export interface ConnectorCardProps { id: string; data: CardData; selected: boolean }
 
 export const CanvasConnectorCard = memo(({ id, data: d, selected }: ConnectorCardProps) => {
   const { deleteElements } = useReactFlow();
-  const ct = (d.connectorType ?? 'custom') as ConnectorType;
-  const borderColor = selected ? '#4A9EFF' : 'rgba(0,0,0,0.18)';
+  const ct          = (d.connectorType ?? 'custom') as ConnectorType;
+  const borderColor = selected ? '#4A9EFF' : 'rgba(0,0,0,0.15)';
+  const hasFlow1    = d.flowA || d.flowB;
+  const hasFlow2    = d.flowA2 || d.flowB2;
 
   return (
     <div style={{ position: 'relative' }}>
@@ -31,7 +66,7 @@ export const CanvasConnectorCard = memo(({ id, data: d, selected }: ConnectorCar
           boxShadow: '0 4px 12px rgba(0,0,0,0.12)', border: '0.5px solid var(--cn-border)',
           zIndex: 10,
         }}>
-          <button style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: 6, cursor: 'pointer' }}
+          <button style={tbBtn} title="Delete"
             onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             onClick={() => deleteElements({ nodes: [{ id }] })}>
@@ -44,65 +79,78 @@ export const CanvasConnectorCard = memo(({ id, data: d, selected }: ConnectorCar
 
       {/* Card */}
       <div style={{
-        background: 'rgba(255,255,255,0.65)',
+        background: 'rgba(255,255,255,0.72)',
         border: `1.5px dashed ${borderColor}`,
-        borderRadius: 5,
-        minWidth: 190, maxWidth: 280,
+        borderRadius: 8,
+        minWidth: 220, maxWidth: 320,
+        backdropFilter: 'blur(4px)',
+        overflow: 'hidden',
       }}>
 
-        {/* Head */}
-        <div style={{ padding: '8px 12px 6px', borderBottom: '1px dashed rgba(0,0,0,0.10)' }}>
+        {/* HEAD */}
+        <div style={{ padding: '10px 13px 9px', borderBottom: '1px dashed rgba(0,0,0,0.09)' }}>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2,
-            fontSize: 9.5, fontFamily: 'ui-monospace,monospace', fontWeight: 600,
-            letterSpacing: '.07em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.32)',
+            display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3,
+            fontSize: 10, fontFamily: 'ui-monospace,monospace', fontWeight: 600,
+            letterSpacing: '.06em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.32)',
           }}>
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1 6h10M8 3l3 3-3 3"/>
+            <svg width="12" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor"
+              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 5h12M9 2l3 3-3 3M5 8L2 5l3-3"/>
             </svg>
-            {CONN_LABEL[ct]}
+            {d.connectorName ? (d.connectorType ? CONN_LABEL[ct] : '数据流') : '数据流'}
           </div>
-          <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(0,0,0,0.72)' }}>
-            {d.connectorName || '数据流'}
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.78)', lineHeight: 1.25 }}>
+            {d.connectorName || '未命名连接'}
           </div>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '8px 12px' }}>
-          {(d.flowA || d.flowB) ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', background: 'rgba(0,0,0,0.03)', borderRadius: 3, marginBottom: d.flowLabel ? 5 : 0 }}>
-              <span style={{ fontSize: 10.5, fontWeight: 500, color: 'rgba(0,0,0,0.58)', padding: '1px 5px', background: 'rgba(255,255,255,0.85)', border: '0.5px solid rgba(0,0,0,0.10)', borderRadius: 2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {d.flowA || '?'}
-              </span>
-              <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 5h12M9 2l3 3-3 3"/>
-              </svg>
-              <span style={{ fontSize: 10.5, fontWeight: 500, color: 'rgba(0,0,0,0.58)', padding: '1px 5px', background: 'rgba(255,255,255,0.85)', border: '0.5px solid rgba(0,0,0,0.10)', borderRadius: 2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {d.flowB || '?'}
-              </span>
-            </div>
-          ) : (
-            <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.30)', fontStyle: 'italic' }}>
+        {/* BODY — flow rows */}
+        <div style={{ padding: '9px 13px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {hasFlow1 && <FlowRow a={d.flowA || '?'} b={d.flowB || '?'} />}
+          {hasFlow2 && <FlowRow a={d.flowA2 || '?'} b={d.flowB2 || '?'} />}
+          {!hasFlow1 && !hasFlow2 && (
+            <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.28)', fontStyle: 'italic' }}>
               设置连接端点…
             </div>
           )}
-          {d.flowLabel && (
-            <div style={{ fontSize: 10, fontFamily: 'ui-monospace,monospace', color: 'rgba(0,0,0,0.35)', marginTop: 4 }}>
-              {d.flowLabel}
+          {d.flowNote && (
+            <div style={{ fontSize: 10.5, fontFamily: 'ui-monospace,monospace', color: 'rgba(0,0,0,0.32)', marginTop: 1 }}>
+              {d.flowNote}
             </div>
           )}
         </div>
 
-        {/* Handles */}
-        {SIDES.map(({ pos, id: hid }) => (
-          <Handle key={hid} id={`src-${hid}`} type="source" position={pos}
-            style={{ opacity: 0, width: 8, height: 8, background: '#4A9EFF', border: '1.5px solid #fff', transition: 'opacity 0.12s' }} />
-        ))}
-        {SIDES.map(({ pos, id: hid }) => (
-          <Handle key={`t-${hid}`} id={`tgt-${hid}`} type="target" position={pos}
-            style={{ opacity: 0, width: 14, height: 14 }} />
-        ))}
+        {/* FOOT — badge + label */}
+        <div style={{
+          borderTop: '1px dashed rgba(0,0,0,0.09)', padding: '6px 13px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{
+            fontSize: 9.5, fontFamily: 'ui-monospace,monospace', fontWeight: 700,
+            letterSpacing: '.08em', padding: '2px 7px',
+            border: '1px solid rgba(0,0,0,0.18)', borderRadius: 3,
+            color: 'rgba(0,0,0,0.52)', background: 'transparent',
+          }}>
+            {CONN_LABEL[ct]}
+          </span>
+          {d.flowBidirectional && (
+            <span style={{ fontSize: 10.5, color: 'rgba(0,0,0,0.36)', fontFamily: 'ui-monospace,monospace' }}>
+              双向可见
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* Handles */}
+      {SIDES.map(({ pos, id: hid }) => (
+        <Handle key={hid} id={`src-${hid}`} type="source" position={pos}
+          style={{ opacity: 0, width: 8, height: 8, background: '#4A9EFF', border: '1.5px solid #fff', transition: 'opacity 0.12s' }} />
+      ))}
+      {SIDES.map(({ pos, id: hid }) => (
+        <Handle key={`t-${hid}`} id={`tgt-${hid}`} type="target" position={pos}
+          style={{ opacity: 0, width: 14, height: 14 }} />
+      ))}
     </div>
   );
 });

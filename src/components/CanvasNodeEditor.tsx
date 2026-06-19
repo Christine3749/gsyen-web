@@ -1,128 +1,69 @@
 import { useCallback, useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import {
-  ReactFlow, Background, Panel, BackgroundVariant, ReactFlowProvider,
-  addEdge, useNodesState, useEdgesState, useReactFlow, useViewport,
+  ReactFlow, Background, BackgroundVariant, ReactFlowProvider,
+  addEdge, useNodesState, useEdgesState, useReactFlow,
   type Node, type Edge, type Connection,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { CanvasNodeCard, type CardData } from './CanvasNodeCard';
 import { CanvasBox } from './CanvasBox';
+import { CanvasRightControls, CanvasHint } from './CanvasFlowPanels';
+import { CanvasContextMenu, type MenuPosition } from './CanvasContextMenu';
+import type { EntityType, ModuleColor } from './CanvasCardData';
 import { canvasStore } from '../stores/canvasStore';
+import { toObsidian, loadGraph } from './canvasObsidian';
 
 const NODE_TYPES = { card: CanvasNodeCard, box: CanvasBox };
+const EDGE_DEFAULTS = { style: { stroke: 'rgba(0,0,0,0.15)', strokeWidth: 1.5 }, animated: false };
 
-const EDGE_DEFAULTS = {
-  style: { stroke: 'rgba(0,0,0,0.15)', strokeWidth: 1.5 },
-  animated: false,
-};
-
-/* ── Right toolbar ── */
-function CanvasRightControls({ dark }: { dark: boolean }) {
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
-  const bg  = dark ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)';
-  const bdr = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-  const ic  = dark ? '#888' : '#666';
-
-  const btn = (onClick: () => void, title: string, svg: React.ReactNode) => (
-    <button title={title} onClick={onClick}
-      onMouseEnter={e => { e.currentTarget.style.opacity = '0.65'; }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-      style={{ width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: bg, border: `0.5px solid ${bdr}`, borderRadius: 7, cursor: 'pointer',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.07)', color: ic, transition: 'opacity 0.12s',
-      }}>{svg}</button>
-  );
-
-  return (
-    <Panel position="top-right" style={{ display: 'flex', flexDirection: 'column', gap: 5, margin: '14px 14px 0 0' }}>
-      {btn(() => zoomIn({ duration: 200 }), 'Zoom In',
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-          <line x1="6.5" y1="2" x2="6.5" y2="11"/><line x1="2" y1="6.5" x2="11" y2="6.5"/></svg>)}
-      {btn(() => fitView({ duration: 300, padding: 0.15 }), 'Fit View',
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-          <path d="M1.5 4V1.5H4M9 1.5h2.5V4M11.5 9v2.5H9M4 11.5H1.5V9"/></svg>)}
-      {btn(() => zoomOut({ duration: 200 }), 'Zoom Out',
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-          <line x1="2" y1="6.5" x2="11" y2="6.5"/></svg>)}
-    </Panel>
-  );
-}
-
-/* ── Bottom hint (2 states) ── */
-function CanvasHint({ dark }: { dark: boolean }) {
-  const { fitView } = useReactFlow();
-  const { x, y, zoom } = useViewport();
-  const hasMoved = Math.abs(x) > 30 || Math.abs(y) > 30 || Math.abs(zoom - 1) > 0.08;
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'h' && e.key !== 'H') return;
-      if (['TEXTAREA', 'INPUT'].includes((e.target as HTMLElement).tagName)) return;
-      fitView({ duration: 350, padding: 0.15 });
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [fitView]);
-
-  const txt: React.CSSProperties = {
-    fontSize: 11, fontFamily: 'ui-monospace, monospace', letterSpacing: '0.04em',
-    color: dark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)',
-    transition: 'opacity 0.3s',
-  };
-  const kbdStyle: React.CSSProperties = {
-    padding: '1px 5px', borderRadius: 4, fontSize: 10,
-    background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
-    border: dark ? '0.5px solid rgba(255,255,255,0.14)' : '0.5px solid rgba(0,0,0,0.14)',
-  };
-
-  return (
-    <Panel position="bottom-center" style={{ pointerEvents: 'none', textAlign: 'center', paddingBottom: 16 }}>
-      {hasMoved && (
-        <div style={{ ...txt, marginBottom: 5 }}>
-          按 <kbd style={kbdStyle}>H</kbd> 回到中心
-        </div>
-      )}
-      <div style={txt}>双击画布新建卡片</div>
-    </Panel>
-  );
-}
-
-/* ── Inner component (inside ReactFlowProvider context) ── */
+/* ── Inner (needs ReactFlow context) ── */
 interface InnerProps {
   nodes: Node[]; edges: Edge[];
   onNodesChange: (e: any) => void;
   onEdgesChange: (e: any) => void;
   onConnect: (c: Connection) => void;
-  addCard: (pos?: { x: number; y: number }) => void;
+  addCard:      (pos?: { x: number; y: number }) => void;
+  addEntity:    (pos: { x: number; y: number }, et: EntityType) => void;
+  addConnector: (pos: { x: number; y: number }) => void;
+  addBox:       (pos: { x: number; y: number }, mc: ModuleColor) => void;
   dark: boolean;
 }
 
-function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect, addCard, dark }: InnerProps) {
+function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect, addCard, addEntity, addConnector, addBox, dark }: InnerProps) {
   const { screenToFlowPosition } = useReactFlow();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState<MenuPosition | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.react-flow__node, .react-flow__edge, .react-flow__controls, .react-flow__panel, .react-flow__minimap')) return;
-      const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
-      addCard({ x: pos.x - 100, y: pos.y - 40 });
+    const onDbl = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('.react-flow__node, .react-flow__edge, .react-flow__controls, .react-flow__panel, .react-flow__minimap')) return;
+      const p = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      addCard({ x: p.x - 100, y: p.y - 40 });
     };
-    el.addEventListener('dblclick', handler, { capture: true });
-    return () => el.removeEventListener('dblclick', handler, { capture: true });
+    const onCtx = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('.react-flow__node, .react-flow__edge')) return;
+      e.preventDefault();
+      const fp = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      setMenuPos({ x: e.clientX, y: e.clientY, flowX: fp.x - 110, flowY: fp.y - 40 });
+    };
+    el.addEventListener('dblclick', onDbl, { capture: true });
+    el.addEventListener('contextmenu', onCtx, { capture: true });
+    return () => {
+      el.removeEventListener('dblclick', onDbl, { capture: true });
+      el.removeEventListener('contextmenu', onCtx, { capture: true });
+    };
   }, [screenToFlowPosition, addCard]);
 
-  const bgColor  = dark ? '#1A1A1A' : '#CAC4BA';
-  const dotColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.18)';
-  const vars     = dark
-    ? { '--cn-bg': '#1E1E1E', '--cn-fg': '#CCCCCC', '--cn-border': '#383838', '--cn-dim': '#666' }
-    : { '--cn-bg': '#FFFFFF', '--cn-fg': '#1A1A1A', '--cn-border': 'rgba(0,0,0,0.08)', '--cn-dim': '#AAA' };
+  const bgColor  = '#EEEDF6';
+  const dotColor = '#C8C7D6';
+  const vars = { '--cn-bg': '#FFFFFF', '--cn-fg': '#1A1A1A', '--cn-border': 'rgba(0,0,0,0.08)', '--cn-dim': '#AAA' };
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', background: bgColor, ...vars } as React.CSSProperties}>
-      {/* 覆盖 ReactFlow 默认 grab 光标：空白处用箭头，拖拽时用 grabbing */}
       <style>{`
         .react-flow__pane { cursor: default !important; }
         .react-flow__pane.dragging { cursor: grabbing !important; }
@@ -130,102 +71,25 @@ function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         .react-flow__node:hover .react-flow__handle[data-handletype="source"] { opacity: 0.55 !important; }
         .react-flow__node.selected .react-flow__handle[data-handletype="source"] { opacity: 0.75 !important; }
       `}</style>
-      <ReactFlow
-        nodes={nodes} edges={edges}
-        onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={NODE_TYPES}
-        defaultEdgeOptions={EDGE_DEFAULTS}
-        colorMode={dark ? 'dark' : 'light'}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        proOptions={{ hideAttribution: true }}
-        panOnDrag={[1, 2]}
-        panOnScroll
-      >
-        <Background variant={BackgroundVariant.Dots} color={dotColor} gap={24} size={1.5} />
+      <ReactFlow nodes={nodes} edges={edges}
+        onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect}
+        nodeTypes={NODE_TYPES} defaultEdgeOptions={EDGE_DEFAULTS}
+        colorMode={dark ? 'dark' : 'light'} defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        proOptions={{ hideAttribution: true }} panOnDrag={[1, 2]} panOnScroll>
+        <Background variant={BackgroundVariant.Cross} color={dotColor} gap={24} size={5} strokeWidth={1} />
         <CanvasRightControls dark={dark} />
         <CanvasHint dark={dark} />
       </ReactFlow>
+      <CanvasContextMenu pos={menuPos} onClose={() => setMenuPos(null)}
+        onCreateText={fp => addCard(fp)}
+        onCreateEntity={(fp, et) => addEntity(fp, et)}
+        onCreateConnector={fp => addConnector(fp)}
+        onCreateBox={(fp, mc) => addBox(fp, mc)} />
     </div>
   );
 }
 
 /* ── Exported component ── */
-interface SavedGraph { nodes: Node[]; edges: Edge[] }
-
-/* ── Obsidian .canvas ↔ ReactFlow 双向互转（完整兼容）── */
-const SIDE: Record<string, string>   = { top: 't', right: 'r', bottom: 'b', left: 'l' };
-const SIDE_R: Record<string, string> = { t: 'top', r: 'right', b: 'bottom', l: 'left' };
-
-function obsidianNodeText(n: any): string {
-  if (n.type === 'file')  return `📎 ${n.file ?? ''}`;
-  if (n.type === 'link')  return `🔗 ${n.url ?? ''}`;
-  if (n.type === 'group') return `▣ ${n.label ?? 'Group'}`;
-  return n.text ?? '';
-}
-
-function fromObsidian(raw: any): SavedGraph {
-  const nodes: Node[] = (raw.nodes ?? []).map((n: any) => ({
-    id: n.id, type: 'card',
-    position: { x: n.x ?? 0, y: n.y ?? 0 },
-    style: n.width ? { width: n.width } : undefined,
-    data: {
-      text: obsidianNodeText(n),
-      color: n.color ?? '',
-      width: n.width ?? 250, height: n.height ?? 100,
-      _obs: n,                     // 原始节点存档，保证非 text 类型安全回写
-    },
-  }));
-  const edges: Edge[] = (raw.edges ?? []).map((e: any) => ({
-    id: e.id, source: e.fromNode, target: e.toNode,
-    sourceHandle: `src-${SIDE[e.fromSide] ?? 'r'}`,
-    targetHandle: `tgt-${SIDE[e.toSide] ?? 'l'}`,
-    label: e.label,
-    style: { ...EDGE_DEFAULTS.style, ...(e.color ? { stroke: e.color } : {}) },
-    data: { _obs: e },             // 原始边存档（保留 label / color / toEnd 等）
-  }));
-  return { nodes, edges };
-}
-
-function toObsidian(nodes: Node[], edges: Edge[]) {
-  return {
-    nodes: nodes.map(n => {
-      const d = n.data as CardData & { _obs?: any };
-      const x = Math.round(n.position.x);
-      const y = Math.round(n.position.y);
-      if (d._obs && d._obs.type !== 'text') {
-        // 非 text 节点（file / link / group）：只更新位置，其余原样保留
-        return { ...d._obs, x, y };
-      }
-      const obj: any = { id: n.id, type: 'text', x, y,
-        width: d.width ?? 250, height: d.height ?? 100, text: d.text ?? '' };
-      if (d.color) obj.color = d.color;
-      return obj;
-    }),
-    edges: edges.map(e => {
-      const obs = (e.data as any)?._obs ?? {};
-      return {
-        ...obs,                     // 保留 Obsidian 原有字段（label / color / toEnd 等）
-        id: e.id,
-        fromNode: e.source,
-        fromSide: SIDE_R[e.sourceHandle?.replace('src-', '') ?? 'r'] ?? 'right',
-        toNode: e.target,
-        toSide: SIDE_R[e.targetHandle?.replace('tgt-', '') ?? 'l'] ?? 'left',
-      };
-    }),
-  };
-}
-
-function loadGraph(docId: string): SavedGraph {
-  try {
-    const doc = canvasStore.getById(docId);
-    if (!doc?.content) return { nodes: [], edges: [] };
-    const raw = JSON.parse(doc.content);
-    const isObsidian = Array.isArray(raw.nodes) && raw.nodes.length > 0 && 'x' in raw.nodes[0];
-    return isObsidian ? fromObsidian(raw) : fromObsidian(raw); // 统一走 Obsidian 路径
-  } catch { return { nodes: [], edges: [] }; }
-}
-
 export interface CanvasNodeEditorRef { addCard: () => void }
 
 export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string; dark: boolean }>(
@@ -237,9 +101,8 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string;
 
     const scheduleSave = useCallback((ns: Node[], es: Edge[]) => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => {
-        canvasStore.update(docId, { content: JSON.stringify(toObsidian(ns, es)) });
-      }, 600);
+      saveTimer.current = setTimeout(() =>
+        canvasStore.update(docId, { content: JSON.stringify(toObsidian(ns, es)) }), 600);
     }, [docId]);
 
     const onConnect = useCallback((conn: Connection) =>
@@ -247,15 +110,32 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string;
 
     const addCard = useCallback((pos?: { x: number; y: number }) => {
       const id = `card-${Date.now()}`;
-      setNodes(ns => {
-        const next = [...ns, {
-          id, type: 'card',
-          position: pos ?? { x: 80 + Math.random() * 200, y: 80 + Math.random() * 120 },
-          data: { text: '', color: '', defaultEditing: true, width: 250, height: 100 } satisfies CardData,
-        }];
-        scheduleSave(next, edges);
-        return next;
-      });
+      setNodes(ns => { const next = [...ns, { id, type: 'card',
+        position: pos ?? { x: 80 + Math.random() * 200, y: 80 + Math.random() * 120 },
+        data: { text: '', color: '', defaultEditing: true, width: 250, height: 100 } satisfies CardData,
+      }]; scheduleSave(next, edges); return next; });
+    }, [setNodes, scheduleSave, edges]);
+
+    const addEntity = useCallback((pos: { x: number; y: number }, entityType: EntityType) => {
+      const id = `card-${Date.now()}`;
+      setNodes(ns => { const next = [...ns, { id, type: 'card', position: pos,
+        data: { cardType: 'entity', text: '', entityType, entityName: '', entitySub: '', statusColor: 'gray' } }];
+        scheduleSave(next, edges); return next; });
+    }, [setNodes, scheduleSave, edges]);
+
+    const addConnector = useCallback((pos: { x: number; y: number }) => {
+      const id = `card-${Date.now()}`;
+      setNodes(ns => { const next = [...ns, { id, type: 'card', position: pos,
+        data: { cardType: 'connector', text: '', connectorType: 'calls', connectorName: '' } }];
+        scheduleSave(next, edges); return next; });
+    }, [setNodes, scheduleSave, edges]);
+
+    const addBox = useCallback((pos: { x: number; y: number }, moduleColor: ModuleColor) => {
+      const id = `box-${Date.now()}`;
+      setNodes(ns => { const next = [...ns, { id, type: 'box', position: pos,
+        style: { width: 280, height: 180 },
+        data: { label: '新建盒子', moduleColor, childCount: 0, collapsed: false } }];
+        scheduleSave(next, edges); return next; });
     }, [setNodes, scheduleSave, edges]);
 
     useImperativeHandle(ref, () => ({ addCard }), [addCard]);
@@ -266,10 +146,9 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string;
           nodes={nodes} edges={edges}
           onNodesChange={e => { onNodesChange(e); scheduleSave(nodes, edges); }}
           onEdgesChange={e => { onEdgesChange(e); scheduleSave(nodes, edges); }}
-          onConnect={onConnect}
-          addCard={addCard}
-          dark={dark}
-        />
+          onConnect={onConnect} addCard={addCard}
+          addEntity={addEntity} addConnector={addConnector} addBox={addBox}
+          dark={dark} />
       </ReactFlowProvider>
     );
   }
