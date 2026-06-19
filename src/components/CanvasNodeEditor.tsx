@@ -129,6 +129,9 @@ function CanvasFlowInner({ nodes, edges, onNodesChange, onEdgesChange, onConnect
         colorMode={dark ? 'dark' : 'light'}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         proOptions={{ hideAttribution: true }}
+        panOnDrag={[1, 2]}
+        selectionOnDrag
+        panOnScroll
       >
         <Background variant={BackgroundVariant.Dots} color={dotColor} gap={24} size={1.5} />
         <CanvasRightControls dark={dark} />
