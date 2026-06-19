@@ -22,6 +22,8 @@ export function useCanvasFileOps({ title, content, onTitleChange, onContent, set
     const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.md,.txt';
     inp.onchange = (ev) => {
       const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return;
+      const ext = f.name.split('.').pop()?.toLowerCase();
+      if (ext !== 'md' && ext !== 'txt') return;
       const r = new FileReader();
       r.onload = (e) => {
         const txt = e.target?.result as string;
@@ -63,7 +65,7 @@ export function useCanvasFileOps({ title, content, onTitleChange, onContent, set
         @media print{body{margin:0;padding:20px}}
       </style>
     </head><body>
-      <h1>${title || '无标题'}</h1>
+      <h1>${(title || '无标题').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</h1>
       <p>${md}</p>
     </body></html>`);
     w.document.close();

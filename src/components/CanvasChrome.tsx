@@ -6,6 +6,7 @@ import { useRef } from 'react';
 import { Dropdown } from './CanvasEditorUI';
 import { WinCtrlButton, SidebarIcon, PreviewIcon } from '../gsyen-designer';
 import { useIsMaximized } from '../hooks/useIsMaximized';
+import { useIsFullscreen } from '../hooks/useIsFullscreen';
 import {
   Palette, MenuSpec, MenuId, EditorMode,
   TITLE_H, MENU_H, SYS_FONT, isElectron, isMac,
@@ -21,7 +22,7 @@ interface Props {
   setActiveMenu: (v: MenuId | ((p: MenuId) => MenuId)) => void;
   mode:          EditorMode;
   setMode:       (m: EditorMode | ((p: EditorMode) => EditorMode)) => void;
-  docType:       'doc' | 'canvas' | 'nodes';
+  docType:       'doc' | 'canvas' | 'nodes' | 'image' | 'office';
   onAddCard?:    () => void;
   onClose:       () => void;
   sidebarOpen:    boolean;
@@ -34,12 +35,13 @@ interface Props {
 export function CanvasChrome({
   title, titleEdit, onTitleChange, setTitleEdit, titleInputRef,
   menus, activeMenu, setActiveMenu, mode, setMode, docType,
-  onAddCard, onClose,
+  onClose,
   sidebarOpen, onSidebarToggle,
   P, dark, onMouseEnter, menuBarRef,
 }: Props) {
   const stopProp  = (e: React.MouseEvent) => e.stopPropagation();
-  const maximized = useIsMaximized();
+  const maximized   = useIsMaximized();
+  const fullscreen  = useIsFullscreen();
 
   const nodrag = isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {};
   const drag   = isElectron ? { WebkitAppRegion: 'drag'    } as React.CSSProperties : {};
@@ -54,8 +56,9 @@ export function CanvasChrome({
     <div onMouseEnter={onMouseEnter}>
 
       {/* ══ Row 1: Title bar ══════════════════════════════════════════════════ */}
-      <div style={{ height: TITLE_H, background: P.chrome, display: 'flex', alignItems: 'center',
-        paddingLeft: isMac ? 70 : 0, ...drag }}>
+      <div style={{ height: TITLE_H, background: docType === 'nodes' ? (dark ? '#1A1A1A' : '#F0EDE8') : P.chrome, display: 'flex', alignItems: 'center',
+        paddingLeft: isMac && !maximized && !fullscreen && !sidebarOpen ? 70 : 0,
+        transition: 'padding-left 0.22s cubic-bezier(0.4,0,0.2,1)', ...drag }}>
 
         {/* [□] sidebar toggle */}
         <button onClick={e => { e.stopPropagation(); onSidebarToggle(); }}
@@ -81,7 +84,7 @@ export function CanvasChrome({
               style={{ fontFamily: SYS_FONT, fontSize: 14, fontWeight: 500, color: P.menuFg,
                 userSelect: 'none', letterSpacing: '0.01em', cursor: 'text', maxWidth: 440,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {title || '无标题'}.md&nbsp;— GSYEN Writer
+              {title || '无标题'}{docType === 'canvas' ? '.excalidraw' : docType === 'nodes' ? '.canvas' : docType === 'doc' ? '.md' : ''}&nbsp;— iG Writer
             </span>
           )}
         </div>
@@ -126,22 +129,14 @@ export function CanvasChrome({
       )}
 
       {/* ══ Non-doc action bar ════════════════════════════════════════════════ */}
-      {docType !== 'doc' && (
+      {(docType === 'canvas' || docType === 'nodes') && (
         <div onClick={stopProp}
-          style={{ height: MENU_H, background: P.chrome,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px',
+          style={{ height: MENU_H, background: docType === 'nodes' ? (dark ? '#1A1A1A' : '#F0EDE8') : P.chrome,
+            display: 'flex', alignItems: 'center', padding: '0 12px',
             borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}` }}>
           <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
-            {docType === 'canvas' ? 'Whiteboard · Excalidraw' : 'Node Canvas · 拖拽连线，双击编辑'}
+            {docType === 'canvas' ? 'Whiteboard · Excalidraw' : docType === 'image' ? 'Image Preview' : docType === 'office' ? 'Office Viewer · Word / Excel / PDF' : 'Node Canvas · Drag to connect, double-click to edit'}
           </span>
-          {docType === 'nodes' && onAddCard && (
-            <button onClick={onAddCard}
-              style={{ background: P.accent, color: '#fff', border: 'none', borderRadius: 5,
-                padding: '3px 12px', fontSize: 12, cursor: 'pointer',
-                fontFamily: SYS_FONT, fontWeight: 500, letterSpacing: '0.01em' }}>
-              + 卡片
-            </button>
-          )}
         </div>
       )}
     </div>

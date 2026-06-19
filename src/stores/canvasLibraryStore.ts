@@ -1,13 +1,54 @@
 /**
- * canvasLibraryStore — Library + DocList 状态（包含子目录导航）
+ * canvasLibraryStore — Library + DocList 状态（包含子目录导航 + 排序设置）
  * 单例 + pub/sub，与 useAuth 同一模式。
+ * 预览由主进程 ipc-library-cache 负责，渲染层只订阅 cache-update 事件。
  */
 import type { FolderSource, FileEntry } from '../hooks/useFileSystem';
-import { fsAdapter } from '../hooks/useFileSystem';
+import { fsAdapter, _entriesToFileEntries } from '../hooks/useFileSystem';
 import { useState, useEffect } from 'react';
 
 const EL_PATHS_KEY    = 'gsyen_library_paths';
 const EL_SELECTED_KEY = 'gsyen_library_selected';
+const SORT_KEY        = 'gsyen_library_sort';
+
+export interface SortSettings {
+  foldersOnTop: boolean;
+  sortBy:       'date' | 'name';
+  newestOnTop:  boolean;
+}
+
+const DEFAULT_SORT: SortSettings = { foldersOnTop: true, sortBy: 'date', newestOnTop: true };
+
+function _loadSort(): SortSettings {
+  try { return { ...DEFAULT_SORT, ...JSON.parse(localStorage.getItem(SORT_KEY) ?? '{}') }; }
+  catch { return DEFAULT_SORT; }
+}
+
+function _sortFiles(files: FileEntry[], s: SortSettings): FileEntry[] {
+  const sortFn = (a: FileEntry, b: FileEntry): number => {
+    if (s.sortBy === 'name') {
+      const na = a.name.replace(/\.[^.]+$/, '');
+      const nb = b.name.replace(/\.[^.]+$/, '');
+      const cmp = na.localeCompare(nb);
+      return s.newestOnTop ? -cmp : cmp;
+    }
+    const diff = (b.lastModified ?? 0) - (a.lastModified ?? 0);
+    return s.newestOnTop ? diff : -diff;
+  };
+  if (s.foldersOnTop) {
+    const dirs = files.filter(f =>  f.isDirectory).sort((a, b) => a.name.localeCompare(b.name));
+    const docs = files.filter(f => !f.isDirectory).sort(sortFn);
+    return [...dirs, ...docs];
+  }
+  return [...files].sort(sortFn);
+}
+
+// readDir 原始结果缓存（未排序）：folderSource.id → FileEntry[]
+const _dirCache = new Map<string, FileEntry[]>();
+
+function _normPath(p: string): string {
+  return p.replace(/\\/g, '/').replace(/\/$/, '');
+}
 
 interface LibraryState {
   folders:        FolderSource[];
@@ -15,15 +56,16 @@ interface LibraryState {
   files:          FileEntry[];
   selectedFile:   FileEntry | null;
   loading:        boolean;
-  // DocList 子目录导航
   navStack:       FolderSource[];
   navFiles:       FileEntry[];
   navLoading:     boolean;
+  sortSettings:   SortSettings;
 }
 
 let _s: LibraryState = {
   folders: [], selectedFolder: null, files: [], selectedFile: null, loading: false,
   navStack: [], navFiles: [], navLoading: false,
+  sortSettings: _loadSort(),
 };
 
 const _listeners = new Set<(s: LibraryState) => void>();
@@ -32,26 +74,64 @@ function _set(patch: Partial<LibraryState>) {
   _listeners.forEach(fn => fn(_s));
 }
 
+// ── 主进程缓存更新事件 ─────────────────────────────────────────────────────────
+// 当 ipc-library-cache 扫描完一批预览，把最新 entries 推过来，渲染层直接更新 state
+function _setupCacheListener() {
+  const api = (window as any).electronAPI;
+  if (!api?.library?.onCacheUpdate) return;
+  api.library.onCacheUpdate(({ folderPath, entries }: { folderPath: string; entries: any[] }) => {
+    const files = _entriesToFileEntries(folderPath, entries);
+    // 更新选中文件夹的列表
+    if (_s.selectedFolder?.path === folderPath) {
+      _set({ files, loading: false });
+    }
+    // 更新子目录导航的列表
+    const topNav = _s.navStack[_s.navStack.length - 1];
+    if (topNav?.path === folderPath) {
+      _set({ navFiles: files, navLoading: false });
+    }
+  });
+}
+_setupCacheListener();
+
+function _savePaths(folders: FolderSource[]) {
+  if (fsAdapter.env !== 'electron') return;
+  localStorage.setItem(EL_PATHS_KEY, JSON.stringify(
+    folders
+      .filter(f => f.name?.trim() && f.path?.trim() && f.path.trim().length > 2)
+      .map(f => ({ id: f.id, name: f.name, path: f.path ?? '' }))
+  ));
+}
+
 function _restoreElectronPaths() {
   if (fsAdapter.env !== 'electron') return;
   try {
     const saved: { id: string; name: string; path: string }[] =
       JSON.parse(localStorage.getItem(EL_PATHS_KEY) ?? '[]');
-    const folders: FolderSource[] = saved.map(p => ({ ...p, env: 'electron' as const }));
+    const seen = new Set<string>();
+    const folders: FolderSource[] = saved
+      .filter(p => p.name?.trim() && p.path?.trim() && p.path.trim().length > 2)
+      .map(p => ({ ...p, env: 'electron' as const }))
+      .filter(f => {
+        const key = _normPath(f.path!);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     const selectedId = localStorage.getItem(EL_SELECTED_KEY);
     const selectedFolder = selectedId ? (folders.find(f => f.id === selectedId) ?? null) : null;
     _set({ folders, selectedFolder });
+
+    // 冷启动：把所有已存的文件夹路径交给主进程，后台扫描建缓存
+    const paths = folders.map(f => f.path).filter(Boolean) as string[];
+    if (paths.length > 0) {
+      (window as any).electronAPI?.library?.scanAll?.(paths);
+    }
+
     if (selectedFolder) libraryStore.selectFolder(selectedFolder);
   } catch {}
 }
 _restoreElectronPaths();
-
-function _savePaths(folders: FolderSource[]) {
-  if (fsAdapter.env !== 'electron') return;
-  localStorage.setItem(EL_PATHS_KEY, JSON.stringify(
-    folders.map(f => ({ id: f.id, name: f.name, path: f.path ?? '' }))
-  ));
-}
 
 export const libraryStore = {
   get: () => _s,
@@ -62,7 +142,10 @@ export const libraryStore = {
   },
 
   clearFolder() {
-    if (fsAdapter.env === 'electron') localStorage.removeItem(EL_SELECTED_KEY);
+    if (fsAdapter.env === 'electron') {
+      localStorage.removeItem(EL_SELECTED_KEY);
+      (window as any).electronAPI?.library?.unwatchFolder?.();
+    }
     _set({ selectedFolder: null, files: [], selectedFile: null, navStack: [], navFiles: [], navLoading: false });
   },
 
@@ -73,9 +156,16 @@ export const libraryStore = {
   },
 
   addFolderSource(src: FolderSource) {
-    const folders = [src, ..._s.folders.filter(f => f.id !== src.id)];
+    if (!src.name?.trim() || !src.path?.trim()) return;
+    const normKey = src.path ? _normPath(src.path) : src.id;
+    const folders = [src, ..._s.folders.filter(f => {
+      const key = f.path ? _normPath(f.path) : f.id;
+      return key !== normKey;
+    })];
     _savePaths(folders);
     _set({ folders });
+    // 新增文件夹也加入扫描
+    if (src.path) (window as any).electronAPI?.library?.scanAll?.([src.path]);
     libraryStore.selectFolder(src);
   },
 
@@ -88,52 +178,133 @@ export const libraryStore = {
 
   async selectFolder(src: FolderSource) {
     if (fsAdapter.env === 'electron') localStorage.setItem(EL_SELECTED_KEY, src.id);
-    _set({ selectedFolder: src, loading: true, files: [], selectedFile: null, navStack: [], navFiles: [] });
-    try {
-      const files = await fsAdapter.readDir(src);
-      _set({ files, loading: false });
-    } catch {
-      _set({ loading: false });
+    const cached = _dirCache.get(src.id);
+    if (cached) {
+      _set({ selectedFolder: src, files: _sortFiles(cached, _s.sortSettings),
+        loading: false, selectedFile: null, navStack: [], navFiles: [] });
+      (window as any).electronAPI?.library?.watchFolder?.(src.path);
+      return;
     }
+    _set({ selectedFolder: src, loading: true, selectedFile: null, navStack: [], navFiles: [] });
+    try {
+      const raw = await fsAdapter.readDir(src);
+      _dirCache.set(src.id, raw);
+      _set({ files: _sortFiles(raw, _s.sortSettings), loading: false });
+      (window as any).electronAPI?.library?.watchFolder?.(src.path);
+    } catch { _set({ loading: false }); }
   },
 
   setSelectedFile(file: FileEntry | null) { _set({ selectedFile: file }); },
 
-  // ── DocList 子目录导航 ──────────────────────────────────────────────────────
+  optimisticRemoveFile(filePath: string) {
+    const keep = (f: FileEntry) => f.path !== filePath;
+    for (const [k, v] of _dirCache) _dirCache.set(k, v.filter(keep));
+    _set({
+      files:    _s.files.filter(keep),
+      navFiles: _s.navFiles.filter(keep),
+      selectedFile: _s.selectedFile?.path === filePath ? null : _s.selectedFile,
+    });
+  },
+
+  optimisticRenameFile(oldPath: string, newPath: string, newName: string) {
+    const update = (f: FileEntry): FileEntry =>
+      f.path === oldPath ? { ...f, path: newPath, name: newName } : f;
+    for (const [k, v] of _dirCache) _dirCache.set(k, v.map(update));
+    _set({
+      files:        _s.files.map(update),
+      navFiles:     _s.navFiles.map(update),
+      selectedFile: _s.selectedFile?.path === oldPath ? update(_s.selectedFile) : _s.selectedFile,
+    });
+  },
+
+
+  optimisticAddFile(entry: FileEntry) {
+    if (_s.navStack.length > 0) {
+      _set({ navFiles: [entry, ..._s.navFiles] });
+    } else {
+      _set({ files: [entry, ..._s.files] });
+    }
+  },
+
+  setSortSettings(patch: Partial<SortSettings>) {
+    const sortSettings = { ..._s.sortSettings, ...patch };
+    try { localStorage.setItem(SORT_KEY, JSON.stringify(sortSettings)); } catch {}
+    _set({
+      sortSettings,
+      files:    _sortFiles(_s.files,    sortSettings),
+      navFiles: _sortFiles(_s.navFiles, sortSettings),
+    });
+  },
+
+  // ── DocList 子目录导航 ────────────────────────────────────────────────────────
 
   async pushNav(src: FolderSource) {
     const navStack = [..._s.navStack, src];
+    const cached = _dirCache.get(src.id);
+    if (cached) {
+      _set({ navStack, navFiles: _sortFiles(cached, _s.sortSettings), navLoading: false });
+      return;
+    }
     _set({ navStack, navLoading: true });
     try {
-      const navFiles = await fsAdapter.readDir(src);
-      _set({ navFiles, navLoading: false });
+      const raw = await fsAdapter.readDir(src);
+      _dirCache.set(src.id, raw);
+      _set({ navFiles: _sortFiles(raw, _s.sortSettings), navLoading: false });
     } catch { _set({ navLoading: false }); }
   },
 
   async popNav() {
     if (_s.navStack.length === 0) { libraryStore.clearFolder(); return; }
     const navStack = _s.navStack.slice(0, -1);
-    _set({ navStack, navLoading: true });
     if (navStack.length === 0) {
-      _set({ navFiles: [], navLoading: false });
-    } else {
-      try {
-        const navFiles = await fsAdapter.readDir(navStack[navStack.length - 1]);
-        _set({ navFiles, navLoading: false });
-      } catch { _set({ navLoading: false }); }
+      _set({ navStack, navFiles: [], navLoading: false });
+      return;
     }
+    const parent = navStack[navStack.length - 1];
+    const cached = _dirCache.get(parent.id);
+    if (cached) {
+      _set({ navStack, navFiles: _sortFiles(cached, _s.sortSettings), navLoading: false });
+      return;
+    }
+    _set({ navStack, navLoading: true });
+    try {
+      const raw = await fsAdapter.readDir(parent);
+      _dirCache.set(parent.id, raw);
+      _set({ navFiles: _sortFiles(raw, _s.sortSettings), navLoading: false });
+    } catch { _set({ navLoading: false }); }
+  },
+
+  prefetchDir(entry: FileEntry) {
+    if (!entry.path || _dirCache.has(entry.path)) return;
+    if (_dirCache.size >= 40) _dirCache.delete(_dirCache.keys().next().value!);
+    const src: FolderSource = entry.dirHandle ? { id: entry.path, name: entry.name, handle: entry.dirHandle, env: 'web' } : { id: entry.path, name: entry.name, path: entry.path, env: 'electron' };
+    fsAdapter.readDir(src).then(raw => _dirCache.set(entry.path!, raw)).catch(() => {});
   },
 
   async refreshCurrent() {
     if (_s.navStack.length > 0) {
-      const navFiles = await fsAdapter.readDir(_s.navStack[_s.navStack.length - 1]);
-      _set({ navFiles });
+      const src = _s.navStack[_s.navStack.length - 1];
+      const raw = await fsAdapter.readDir(src);
+      _dirCache.set(src.id, raw);
+      _set({ navFiles: _sortFiles(raw, _s.sortSettings) });
     } else if (_s.selectedFolder) {
-      const files = await fsAdapter.readDir(_s.selectedFolder);
-      _set({ files });
+      const raw = await fsAdapter.readDir(_s.selectedFolder);
+      _dirCache.set(_s.selectedFolder.id, raw);
+      _set({ files: _sortFiles(raw, _s.sortSettings) });
     }
   },
 };
+
+// fs.watch 事件订阅：文件夹有变化 → 失效缓存 → 自动刷新
+function _initFsWatcher() {
+  const api = (window as any).electronAPI;
+  if (!api?.library?.onFolderChanged) return;
+  api.library.onFolderChanged(() => {
+    if (_s.selectedFolder) _dirCache.delete(_s.selectedFolder.id);
+    libraryStore.refreshCurrent();
+  });
+}
+if (typeof window !== 'undefined') setTimeout(_initFsWatcher, 0);
 
 export function useLibraryStore() {
   const [state, setState] = useState(_s);

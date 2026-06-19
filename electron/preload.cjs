@@ -15,7 +15,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     maximize:   () => ipcRenderer.invoke('window:maximize'),
     fullscreen: () => ipcRenderer.invoke('window:fullscreen'),
     close:      () => ipcRenderer.invoke('window:close'),
-    isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+    isMaximized:  () => ipcRenderer.invoke('window:isMaximized'),
+    isFullscreen: () => ipcRenderer.invoke('window:isFullscreen'),
+    onFullscreenState: (fn) => {
+      const h = (_e, v) => fn(v);
+      ipcRenderer.on('window:fullscreen-state', h);
+      return () => ipcRenderer.removeListener('window:fullscreen-state', h);
+    },
     // 监听最大化状态变化；返回取消订阅函数（多个组件可独立订阅，互不干扰）
     onMaximized: (fn) => {
       const h = (_e, v) => fn(v);
@@ -47,13 +53,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setGatewayMode:  (mode) => ipcRenderer.invoke('v2ray:setGatewayMode', mode),
   },
   library: {
-    showMenu:     (pos) => ipcRenderer.send('library:showMenu', pos),
-    onMenuResult: (fn)  => ipcRenderer.once('library:menuResult', (_e, action) => fn(action)),
+    showMenu:      (pos)  => ipcRenderer.send('library:showMenu', pos),
+    onMenuResult:  (fn)   => ipcRenderer.once('library:menuResult', (_e, action) => fn(action)),
+    scanAll:       (paths) => ipcRenderer.invoke('library:scanAll', paths),
+    readDir:       (p)    => ipcRenderer.invoke('library:readDir', p),
+    onCacheUpdate: (fn) => {
+      const h = (_e, data) => fn(data);
+      ipcRenderer.on('library:cache-update', h);
+      return () => ipcRenderer.removeListener('library:cache-update', h);
+    },
+    watchFolder:   (path) => ipcRenderer.send('library:watchFolder', path),
+    unwatchFolder: ()     => ipcRenderer.send('library:unwatchFolder'),
+    onFolderChanged: (fn) => {
+      const h = (_e, p) => fn(p);
+      ipcRenderer.on('library:folderChanged', h);
+      return () => ipcRenderer.removeListener('library:folderChanged', h);
+    },
+    delete:          (filePath)         => ipcRenderer.invoke('library:delete',         filePath),
+    showInExplorer:  (filePath)         => ipcRenderer.invoke('library:showInExplorer', filePath),
+    rename:          (oldPath, newName) => ipcRenderer.invoke('library:rename',         oldPath, newName),
+  },
+  docviewer: {
+    parseOffice: (filePath) => ipcRenderer.invoke('docviewer:parseOffice', filePath),
   },
   isElectron: true,
   platform: process.platform,
-  showOpenDialog: (opts)           => ipcRenderer.invoke('fs:showOpenDialog', opts),
-  readDir:        (dirPath)        => ipcRenderer.invoke('fs:readDir',        dirPath),
-  readFile:       (filePath)       => ipcRenderer.invoke('fs:readFile',       filePath),
-  writeFile:      (filePath, text) => ipcRenderer.invoke('fs:writeFile',      filePath, text),
+  showOpenDialog: (opts)               => ipcRenderer.invoke('fs:showOpenDialog', opts),
+  readDir:          (dirPath)          => ipcRenderer.invoke('fs:readDir',          dirPath),
+  readFile:         (filePath)         => ipcRenderer.invoke('fs:readFile',         filePath),
+  readFileBuffer:   (filePath)         => ipcRenderer.invoke('fs:readFileBuffer',   filePath),
+  writeFile:        (filePath, text)   => ipcRenderer.invoke('fs:writeFile',        filePath, text),
+  writeFileBuffer:  (filePath, base64) => ipcRenderer.invoke('fs:writeFileBuffer',  filePath, base64),
 });

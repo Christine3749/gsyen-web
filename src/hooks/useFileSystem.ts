@@ -72,7 +72,7 @@ async function _webReadDir(src: FolderSource): Promise<FileEntry[]> {
       out.push({ name, path: name, isMarkdown: false, isDirectory: true, dirHandle: h });
       continue;
     }
-    if (!/\.(md|txt|excalidraw|canvas)$/i.test(name)) continue;
+    if (!/\.(md|txt|excalidraw|canvas|jpg|jpeg|png|gif|webp|bmp|svg|docx|xlsx|pptx)$/i.test(name)) continue;
     const f = await h.getFile();
     let preview = '';
     if (/\.(md|txt)$/i.test(name)) {
@@ -108,8 +108,9 @@ async function _elPickFolderViaDialog(): Promise<FolderSource | null> {
   try {
     const r = await api?.showOpenDialog?.({ properties: ['openDirectory'] });
     if (!r || r.canceled || !r.filePaths?.[0]) return null;
-    const p = r.filePaths[0];
-    const name = p.split(/[\\/]/).pop() ?? p;
+    const p = r.filePaths[0].replace(/[\\/]+$/, ''); // 去掉末尾反斜杠（Windows 路径常见）
+    const name = p.split(/[\\/]/).pop() || p;        // || 而非 ??，空字符串也回退到 p
+    if (!name.trim()) return null;                   // 彻底兜底
     return { id: p, name, path: p, env: 'electron' };
   } catch (e) {
     console.error('[fsAdapter] showOpenDialog IPC error:', e);
@@ -117,37 +118,41 @@ async function _elPickFolderViaDialog(): Promise<FolderSource | null> {
   }
 }
 
+type RawEntry = { name: string; lastModified: number; isDir: boolean; preview?: string };
+
+function _entriesToFileEntries(basePath: string, entries: RawEntry[]): FileEntry[] {
+  const dirs: FileEntry[] = entries
+    .filter(e => e.isDir && !e.name.startsWith('.') && !e.name.startsWith('$'))
+    .map(e => ({ name: e.name, path: `${basePath}/${e.name}`,
+      isMarkdown: false, isDirectory: true, lastModified: e.lastModified, preview: '' }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const files: FileEntry[] = entries
+    .filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas|jpg|jpeg|png|gif|webp|bmp|svg|docx|xlsx|pptx)$/i.test(e.name))
+    .map(e => ({ name: e.name, path: `${basePath}/${e.name}`,
+      isMarkdown: /\.md$/i.test(e.name), lastModified: e.lastModified, preview: e.preview ?? '' }))
+    .sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
+
+  return [...dirs, ...files];
+}
+
 async function _elReadDir(src: FolderSource): Promise<FileEntry[]> {
   const api = (window as any).electronAPI;
   if (!src.path) return [];
   try {
-    const entries: { name: string; lastModified: number; isDir: boolean }[] =
-      await api?.readDir?.(src.path) ?? [];
-
-    const dirs: FileEntry[] = entries
-      .filter(e => e.isDir && !e.name.startsWith('.'))
-      .map(e => ({
-        name: e.name,
-        path: `${src.path}/${e.name}`,
-        isMarkdown: false,
-        isDirectory: true,
-        lastModified: e.lastModified,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    const textFiles = entries.filter(e => !e.isDir && /\.(md|txt|excalidraw|canvas)$/i.test(e.name));
-    const files = await Promise.all(
-      textFiles.map(async e => {
-        const path = `${src.path}/${e.name}`;
-        const preview = /\.(md|txt)$/i.test(e.name) ? await _elReadPreview(path) : '';
-        return { name: e.name, path, isMarkdown: /\.md$/i.test(e.name), lastModified: e.lastModified, preview };
-      })
-    );
-    files.sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0));
-
-    return [...dirs, ...files];
+    // 新缓存层（需重启 Electron 生效）
+    if (api?.library?.readDir) {
+      const entries: RawEntry[] | null = await api.library.readDir(src.path);
+      if (entries) return _entriesToFileEntries(src.path, entries);
+      return []; // null = 冷启动扫描中，等 cache-update 事件
+    }
+    // Fallback：旧版 Electron，直接读目录（无预览）
+    const raw: RawEntry[] = await api?.readDir?.(src.path) ?? [];
+    return _entriesToFileEntries(src.path, raw);
   } catch { return []; }
 }
+
+export { _entriesToFileEntries };
 
 async function _elReadFile(e: FileEntry): Promise<string> {
   if (!e.path) return '';
@@ -164,12 +169,48 @@ async function _elWriteFile(e: FileEntry, content: string): Promise<void> {
   await (window as any).electronAPI?.writeFile?.(e.path, content);
 }
 
+async function _elDeleteFile(e: FileEntry): Promise<boolean> {
+  if (!e.path) return false;
+  const r = await (window as any).electronAPI?.library?.delete?.(e.path);
+  return r?.ok ?? false;
+}
+
+function _elShowInExplorer(e: FileEntry): void {
+  if (e.path) (window as any).electronAPI?.library?.showInExplorer?.(e.path);
+}
+
+async function _elRenameFile(e: FileEntry, newName: string): Promise<{ ok: boolean; newPath?: string }> {
+  if (!e.path) return { ok: false };
+  const r = await (window as any).electronAPI?.library?.rename?.(e.path, newName);
+  return r ?? { ok: false };
+}
+
 // ── 统一接口 ──────────────────────────────────────────────────────────────────
 
+async function _webReadPreview(e: FileEntry): Promise<string> {
+  if (!e.handle) return '';
+  try {
+    const f = await (e.handle as FileSystemFileHandle).getFile();
+    const text = await f.slice(0, 512).text();
+    return text.split('\n')
+      .map((l: string) => l.replace(/^[#>\s*\-–—]+/, '').trim())
+      .find((l: string) => l.length > 2)
+      ?.slice(0, 80) ?? '';
+  } catch { return ''; }
+}
+
+async function _elReadPreviewEntry(e: FileEntry): Promise<string> {
+  return e.path ? _elReadPreview(e.path) : '';
+}
+
 export const fsAdapter = {
-  env:        _isElectron ? 'electron' : 'web' as 'electron' | 'web',
-  pickFolder: _isElectron ? _elPickFolderViaDialog : _webPickFolder,
-  readDir:    _isElectron ? _elReadDir             : _webReadDir,
-  readFile:   _isElectron ? _elReadFile            : _webReadFile,
-  writeFile:  _isElectron ? _elWriteFile           : _webWriteFile,
+  env:            _isElectron ? 'electron' : 'web' as 'electron' | 'web',
+  pickFolder:     _isElectron ? _elPickFolderViaDialog : _webPickFolder,
+  readDir:        _isElectron ? _elReadDir             : _webReadDir,
+  readFile:       _isElectron ? _elReadFile            : _webReadFile,
+  writeFile:      _isElectron ? _elWriteFile           : _webWriteFile,
+  readPreview:    _isElectron ? _elReadPreviewEntry    : _webReadPreview,
+  deleteFile:     _isElectron ? _elDeleteFile          : async () => false,
+  showInExplorer: _isElectron ? _elShowInExplorer      : () => {},
+  renameFile:     _isElectron ? _elRenameFile          : async () => ({ ok: false as const }),
 };
