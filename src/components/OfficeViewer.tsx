@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import * as mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
-import type { FileEntry } from '../hooks/useFileSystem';
+import { fsAdapter, type FileEntry } from '../hooks/useFileSystem';
 import type { Palette } from './CanvasEditorTypes';
 import { SYS_FONT } from './CanvasEditorTypes';
-import { buildSheetTable, DOCX_STYLE_MAP, officeCss } from './officeViewerHelpers';
+import { buildSheetTable, DOCX_STYLE_MAP, officeCss, htmlToMarkdown } from './officeViewerHelpers';
+import { DocxEditor } from './DocxEditor';
 
 interface Props { entry: FileEntry; P: Palette; dark: boolean; }
 interface SheetData { name: string; html: string; }
+
+function mdSiblingEntry(entry: FileEntry): FileEntry {
+  const name = entry.name.replace(/\.docx$/i, '.md');
+  const path = entry.path.replace(/\.docx$/i, '.md');
+  return { name, path, isMarkdown: true, lastModified: Date.now() };
+}
 
 async function readArrayBuffer(entry: FileEntry): Promise<ArrayBuffer> {
   if (entry.path && (window as any).electronAPI?.readFileBuffer) {
@@ -28,9 +35,10 @@ export function OfficeViewer({ entry, P, dark }: Props) {
   const [active,  setActive]  = useState(0);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    setLoading(true); setDocHtml(null); setSheets(null); setError(null); setActive(0);
+    setLoading(true); setDocHtml(null); setSheets(null); setError(null); setActive(0); setEditing(false);
     (async () => {
       try {
         const buf = await readArrayBuffer(entry);
@@ -75,6 +83,18 @@ export function OfficeViewer({ entry, P, dark }: Props) {
 
   const paper = dark ? '#242424' : '#ffffff';
 
+  if (editing && docHtml !== null) {
+    return (
+      <DocxEditor
+        initialHtml={docHtml}
+        P={P}
+        dark={dark}
+        onBack={() => setEditing(false)}
+        onSaveMd={(markdown) => fsAdapter.writeFile(mdSiblingEntry(entry), markdown)}
+      />
+    );
+  }
+
   if (sheets) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: paper }}>
@@ -100,9 +120,22 @@ export function OfficeViewer({ entry, P, dark }: Props) {
   }
 
   return (
-    <div style={{ width: '100%', height: '100%', overflow: 'auto', background: paper }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'auto', background: paper, position: 'relative' }}>
       <style>{officeCss(P, dark)}</style>
-      <div className="gs-office-doc" style={{ maxWidth: 760, margin: '0 auto', padding: '48px 56px',
+      <div style={{ position: 'sticky', top: 0, display: 'flex', justifyContent: 'flex-end', gap: 8,
+        padding: '10px 16px', background: paper, zIndex: 1 }}>
+        <button onClick={() => fsAdapter.writeFile(mdSiblingEntry(entry), htmlToMarkdown(docHtml ?? ''))}
+          style={{ padding: '5px 14px', fontSize: 12, fontFamily: SYS_FONT, border: `1px solid ${P.border}`,
+            borderRadius: 5, cursor: 'pointer', background: 'transparent', color: P.fg }}>
+          Export .md
+        </button>
+        <button onClick={() => setEditing(true)}
+          style={{ padding: '5px 14px', fontSize: 12, fontFamily: SYS_FONT, fontWeight: 600, border: 'none',
+            borderRadius: 5, cursor: 'pointer', background: P.accent, color: '#fff' }}>
+          Edit
+        </button>
+      </div>
+      <div className="gs-office-doc" style={{ maxWidth: 760, margin: '0 auto', padding: '0 56px 48px',
         fontFamily: '"iA Writer Quattro","Georgia","Times New Roman",serif', fontSize: 15.5, lineHeight: 1.75 }}
         dangerouslySetInnerHTML={{ __html: docHtml ?? '' }} />
     </div>

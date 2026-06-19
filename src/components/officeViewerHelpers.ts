@@ -1,4 +1,11 @@
+import TurndownService from 'turndown';
 import type { Palette } from './CanvasEditorTypes';
+
+const turndownService = new TurndownService({ headingStyle: 'atx', bulletListMarker: '-' });
+
+export function htmlToMarkdown(html: string): string {
+  return turndownService.turndown(html);
+}
 
 export function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
