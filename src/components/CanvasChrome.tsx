@@ -30,6 +30,7 @@ interface Props {
   P: Palette; dark: boolean;
   onMouseEnter: () => void;
   menuBarRef:   React.RefObject<HTMLDivElement>;
+  titleBarRef?: React.RefObject<HTMLDivElement>;
 }
 
 export function CanvasChrome({
@@ -37,7 +38,7 @@ export function CanvasChrome({
   menus, activeMenu, setActiveMenu, mode, setMode, docType,
   onClose,
   sidebarOpen, onSidebarToggle,
-  P, dark, onMouseEnter, menuBarRef,
+  P, dark, onMouseEnter, menuBarRef, titleBarRef,
 }: Props) {
   const stopProp  = (e: React.MouseEvent) => e.stopPropagation();
   const maximized   = useIsMaximized();
@@ -46,6 +47,7 @@ export function CanvasChrome({
   const NB  = '#EEEDF6';
   const NTL = '#3D3D3D';
   const NDM = '#888';
+  const NB_STAR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M 12,10 A 2,2 0 0 0 14,12 A 2,2 0 0 0 12,14 A 2,2 0 0 0 10,12 A 2,2 0 0 0 12,10 Z' fill='%23C8C7D6'/%3E%3C/svg%3E")`;
 
   const nodrag = isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : {};
   const drag   = isElectron ? { WebkitAppRegion: 'drag'    } as React.CSSProperties : {};
@@ -60,7 +62,8 @@ export function CanvasChrome({
     <div onMouseEnter={onMouseEnter}>
 
       {/* ══ Row 1: Title bar ══════════════════════════════════════════════════ */}
-      <div style={{ height: TITLE_H, background: nodesMode ? NB : (dark ? '#1A1A1A' : P.chrome), display: 'flex', alignItems: 'center',
+      <div ref={titleBarRef} style={{ height: TITLE_H, background: nodesMode ? 'transparent' : (dark ? '#1A1A1A' : P.chrome),
+        display: 'flex', alignItems: 'center',
         paddingLeft: isMac && !maximized && !fullscreen && !sidebarOpen ? 70 : 0,
         transition: 'padding-left 0.22s cubic-bezier(0.4,0,0.2,1)', ...drag }}>
 
@@ -70,7 +73,7 @@ export function CanvasChrome({
             color: nodesMode ? NTL : (sidebarOpen ? P.menuFgHover : P.menuFg),
             background: sidebarOpen ? `${P.fg}0A` : 'transparent',
             border: 'none', cursor: 'pointer', flexShrink: 0, ...nodrag }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = nodesMode ? 'rgba(255,255,255,0.8)' : P.menuFgHover}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = P.menuFgHover}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = nodesMode ? NTL : (sidebarOpen ? P.menuFgHover : P.menuFg)}>
           <SidebarIcon />
         </button>
@@ -133,14 +136,16 @@ export function CanvasChrome({
       )}
 
       {/* ══ Non-doc action bar ════════════════════════════════════════════════ */}
-      {(docType === 'canvas' || docType === 'nodes') && (
+      {docType === 'canvas' && (
         <div onClick={stopProp}
-          style={{ height: MENU_H, background: docType === 'nodes' ? (dark ? '#1A1A1A' : '#F8F8F8') : P.chrome,
+          style={{ height: MENU_H, background: nodesMode ? NB : (dark ? '#1A1A1A' : P.chrome),
             display: 'flex', alignItems: 'center', padding: '0 12px',
-            borderBottom: docType === 'nodes' ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}` }}>
-          <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
-            {docType === 'canvas' ? 'Whiteboard · Excalidraw' : docType === 'image' ? 'Image Preview' : docType === 'office' ? 'Office Viewer · Word / Excel / PDF' : 'Node Canvas · Drag to connect, double-click to edit'}
-          </span>
+            borderBottom: nodesMode ? 'none' : `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)'}` }}>
+          {!nodesMode && (
+            <span style={{ fontFamily: SYS_FONT, fontSize: 11, color: P.dim }}>
+              {docType === 'canvas' ? 'Whiteboard · Excalidraw' : 'Office Viewer · Word / Excel / PDF'}
+            </span>
+          )}
         </div>
       )}
     </div>

@@ -1,6 +1,9 @@
 import { memo } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import type { CardData, ConnectorType } from './CanvasCardData';
+import type { CardData, CardSize, ConnectorType } from './CanvasCardData';
+
+const SIZE_W: Record<CardSize, number>      = { S: 200, M: 280, L: 360 };
+const SIZE_BODY_H: Record<CardSize, number> = { S: 32,  M: 80,  L: 150 };
 
 const CONN_LABEL: Record<ConnectorType, string> = {
   calls: 'CALLS', imports: 'IMPORTS', routes: 'ROUTES',
@@ -49,6 +52,7 @@ export interface ConnectorCardProps { id: string; data: CardData; selected: bool
 
 export const CanvasConnectorCard = memo(({ id, data: d, selected }: ConnectorCardProps) => {
   const { deleteElements } = useReactFlow();
+  const sz: CardSize = d.cardSize ?? 'S';
   const ct          = (d.connectorType ?? 'custom') as ConnectorType;
   const borderColor = selected ? '#4A9EFF' : 'rgba(0,0,0,0.15)';
   const hasFlow1    = d.flowA || d.flowB;
@@ -82,7 +86,7 @@ export const CanvasConnectorCard = memo(({ id, data: d, selected }: ConnectorCar
         background: 'rgba(255,255,255,0.72)',
         border: `1.5px dashed ${borderColor}`,
         borderRadius: 8,
-        minWidth: 220, maxWidth: 320,
+        width: SIZE_W[sz],
         backdropFilter: 'blur(4px)',
         overflow: 'hidden',
       }}>
@@ -106,7 +110,7 @@ export const CanvasConnectorCard = memo(({ id, data: d, selected }: ConnectorCar
         </div>
 
         {/* BODY — flow rows */}
-        <div style={{ padding: '9px 13px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ padding: '9px 13px', display: 'flex', flexDirection: 'column', gap: 6, minHeight: SIZE_BODY_H[sz] }}>
           {hasFlow1 && <FlowRow a={d.flowA || '?'} b={d.flowB || '?'} />}
           {hasFlow2 && <FlowRow a={d.flowA2 || '?'} b={d.flowB2 || '?'} />}
           {!hasFlow1 && !hasFlow2 && (

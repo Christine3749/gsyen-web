@@ -69,6 +69,18 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
   const menuBarRef     = useRef<HTMLDivElement>(null);
   const hideTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef  = useRef<HTMLInputElement>(null);
+  const titleBarRef    = useRef<HTMLDivElement>(null);
+
+  const handleViewportChange = useCallback((vp: { x: number; y: number; zoom: number }) => {
+    const el = titleBarRef.current;
+    if (!el) return;
+    const gap = 24 * vp.zoom;
+    const px = ((vp.x % gap) + gap) % gap;
+    const py = ((vp.y % gap) + gap) % gap;
+    el.style.backgroundPositionX = `${px}px`;
+    el.style.backgroundPositionY = `${py - TITLE_H}px`;
+    el.style.backgroundSize = `${gap}px ${gap}px`;
+  }, []);
 
   const { libW, doclistW } = useCanvasPanelWidths();
   const SIDEBAR_EASE = '0.22s cubic-bezier(0.4,0,0.2,1)';
@@ -221,9 +233,9 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
 
       <div style={{ position:'absolute', inset:0, overflow:'hidden', display:'flex' }}>
         {/* Sidebar — all modes */}
-        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} onSettings={() => setSettingsOpen(true)} />
+        <CanvasLibrary open={sidebarOpen} P={P} dark={dark} onSettings={() => setSettingsOpen(true)} nodesMode={docType === 'nodes'} />
         <CanvasDocList open={sidebarOpen} onFileSelect={onFsFileSelect} P={P} dark={dark}
-          onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} />
+          onBack={handleDocListBack} onNew={() => handleCreateFile('doc')} nodesMode={docType === 'nodes'} />
 
         {/* Main area */}
         <div style={{ flex:1, position:'relative', overflow:'hidden', height:'100%' }}>
@@ -238,8 +250,8 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
             </div>
           )}
           {docId && nodesEverActive && (
-            <div style={{ visibility: docType === 'nodes' ? 'visible' : 'hidden', pointerEvents: docType === 'nodes' ? 'auto' : 'none', position: 'absolute', inset: 0, paddingTop: CHROME_H, display: 'flex' }}>
-              <CanvasNodeEditor key={docId} ref={nodeEditorRef} docId={docId} dark={dark} />
+            <div style={{ visibility: docType === 'nodes' ? 'visible' : 'hidden', pointerEvents: docType === 'nodes' ? 'auto' : 'none', position: 'absolute', inset: 0, display: 'flex' }}>
+              <CanvasNodeEditor key={activeFsFile?.path ?? docId} ref={nodeEditorRef} docId={docId} dark={dark} onViewportChange={handleViewportChange} />
             </div>
           )}
           <div style={{ display: docType === 'image' ? 'flex' : 'none', width:'100%', height:'100%', paddingTop: CHROME_H }}>
@@ -267,7 +279,8 @@ export function CanvasEditorContent({ docId, onClose }: Props) {
           mode={mode} setMode={setMode} docType={docType}
           onClose={onClose}
           sidebarOpen={sidebarOpen} onSidebarToggle={() => setSidebarOpen(o => !o)}
-          P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef} />
+          P={P} dark={dark} onMouseEnter={showChrome} menuBarRef={menuBarRef}
+          titleBarRef={titleBarRef} />
       </div>
 
       {/* Hot zone */}

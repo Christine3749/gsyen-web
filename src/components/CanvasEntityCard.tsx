@@ -1,7 +1,9 @@
 import { memo } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import type { CardData, EntityType, StatusColor } from './CanvasCardData';
+import type { CardData, CardSize, EntityType, StatusColor } from './CanvasCardData';
 import { STATUS_COLORS } from './CanvasCardData';
+
+const SIZE_W: Record<CardSize, number> = { S: 200, M: 280, L: 360 };
 
 const ENTITY_LABEL: Record<EntityType, string> = {
   contact: '联系人', order: '订单', task: '任务',
@@ -45,6 +47,7 @@ export interface EntityCardProps { id: string; data: CardData; selected: boolean
 
 export const CanvasEntityCard = memo(({ id, data: d, selected }: EntityCardProps) => {
   const { deleteElements, fitView } = useReactFlow();
+  const sz: CardSize = d.cardSize ?? 'S';
   const sc  = (d.statusColor ?? 'gray') as StatusColor;
   const et  = (d.entityType  ?? 'custom') as EntityType;
   const bc  = selected ? '#4A9EFF' : 'rgba(0,0,0,0.09)';
@@ -86,7 +89,7 @@ export const CanvasEntityCard = memo(({ id, data: d, selected }: EntityCardProps
       <div style={{
         background: '#FFFFFF', color: 'var(--cn-fg)',
         border: `${bw} solid ${bc}`, borderRadius: 8,
-        minWidth: 220, maxWidth: 300,
+        width: SIZE_W[sz],
         boxShadow: selected
           ? '0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06)'
           : '0 1px 6px rgba(0,0,0,0.07), 0 0.5px 2px rgba(0,0,0,0.04)',

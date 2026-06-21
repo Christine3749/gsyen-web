@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="620" viewBox="0 0 1180 620">
+  <defs>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="1.8" fill="#c7ccd9" opacity=".55"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#30283d" flood-opacity=".12"/>
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#30283d" flood-opacity=".08"/>
+    </filter>
+    <linearGradient id="topMask" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c9" stop-opacity=".96"/>
+      <stop offset="1" stop-color="#fff7dc" stop-opacity=".90"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1180" height="620" fill="#f0f1f8"/>
+  <rect width="1180" height="620" fill="url(#grid)"/>
+
+  <text x="120" y="70" font-family="Inter, HarmonyOS Sans, system-ui, sans-serif" font-size="24" font-weight="650" fill="#3d414b">当前：实线 / 满卡颜色</text>
+  <text x="665" y="70" font-family="Inter, HarmonyOS Sans, system-ui, sans-serif" font-size="24" font-weight="650" fill="#3d414b">目标：虚线 / 顶部遮色</text>
+
+  <g transform="translate(120 120)" filter="url(#shadow)">
+    <rect x="0" y="0" width="390" height="260" rx="8" fill="#fff6d7" stroke="#d6b24f" stroke-width="2"/>
+    <rect x="318" y="18" width="42" height="42" rx="10" fill="rgba(255,255,255,.52)" stroke="#d6b24f" stroke-width="3"/>
+    <circle cx="332" cy="39" r="3" fill="#795914"/>
+    <circle cx="341" cy="39" r="3" fill="#795914"/>
+    <circle cx="350" cy="39" r="3" fill="#795914"/>
+    <text x="28" y="48" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="26" font-weight="720" fill="#343842">未命名</text>
+    <text x="28" y="86" font-family="Inter, HarmonyOS Sans, sans-serif" font-size="14" fill="rgba(121,89,20,.58)">#note board #草稿</text>
+    <text x="28" y="132" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="18" font-weight="700" fill="rgba(32,35,43,.55)">Schedule</text>
+    <circle cx="32" cy="162" r="3.5" fill="rgba(32,35,43,.22)"/>
+    <rect x="50" y="157" width="230" height="8" rx="4" fill="rgba(32,35,43,.055)"/>
+    <circle cx="32" cy="184" r="3.5" fill="rgba(32,35,43,.22)"/>
+    <rect x="50" y="179" width="200" height="8" rx="4" fill="rgba(32,35,43,.055)"/>
+    <circle cx="32" cy="206" r="3.5" fill="rgba(32,35,43,.22)"/>
+    <rect x="50" y="201" width="160" height="8" rx="4" fill="rgba(32,35,43,.055)"/>
+    <circle cx="30" cy="236" r="4.5" fill="rgba(54,60,74,.44)"/>
+    <text x="48" y="242" font-family="Inter, HarmonyOS Sans, sans-serif" font-size="15" fill="rgba(54,60,74,.50)">草稿  ·  edited</text>
+  </g>
+
+  <g transform="translate(665 120)" filter="url(#shadow)">
+    <rect x="0" y="0" width="390" height="260" rx="8" fill="#edf0f6" stroke="#d6b24f" stroke-width="2" stroke-dasharray="8 7"/>
+    <rect x="0" y="0" width="390" height="102" rx="8" fill="url(#topMask)"/>
+    <path d="M0 94 H390" stroke="rgba(121,89,20,.16)" stroke-width="1"/>
+    <rect x="318" y="18" width="42" height="42" rx="10" fill="rgba(255,255,255,.52)" stroke="#d6b24f" stroke-width="3" stroke-dasharray="6 5"/>
+    <circle cx="332" cy="39" r="3" fill="#795914"/>
+    <circle cx="341" cy="39" r="3" fill="#795914"/>
+    <circle cx="350" cy="39" r="3" fill="#795914"/>
+    <text x="28" y="48" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="26" font-weight="720" fill="#343842">未命名</text>
+    <text x="28" y="86" font-family="Inter, HarmonyOS Sans, sans-serif" font-size="14" fill="rgba(121,89,20,.58)">#note board #草稿</text>
+    <text x="28" y="132" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="18" font-weight="700" fill="rgba(32,35,43,.50)">Schedule</text>
+    <circle cx="32" cy="162" r="3.5" fill="rgba(32,35,43,.20)"/>
+    <rect x="50" y="157" width="230" height="8" rx="4" fill="rgba(32,35,43,.050)"/>
+    <circle cx="32" cy="184" r="3.5" fill="rgba(32,35,43,.20)"/>
+    <rect x="50" y="179" width="200" height="8" rx="4" fill="rgba(32,35,43,.050)"/>
+    <circle cx="32" cy="206" r="3.5" fill="rgba(32,35,43,.20)"/>
+    <rect x="50" y="201" width="160" height="8" rx="4" fill="rgba(32,35,43,.050)"/>
+    <circle cx="30" cy="236" r="4.5" fill="rgba(54,60,74,.38)"/>
+    <text x="48" y="242" font-family="Inter, HarmonyOS Sans, sans-serif" font-size="15" fill="rgba(54,60,74,.48)">草稿  ·  edited</text>
+  </g>
+
+  <text x="120" y="445" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="20" fill="#3d414b">实线：色块铺满整张标准卡。</text>
+  <text x="665" y="445" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="20" fill="#3d414b">虚线：卡片本体仍是默认纸色，只在顶部覆盖一层颜色。</text>
+  <text x="665" y="485" font-family="HarmonyOS Sans SC, Inter, sans-serif" font-size="18" fill="rgba(61,65,75,.70)">理解为“上半部分被色纸贴住”，不是整张卡变黄。</text>
+</svg>

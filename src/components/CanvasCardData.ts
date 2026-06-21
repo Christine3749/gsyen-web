@@ -1,4 +1,13 @@
-export type CardType      = 'text' | 'entity' | 'connector';
+export type CardType      = 'text' | 'entity' | 'connector' | 'solid';
+export type CardSize      = 'S' | 'M' | 'L';
+export type ContentType   = 'note' | 'code' | 'image' | 'link' | 'task' | 'quote' | 'table' | 'math';
+export type CardBorder    = 'solid' | 'dashed';
+export type CardAccent    = '' | 'blue' | 'green' | 'amber' | 'red' | 'purple' | 'cyan' | 'black';
+export type CardElevation = 'flat' | 'float';
+export type CardOpacity   = 'solid' | 'frosted';
+export type CardCorner    = 'sm' | 'none';
+export type CardDensity   = 'compact' | 'loose';
+export type CardState     = 'normal' | 'highlight' | 'fade';
 export type EntityType    = 'contact' | 'order' | 'task' | 'schedule' | 'file' | 'custom';
 export type StatusColor   = 'green' | 'amber' | 'red' | 'gray';
 export type ConnectorType = 'calls' | 'imports' | 'routes' | 'references' | 'custom';
@@ -7,11 +16,22 @@ export type ModuleColor   = 'purple' | 'blue' | 'green' | 'amber' | 'red' | 'tea
 export interface CardData extends Record<string, unknown> {
   /* common */
   cardType?:        CardType;
+  cardSize?:        CardSize;
   text:             string;
   color?:           string;          // Obsidian left-bar '1'–'6'
   defaultEditing?:  boolean;
   width?:           number;
   height?:          number;
+
+  /* visual properties (Card Panel) */
+  contentType?:     ContentType;
+  cardBorder?:      CardBorder;
+  cardAccent?:      CardAccent;
+  cardElevation?:   CardElevation;
+  cardOpacity?:     CardOpacity;
+  cardCorner?:      CardCorner;
+  cardDensity?:     CardDensity;
+  cardState?:       CardState;
 
   /* entity card */
   entityType?:      EntityType;
@@ -45,6 +65,10 @@ export interface BoxData extends Record<string, unknown> {
   moduleColor: ModuleColor;
   childCount?: number;
   collapsed?:  boolean;
+  collectionId?: string;
+  width?:       number;
+  height?:      number;
+  absorbPreview?: boolean;
 }
 
 /* Status pill colour tokens */
@@ -53,6 +77,18 @@ export const STATUS_COLORS: Record<StatusColor, { bg: string; fg: string }> = {
   amber: { bg: '#FEF9C3', fg: '#854D0E' },
   red:   { bg: '#FEE2E2', fg: '#991B1B' },
   gray:  { bg: '#F3F4F6', fg: '#374151' },
+};
+
+/* Per-type status presets */
+export const CT_STATUS: Record<ContentType, { label: string; color: StatusColor }[]> = {
+  note:  [{ label:'草稿', color:'gray' }, { label:'发布', color:'green' }, { label:'归档', color:'gray' }],
+  code:  [{ label:'开发中', color:'amber' }, { label:'审查', color:'amber' }, { label:'完成', color:'green' }, { label:'废弃', color:'gray' }],
+  image: [{ label:'草稿', color:'gray' }, { label:'定稿', color:'amber' }, { label:'已批准', color:'green' }],
+  link:  [{ label:'有效', color:'green' }, { label:'失效', color:'red' }, { label:'归档', color:'gray' }],
+  task:  [{ label:'待办', color:'gray' }, { label:'进行中', color:'amber' }, { label:'完成', color:'green' }, { label:'阻塞', color:'red' }],
+  table: [{ label:'草稿', color:'gray' }, { label:'发布', color:'green' }, { label:'过时', color:'red' }],
+  math:  [{ label:'草稿', color:'gray' }, { label:'已验证', color:'green' }],
+  quote: [{ label:'草稿', color:'gray' }, { label:'发布', color:'green' }, { label:'已引用', color:'amber' }],
 };
 
 /* Module colour tokens – used by CanvasBox and any module-aware chip */

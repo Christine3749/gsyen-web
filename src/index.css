@@ -29,7 +29,7 @@
      font-cinzel   Cinzel         品牌名 GSYEN — 碑文刻字风格
      font-serif-sc Noto Serif SC  中文品牌名 疆域 — 宋体权威感
      ---------------------------------------------------------- */
-  --font-sans:     "Inter",            ui-sans-serif,  system-ui, sans-serif;
+  --font-sans:     "HarmonyOS Sans SC", "HarmonyOS Sans", "Inter", "PingFang SC", "Microsoft YaHei UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono:     "JetBrains Mono",   ui-monospace,   SFMono-Regular, monospace;
   --font-display:  "Outfit",           sans-serif;
   --font-space:    "Space Grotesk",    sans-serif;

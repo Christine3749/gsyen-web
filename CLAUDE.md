@@ -44,6 +44,10 @@
   - `src/components/CanvasNodeCard.tsx` — 四向连接 handle，双击编辑
   - `src/components/CanvasNodeEditor.tsx` — React Flow Node Canvas
   - 默认 Light mode；Stats pill 与 panel 间距 ~13px
+  - **Canvas Node 背景规格（勿改回 Cross）**：`StarBackground` 组件，4 向内凹弧星形
+    - `arm = 2 * zoom`，`gap = 24 * zoom`，颜色 `#C8C7D6`（bg `#EEEDF6`）
+    - SVG arc `A arm,arm 0 0 0`（sweep-flag=0，内凹弧），随 viewport 跟随平移缩放
+    - 不使用 ReactFlow `<Background>`，用自定义 `<Panel>` + SVG pattern 实现
   - **光标规格（iA Writer 标准，勿改）**：`width: 2.5px`，`marginLeft: 0`，`borderRadius: 99px`，`height: 1.36em`
     - 原 `marginLeft: -1px` 会在段首（position 0）裁掉 1px → 只剩 1px 可见；必须为 0
     - 宽度 2px 偏细，2.5px 与 iA Writer 视觉一致
