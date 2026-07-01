@@ -138,8 +138,8 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
 
   return (
     <>
-      <header className={`relative bg-[#F4F2EE] sticky top-0 z-40 py-6 flex items-start justify-between ${isMac ? 'pl-20 pr-8' : 'px-8'}`} id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
-        <div className="flex items-center gap-4 w-[200px] shrink-0 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+      <header className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 flex items-start justify-between ${isMac ? 'pl-20 pr-8' : 'px-8'}`} id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+        <div className="gsyen-brand-lockup flex items-center gap-4 w-[200px] shrink-0 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
             const isHome = activeSpace === 'chat';
@@ -148,7 +148,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
             return (
               <>
                 <div
-                  className={`shrink-0 -mt-1 transition-transform duration-500 ${isHome ? 'hover:rotate-6' : ''} ${isElectron ? 'cursor-pointer' : ''}`}
+                  className={`gsyen-brand-mark shrink-0 -mt-1 transition-transform duration-500 ${isElectron ? 'cursor-pointer' : ''}`}
                   onClick={() => isElectron && setShowAbout(true)}
                   title={isElectron ? (lang === 'zh' ? '关于 GSYEN' : 'About GSYEN') : undefined}
                 >
@@ -159,12 +159,12 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
                       }`} />
                   }
                 </div>
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-2.5 flex-nowrap whitespace-nowrap">
-                    <span className="text-xl md:text-2xl font-black font-serif-sc tracking-[0.12em] text-[#111111] leading-none select-none">疆域</span>
-                    <span className="font-cinzel text-xs md:fs-lg font-bold tracking-[0.22em] text-[#111111]/85 uppercase leading-none select-none ml-0.5">GSYEN</span>
+                <div className="gsyen-brand-copy flex flex-col">
+                  <div className="gsyen-brand-title flex items-baseline gap-2.5 flex-nowrap whitespace-nowrap">
+                    <span className="gsyen-brand-cn text-xl md:text-2xl font-black font-serif-sc tracking-[0.12em] text-[#111111] leading-none select-none">疆域</span>
+                    <span className="gsyen-brand-latin font-cinzel text-xs md:fs-lg font-bold tracking-[0.22em] text-[#111111]/85 uppercase leading-none select-none ml-0.5">GSYEN</span>
                   </div>
-                  <p className="text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5 truncate">
+                  <p className="gsyen-brand-subtitle text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5 truncate">
                     {isHome ? t.headerSubtitle : space?.subtitle}
                   </p>
                 </div>
@@ -174,12 +174,12 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
         </div>
 
         {/* 桌面标签栏 */}
-        <div className="flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <div className="gsyen-space-nav flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {SPACES.map(({ value, Icon, iconClass, zh, en, shortZh, shortEn }) => (
             <button
               key={value}
               onClick={() => setActiveSpace(value)}
-              className={`min-w-[80px] px-3 py-1.5 rounded-none fs-sm font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`gsyen-space-tab min-w-[80px] px-3 py-1.5 rounded-none fs-sm font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
                 activeSpace === value ? 'bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
               }`}
             >
@@ -202,7 +202,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
         )}
 
         {/* 右侧：状态 + 语言 + 登录/注册 */}
-        <div className="flex items-center gap-2 shrink-0"
+        <div className="gsyen-header-actions flex items-center gap-2 shrink-0"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
 
           {/* 地球仪 — 点击切换语言 */}
@@ -254,16 +254,16 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
             <>
               <button
                 onClick={() => setAuthModal('login')}
-                className="px-2 py-1.5 fs-xs font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A] transition-all whitespace-nowrap shrink-0"
+                className="gsyen-auth-login px-2 py-1.5 fs-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap shrink-0"
               >
                 {lang === 'zh' ? '登录' : 'LOGIN'}
               </button>
               <button
                 onClick={() => setAuthModal('register')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-[#1A1A1A] text-[#F9F8F6] fs-xs font-bold tracking-wider uppercase hover:bg-[#1A1A1A]/80 transition-all whitespace-nowrap shrink-0"
+                className="gsyen-auth-cta flex items-center gap-1 px-3 py-1.5 fs-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap shrink-0"
               >
                 {lang === 'zh' ? '注册' : 'REGISTER'}
-                <span className="text-[#F9F8F6]/50 ml-0.5">→</span>
+                <span className="gsyen-auth-arrow ml-0.5">→</span>
               </button>
             </>
           )}

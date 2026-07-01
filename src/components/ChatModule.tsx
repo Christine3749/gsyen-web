@@ -9,8 +9,8 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { AnimatePresence } from 'motion/react';
-import { Sparkles, MessageSquare, PanelLeft, Plus } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { ChevronDown, ChevronUp, MessageSquare, PanelLeft, Plus, Sparkles } from 'lucide-react';
 
 import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId, MODELS } from '../config/models';
@@ -24,6 +24,7 @@ import { ChatSidebar } from './ChatSidebar';
 import { ChatEmptyState } from './ChatEmptyState';
 import { CanvasEditorContent } from './CanvasEditorContent';
 import { ModelStatusLight } from './ModelStatusLight';
+import { ModelStatusPanel } from './ModelStatusPanel';
 import { TeamMembersPanel } from './TeamMembersPanel';
 import { FriendsPanel } from './FriendsPanel';
 import { ChatCreateTeamModal } from './ChatCreateTeamModal';
@@ -39,6 +40,8 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [isCopiedId, setIsCopiedId]   = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [recentsOpen, setRecentsOpen] = useState(true);
+  const [pulseOpen, setPulseOpen]     = useState(false);
+  const [modelPanelOpen, setModelPanelOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
   const [toast, setToast]             = useState<string | null>(null);
   const [creativeDocId, setCreativeDocId]   = useState<string | null>(null);
@@ -151,6 +154,51 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const gyenPulseSignals = [
+    {
+      label: 'GYENBOX',
+      value: '3',
+      unit: lang === 'zh' ? '文件' : 'FILES',
+      detail: lang === 'zh' ? '桌面端未提交 Rust 修改' : 'desktop pending Rust changes',
+      action: lang === 'zh' ? '进入项目' : 'Open',
+    },
+    {
+      label: 'DGWM',
+      value: '3',
+      unit: lang === 'zh' ? '候选' : 'CANDIDATES',
+      detail: lang === 'zh' ? 'canonical 候选待裁决' : 'canonical candidates to decide',
+      action: lang === 'zh' ? '转任务' : 'Task',
+    },
+    {
+      label: 'PRISM',
+      value: 'V2',
+      unit: lang === 'zh' ? '冻结' : 'FROZEN',
+      detail: lang === 'zh' ? 'Prism-Edge 等待 DGWM adapter' : 'Prism-Edge waits for DGWM adapter',
+      action: lang === 'zh' ? '进入项目' : 'Open',
+    },
+    {
+      label: lang === 'zh' ? '小纸笺' : 'ZHIJIAN',
+      value: '94',
+      unit: lang === 'zh' ? '改动' : 'CHANGES',
+      detail: lang === 'zh' ? '设计系统今日改动，建议冻结版本' : 'design system changes, freeze version',
+      action: lang === 'zh' ? '归档' : 'Archive',
+    },
+    {
+      label: 'TEMPORA',
+      value: '7D',
+      unit: lang === 'zh' ? '停滞' : 'IDLE',
+      detail: lang === 'zh' ? 'Tempora Find 7 天无动作，保持 frozen' : 'Tempora Find idle, keep frozen',
+      action: lang === 'zh' ? '忽略' : 'Ignore',
+    },
+    {
+      label: lang === 'zh' ? '今日推进' : 'FOCUS',
+      value: '2',
+      unit: lang === 'zh' ? '项目' : 'PROJECTS',
+      detail: lang === 'zh' ? 'GyenBox + Prism-Edge' : 'GyenBox + Prism-Edge',
+      action: lang === 'zh' ? '置顶' : 'Pin',
+    },
+  ];
+
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setIsCopiedId(id);
@@ -170,38 +218,103 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
       )}
 
       {/* Status bar */}
-      <div className="relative shrink-0 h-[52px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE] flex items-center justify-between font-mono fs-xs tracking-widest text-[#1A1A1A]/55 font-bold uppercase">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setSidebarOpen(o => !o)} className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all ${sidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'text-[#1A1A1A]/70'}`}>
+      <div className={`gsyen-command-deck relative shrink-0 h-[56px] px-8 border-y border-[#1A1A1A]/10 bg-[#ECE9E3] flex items-center justify-between text-[#1A1A1A]/70 ${pulseOpen ? 'has-pulse-open' : ''} ${modelPanelOpen ? 'has-model-open' : ''}`}>
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-6">
+          <button onClick={() => setSidebarOpen(o => !o)} aria-label={lang === 'zh' ? '切换档案库' : 'Toggle archive'} aria-pressed={sidebarOpen} className={`gsyen-icon-command ${sidebarOpen ? 'is-active' : ''}`}>
             <PanelLeft className="w-4 h-4" />
           </button>
-          <button onClick={handleNewChat} className="flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all fs-sm font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">
+          <button onClick={handleNewChat} className="gsyen-command-button" aria-label={lang === 'zh' ? '新建对话' : 'New chat'}>
             <Plus className="w-3 h-3" /><span>NEW</span>
           </button>
           <button onClick={openCreativeKingdom}
-            className="flex items-center gap-2 px-2 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all fs-sm font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">
+            className="gsyen-command-button" aria-label={lang === 'zh' ? '打开创意灵感' : 'Open muse'}>
             <MessageSquare className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '疆域灵感创意国度' : 'GSYEN Muse'}</span>
+            <span>{lang === 'zh' ? '创意灵感' : 'Muse'}</span>
+          </button>
+          <button type="button" onClick={() => setPulseOpen(v => !v)}
+            className={`gsyen-pulse-tape gsyen-system-bus ${pulseOpen ? 'is-open' : ''}`}
+            aria-expanded={pulseOpen} aria-label={lang === 'zh' ? '展开疆域脉搏' : 'Toggle GYEN pulse'}>
+            <span className="gsyen-system-bus-label">
+              GYEN PULSE
+            </span>
+            <span className="gsyen-pulse-window gsyen-system-bus-window">
+              <span className="gsyen-pulse-marquee gsyen-system-bus-track">
+                {gyenPulseSignals.map(signal => (
+                  <span key={`a-${signal.label}-${signal.value}`} className="gsyen-system-cell">
+                    <span className="gsyen-system-cell-name">{signal.label}</span>
+                    <span className="gsyen-system-cell-value">{signal.value}</span>
+                    <span className="gsyen-system-cell-unit">{signal.unit}</span>
+                  </span>
+                ))}
+                {gyenPulseSignals.map(signal => (
+                  <span key={`b-${signal.label}-${signal.value}`} className="gsyen-system-cell" aria-hidden="true">
+                    <span className="gsyen-system-cell-name">{signal.label}</span>
+                    <span className="gsyen-system-cell-value">{signal.value}</span>
+                    <span className="gsyen-system-cell-unit">{signal.unit}</span>
+                  </span>
+                ))}
+              </span>
+            </span>
+            <span className="gsyen-system-count">
+              <span>{gyenPulseSignals.length}</span>
+              {pulseOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </span>
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="text-neutral-400">MODEL:</span>
+        <div className="gsyen-model-strip">
+          <div className="flex items-center gap-2">
+            <span className="gsyen-model-label">MODEL</span>
             <div ref={modelScrollRef} onMouseDown={onMsDragStart} onMouseMove={onMsDragMove} onMouseUp={onMsDragEnd} onMouseLeave={onMsDragEnd}
-              className="flex bg-[#1A1A1A]/5 p-0.5 border border-[#1A1A1A]/10 overflow-x-scroll select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="gsyen-model-selector"
               style={{ maxWidth: 224, cursor: 'grab' }}>
               {MODELS.map(m => (
                 <button key={m.id} onClick={() => !m.disabled && setSelectedModel(m.id as ModelId)} disabled={m.disabled}
-                  className={`px-2 py-0.5 fs-xs font-mono font-bold tracking-widest uppercase shrink-0 rounded-none transition-all ${m.disabled ? 'text-[#1A1A1A]/20 cursor-not-allowed' : selectedModel === m.id ? 'bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'}`}>
+                  className={`gsyen-model-option ${m.disabled ? 'is-disabled' : selectedModel === m.id ? 'is-active' : ''}`}>
                   {m.label}
                 </button>
               ))}
             </div>
           </div>
-          <ModelStatusLight selectedModel={selectedModel} />
+          <ModelStatusLight selectedModel={selectedModel} active={modelPanelOpen} onClick={() => setModelPanelOpen(v => !v)} />
         </div>
       </div>
+
+      <AnimatePresence initial={false}>
+        {pulseOpen && (
+          <motion.div key="pulse-panel"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="gsyen-pulse-panel shrink-0 overflow-hidden border-b border-[#1A1A1A]/20 bg-[#151412] text-[#F4F2EE] shadow-[inset_0_1px_0_rgba(215,181,109,0.18)]">
+            <div className="px-8 py-2">
+              <div className="gsyen-pulse-panel-head flex h-7 items-center justify-between border-b border-[#D7B56D]/20 font-mono fs-xs font-bold uppercase tracking-widest">
+                <div className="flex items-center text-[#D7B56D]">
+                  <span>{lang === 'zh' ? '今日疆域状态' : 'Today GYEN State'}</span>
+                </div>
+                <button onClick={() => setPulseOpen(false)}
+                  className="text-[#F4F2EE]/45 transition-colors hover:text-[#D7B56D]">
+                  {lang === 'zh' ? '收起' : 'Collapse'} ▲
+                </button>
+              </div>
+              <div className="grid gap-0 py-1">
+                {gyenPulseSignals.map((signal) => (
+                  <div key={`${signal.label}-${signal.value}-${signal.detail}`} className="gsyen-pulse-panel-row grid h-8 grid-cols-[96px_48px_72px_minmax(0,1fr)_84px] items-center border-b border-white/[0.06] last:border-b-0">
+                    <span className="font-mono fs-xs font-bold tracking-widest text-[#F4F2EE]/38">{signal.label}</span>
+                    <span className="font-mono fs-xs font-bold tracking-widest text-[#D7B56D]/90">{signal.value}</span>
+                    <span className="font-mono fs-xs font-bold tracking-widest text-[#F4F2EE]/40">{signal.unit}</span>
+                    <span className="truncate fs-sm text-[#F4F2EE]/82">{signal.detail}</span>
+                    <button className="gsyen-pulse-panel-action h-6 justify-self-end border border-[#F4F2EE]/18 px-2 font-mono fs-xs font-bold tracking-widest text-[#F4F2EE]/62 transition-colors hover:border-[#D7B56D]/70 hover:text-[#D7B56D]">
+                      {signal.action}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Body: sidebar + chat + team panel */}
       <div className="flex-grow flex flex-col md:flex-row min-h-0">
@@ -264,8 +377,10 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
             onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }} />
         </div>
 
-        {/* Right panel: team members or friends */}
-        {showPanel && selectedTeam
+        {/* Right panel: model status, team members or friends */}
+        {modelPanelOpen
+          ? <ModelStatusPanel lang={lang} selectedModel={selectedModel} onSelectModel={setSelectedModel} onClose={() => setModelPanelOpen(false)} contextLabel={selectedTeam?.name} />
+          : showPanel && selectedTeam
           ? <TeamMembersPanel team={selectedTeam} members={members} onClose={clearTeam} />
           : showFriends && <FriendsPanel friends={friends} onClose={() => setShowFriends(false)} />
         }
@@ -284,3 +399,5 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     </>
   );
 }
+
+

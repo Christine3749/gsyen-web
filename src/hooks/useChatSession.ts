@@ -29,7 +29,9 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     const allSessions = chatSessionStore.loadAll();
     setSessions(allSessions);
     const saved = chatSessionStore.loadCurrentChat();
-    if (saved.length > 0) {
+    const hasRealSavedChat = saved.length > 0 && !isLegacyGreetingOnly(saved);
+
+    if (hasRealSavedChat) {
       setMessagesState(saved);
       // 优先用持久化的 session ID 直接恢复，不依赖消息匹配
       const savedId = localStorage.getItem('gsyen_current_session_id');
@@ -46,7 +48,8 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
         setCurrentTeamId(match.teamId ?? null);
       }
     } else {
-      setMessagesState([defaultGreeting(lang)]);
+      setMessagesState([]);
+      chatSessionStore.clearCurrentChat();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
@@ -83,8 +86,8 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     teamIdRef.current    = session.teamId ?? null;
     setCurrentSessionId(session.id);
     setCurrentTeamId(session.teamId ?? null);
-    setMessagesState(session.messages);
-    chatSessionStore.saveCurrentChat(session.messages);
+    setMessagesState(isLegacyGreetingOnly(session.messages) ? [] : session.messages);
+    chatSessionStore.saveCurrentChat(isLegacyGreetingOnly(session.messages) ? [] : session.messages);
     localStorage.setItem('gsyen_current_session_id', session.id);
   }, []);
 
@@ -96,11 +99,11 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
       teamIdRef.current    = null;
       setCurrentSessionId(null);
       setCurrentTeamId(null);
-      setMessagesState([defaultGreeting(lang)]);
+      setMessagesState([]);
       chatSessionStore.clearCurrentChat();
       localStorage.removeItem('gsyen_current_session_id');
     }
-  }, [lang]);
+  }, []);
 
   const newChat = useCallback((model: ModelId) => {
     const id = crypto.randomUUID();
@@ -122,19 +125,18 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
       teamIdRef.current    = teamId;
       setCurrentSessionId(existing.id);
       setCurrentTeamId(teamId);
-      const msgs = existing.messages.length > 0 ? existing.messages : [defaultGreeting(lang)];
+      const msgs = isLegacyGreetingOnly(existing.messages) ? [] : existing.messages;
       setMessagesState(msgs);
       chatSessionStore.saveCurrentChat(msgs);
     } else {
-      // New team session — id assigned on first message
       sessionIdRef.current = null;
       teamIdRef.current    = teamId;
       setCurrentSessionId(null);
       setCurrentTeamId(teamId);
-      setMessagesState([defaultGreeting(lang)]);
+      setMessagesState([]);
       chatSessionStore.clearCurrentChat();
     }
-  }, [lang]);
+  }, []);
 
   return {
     messages, sessions, currentSessionId, currentTeamId,
@@ -142,15 +144,8 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
   };
 }
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
-
-function defaultGreeting(lang: 'zh' | 'en'): ChatMessage {
-  return {
-    id: `greet-${Date.now()}`,
-    role: 'model',
-    content: lang === 'zh'
-      ? '欢迎来到 **疆域灵阁 (GSYEN Muse)**。\n\n我是您的智能美学设计与品牌策略助手。在这里，您可以向我咨询品牌艺术命名、高级视觉符号创意、排版色彩推荐及业务流程规划。请在下方输入您的畅想，或选择侧边栏的灵感命题开始：'
-      : 'Welcome to the **GSYEN Muse Atelier Workspace**.\n\nI am your digital brand curator and creative consultant. Begin by typing an inquiry or selecting one of our curated prompts below:',
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  };
+function isLegacyGreetingOnly(messages: ChatMessage[]): boolean {
+  return messages.length === 1
+    && messages[0].role === 'model'
+    && (messages[0].id.startsWith('greet-') || messages[0].content.includes('欢迎来到 **疆域灵阁'));
 }

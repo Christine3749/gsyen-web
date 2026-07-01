@@ -4,7 +4,7 @@
  * 底部状态/更新卡逻辑见 ChatUpdaterCard.tsx。
  */
 import { useState } from 'react';
-import { MessageSquare, X, Plus, Users, User } from 'lucide-react';
+import { Archive, MessageSquare, X, Plus, Users, User } from 'lucide-react';
 import { StoredSession } from '../types/chat';
 import { joinTeam } from '../hooks/useTeams';
 import { useAuth } from '../auth/useAuth';
@@ -34,7 +34,7 @@ interface ChatSidebarProps {
 
 export function ChatSidebar({
   lang, open, recentsOpen, setRecentsOpen,
-  sessions, currentSessionId, loadSession, deleteSession, onNewChat,
+  sessions, currentSessionId, loadSession, deleteSession,
   teams = [], selectedTeamId, onSelectTeam, onCreateTeam,
 }: ChatSidebarProps) {
   const [teamsOpen, setTeamsOpen] = useState(false);
@@ -54,62 +54,68 @@ export function ChatSidebar({
   };
 
   return (
-    <aside className={`bg-[#F4F2EE] border-[#1A1A1A]/10 flex flex-col justify-between transition-all duration-300 overflow-hidden shrink-0 ${open ? 'w-full md:w-[240px] 2xl:w-[320px] p-6 border-r opacity-100' : 'w-0 p-0 border-r-0 opacity-0 pointer-events-none'}`}>
-      <div className="flex flex-col h-full min-w-[208px] 2xl:min-w-[272px] gap-4">
-
-        {/* 往来标题 */}
-        <button onClick={() => setRecentsOpen(o => !o)} className="flex items-center justify-between w-full group">
-          <h2 className="fs-md font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 group-hover:text-[#1A1A1A] transition-colors">
-            {lang === 'zh' ? '往来' : 'Recents'}
-          </h2>
-          <div className="flex items-center gap-2">
-            <span className="fs-2xs font-mono text-[#1A1A1A]/25">{sessions.length}</span>
-            <span className={`text-[#1A1A1A]/30 fs-sm transition-transform duration-200 ${recentsOpen ? 'rotate-90' : ''}`}>›</span>
+    <aside className={`gsyen-archive-sidebar flex flex-col justify-between transition-all duration-300 overflow-hidden shrink-0 ${open ? 'w-full md:w-[240px] 2xl:w-[320px] border-r opacity-100' : 'w-0 border-r-0 opacity-0 pointer-events-none'}`}>
+      <div className="flex flex-col h-full min-w-[208px] 2xl:min-w-[272px]">
+        <div className="gsyen-archive-header">
+          <div>
+            <p className="gsyen-archive-kicker">{lang === 'zh' ? 'MUSE ARCHIVE' : 'MUSE ARCHIVE'}</p>
+            <p className="gsyen-archive-title">{lang === 'zh' ? '档案库' : 'Archive'}</p>
           </div>
-        </button>
-
-        {/* 会话列表 */}
-        <div className={`overflow-y-auto space-y-1.5 pr-0.5 transition-all duration-200 ${recentsOpen ? 'flex-1' : 'hidden'}`}>
-          {sessions.length === 0 ? (
-            <div className="py-10 text-center space-y-2">
-              <MessageSquare className="w-6 h-6 text-[#1A1A1A]/15 mx-auto" />
-              <p className="fs-xs font-mono text-[#1A1A1A]/30 uppercase tracking-widest">{lang === 'zh' ? '暂无记录' : 'No history yet'}</p>
-            </div>
-          ) : sessions.map(s => (
-            <div key={s.id} onClick={() => loadSession(s)}
-              className={`group relative flex items-start gap-2.5 p-3 border cursor-pointer transition-all ${currentSessionId === s.id ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
-              <div className="flex-1 min-w-0 space-y-1">
-                <p className="fs-md font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2">{s.title}</p>
-                <div className="flex items-center gap-2">
-                  <span className="fs-2xs font-mono text-[#1A1A1A]/30 uppercase">{new Date(s.updatedAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
-                  {s.teamId
-                    ? <span className="fs-2xs font-mono text-[#1A6ECC]/60 uppercase">· team</span>
-                    : <span className="fs-2xs font-mono text-[#1A1A1A]/25 uppercase">{s.model}</span>
-                  }
-                </div>
-              </div>
-              <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} className="opacity-0 group-hover:opacity-100 shrink-0 p-0.5 hover:text-red-500 text-[#1A1A1A]/30 transition-all">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
+          <div className="gsyen-archive-counter">
+            <Archive className="w-3 h-3" strokeWidth={1.5} />
+            <span>{sessions.length + teams.length}</span>
+          </div>
         </div>
 
-        {/* 团队列表 */}
-        <div className="pt-2 border-t border-[#1A1A1A]/10 space-y-0.5 shrink-0">
-          <button onClick={() => setTeamsOpen(o => !o)} className="flex items-center justify-between w-full mb-2 group">
-            <span className="fs-xs font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/40 group-hover:text-[#1A1A1A]/70 transition-colors">
-              {lang === 'zh' ? '我的团队' : 'Teams'} · {teams.length}
+        <section className="gsyen-archive-section min-h-0 flex-1">
+          <button onClick={() => setRecentsOpen(o => !o)} className="gsyen-archive-section-title group">
+            <span>{lang === 'zh' ? '往来' : 'Recents'}</span>
+            <span className="gsyen-archive-section-meta">
+              <span>{sessions.length}</span>
+              <span className={`gsyen-archive-chevron ${recentsOpen ? 'is-open' : ''}`}>›</span>
             </span>
-            <span className={`text-[#1A1A1A]/30 fs-sm transition-transform duration-200 ${teamsOpen ? 'rotate-90' : ''}`}>›</span>
+          </button>
+
+          <div className={`gsyen-archive-list transition-all duration-200 ${recentsOpen ? '' : 'hidden'}`}>
+            {sessions.length === 0 ? (
+              <div className="gsyen-archive-empty">
+                <MessageSquare className="w-6 h-6 text-[#1A1A1A]/14 mx-auto" strokeWidth={1.4} />
+                <p>{lang === 'zh' ? '暂无记录' : 'No history yet'}</p>
+                <span>{lang === 'zh' ? '等待第一条往来写入' : 'waiting for first thread'}</span>
+              </div>
+            ) : sessions.map(s => (
+              <div key={s.id} onClick={() => loadSession(s)}
+                className={`gsyen-archive-item group ${currentSessionId === s.id ? 'is-active' : ''}`}>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="fs-md font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2">{s.title}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="fs-2xs font-mono text-[#1A1A1A]/30 uppercase">{new Date(s.updatedAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' })}</span>
+                    {s.teamId
+                      ? <span className="fs-2xs font-mono text-[#1A6ECC]/60 uppercase">· team</span>
+                      : <span className="fs-2xs font-mono text-[#1A1A1A]/25 uppercase">{s.model}</span>
+                    }
+                  </div>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} className="opacity-0 group-hover:opacity-100 shrink-0 p-0.5 hover:text-red-500 text-[#1A1A1A]/30 transition-all">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="gsyen-archive-section shrink-0">
+          <button onClick={() => setTeamsOpen(o => !o)} className="gsyen-archive-section-title group">
+            <span>{lang === 'zh' ? '我的团队' : 'Teams'} · {teams.length}</span>
+            <span className={`gsyen-archive-chevron ${teamsOpen ? 'is-open' : ''}`}>›</span>
           </button>
           {teamsOpen && (
-            <>
+            <div className="gsyen-archive-team-list">
               {teams.map(t => {
                 const active = selectedTeamId === t.id;
                 return (
                   <button key={t.id} onClick={() => onSelectTeam?.(t)}
-                    className={`group flex items-start gap-2.5 p-3 w-full border cursor-pointer transition-all text-left ${active ? 'border-[#1A1A1A]/30 bg-white shadow-xs' : 'border-transparent hover:border-[#1A1A1A]/10 hover:bg-white/60'}`}>
+                    className={`gsyen-archive-team group ${active ? 'is-active' : ''}`}>
                     <Users className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${active ? 'text-[#1A1A1A]/70' : 'text-[#1A1A1A]/25 group-hover:text-[#1A1A1A]/50'}`} strokeWidth={1.5} />
                     <span className="fs-md font-sans text-[#1A1A1A]/80 leading-snug line-clamp-2 flex-1">{t.name}</span>
                   </button>
@@ -128,15 +134,16 @@ export function ChatSidebar({
                   {lang === 'zh' ? '加入' : 'Join'}
                 </button>
               </div>
-            </>
+            </div>
           )}
-        </div>
+        </section>
 
-        <ChatVaultCard lang={lang} />
-        <ChatUpdaterCard lang={lang} />
+        <div className="gsyen-archive-bottom">
+          <ChatVaultCard lang={lang} />
+          <ChatUpdaterCard lang={lang} />
+        </div>
       </div>
 
-      {/* 加入团队弹窗 */}
       {joinOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A1A1A]/40"
           onClick={() => setJoinOpen(false)}>
@@ -162,3 +169,4 @@ export function ChatSidebar({
     </aside>
   );
 }
+
