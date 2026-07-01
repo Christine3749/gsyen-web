@@ -58,7 +58,7 @@ export default function BrandMember({ lang }: { lang: 'zh' | 'en' }) {
   }, []);
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto">
+    <div ref={scrollRef} className="gsyen-member-page flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto flex gap-14 px-8 py-10">
 
         {/* 左侧锚点导航 — sticky */}
@@ -148,3 +148,4 @@ function SecuritySection({ lang }: { lang: 'zh' | 'en' }) {
     </div>
   );
 }
+

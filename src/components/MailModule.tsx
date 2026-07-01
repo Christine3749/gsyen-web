@@ -24,7 +24,7 @@ export default function MailModule({ lang }: MailModuleProps) {
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
 
   return (
-    <div className="flex flex-col h-full text-[#1A1A1A] font-sans">
+    <div className="gsyen-mail-page flex flex-col h-full text-[#1A1A1A] font-sans">
       {/* Toolbar strip */}
       <div className="relative shrink-0 h-[52px] flex flex-row items-center justify-between gap-3 flex-nowrap px-8 bg-[#F4F2EE]">
         <div className="flex items-center gap-3 shrink-0">
@@ -200,3 +200,4 @@ export default function MailModule({ lang }: MailModuleProps) {
     </div>
   );
 }
+

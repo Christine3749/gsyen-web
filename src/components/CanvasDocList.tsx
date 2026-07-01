@@ -5,42 +5,15 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import type { SortSettings } from '../stores/canvasLibraryStore';
-import { fsAdapter } from '../hooks/useFileSystem';
 import type { FileEntry } from '../hooks/useFileSystem';
 import { SYS_FONT, TITLE_H, MENU_H } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
-import { DocIcon, DrawIcon, NodeIcon, ImageIcon } from '../gsyen-designer';
 import { useCanvasPanelWidths } from '../hooks/useCanvasPanelWidths';
 import { CanvasDocListMenu } from './CanvasDocListMenu';
 import { CanvasDocListPreview } from './CanvasDocListPreview';
+import { prefetchFile, prefetchCache, relativeDate, fileIcon, SKEL_WIDTHS, MEDIA_RE } from './CanvasDocListUtils';
 
-// ── 悬停预加载缓存（最多 40 条，LRU by insertion order）──────────────────────
-const _MAX_CACHE = 40;
-const _prefetchCache = new Map<string, string>();
-const _MEDIA_RE = /\.(jpg|jpeg|png|gif|webp|bmp|svg|docx|xlsx|pptx|pdf)$/i;
-const _IMG_RE   = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i;
-
-function _prefetchFile(file: FileEntry) {
-  if (!file.path || _prefetchCache.has(file.path) || _MEDIA_RE.test(file.name)) return;
-  if (_prefetchCache.size >= _MAX_CACHE) _prefetchCache.delete(_prefetchCache.keys().next().value!);
-  fsAdapter.readFile(file).then(text => _prefetchCache.set(file.path!, text)).catch(() => {});
-}
-
-export function invalidatePrefetch(path: string) { _prefetchCache.delete(path); }
-
-function relativeDate(ts?: number): string {
-  if (!ts) return '';
-  const diff = Date.now() - ts;
-  return diff < 86_400_000 ? 'Today' : diff < 172_800_000 ? 'Yesterday' : new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function fileIcon(name: string) {
-  if (/\.excalidraw$/i.test(name)) return DrawIcon;
-  if (/\.canvas$/i.test(name)) return NodeIcon;
-  return _IMG_RE.test(name) ? ImageIcon : DocIcon;
-}
-
-const SKEL_WIDTHS = ['72%', '58%', '80%', '64%', '50%'];
+export { invalidatePrefetch } from './CanvasDocListUtils';
 
 interface Props {
   open: boolean;
@@ -49,9 +22,10 @@ interface Props {
   dark: boolean;
   onBack: () => void;
   onNew: () => void;
+  nodesMode?: boolean;
 }
 
-export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Props) {
+export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew, nodesMode }: Props) {
   const { selectedFolder, files, navStack, navFiles, navLoading, loading, selectedFile, sortSettings } = useLibraryStore();
   const currentName = navStack.length > 0 ? navStack[navStack.length - 1].name : (selectedFolder?.name ?? '');
   const { doclistW } = useCanvasPanelWidths();
@@ -128,8 +102,8 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
   const handleSelect = useCallback(async (file: FileEntry) => {
     libraryStore.setSelectedFile(file);
     const seq = ++selectSeqRef.current;
-    if (_MEDIA_RE.test(file.name)) { onFileSelect(file, ''); return; }
-    const cached = file.path ? _prefetchCache.get(file.path) : undefined;
+    if (MEDIA_RE.test(file.name)) { onFileSelect(file, ''); return; }
+    const cached = file.path ? prefetchCache.get(file.path) : undefined;
     const content = cached !== undefined ? cached : await fsAdapter.readFile(file);
     if (seq !== selectSeqRef.current) return;
     onFileSelect(file, content);
@@ -159,7 +133,7 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
     <div style={{ width: open ? doclistW : 0, overflow: 'hidden', flexShrink: 0,
       transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
       borderRight: `0.5px solid ${P.border}`, display: 'flex', flexDirection: 'column',
-      background: P.chrome }}>
+      background: nodesMode ? '#EEEDF6' : P.chrome }}>
       <div style={{ width: doclistW, height: '100%', display: 'flex', flexDirection: 'column' }}>
 
         {/* ─ Header ─ */}
@@ -250,11 +224,11 @@ export function CanvasDocList({ open, onFileSelect, P, dark, onBack, onNew }: Pr
                 onClick={() => !renaming && handleSelect(entry)}
                 onContextMenu={e => handleContextMenu(e, entry)}
                 onMouseEnter={(e) => {
-                  setHoveredPath(entry.path); _prefetchFile(entry);
+                  setHoveredPath(entry.path); prefetchFile(entry);
                   if (/\.(md|txt)$/i.test(entry.name)) {
                     pvTimer.current && clearTimeout(pvTimer.current);
                     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                    pvTimer.current = setTimeout(() => { const t = _prefetchCache.get(entry.path!); if (t) setPreview({ x: r.right + 8, y: r.top, text: t }); }, 180);
+                    pvTimer.current = setTimeout(() => { const t = prefetchCache.get(entry.path!); if (t) setPreview({ x: r.right + 8, y: r.top, text: t }); }, 180);
                   }
                 }}
                 onMouseLeave={() => { pvTimer.current && clearTimeout(pvTimer.current); setPreview(null); setHoveredPath(null); }}

@@ -138,6 +138,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           <VintageCar
             size={120}
             strokeWidth={1}
+            tone="light"
             className="text-[#F9F8F6]/80"
           />
         </motion.div>

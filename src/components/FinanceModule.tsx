@@ -69,7 +69,7 @@ export default function FinanceModule({ lang }: FinanceModuleProps) {
   const expenseCount = transactions.length - incomeCount;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="gsyen-ledger-page flex flex-col h-full">
       {/* Empty toolbar strip — 对齐其他模块的 toolbar 高度 */}
       <div className="relative shrink-0 h-[52px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
       </div>
@@ -106,3 +106,4 @@ export default function FinanceModule({ lang }: FinanceModuleProps) {
     </div>
   );
 }
+

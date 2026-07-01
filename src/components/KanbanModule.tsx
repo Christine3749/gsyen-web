@@ -150,7 +150,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
   };
 
   return (
-    <div className="flex flex-col h-full text-[#1A1A1A] font-sans animate-fadeIn">
+    <div className="gsyen-kanban-page flex flex-col h-full text-[#1A1A1A] font-sans animate-fadeIn">
       {notification && (
         <div className="fixed bottom-6 right-6 bg-[#1A1A1A] text-[#F9F8F6] px-5 py-3 border border-amber-900/40 text-xs font-mono uppercase tracking-widest z-50 flex items-center gap-3">
           <CheckCircle2 className="w-4 h-4 text-emerald-500 animate-bounce" /><span>{notification}</span>
@@ -279,3 +279,4 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
     </div>
   );
 }
+
