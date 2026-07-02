@@ -1,0 +1,238 @@
+.gsyen-standby-feed,
+.gsyen-standby-input {
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 1px 0 rgba(20,20,20,0.025) !important;
+}
+
+.gsyen-standby-frame {
+  border-top-width: 3px !important;
+  border-top-color: var(--gyen-n0-selected) !important;
+}
+
+.gsyen-standby-header {
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 66%, transparent) !important;
+}
+
+.gsyen-standby-row,
+.gsyen-standby-signal {
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 58%, transparent) !important;
+}
+
+.gsyen-standby-input:focus-within {
+  border-color: color-mix(in srgb, var(--gyen-n5-control) 56%, var(--gyen-n8-hairline)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.78),
+    0 0 0 1px rgba(20,20,20,0.035) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gsyen-icon-command,
+  .gsyen-command-button,
+  .gsyen-model-option,
+  .gsyen-model-status-button,
+  .gsyen-pulse-panel-action,
+  .gsyen-standby-actions button,
+  .gsyen-system-panel-action {
+    transition-duration: 0ms !important;
+  }
+}
+
+/* GYEN System Panel V7.1 - model status becomes an instrument drawer */
+.gsyen-system-panel {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-n10-page) 92%, white) 0%, color-mix(in srgb, var(--gyen-n10-page) 82%, var(--gyen-n9-card)) 100%) !important;
+  border-left-color: color-mix(in srgb, var(--gyen-n8-hairline) 64%, transparent) !important;
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,0.56),
+    -1px 0 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-system-panel-head {
+  min-height: 88px !important;
+  height: auto !important;
+  padding: 20px 24px 18px !important;
+  background: transparent !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+}
+
+.gsyen-system-panel-head p {
+  color: var(--gyen-n6-weak) !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.22em !important;
+}
+
+.gsyen-system-panel-head h3 {
+  margin-top: 7px !important;
+  color: var(--gyen-n2-title) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.05 !important;
+}
+
+.gsyen-system-panel-head button {
+  width: 26px !important;
+  height: 26px !important;
+  color: var(--gyen-n6-weak) !important;
+  transition: background-color 160ms cubic-bezier(.2,.8,.2,1), color 160ms cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.gsyen-system-panel-head button:hover {
+  background: color-mix(in srgb, var(--gyen-card-white) 72%, var(--gyen-n9-card)) !important;
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-system-panel-readout {
+  min-height: 104px !important;
+  margin: 24px 24px 20px !important;
+  grid-template-columns: 36px minmax(0, 1fr) !important;
+  gap: 16px !important;
+  padding: 20px 22px !important;
+  align-items: center !important;
+  background:
+    linear-gradient(180deg, var(--gyen-v7-readout-top) 0%, var(--gyen-v7-readout) 45%, var(--gyen-v7-readout-bottom) 100%) !important;
+  border-color: color-mix(in srgb, var(--gyen-v7-readout-bottom) 86%, black) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.82),
+    0 1px 0 rgba(255,255,255,0.26) !important;
+}
+
+.gsyen-system-panel-readout p {
+  color: var(--gyen-card-white) !important;
+  font-family: var(--font-serif-sc) !important;
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+}
+
+.gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  margin-top: 10px !important;
+  color: var(--gyen-n7-retreat) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.18em !important;
+}
+
+.gsyen-system-panel-dot {
+  width: 14px !important;
+  height: 14px !important;
+  justify-self: center !important;
+  background: var(--gyen-n5-control) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--gyen-n7-retreat) 44%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+.gsyen-system-panel-dot.is-offline,
+.gsyen-system-panel-mini-dot.is-offline {
+  background: var(--gyen-n5-control) !important;
+}
+
+.gsyen-system-panel-dot.is-checking,
+.gsyen-system-panel-mini-dot.is-checking {
+  background: var(--gyen-v7-gold-signal) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--gyen-v7-gold-signal) 46%, transparent),
+    0 0 10px color-mix(in srgb, var(--gyen-v7-gold-signal) 22%, transparent) !important;
+}
+
+.gsyen-system-panel-dot.is-online,
+.gsyen-system-panel-mini-dot.is-online {
+  background: var(--gyen-status-online) !important;
+}
+
+.gsyen-system-panel-select {
+  position: relative !important;
+  margin: 0 24px 18px !important;
+  gap: 9px !important;
+}
+
+.gsyen-system-panel-select label {
+  color: var(--gyen-n6-weak) !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.18em !important;
+}
+
+.gsyen-system-panel-select select {
+  height: 42px !important;
+  appearance: none !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, var(--gyen-n7-retreat)) !important;
+  background:
+    linear-gradient(180deg, var(--gyen-card-white) 0%, color-mix(in srgb, var(--gyen-card-white) 80%, var(--gyen-n9-card)) 100%) !important;
+  padding: 0 42px 0 16px !important;
+  color: var(--gyen-n3-content) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.82) !important;
+}
+
+.gsyen-system-panel-select::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  bottom: 15px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--gyen-n5-control);
+  border-bottom: 2px solid var(--gyen-n5-control);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.gsyen-system-panel-table {
+  margin: 0 24px !important;
+  border-top-color: color-mix(in srgb, var(--gyen-n8-hairline) 64%, transparent) !important;
+}
+
+.gsyen-system-panel-row {
+  min-height: 44px !important;
+  grid-template-columns: 78px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+}
+
+.gsyen-system-panel-row:hover {
+  background: linear-gradient(90deg, rgba(255,255,255,0.38), transparent 68%) !important;
+}
+
+.gsyen-system-panel-row span {
+  color: var(--gyen-n5-control) !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.11em !important;
+}
+
+.gsyen-system-panel-row strong {
+  color: var(--gyen-n3-content) !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.055em !important;
+}
+
+.gsyen-system-panel-mini-dot {
+  width: 7px !important;
+  height: 7px !important;
+  margin-right: 9px !important;
+  vertical-align: 1px !important;
+}
+
+.gsyen-system-panel-action {
+  height: 38px !important;
+  margin: 24px !important;
+  padding: 0 14px !important;
+  background: var(--gyen-card-white) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, var(--gyen-n7-retreat)) !important;
+  color: var(--gyen-n5-control) !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.12em !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.82) !important;
+}

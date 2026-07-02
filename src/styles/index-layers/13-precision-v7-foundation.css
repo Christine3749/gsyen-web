@@ -1,0 +1,235 @@
+
+.gsyen-model-status-button:hover,
+.gsyen-model-status-button.is-active {
+  background: var(--gyen-card-white) !important;
+  border-color: color-mix(in srgb, var(--gyen-n7-retreat) 78%, var(--gyen-n5-control)) !important;
+  color: var(--gyen-n5-control) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 0 0 1px rgba(20,20,20,0.03) !important;
+}
+
+.gsyen-model-status-label {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-model-status-button:hover .gsyen-model-status-label,
+.gsyen-model-status-button.is-active .gsyen-model-status-label {
+  color: var(--gyen-n5-control) !important;
+}
+
+.gsyen-model-status-dot {
+  background: var(--gyen-status-unavailable) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gyen-status-unavailable) 66%, var(--gyen-n5-control)), inset 0 1px 0 rgba(255,255,255,0.26) !important;
+}
+
+.gsyen-model-status-button.is-checking .gsyen-model-status-dot,
+.gsyen-system-panel-dot.is-checking,
+.gsyen-system-panel-mini-dot.is-checking {
+  background: var(--gyen-gold-light) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gyen-gold-light) 54%, var(--gyen-n9-card)), 0 0 7px color-mix(in srgb, var(--gyen-gold-light) 24%, transparent) !important;
+}
+
+.gsyen-model-status-button.is-online .gsyen-model-status-dot,
+.gsyen-system-panel-dot.is-online,
+.gsyen-system-panel-mini-dot.is-online {
+  background: var(--gyen-status-online) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gyen-status-online) 52%, var(--gyen-n9-card)), 0 0 7px color-mix(in srgb, var(--gyen-status-online) 20%, transparent) !important;
+}
+
+.gsyen-standby-frame {
+  border-top-color: var(--gyen-n0-selected) !important;
+  background: transparent !important;
+}
+
+.gsyen-standby-mark,
+.gsyen-standby-ledger,
+.gsyen-standby-feed,
+.gsyen-standby-input,
+.gsyen-system-panel-select select,
+.gsyen-system-panel-action {
+  background: var(--gyen-card-white) !important;
+  border-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-standby-title,
+.gsyen-archive-title,
+.gsyen-system-panel-head h3 {
+  color: var(--gyen-n2-title) !important;
+}
+
+.gsyen-standby-kicker,
+.gsyen-archive-kicker,
+.gsyen-system-panel-head p {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-standby-index {
+  border-left-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-standby-index span,
+.gsyen-standby-feed-title span:last-child {
+  color: var(--gyen-gold-light) !important;
+}
+
+.gsyen-standby-index small {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-standby-row,
+.gsyen-standby-signal,
+.gsyen-system-panel-row {
+  border-bottom-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-standby-row span,
+.gsyen-standby-signal span,
+.gsyen-standby-feed-title span,
+.gsyen-system-panel-row span {
+  color: var(--gyen-n4-label) !important;
+}
+
+.gsyen-standby-row strong,
+.gsyen-standby-signal strong,
+.gsyen-system-panel-row strong {
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-standby-row.is-primary strong,
+.gsyen-standby-signal.is-primary strong {
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-standby-row.is-warn::before,
+.gsyen-standby-signal.is-warn::before {
+  background: var(--gyen-gold-light) !important;
+}
+
+.gsyen-standby-row.is-warn strong,
+.gsyen-standby-signal.is-warn strong {
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-standby-row strong em,
+.gsyen-standby-signal strong em {
+  color: var(--gyen-gold-dim) !important;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.gsyen-standby-input textarea {
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-standby-input textarea::placeholder {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-standby-input-footer span,
+.gsyen-archive-empty p,
+.gsyen-archive-empty span {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-standby-actions button {
+  background: var(--gyen-card-white) !important;
+  border-color: var(--gyen-n8-hairline) !important;
+  color: var(--gyen-n5-control) !important;
+}
+
+.gsyen-standby-actions button:hover {
+  background: var(--gyen-n9-card) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 60%, var(--gyen-n5-control)) !important;
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-archive-sidebar,
+.gsyen-system-panel {
+  background: color-mix(in srgb, var(--gyen-n10-page) 72%, var(--gyen-n9-card)) !important;
+  border-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-archive-header,
+.gsyen-system-panel-head {
+  background: linear-gradient(180deg, var(--gyen-card-white), color-mix(in srgb, var(--gyen-n10-page) 70%, var(--gyen-n9-card))) !important;
+  border-bottom-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-archive-section,
+.gsyen-archive-bottom {
+  border-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-archive-section-title,
+.gsyen-archive-section-meta {
+  color: var(--gyen-n5-control) !important;
+}
+
+.gsyen-archive-item,
+.gsyen-archive-team {
+  border-top-color: color-mix(in srgb, var(--gyen-n8-hairline) 75%, transparent) !important;
+}
+
+.gsyen-archive-empty {
+  background: color-mix(in srgb, var(--gyen-n10-page) 82%, var(--gyen-card-white)) !important;
+  border-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-pulse-panel {
+  background: var(--gyen-n1-readout) !important;
+  border-top-color: color-mix(in srgb, var(--gyen-gold-dark) 22%, transparent) !important;
+}
+
+.gsyen-pulse-panel-head {
+  color: var(--gyen-gold-dark) !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-gold-dark) 18%, transparent) !important;
+}
+
+.gsyen-pulse-panel-row {
+  border-bottom-color: color-mix(in srgb, var(--gyen-n7-retreat) 10%, transparent) !important;
+}
+
+.gsyen-pulse-panel-row > span:first-child,
+.gsyen-pulse-panel-row > span:nth-child(3) {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 56%, var(--gyen-n1-readout)) !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(2) {
+  color: var(--gyen-gold-dark) !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(4) {
+  color: color-mix(in srgb, var(--gyen-card-white) 82%, var(--gyen-n7-retreat)) !important;
+}
+
+.gsyen-pulse-panel-action {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 72%, var(--gyen-n1-readout)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n7-retreat) 20%, transparent) !important;
+  background: transparent !important;
+}
+
+.gsyen-pulse-panel-action:hover {
+  color: var(--gyen-gold-dark) !important;
+  border-color: color-mix(in srgb, var(--gyen-gold-dark) 46%, transparent) !important;
+}
+
+.gsyen-system-panel-readout {
+  background: var(--gyen-n1-readout) !important;
+  border-color: color-mix(in srgb, var(--gyen-n1-readout) 70%, black) !important;
+}
+
+.gsyen-system-panel-readout p {
+  color: var(--gyen-card-white) !important;
+}
+
+.gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  color: var(--gyen-n7-retreat) !important;
+}
+
+.gsyen-system-panel.is-checking .gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  color: var(--gyen-gold-dark) !important;
+}
+
+.gsyen-system-panel.is-online .gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  color: color-mix(in srgb, var(--gyen-status-online) 70%, var(--gyen-card-white)) !important;
+}
+

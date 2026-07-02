@@ -1,0 +1,243 @@
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.94) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* ----------------------------------------------------------
+   GLOBAL BASE STYLES
+   ---------------------------------------------------------- */
+
+/* 最小宽度 880px — 防止窗口压缩破版 / 文字竖排 */
+html, body {
+  min-width: 880px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+body {
+  overflow-x: auto;
+}
+#root {
+  min-width: 880px;
+}
+
+/* flex 子元素默认 min-width: auto，压缩时会竖排。全局修复。 */
+.flex > *, .flex-col > *, .flex-row > * {
+  min-width: 0;
+}
+
+/* 文字选中效果：墨水底 + 羊皮纸字 */
+::selection {
+  background-color: #1A1A1A;
+  color: #F9F8F6;
+}
+
+/* 滚动条极简化 */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 26, 26, 0.15);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 26, 26, 0.30);
+}
+
+/* Range input 统一样式（密钥库强度滑块） */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(26, 26, 26, 0.10);
+  cursor: pointer;
+  border-radius: 0;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #1A1A1A;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid #F9F8F6;
+  box-shadow: 0 0 0 1px #1A1A1A;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #1A1A1A;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid #F9F8F6;
+  box-shadow: 0 0 0 1px #1A1A1A;
+}
+
+/* ── Library panel animations ──────────────────────────────── */
+@keyframes gs-fadeUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+@keyframes gs-shimmer {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 0.55; }
+}
+.gs-list-item {
+  animation: gs-fadeUp 0.18s ease both;
+}
+.gs-skeleton {
+  border-radius: 4px;
+  animation: gs-shimmer 1.4s ease-in-out infinite;
+}
+
+/* ============================================================
+   GSYEN Workbench V1 — archive, standby, system status
+   ============================================================ */
+.gsyen-archive-sidebar {
+  background: #F1EFEA;
+  border-color: rgba(26, 26, 26, 0.13);
+  color: #1A1A1A;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.62);
+}
+
+.gsyen-archive-header {
+  height: 72px;
+  padding: 18px 18px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(26,26,26,0.015));
+}
+
+.gsyen-archive-kicker {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(26, 26, 26, 0.34);
+  text-transform: uppercase;
+}
+
+.gsyen-archive-title {
+  margin-top: 4px;
+  font-family: var(--font-serif-sc);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.82);
+}
+
+.gsyen-archive-counter {
+  min-width: 38px;
+  height: 24px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid rgba(26, 26, 26, 0.16);
+  background: rgba(249, 248, 246, 0.68);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(26, 26, 26, 0.54);
+}
+
+.gsyen-archive-section {
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.09);
+}
+
+.gsyen-archive-section-title {
+  width: 100%;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(26, 26, 26, 0.56);
+  text-transform: uppercase;
+}
+
+.gsyen-archive-section-title:hover {
+  color: rgba(26, 26, 26, 0.86);
+}
+
+.gsyen-archive-section-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(26, 26, 26, 0.28);
+}
+
+.gsyen-archive-chevron {
+  display: inline-block;
+  color: rgba(26, 26, 26, 0.28);
+  transition: transform 160ms ease;
+}
+
+.gsyen-archive-chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.gsyen-archive-list {
+  height: calc(100% - 28px);
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 8px;
+  padding-right: 2px;
+}
+
+.gsyen-archive-empty {
+  margin-top: 28px;
+  padding: 22px 10px;
+  text-align: center;
+  border: 1px dashed rgba(26, 26, 26, 0.12);
+  background: rgba(249, 248, 246, 0.34);
+}
+
+.gsyen-archive-empty p {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: rgba(26, 26, 26, 0.38);
+  text-transform: uppercase;
+}
+
+.gsyen-archive-empty span {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgba(26, 26, 26, 0.32);
+}
+
+.gsyen-archive-item,
+.gsyen-archive-team {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 9px;
+  border-left: 2px solid transparent;
+  border-top: 1px solid rgba(26, 26, 26, 0.045);
+  cursor: pointer;
+  text-align: left;
+  transition: background 140ms ease, border-color 140ms ease;
+}

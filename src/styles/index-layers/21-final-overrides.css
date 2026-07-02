@@ -1,0 +1,195 @@
+
+.gsyen-mail-page aside button[class~="bg-[#1A1A1A]"],
+.gsyen-member-page aside button[class*="bg-[#1A1A1A]/6"] {
+  background: var(--gyen-n0-selected) !important;
+  color: var(--gyen-card-white) !important;
+}
+
+.gsyen-mail-page .group:hover,
+.gsyen-kanban-page .group:hover,
+.gsyen-ledger-page .group:hover,
+.gsyen-citadel-page .group:hover {
+  box-shadow: none !important;
+}
+
+.gsyen-mail-page .divide-y > div:not(:first-child),
+.gsyen-ledger-page .divide-y > div:not(:first-child),
+.gsyen-citadel-page .divide-y > div:not(:first-child) {
+  border-top-color: color-mix(in srgb, var(--gyen-n8-hairline) 66%, transparent) !important;
+}
+
+.gsyen-mail-page [class*="bg-neutral-50"] {
+  background: color-mix(in srgb, var(--gyen-n10-page) 78%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-mail-page [class*="border-l-2"] {
+  border-left-color: var(--gyen-n0-selected) !important;
+}
+
+/* Kanban: flow board */
+.gsyen-kanban-page #kanban-lanes-master {
+  padding-top: 14px !important;
+  gap: 16px !important;
+  scroll-behavior: smooth !important;
+}
+
+.gsyen-kanban-page #kanban-lanes-master > div[draggable="true"],
+.gsyen-kanban-page #kanban-lanes-master > button,
+.gsyen-kanban-page #kanban-lanes-master > div:not([draggable="true"]) {
+  background: color-mix(in srgb, var(--gyen-card-white) 92%, var(--gyen-n9-card)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 78%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7) !important;
+}
+
+.gsyen-kanban-page #kanban-lanes-master > div[draggable="true"] > div:first-child {
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 70%, transparent) !important;
+}
+
+.gsyen-kanban-page #kanban-lanes-master span[class*="rounded-full"] {
+  filter: saturate(0.36) brightness(0.86) !important;
+}
+
+.gsyen-kanban-page #kanban-lanes-master .relative.border.bg-white {
+  background: var(--gyen-card-white) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
+}
+
+.gsyen-kanban-page #kanban-lanes-master .relative.border.bg-white:hover {
+  border-color: color-mix(in srgb, var(--gyen-n5-control) 44%, var(--gyen-n8-hairline)) !important;
+  background: color-mix(in srgb, var(--gyen-card-white) 96%, white) !important;
+}
+
+.gsyen-kanban-page #kanban-lanes-master [class*="border-dashed"] {
+  border-style: solid !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+  background: color-mix(in srgb, var(--gyen-n10-page) 72%, var(--gyen-card-white)) !important;
+}
+
+/* Ledger and Citadel: instrument pages */
+.gsyen-ledger-page > .flex-1,
+.gsyen-citadel-page > .flex-1 {
+  background: color-mix(in srgb, var(--gyen-n10-page) 82%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-ledger-page .grid > div,
+.gsyen-citadel-page .grid > div,
+.gsyen-member-page [class*="bg-white"][class*="border"] {
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 78%, transparent) !important;
+}
+
+.gsyen-ledger-page .grid > div > div,
+.gsyen-citadel-page .grid > div > div,
+.gsyen-member-page [class*="bg-white"][class*="border"] {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.68) !important;
+}
+
+.gsyen-ledger-page [class~="bg-[#1A1A1A]"],
+.gsyen-citadel-page [class~="bg-[#1A1A1A]"],
+.gsyen-member-page [class~="bg-[#1A1A1A]"] {
+  background: var(--gyen-n0-selected) !important;
+}
+
+.gsyen-ledger-page [class*="text-2xl"],
+.gsyen-ledger-page [class*="text-[34px]"] {
+  letter-spacing: -0.01em !important;
+}
+
+.gsyen-ledger-page .text-emerald-800,
+.gsyen-ledger-page .text-emerald-400 {
+  color: color-mix(in srgb, var(--gyen-status-online) 72%, var(--gyen-n2-title)) !important;
+}
+
+.gsyen-ledger-page .text-amber-700 {
+  color: var(--gyen-v7-gold-muted) !important;
+}
+
+.gsyen-ledger-page [class*="bg-[#1A1A1A]/5"],
+.gsyen-citadel-page [class*="bg-[#1A1A1A]/5"] {
+  background-color: color-mix(in srgb, var(--gyen-n8-hairline) 42%, transparent) !important;
+}
+
+.gsyen-citadel-page .lg\:col-span-5 > div:first-child {
+  background:
+    linear-gradient(180deg, var(--gyen-v7-readout-top), var(--gyen-v7-readout-bottom)) !important;
+  border-color: color-mix(in srgb, var(--gyen-v7-readout-bottom) 84%, black) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.82) !important;
+}
+
+.gsyen-citadel-page .lg\:col-span-5 > div:first-child h3,
+.gsyen-citadel-page .lg\:col-span-5 > div:first-child [class*="text-[#E5C158]"] {
+  color: var(--gyen-v7-gold-signal) !important;
+}
+
+.gsyen-citadel-page .lg\:col-span-5 > div:first-child input {
+  background: color-mix(in srgb, var(--gyen-card-white) 7%, transparent) !important;
+  border-color: color-mix(in srgb, var(--gyen-card-white) 18%, transparent) !important;
+  color: var(--gyen-card-white) !important;
+}
+
+.gsyen-citadel-page .lg\:col-span-5 > div:first-child button:last-child {
+  background: var(--gyen-card-white) !important;
+  color: var(--gyen-n0-selected) !important;
+}
+
+/* Member center: account ledger */
+.gsyen-member-page {
+  background: color-mix(in srgb, var(--gyen-card-white) 72%, var(--gyen-n10-page)) !important;
+}
+
+.gsyen-member-page > div {
+  max-width: 940px !important;
+}
+
+.gsyen-member-page aside {
+  top: 18px !important;
+}
+
+.gsyen-member-page aside p,
+.gsyen-member-page [class*="tracking-[0.28em]"] {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-member-page section > div:first-child p:first-child,
+.gsyen-member-page h2 {
+  color: var(--gyen-n2-title) !important;
+  font-weight: 900 !important;
+}
+
+.gsyen-member-page section > div:first-child p:last-child {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-member-page [class*="bg-[#F8F9FA]"],
+.gsyen-member-page [class*="bg-[#F4F2EE]"] {
+  background: color-mix(in srgb, var(--gyen-n10-page) 74%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-member-page [class*="rounded-sm"] {
+  border-radius: 0 !important;
+}
+
+.gsyen-member-page [class*="text-[#137333]"] {
+  color: color-mix(in srgb, var(--gyen-status-online) 76%, var(--gyen-n3-content)) !important;
+}
+
+.gsyen-member-page [class*="bg-[#E6F4EA]"] {
+  background: color-mix(in srgb, var(--gyen-status-online) 12%, var(--gyen-card-white)) !important;
+}
+
+@media (max-width: 900px) {
+  .gsyen-member-page > div {
+    flex-direction: column !important;
+    gap: 24px !important;
+  }
+
+  .gsyen-member-page aside {
+    position: static !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+

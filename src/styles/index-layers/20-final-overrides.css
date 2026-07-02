@@ -1,0 +1,235 @@
+
+.gsyen-system-panel-action:hover {
+  transform: translateY(-1px) !important;
+  background: var(--gyen-n0-selected) !important;
+  border-color: var(--gyen-n0-selected) !important;
+  color: var(--gyen-card-white) !important;
+}
+
+/* GYEN System Panel V7.2 - tune for the narrow right drawer */
+.gsyen-system-panel-head {
+  min-height: 84px !important;
+  padding: 18px 20px 16px !important;
+}
+
+.gsyen-system-panel-head h3 {
+  font-size: 20px !important;
+  letter-spacing: 0.035em !important;
+}
+
+.gsyen-system-panel-readout {
+  min-height: 96px !important;
+  margin: 20px 20px 18px !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 18px 18px !important;
+}
+
+.gsyen-system-panel-readout p {
+  font-size: 15px !important;
+}
+
+.gsyen-system-panel-select {
+  margin: 0 20px 16px !important;
+}
+
+.gsyen-system-panel-select select {
+  height: 40px !important;
+  padding-left: 14px !important;
+  padding-right: 38px !important;
+  font-size: 10.5px !important;
+}
+
+.gsyen-system-panel-select::after {
+  right: 15px !important;
+  bottom: 14px !important;
+}
+
+.gsyen-system-panel-table {
+  margin: 0 20px !important;
+}
+
+.gsyen-system-panel-row {
+  min-height: 41px !important;
+  grid-template-columns: 68px minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+
+.gsyen-system-panel-action {
+  height: 38px !important;
+  margin: 20px !important;
+}
+
+/* GYEN Scoped Module VI Pass V8 - mail / kanban / ledger / citadel / member only */
+.gsyen-mail-page,
+.gsyen-kanban-page,
+.gsyen-ledger-page,
+.gsyen-citadel-page,
+.gsyen-member-page {
+  background: var(--gyen-n10-page) !important;
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-mail-page > .relative,
+.gsyen-kanban-page > .relative,
+.gsyen-ledger-page > .relative,
+.gsyen-citadel-page > .relative {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-n10-page) 92%, white) 0%, var(--gyen-n10-page) 100%) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 70%, var(--gyen-n5-control)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62), inset 0 -1px 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-mail-page button,
+.gsyen-kanban-page button,
+.gsyen-ledger-page button,
+.gsyen-citadel-page button,
+.gsyen-member-page button {
+  border-radius: 0 !important;
+  transition:
+    background-color 150ms cubic-bezier(.2,.8,.2,1),
+    border-color 150ms cubic-bezier(.2,.8,.2,1),
+    color 150ms cubic-bezier(.2,.8,.2,1),
+    opacity 150ms cubic-bezier(.2,.8,.2,1),
+    transform 150ms cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.gsyen-mail-page button:hover,
+.gsyen-kanban-page button:hover,
+.gsyen-ledger-page button:hover,
+.gsyen-citadel-page button:hover,
+.gsyen-member-page button:hover {
+  transform: translateY(-1px);
+}
+
+.gsyen-mail-page input,
+.gsyen-mail-page select,
+.gsyen-mail-page textarea,
+.gsyen-kanban-page input,
+.gsyen-kanban-page select,
+.gsyen-kanban-page textarea,
+.gsyen-ledger-page input,
+.gsyen-ledger-page select,
+.gsyen-ledger-page textarea,
+.gsyen-citadel-page input,
+.gsyen-citadel-page select,
+.gsyen-citadel-page textarea,
+.gsyen-member-page input,
+.gsyen-member-page select,
+.gsyen-member-page textarea {
+  background: var(--gyen-card-white) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 78%, var(--gyen-n7-retreat)) !important;
+  color: var(--gyen-n3-content) !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.78) !important;
+}
+
+.gsyen-mail-page input:focus,
+.gsyen-mail-page select:focus,
+.gsyen-mail-page textarea:focus,
+.gsyen-kanban-page input:focus,
+.gsyen-kanban-page select:focus,
+.gsyen-kanban-page textarea:focus,
+.gsyen-ledger-page input:focus,
+.gsyen-ledger-page select:focus,
+.gsyen-ledger-page textarea:focus,
+.gsyen-citadel-page input:focus,
+.gsyen-citadel-page select:focus,
+.gsyen-citadel-page textarea:focus,
+.gsyen-member-page input:focus,
+.gsyen-member-page select:focus,
+.gsyen-member-page textarea:focus {
+  border-color: color-mix(in srgb, var(--gyen-n5-control) 72%, var(--gyen-n8-hairline)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 0 0 1px color-mix(in srgb, var(--gyen-n5-control) 18%, transparent) !important;
+  outline: none !important;
+}
+
+.gsyen-mail-page .bg-white,
+.gsyen-kanban-page .bg-white,
+.gsyen-ledger-page .bg-white,
+.gsyen-citadel-page .bg-white,
+.gsyen-member-page .bg-white {
+  background-color: var(--gyen-card-white) !important;
+}
+
+.gsyen-mail-page [class*="border-[#1A1A1A]/10"],
+.gsyen-mail-page [class*="border-[#DADCE0]"],
+.gsyen-kanban-page [class*="border-[#1A1A1A]/10"],
+.gsyen-kanban-page [class*="border-[#DADCE0]"],
+.gsyen-ledger-page [class*="border-[#1A1A1A]/10"],
+.gsyen-ledger-page [class*="border-[#DADCE0]"],
+.gsyen-citadel-page [class*="border-[#1A1A1A]/10"],
+.gsyen-citadel-page [class*="border-[#DADCE0]"],
+.gsyen-member-page [class*="border-[#1A1A1A]/10"],
+.gsyen-member-page [class*="border-[#DADCE0]"] {
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 78%, transparent) !important;
+}
+
+.gsyen-mail-page [class*="text-red"],
+.gsyen-kanban-page [class*="text-red"],
+.gsyen-ledger-page [class*="text-red"],
+.gsyen-citadel-page [class*="text-red"],
+.gsyen-member-page [class*="text-red"] {
+  color: #A2473E !important;
+}
+
+.gsyen-mail-page [class*="bg-red"],
+.gsyen-kanban-page [class*="bg-red"],
+.gsyen-ledger-page [class*="bg-red"],
+.gsyen-citadel-page [class*="bg-red"],
+.gsyen-member-page [class*="bg-red"] {
+  background-color: color-mix(in srgb, #A2473E 8%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-mail-page [class*="text-emerald"],
+.gsyen-kanban-page [class*="text-emerald"],
+.gsyen-ledger-page [class*="text-emerald"],
+.gsyen-citadel-page [class*="text-emerald"],
+.gsyen-member-page [class*="text-emerald"] {
+  color: color-mix(in srgb, var(--gyen-status-online) 78%, var(--gyen-n3-content)) !important;
+}
+
+.gsyen-mail-page [class*="text-indigo"],
+.gsyen-kanban-page [class*="text-indigo"],
+.gsyen-ledger-page [class*="text-indigo"],
+.gsyen-citadel-page [class*="text-indigo"],
+.gsyen-member-page [class*="text-indigo"],
+.gsyen-member-page [class*="text-[#1A6ECC]"] {
+  color: var(--gyen-n5-control) !important;
+}
+
+.gsyen-mail-page [class*="bg-amber"],
+.gsyen-kanban-page [class*="bg-amber"],
+.gsyen-ledger-page [class*="bg-amber"],
+.gsyen-citadel-page [class*="bg-amber"],
+.gsyen-member-page [class*="bg-amber"] {
+  background-color: color-mix(in srgb, var(--gyen-v7-gold-signal) 12%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-mail-page [class*="text-amber"],
+.gsyen-kanban-page [class*="text-amber"],
+.gsyen-ledger-page [class*="text-amber"],
+.gsyen-citadel-page [class*="text-amber"],
+.gsyen-member-page [class*="text-amber"] {
+  color: var(--gyen-v7-gold-muted) !important;
+}
+
+/* Mail: correspondence desk */
+.gsyen-mail-page > .flex-1 {
+  background: var(--gyen-card-white) !important;
+  border-top: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 72%, transparent) !important;
+}
+
+.gsyen-mail-page aside,
+.gsyen-kanban-page aside {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-n10-page) 88%, white), color-mix(in srgb, var(--gyen-n10-page) 92%, var(--gyen-n9-card))) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, transparent) !important;
+}
+
+.gsyen-mail-page aside button,
+.gsyen-kanban-page aside button,
+.gsyen-member-page aside button {
+  min-height: 31px !important;
+  letter-spacing: 0.08em !important;
+}

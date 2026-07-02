@@ -1,0 +1,235 @@
+.gsyen-command-deck {
+  height: 52px !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-n9-card) 92%, white) 0%, var(--gyen-n9-card) 100%) !important;
+  border-top-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, white) !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 58%, var(--gyen-n5-control)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.70),
+    inset 0 -1px 0 rgba(20,20,20,0.06),
+    0 1px 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-command-deck .gsyen-icon-command,
+.gsyen-command-deck .gsyen-command-button,
+.gsyen-command-deck .gsyen-system-bus,
+.gsyen-command-deck .gsyen-model-strip {
+  transform: translateY(0);
+}
+
+@media (max-width: 1320px) {
+  #app-header.gsyen-app-header {
+    grid-template-columns: minmax(210px, 260px) minmax(430px, 1fr) minmax(170px, 240px);
+    gap: 12px;
+  }
+
+  .gsyen-space-tab {
+    min-width: 76px !important;
+    padding: 0 9px !important;
+  }
+
+  .gsyen-brand-latin,
+  .gsyen-brand-subtitle {
+    display: none;
+  }
+}
+
+/* GYEN Header Refinement V6.1 - brand lockup becomes a nameplate */
+.gsyen-brand-lockup {
+  position: relative;
+  padding-left: 2px;
+}
+
+.gsyen-brand-lockup::before {
+  content: "";
+  position: absolute;
+  left: 52px;
+  top: 8px;
+  width: 3px;
+  height: 3px;
+  background: var(--gyen-gold-light);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gyen-gold-light) 42%, transparent);
+}
+
+.gsyen-brand-copy {
+  position: relative;
+  padding-bottom: 7px;
+}
+
+.gsyen-brand-copy::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 10px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gyen-n8-hairline), transparent);
+}
+
+.gsyen-brand-mark {
+  opacity: 0.96;
+}
+
+.gsyen-brand-mark:hover {
+  transform: translateY(-1px);
+}
+
+.gsyen-brand-cn {
+  color: var(--gyen-n0-selected) !important;
+}
+
+.gsyen-brand-latin {
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-brand-subtitle {
+  color: var(--gyen-n7-retreat) !important;
+}
+
+@media (max-width: 1320px) {
+  .gsyen-brand-copy::after,
+  .gsyen-brand-lockup::before {
+    display: none;
+  }
+}
+
+/* GYEN Frontier Car V1 - press lift */
+.gsyen-brand-mark svg {
+  overflow: visible;
+}
+
+.gsyen-brand-mark .gsyen-car-body,
+.gsyen-brand-mark .gsyen-car-front,
+.gsyen-brand-mark .gsyen-car-front-wheel,
+.gsyen-brand-mark .gsyen-car-lamp {
+  transform-box: fill-box;
+  transition:
+    transform 170ms cubic-bezier(.2,.8,.2,1),
+    opacity 170ms ease,
+    filter 170ms ease;
+}
+
+.gsyen-brand-mark .gsyen-car-front {
+  transform-origin: 8% 92%;
+}
+
+.gsyen-brand-mark .gsyen-car-body {
+  transform-origin: 25% 86%;
+}
+
+.gsyen-brand-mark .gsyen-car-front-wheel {
+  transform-origin: 50% 50%;
+}
+
+.gsyen-brand-mark .gsyen-car-lamp {
+  transform-origin: 50% 50%;
+}
+
+.gsyen-brand-mark:active .gsyen-car-body {
+  transform: rotate(-1.2deg) translateY(-0.35px);
+}
+
+.gsyen-brand-mark:active .gsyen-car-front {
+  transform: rotate(-4.2deg) translateY(-1.25px);
+}
+
+.gsyen-brand-mark:active .gsyen-car-front-wheel {
+  transform: translateY(-0.8px) rotate(10deg);
+}
+
+.gsyen-brand-mark:active .gsyen-car-lamp {
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 2px rgba(167, 133, 63, 0.44));
+}
+
+.gsyen-brand-mark:not(:active) .gsyen-car-front-wheel,
+.gsyen-brand-mark:not(:active) .gsyen-car-rear-wheel {
+  transition: transform 240ms cubic-bezier(.2,.8,.2,1);
+}
+
+.gsyen-brand-mark:hover .gsyen-car-lamp {
+  filter: drop-shadow(0 0 2px rgba(167, 133, 63, 0.30));
+}
+
+/* GYEN Frontier Car V1.1 - keep the automobile wide, not icon-square */
+.gsyen-brand-mark {
+  width: 76px !important;
+  height: 52px !important;
+  justify-items: start;
+}
+
+.gsyen-brand-mark svg {
+  width: 74px !important;
+  height: 50px !important;
+  max-width: none !important;
+  overflow: visible;
+}
+
+.gsyen-brand-lockup {
+  gap: 10px !important;
+}
+
+.gsyen-brand-lockup::before {
+  left: 73px !important;
+}
+
+.gsyen-brand-mark:active .gsyen-car-front {
+  transform: rotate(-3.3deg) translateY(-1.15px);
+}
+
+.gsyen-brand-mark:active .gsyen-car-body {
+  transform: rotate(-0.7deg) translateY(-0.25px);
+}
+
+.gsyen-brand-mark:active .gsyen-car-lamp-ray {
+  opacity: 0.95;
+}
+
+/* GYEN Frontier Car V1.2 - exact image, no reinterpretation */
+.gsyen-brand-mark {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.gsyen-brand-mark:hover {
+  transform: none !important;
+}
+
+.gsyen-brand-mark img {
+  filter: none !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  image-rendering: auto;
+}
+
+.gsyen-brand-lockup::before {
+  display: none !important;
+}
+
+/* GYEN Frontier Car V1.3 - transparent raster, left-facing kick */
+@keyframes gsyen-frontier-car-kick-left {
+  0%   { transform: translateY(0) rotate(0deg); }
+  28%  { transform: translateY(-1px) rotate(3.8deg); }
+  58%  { transform: translateY(0.35px) rotate(-0.8deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.gsyen-vintage-car {
+  background: transparent !important;
+  transform-origin: 82% 82%;
+  will-change: transform;
+}
+
+.gsyen-vintage-car.is-kicking {
+  animation: gsyen-frontier-car-kick-left 420ms cubic-bezier(.18,.85,.18,1) both;
+}
+
+.gsyen-brand-mark img.gsyen-vintage-car {
+  width: 74px !important;
+  height: 50px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+

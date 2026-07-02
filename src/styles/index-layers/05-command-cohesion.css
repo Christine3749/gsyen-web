@@ -1,0 +1,235 @@
+
+.gsyen-model-status-label {
+  display: none;
+  margin-left: 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(26, 26, 26, 0.46);
+}
+
+.gsyen-system-bus {
+  max-width: 720px;
+  flex-basis: 560px;
+}
+
+.gsyen-system-bus-label {
+  width: 116px;
+  flex-basis: 116px;
+  background: #B99A57;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+}
+
+.gsyen-system-cell {
+  min-width: 132px;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+}
+
+.gsyen-system-cell-value {
+  color: #D7B56D;
+}
+
+@media (min-width: 1780px) {
+  .gsyen-model-status-button {
+    width: auto;
+    min-width: 154px;
+    justify-content: flex-start;
+    padding: 0 11px;
+  }
+
+  .gsyen-model-status-label {
+    display: inline;
+  }
+}
+
+@media (max-width: 1180px) {
+  .gsyen-standby-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gsyen-standby-index {
+    display: none;
+  }
+
+  .gsyen-system-panel {
+    display: none;
+  }
+}
+
+/* ============================================================
+   GSYEN Workbench V2 — command dock cohesion pass
+   ============================================================ */
+.gsyen-command-deck {
+  height: 56px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 26px;
+  padding: 0 30px !important;
+  border-top: 1px solid rgba(26, 26, 26, 0.095) !important;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.16) !important;
+  background: #E9E6DF !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(26, 26, 26, 0.05);
+}
+
+.gsyen-command-deck::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 36px;
+  transform: translateY(-50%);
+  border-top: 1px solid rgba(255, 255, 255, 0.42);
+  border-bottom: 1px solid rgba(26, 26, 26, 0.055);
+  pointer-events: none;
+}
+
+.gsyen-command-deck > div:first-child {
+  position: relative;
+  z-index: 1;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-right: 22px !important;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button,
+.gsyen-system-bus,
+.gsyen-model-selector,
+.gsyen-model-option,
+.gsyen-model-status-button {
+  height: 30px !important;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button {
+  border-color: rgba(26, 26, 26, 0.14);
+  background: #F7F5F0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62);
+}
+
+.gsyen-icon-command.is-active {
+  border-color: #11100F;
+  background: #11100F;
+  color: #F9F8F6;
+  box-shadow: none;
+}
+
+.gsyen-command-button:hover {
+  border-color: #11100F;
+  background: #11100F;
+  color: #F9F8F6;
+  box-shadow: none;
+}
+
+.gsyen-system-bus {
+  min-width: 410px;
+  max-width: 690px;
+  flex: 1 1 560px;
+  margin-left: 4px;
+  border: 1px solid rgba(17, 16, 15, 0.42);
+  background: #11100F;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.20);
+}
+
+.gsyen-system-bus-label {
+  width: 112px;
+  flex-basis: 112px;
+  background: #B99A57;
+  border-right: 1px solid rgba(0, 0, 0, 0.58);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+}
+
+.gsyen-system-cell {
+  min-width: 126px;
+  gap: 7px;
+  padding: 0 10px;
+  border-right-color: rgba(249, 248, 246, 0.075);
+}
+
+.gsyen-system-cell-name {
+  color: rgba(249, 248, 246, 0.30);
+}
+
+.gsyen-system-cell-value {
+  color: #D5B369;
+  font-size: 10px;
+}
+
+.gsyen-system-cell-unit {
+  color: rgba(249, 248, 246, 0.50);
+}
+
+.gsyen-system-count {
+  width: 40px;
+  flex-basis: 40px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.gsyen-model-strip {
+  position: relative;
+  z-index: 1;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 18px;
+  border-left: 1px solid rgba(26, 26, 26, 0.12);
+}
+
+.gsyen-model-label {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: rgba(26, 26, 26, 0.34);
+}
+
+.gsyen-model-selector {
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.gsyen-model-option {
+  background: rgba(26, 26, 26, 0.045);
+  border-color: rgba(26, 26, 26, 0.115);
+  color: rgba(26, 26, 26, 0.54);
+}
+
+.gsyen-model-option.is-active {
+  background: #11100F;
+  border-color: #11100F;
+  color: #F9F8F6;
+}
+
+.gsyen-model-status-button {
+  background: rgba(255, 255, 255, 0.34);
+  border-color: rgba(26, 26, 26, 0.13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.gsyen-model-status-button:hover,
+.gsyen-model-status-button.is-active {
+  background: #F7F5F0;
+  border-color: rgba(26, 26, 26, 0.36);
+}
+
+.gsyen-pulse-panel {
+  border-top: 1px solid rgba(215, 181, 109, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(215, 181, 109, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.85);
+}

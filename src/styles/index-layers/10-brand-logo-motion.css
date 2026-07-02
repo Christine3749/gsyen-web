@@ -1,0 +1,276 @@
+.gsyen-model-status-button svg,
+.gsyen-pulse-panel-action svg,
+.gsyen-standby-actions button svg {
+  flex: 0 0 auto;
+  stroke-width: 1.75;
+}
+
+.gsyen-command-button {
+  border-color: rgba(15, 14, 12, 0.18);
+}
+
+.gsyen-command-button:not(:hover) {
+  color: rgba(15, 14, 12, 0.62);
+}
+
+.gsyen-system-bus {
+  will-change: box-shadow, border-color;
+}
+
+.gsyen-system-bus::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: rgba(255,255,255,0.075);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.gsyen-system-bus-label {
+  text-shadow: 0 1px 0 rgba(255,255,255,0.14);
+}
+
+.gsyen-system-cell {
+  position: relative;
+  transition:
+    background-color var(--gsyen-medium) var(--gsyen-motion),
+    border-color var(--gsyen-medium) var(--gsyen-motion);
+}
+
+.gsyen-system-cell::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: rgba(0,0,0,0.38);
+  opacity: 0.42;
+}
+
+.gsyen-system-cell:hover {
+  background: rgba(255,255,255,0.026);
+}
+
+.gsyen-system-cell-value,
+.gsyen-system-count span {
+  font-variant-numeric: tabular-nums;
+}
+
+.gsyen-model-strip {
+  background: linear-gradient(90deg, rgba(17,16,15,0.025), rgba(255,255,255,0.10));
+}
+
+.gsyen-model-selector {
+  border-left: 1px solid rgba(15, 14, 12, 0.12);
+}
+
+.gsyen-model-option:not(.is-active):hover {
+  background: rgba(17, 16, 15, 0.07);
+  color: rgba(15, 14, 12, 0.68);
+}
+
+.gsyen-model-option.is-active {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.gsyen-model-status-dot,
+.gsyen-system-panel-dot,
+.gsyen-system-panel-mini-dot {
+  transition:
+    background-color var(--gsyen-medium) var(--gsyen-motion),
+    box-shadow var(--gsyen-medium) var(--gsyen-motion),
+    opacity var(--gsyen-medium) var(--gsyen-motion);
+}
+
+.gsyen-model-status-button:not(.is-active):not(:hover) {
+  border-color: rgba(15, 14, 12, 0.13);
+}
+
+.gsyen-pulse-panel {
+  will-change: height, opacity;
+}
+
+.gsyen-pulse-panel-head,
+.gsyen-pulse-panel-row {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.gsyen-pulse-panel-row span {
+  line-height: 1;
+}
+
+.gsyen-pulse-panel-action {
+  min-width: 58px;
+  text-align: center;
+}
+
+.gsyen-pulse-panel-action:hover {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.gsyen-archive-sidebar,
+.gsyen-system-panel {
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,0.34),
+    inset -1px 0 0 rgba(15,14,12,0.035);
+}
+
+.gsyen-archive-section-title,
+.gsyen-archive-item,
+.gsyen-archive-team,
+.gsyen-system-panel-row,
+.gsyen-standby-row,
+.gsyen-standby-signal {
+  transition:
+    background-color var(--gsyen-medium) var(--gsyen-motion),
+    border-color var(--gsyen-medium) var(--gsyen-motion),
+    color var(--gsyen-medium) var(--gsyen-motion),
+    opacity var(--gsyen-medium) var(--gsyen-motion);
+}
+
+.gsyen-archive-section-title:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+.gsyen-archive-item:hover,
+.gsyen-archive-team:hover {
+  background: rgba(255,255,255,0.50);
+}
+
+.gsyen-standby-frame {
+  transform: translateZ(0);
+}
+
+.gsyen-standby-ledger,
+.gsyen-standby-feed,
+.gsyen-standby-input {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.68),
+    0 1px 0 rgba(15,14,12,0.028);
+}
+
+.gsyen-standby-row:hover,
+.gsyen-standby-signal:hover,
+.gsyen-system-panel-row:hover {
+  background: rgba(255,255,255,0.50);
+}
+
+.gsyen-standby-input textarea {
+  caret-color: #0F0E0C;
+  transition:
+    color var(--gsyen-medium) var(--gsyen-motion),
+    opacity var(--gsyen-medium) var(--gsyen-motion);
+}
+
+.gsyen-standby-input-footer button:not(:disabled):hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.11),
+    0 0 0 1px rgba(196,162,93,0.12);
+}
+
+.gsyen-standby-actions button {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62);
+}
+
+.gsyen-system-panel-readout {
+  will-change: contents;
+}
+
+.gsyen-system-panel-action:hover {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+#ai-chat-root-workspace .overflow-y-auto,
+.gsyen-archive-list {
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gsyen-icon-command,
+  .gsyen-command-button,
+  .gsyen-model-option,
+  .gsyen-model-status-button,
+  .gsyen-standby-actions button,
+  .gsyen-system-panel-action {
+    transition-duration: 1ms !important;
+    transform: none !important;
+  }
+}
+
+/* GSYEN Workbench V4.3 - responsive command rail resilience */
+@media (max-width: 1180px) {
+  .gsyen-command-deck {
+    column-gap: 12px;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .gsyen-command-deck > div:first-child {
+    gap: 8px;
+    padding-right: 10px !important;
+  }
+
+  .gsyen-icon-command {
+    width: 30px !important;
+    flex: 0 0 30px;
+  }
+
+  .gsyen-command-button {
+    width: 86px;
+    padding-left: 8px;
+    padding-right: 8px;
+    letter-spacing: 0.11em;
+  }
+
+  .gsyen-system-bus {
+    min-width: 0;
+    max-width: none;
+    flex: 1 1 260px;
+  }
+
+  .gsyen-system-bus-label {
+    width: 104px;
+    flex-basis: 104px;
+    letter-spacing: 0.14em;
+  }
+
+  .gsyen-system-cell {
+    min-width: 108px;
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 6px;
+  }
+
+  .gsyen-model-strip {
+    min-width: 0;
+    gap: 8px;
+    padding-left: 10px;
+  }
+
+  .gsyen-model-label {
+    display: none;
+  }
+
+  .gsyen-model-selector {
+    max-width: 150px !important;
+  }
+
+  .gsyen-model-option {
+    min-width: 56px;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .gsyen-model-status-button {
+    width: 30px !important;
+    min-width: 30px !important;
+  }
+
+  .gsyen-model-status-label {
+    display: none !important;
+  }
+}

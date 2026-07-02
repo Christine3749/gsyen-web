@@ -1,0 +1,237 @@
+
+.gsyen-model-status-button:hover .gsyen-model-status-label,
+.gsyen-model-status-button.is-active .gsyen-model-status-label {
+  color: rgba(15, 14, 12, 0.72);
+}
+
+@media (max-width: 1180px) {
+  .gsyen-standby-header {
+    grid-template-columns: 42px minmax(0, 1fr) 84px;
+  }
+
+  .gsyen-standby-index {
+    width: 84px;
+    padding-left: 10px;
+  }
+
+  .gsyen-standby-index span {
+    font-size: 19px;
+  }
+}
+
+/* GSYEN Workbench V4.7 - model bay legibility lift */
+.gsyen-model-strip {
+  background: linear-gradient(90deg, #E7E3DA 0%, #EEEAE2 100%);
+  border-left-color: rgba(15, 14, 12, 0.24);
+}
+
+.gsyen-model-label {
+  color: rgba(15, 14, 12, 0.60);
+}
+
+.gsyen-model-selector {
+  border-color: rgba(15, 14, 12, 0.24);
+  background: #EFEAE0;
+}
+
+.gsyen-model-option {
+  color: rgba(15, 14, 12, 0.72);
+  background: rgba(255, 255, 255, 0.22);
+  border-right-color: rgba(15, 14, 12, 0.18);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.30);
+}
+
+.gsyen-model-option:not(.is-active):not(.is-disabled):hover {
+  background: rgba(15, 14, 12, 0.095);
+  color: rgba(15, 14, 12, 0.86);
+}
+
+.gsyen-model-option.is-active {
+  text-shadow: none;
+}
+
+.gsyen-model-option.is-disabled {
+  color: rgba(15, 14, 12, 0.42);
+}
+
+.gsyen-model-status-button {
+  border-color: rgba(15, 14, 12, 0.30);
+  background: #F2EEE4;
+  color: rgba(15, 14, 12, 0.68);
+}
+
+.gsyen-model-status-button:not(.is-active):not(:hover) {
+  border-color: rgba(15, 14, 12, 0.28);
+}
+
+.gsyen-model-status-label {
+  color: rgba(15, 14, 12, 0.68);
+}
+
+.gsyen-model-status-button:hover,
+.gsyen-model-status-button.is-active {
+  color: rgba(15, 14, 12, 0.82);
+}
+
+.gsyen-model-status-button:hover .gsyen-model-status-label,
+.gsyen-model-status-button.is-active .gsyen-model-status-label {
+  color: rgba(15, 14, 12, 0.82);
+}
+
+/* ============================================================
+   GYEN Attention System V5 - semantic color ramp
+   黑负责定位，仪表黑负责读数，金负责信号，灰阶负责注意力坡道。
+   ============================================================ */
+:root {
+  --gyen-n0-selected: #141414;
+  --gyen-n1-readout: #262420;
+  --gyen-n2-title: #3D3A34;
+  --gyen-n3-content: #55514A;
+  --gyen-n4-label: #6B675E;
+  --gyen-n5-control: #837E70;
+  --gyen-n6-weak: #A6A196;
+  --gyen-n7-retreat: #C4BFB2;
+  --gyen-n8-hairline: #DEDAD0;
+  --gyen-n9-card: #ECE8DE;
+  --gyen-n10-page: #F2EEE6;
+  --gyen-card-white: #FBFAF7;
+  --gyen-gold-dark: #C9A227;
+  --gyen-gold-light: #A7853F;
+  --gyen-gold-dim: #B8935E;
+  --gyen-status-online: #5C7A5A;
+  --gyen-status-unavailable: #B5AFA2;
+}
+
+html,
+body,
+#logo-designer-root,
+#ai-chat-root-workspace {
+  background: var(--gyen-n10-page) !important;
+  color: var(--gyen-n3-content);
+}
+
+#app-header {
+  background: var(--gyen-n10-page) !important;
+  border-bottom-color: var(--gyen-n8-hairline) !important;
+}
+
+#app-header button:not(.bg-\[\#1A1A1A\]):not([class*="bg-[#1A1A1A]"]) {
+  color: var(--gyen-n5-control) !important;
+}
+
+#app-header .font-serif-sc,
+#app-header .font-cinzel {
+  color: var(--gyen-n2-title) !important;
+}
+
+.gsyen-command-deck {
+  background: linear-gradient(180deg, #EEEAE2 0%, var(--gyen-n9-card) 100%) !important;
+  border-top-color: var(--gyen-n8-hairline) !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 78%, var(--gyen-n4-label)) !important;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button {
+  background: var(--gyen-card-white) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, var(--gyen-n5-control)) !important;
+  color: var(--gyen-n5-control) !important;
+}
+
+.gsyen-command-button:not(:hover) {
+  color: var(--gyen-n5-control) !important;
+}
+
+.gsyen-icon-command.is-active {
+  background: var(--gyen-n0-selected) !important;
+  border-color: var(--gyen-n0-selected) !important;
+  color: var(--gyen-card-white) !important;
+}
+
+.gsyen-command-button:hover {
+  background: color-mix(in srgb, var(--gyen-card-white) 82%, var(--gyen-n9-card)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n5-control) 54%, var(--gyen-n8-hairline)) !important;
+  color: var(--gyen-n3-content) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.74), 0 0 0 1px rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-command-button:active {
+  background: var(--gyen-n9-card) !important;
+}
+
+.gsyen-system-bus {
+  background: var(--gyen-n1-readout) !important;
+  border-color: color-mix(in srgb, var(--gyen-n1-readout) 86%, black) !important;
+  color: var(--gyen-n7-retreat) !important;
+}
+
+.gsyen-system-bus-label {
+  background: var(--gyen-gold-dark) !important;
+  color: var(--gyen-n0-selected) !important;
+  text-shadow: none !important;
+}
+
+.gsyen-system-cell-name {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 60%, var(--gyen-n1-readout)) !important;
+}
+
+.gsyen-system-cell-value,
+.gsyen-system-count,
+.gsyen-system-count span {
+  color: var(--gyen-gold-dark) !important;
+}
+
+.gsyen-system-cell-unit {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 76%, var(--gyen-n1-readout)) !important;
+}
+
+.gsyen-system-bus:hover,
+.gsyen-system-bus.is-open {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.88), 0 0 0 1px color-mix(in srgb, var(--gyen-gold-dark) 34%, transparent) !important;
+}
+
+.gsyen-model-strip {
+  background: linear-gradient(90deg, var(--gyen-n9-card), color-mix(in srgb, var(--gyen-n9-card) 74%, var(--gyen-card-white))) !important;
+  border-left-color: color-mix(in srgb, var(--gyen-n8-hairline) 60%, var(--gyen-n5-control)) !important;
+}
+
+.gsyen-model-label {
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-model-selector {
+  background: var(--gyen-card-white) !important;
+  border-color: var(--gyen-n8-hairline) !important;
+}
+
+.gsyen-model-option {
+  background: var(--gyen-card-white) !important;
+  color: var(--gyen-n5-control) !important;
+  border-right-color: var(--gyen-n8-hairline) !important;
+  text-shadow: none !important;
+}
+
+.gsyen-model-option:not(.is-active):not(.is-disabled):hover {
+  background: var(--gyen-n9-card) !important;
+  color: var(--gyen-n3-content) !important;
+}
+
+.gsyen-model-option.is-active {
+  background: var(--gyen-n0-selected) !important;
+  border-color: var(--gyen-n0-selected) !important;
+  color: var(--gyen-card-white) !important;
+}
+
+.gsyen-model-option.is-disabled {
+  background: var(--gyen-n9-card) !important;
+  color: var(--gyen-n7-retreat) !important;
+}
+
+.gsyen-model-status-button {
+  background: var(--gyen-n9-card) !important;
+  border-color: var(--gyen-n8-hairline) !important;
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-model-status-button:not(.is-active):not(:hover) {
+  border-color: var(--gyen-n8-hairline) !important;
+}

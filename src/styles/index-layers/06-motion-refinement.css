@@ -1,0 +1,239 @@
+
+.gsyen-archive-header {
+  height: 66px;
+  padding-top: 16px;
+  padding-bottom: 12px;
+}
+
+.gsyen-archive-kicker {
+  font-size: 7px;
+  color: rgba(26, 26, 26, 0.28);
+}
+
+.gsyen-archive-title {
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+.gsyen-archive-counter {
+  height: 22px;
+  min-width: 34px;
+  background: rgba(249, 248, 246, 0.54);
+}
+
+.gsyen-archive-section {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.gsyen-standby-shell {
+  padding-top: 34px !important;
+}
+
+.gsyen-standby-frame {
+  width: min(960px, 100%);
+  border-top-color: rgba(17, 16, 15, 0.78);
+}
+
+.gsyen-standby-header {
+  min-height: 66px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.gsyen-standby-title {
+  font-size: 19px;
+}
+
+@media (min-width: 1600px) {
+  .gsyen-system-bus {
+    max-width: 760px;
+    flex-basis: 640px;
+  }
+
+  .gsyen-command-deck {
+    column-gap: 34px;
+  }
+}
+
+@media (max-width: 1240px) {
+  .gsyen-system-bus {
+    min-width: 320px;
+    max-width: 520px;
+  }
+
+  .gsyen-system-cell {
+    min-width: 112px;
+  }
+
+  .gsyen-model-status-label {
+    display: none !important;
+  }
+}
+
+/* 8.5 width balance: let Pulse meet the model bay without becoming full-width */
+@media (min-width: 1600px) {
+  .gsyen-system-bus {
+    max-width: 1040px;
+    flex-basis: 900px;
+  }
+
+  .gsyen-system-cell {
+    min-width: 136px;
+  }
+}
+
+/* ============================================================
+   GSYEN Workbench V3 — motion, hierarchy, tactile refinement
+   ============================================================ */
+:root {
+  --gsyen-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --gsyen-ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --gsyen-gold: #B99A57;
+  --gsyen-gold-bright: #D7B56D;
+  --gsyen-ink-soft: rgba(26, 26, 26, 0.62);
+  --gsyen-line-soft: rgba(26, 26, 26, 0.105);
+}
+
+@keyframes gsyen-panel-enter {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes gsyen-standby-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gsyen-pulse-row-enter {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gsyen-readout-scan {
+  from { transform: translateX(-120%); opacity: 0; }
+  18%  { opacity: 0.42; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
+
+.gsyen-command-deck {
+  transition:
+    background-color 220ms var(--gsyen-ease-ui),
+    border-color 220ms var(--gsyen-ease-ui),
+    box-shadow 220ms var(--gsyen-ease-ui);
+}
+
+.gsyen-command-deck.has-pulse-open {
+  background: #E5E1D8 !important;
+  border-bottom-color: rgba(17, 16, 15, 0.26) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 -1px 0 rgba(17, 16, 15, 0.10);
+}
+
+.gsyen-command-deck.has-model-open .gsyen-model-strip {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.gsyen-icon-command,
+.gsyen-command-button,
+.gsyen-model-option,
+.gsyen-model-status-button,
+.gsyen-system-bus,
+.gsyen-system-count,
+.gsyen-pulse-panel-action,
+.gsyen-standby-actions button,
+.gsyen-system-panel-action {
+  transition:
+    background-color 180ms var(--gsyen-ease-ui),
+    border-color 180ms var(--gsyen-ease-ui),
+    color 180ms var(--gsyen-ease-ui),
+    box-shadow 220ms var(--gsyen-ease-ui),
+    transform 180ms var(--gsyen-ease-ui),
+    opacity 180ms var(--gsyen-ease-ui);
+}
+
+.gsyen-icon-command:hover,
+.gsyen-command-button:hover,
+.gsyen-standby-actions button:hover,
+.gsyen-system-panel-action:hover {
+  transform: translateY(-1px);
+}
+
+.gsyen-icon-command:active,
+.gsyen-command-button:active,
+.gsyen-standby-actions button:active,
+.gsyen-system-panel-action:active {
+  transform: translateY(0);
+}
+
+.gsyen-system-bus {
+  position: relative;
+  isolation: isolate;
+}
+
+.gsyen-system-bus:hover,
+.gsyen-system-bus.is-open {
+  border-color: rgba(185, 154, 87, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.92),
+    0 0 0 1px rgba(185, 154, 87, 0.18);
+}
+
+.gsyen-system-bus-label {
+  position: relative;
+  overflow: hidden;
+}
+
+.gsyen-system-bus-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transform: translateX(-120%);
+  opacity: 0;
+}
+
+.gsyen-system-bus:hover .gsyen-system-bus-label::after,
+.gsyen-system-bus.is-open .gsyen-system-bus-label::after {
+  animation: gsyen-readout-scan 900ms var(--gsyen-ease-out) both;
+}
+
+.gsyen-system-bus:hover .gsyen-system-cell-name,
+.gsyen-system-bus.is-open .gsyen-system-cell-name {
+  color: rgba(249, 248, 246, 0.42);
+}
+
+.gsyen-system-bus:hover .gsyen-system-cell-unit,
+.gsyen-system-bus.is-open .gsyen-system-cell-unit {
+  color: rgba(249, 248, 246, 0.60);
+}
+
+.gsyen-system-count svg {
+  transition: transform 200ms var(--gsyen-ease-out);
+}
+
+.gsyen-system-bus.is-open .gsyen-system-count svg {
+  transform: translateY(-1px);
+}
+
+.gsyen-pulse-marquee {
+  animation-duration: 44s;
+}
+
+.gsyen-pulse-panel {
+  transform-origin: top center;
+  backdrop-filter: none;
+}
+
+.gsyen-pulse-panel-head {
+  color: var(--gsyen-gold-bright);
+}
+
+.gsyen-pulse-panel-row {
+  animation: gsyen-pulse-row-enter 260ms var(--gsyen-ease-out) both;
+  transition:
+    background-color 160ms var(--gsyen-ease-ui),
+    border-color 160ms var(--gsyen-ease-ui);
+}

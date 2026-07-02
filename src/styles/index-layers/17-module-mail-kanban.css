@@ -1,0 +1,239 @@
+
+.gsyen-system-count span {
+  min-width: 12px !important;
+  text-align: center !important;
+}
+
+.gsyen-system-count svg {
+  flex: 0 0 auto !important;
+  opacity: 0.88 !important;
+}
+
+/* GYEN Pulse Panel V6.5 - reduce detail column pressure and center the end cap */
+.gsyen-pulse-panel-row > span:nth-child(4) {
+  color: color-mix(in srgb, var(--gyen-card-white) 78%, var(--gyen-n7-retreat)) !important;
+  font-size: 11.6px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.28 !important;
+}
+
+.gsyen-system-count {
+  width: 53px !important;
+  flex-basis: 53px !important;
+  padding: 0 10px !important;
+}
+
+/* GYEN Pulse V6.6 - remove the pale spacer after tape */
+.gsyen-command-deck {
+  column-gap: 12px !important;
+}
+
+.gsyen-command-deck > div:first-child {
+  padding-right: 8px !important;
+}
+
+.gsyen-system-count {
+  border-right-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.gsyen-model-strip {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left-color: transparent !important;
+  background: transparent !important;
+}
+
+/* GYEN Pulse V6.7 - restore rail geometry, soften inner grid lines */
+.gsyen-command-deck {
+  column-gap: 30px !important;
+}
+
+.gsyen-command-deck > div:first-child {
+  padding-right: 20px !important;
+}
+
+.gsyen-model-strip {
+  background: linear-gradient(90deg, #E7E3DA 0%, #EEEAE2 100%) !important;
+  border-left-color: rgba(15, 14, 12, 0.24) !important;
+}
+
+.gsyen-system-cell {
+  border-right-color: transparent !important;
+}
+
+.gsyen-system-cell::after {
+  opacity: 0 !important;
+}
+
+.gsyen-system-bus-window {
+  background: linear-gradient(180deg, rgba(255,255,255,0.032), transparent 44%) !important;
+}
+
+.gsyen-system-count {
+  width: 53px !important;
+  flex-basis: 53px !important;
+  padding: 0 10px !important;
+  border-left-color: color-mix(in srgb, var(--gyen-n7-retreat) 10%, transparent) !important;
+  border-right-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* GYEN Pulse V6.8 - unit text matches the right count chroma */
+.gsyen-system-cell-unit,
+.gsyen-system-cell:hover .gsyen-system-cell-unit {
+  color: #C9A227 !important;
+}
+
+/* GYEN Pulse Panel V6.9 - panel unit chroma matches tape count */
+.gsyen-pulse-panel-row > span:nth-child(3) {
+  color: #C9A227 !important;
+}
+
+/* GYEN Pulse V6.10 - close the spacer without deforming the model bay */
+.gsyen-command-deck {
+  column-gap: 14px !important;
+}
+
+.gsyen-command-deck > div:first-child {
+  padding-right: 0 !important;
+}
+
+.gsyen-model-strip {
+  background: linear-gradient(90deg, #E7E3DA 0%, #EEEAE2 100%) !important;
+  border-left-color: transparent !important;
+}
+
+.gsyen-system-count {
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* GYEN Pulse V6.11 - count chroma matches signal units */
+.gsyen-system-count,
+.gsyen-system-count span,
+.gsyen-system-count svg {
+  color: #C9A227 !important;
+}
+
+.gsyen-system-count svg {
+  opacity: 1 !important;
+}
+
+/* GYEN Pulse V6.12 - restore the darker count chroma to units */
+.gsyen-system-count,
+.gsyen-system-count span,
+.gsyen-system-count svg,
+.gsyen-system-cell-unit,
+.gsyen-system-cell:hover .gsyen-system-cell-unit,
+.gsyen-pulse-panel-row > span:nth-child(3) {
+  color: #A7853F !important;
+}
+
+.gsyen-system-count svg {
+  opacity: 0.88 !important;
+}
+
+/* GYEN Pulse V6.13 - left entry buffer and unified readout black */
+.gsyen-system-bus,
+.gsyen-system-bus-window,
+.gsyen-system-count {
+  background-color: #1A1A18 !important;
+}
+
+.gsyen-system-bus-window {
+  padding-left: 14px !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.032), transparent 44%) !important;
+}
+
+.gsyen-system-bus-track {
+  padding-left: 0 !important;
+}
+
+.gsyen-system-count {
+  background-image: none !important;
+}
+
+/* GYEN Pulse V6.14 - remove left clipping edge over the first signal */
+.gsyen-pulse-window,
+.gsyen-system-bus-window {
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 18px), transparent 100%) !important;
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 18px), transparent 100%) !important;
+}
+
+.gsyen-system-bus-window {
+  padding-left: 0 !important;
+}
+
+.gsyen-system-bus-track {
+  padding-left: 18px !important;
+}
+
+/* GYEN Pulse V6.15 - count cap sits flush to the black edge */
+.gsyen-system-count {
+  width: 48px !important;
+  flex-basis: 48px !important;
+  padding: 0 5px 0 8px !important;
+  justify-content: flex-end !important;
+  gap: 5px !important;
+}
+
+/* GYEN Model Strip V6.16 - keep MODEL label clear of the rail seam */
+.gsyen-model-label {
+  margin-left: 10px !important;
+}
+
+/* ============================================================
+   GYEN Precision Pass V7 - push 8.5 toward 9.5
+   精修目标：去硬线、稳色阶、轻阻尼、让黑/金/纸白成为一套仪表语言。
+   ============================================================ */
+:root {
+  --gyen-v7-readout: #1A1916;
+  --gyen-v7-readout-top: #23211C;
+  --gyen-v7-readout-bottom: #151411;
+  --gyen-v7-paper-rail: #EDE9DF;
+  --gyen-v7-paper-lift: #FBFAF7;
+  --gyen-v7-seam-soft: color-mix(in srgb, var(--gyen-n8-hairline) 54%, transparent);
+  --gyen-v7-gold-signal: #C9A227;
+  --gyen-v7-gold-muted: #A7853F;
+}
+
+.gsyen-command-deck {
+  height: 52px !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-v7-paper-rail) 82%, white) 0%, var(--gyen-v7-paper-rail) 100%) !important;
+  border-top-color: rgba(255,255,255,0.54) !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 58%, var(--gyen-n5-control)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.78),
+    inset 0 -1px 0 rgba(20,20,20,0.055),
+    0 1px 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button,
+.gsyen-model-option,
+.gsyen-model-status-button,
+.gsyen-pulse-panel-action,
+.gsyen-standby-actions button,
+.gsyen-system-panel-action {
+  transition:
+    background-color 170ms cubic-bezier(.2,.8,.2,1),
+    color 170ms cubic-bezier(.2,.8,.2,1),
+    border-color 170ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 170ms cubic-bezier(.2,.8,.2,1),
+    transform 170ms cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button {
+  height: 30px !important;
+  background: var(--gyen-v7-paper-lift) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 70%, var(--gyen-n5-control)) !important;
+  color: var(--gyen-n5-control) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.82),
+    0 1px 0 rgba(20,20,20,0.035) !important;
+}

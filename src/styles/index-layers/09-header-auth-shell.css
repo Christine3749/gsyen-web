@@ -1,0 +1,235 @@
+
+.gsyen-standby-index span {
+  color: #A98745;
+}
+
+.gsyen-standby-ledger,
+.gsyen-standby-feed,
+.gsyen-standby-input {
+  background: rgba(255, 255, 255, 0.48);
+  border-color: rgba(17, 16, 15, 0.13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62);
+}
+
+.gsyen-standby-row,
+.gsyen-standby-signal {
+  min-height: 35px;
+  border-bottom-color: rgba(17, 16, 15, 0.075);
+}
+
+.gsyen-standby-row strong,
+.gsyen-standby-signal strong {
+  color: rgba(17, 16, 15, 0.72);
+  font-weight: 700;
+}
+
+.gsyen-standby-row.is-primary strong,
+.gsyen-standby-signal.is-primary strong {
+  color: rgba(15, 14, 12, 0.88);
+}
+
+.gsyen-standby-row.is-warn strong,
+.gsyen-standby-signal.is-warn strong {
+  color: #8C6E32;
+}
+
+.gsyen-standby-input:focus-within {
+  border-color: rgba(15, 14, 12, 0.46);
+  background: rgba(255,255,255,0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 0 0 1px rgba(15,14,12,0.055);
+}
+
+.gsyen-system-panel {
+  width: 252px;
+  background: var(--gsyen-panel);
+  border-left-color: rgba(17, 16, 15, 0.14);
+}
+
+.gsyen-system-panel-readout {
+  min-height: 68px;
+  margin: 14px 16px;
+  border-color: rgba(15, 14, 12, 0.32);
+  background: var(--gsyen-black);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.075),
+    inset 0 -1px 0 rgba(0,0,0,0.88);
+}
+
+.gsyen-system-panel-select select,
+.gsyen-system-panel-action {
+  background: rgba(248, 246, 241, 0.56);
+  border-color: rgba(17, 16, 15, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62);
+}
+
+.gsyen-system-panel-row {
+  min-height: 37px;
+  border-bottom-color: rgba(17, 16, 15, 0.075);
+}
+
+.gsyen-system-panel-row strong {
+  color: rgba(17, 16, 15, 0.64);
+}
+
+@media (min-width: 1600px) {
+  .gsyen-system-bus {
+    max-width: 980px;
+    flex-basis: 860px;
+  }
+}
+
+@media (min-width: 1780px) {
+  .gsyen-system-bus {
+    max-width: 1040px;
+    flex-basis: 940px;
+  }
+
+  .gsyen-model-status-button {
+    min-width: 168px;
+  }
+}
+
+@media (max-width: 1320px) {
+  .gsyen-command-deck {
+    column-gap: 18px;
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  .gsyen-system-bus {
+    min-width: 320px;
+    max-width: 560px;
+  }
+
+  .gsyen-system-cell {
+    min-width: 118px;
+    padding: 0 10px;
+  }
+}
+
+/* GSYEN Workbench V4.1 - align expanded pulse to the signal bus */
+.gsyen-pulse-panel > div {
+  width: min(1040px, calc(100vw - 420px));
+  max-width: none;
+  margin-left: 306px;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media (max-width: 1320px) {
+  .gsyen-pulse-panel > div {
+    width: calc(100vw - 44px);
+    margin-left: 22px;
+  }
+}
+
+/* GSYEN Workbench V4.2 - tactile controls, hairlines, motion polish */
+:root {
+  --gsyen-fast: 120ms;
+  --gsyen-medium: 190ms;
+  --gsyen-motion: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --gsyen-press: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#ai-chat-root-workspace {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+#ai-chat-root-workspace * {
+  box-sizing: border-box;
+}
+
+.gsyen-command-deck {
+  isolation: isolate;
+}
+
+.gsyen-command-deck::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: rgba(15, 14, 12, 0.16);
+  pointer-events: none;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button,
+.gsyen-model-option,
+.gsyen-model-status-button,
+.gsyen-system-bus,
+.gsyen-system-count,
+.gsyen-pulse-panel-action,
+.gsyen-standby-input-footer button,
+.gsyen-standby-actions button,
+.gsyen-system-panel-action {
+  -webkit-tap-highlight-color: transparent;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition:
+    background-color var(--gsyen-medium) var(--gsyen-motion),
+    border-color var(--gsyen-medium) var(--gsyen-motion),
+    color var(--gsyen-medium) var(--gsyen-motion),
+    box-shadow var(--gsyen-medium) var(--gsyen-motion),
+    opacity var(--gsyen-medium) var(--gsyen-motion),
+    transform var(--gsyen-fast) var(--gsyen-press);
+}
+
+.gsyen-icon-command,
+.gsyen-command-button,
+.gsyen-model-status-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.gsyen-icon-command::after,
+.gsyen-command-button::after,
+.gsyen-model-status-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 1px solid rgba(255,255,255,0.66);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.gsyen-icon-command:hover,
+.gsyen-command-button:hover,
+.gsyen-model-status-button:hover,
+.gsyen-model-option:not(.is-active):hover,
+.gsyen-standby-actions button:hover,
+.gsyen-system-panel-action:hover {
+  transform: translateY(-1px) translateZ(0);
+}
+
+.gsyen-icon-command:active,
+.gsyen-command-button:active,
+.gsyen-model-status-button:active,
+.gsyen-model-option:active,
+.gsyen-pulse-panel-action:active,
+.gsyen-standby-input-footer button:active,
+.gsyen-standby-actions button:active,
+.gsyen-system-panel-action:active {
+  transform: translateY(0) translateZ(0);
+  transition-duration: 70ms;
+}
+
+.gsyen-icon-command:focus-visible,
+.gsyen-command-button:focus-visible,
+.gsyen-system-bus:focus-visible,
+.gsyen-model-option:focus-visible,
+.gsyen-model-status-button:focus-visible,
+.gsyen-pulse-panel-action:focus-visible,
+.gsyen-standby-input-footer button:focus-visible,
+.gsyen-standby-actions button:focus-visible,
+.gsyen-system-panel-action:focus-visible {
+  outline: 1px solid rgba(196, 162, 93, 0.92);
+  outline-offset: 2px;
+}
+
+.gsyen-command-button svg,
+.gsyen-icon-command svg,

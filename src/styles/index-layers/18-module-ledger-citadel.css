@@ -1,0 +1,235 @@
+
+.gsyen-icon-command:hover,
+.gsyen-command-button:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--gyen-v7-paper-lift) 88%, var(--gyen-n9-card)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n5-control) 50%, var(--gyen-n8-hairline)) !important;
+  color: var(--gyen-n3-content) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.86),
+    0 2px 0 rgba(20,20,20,0.045) !important;
+}
+
+.gsyen-icon-command:active,
+.gsyen-command-button:active {
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(20,20,20,0.08) !important;
+}
+
+.gsyen-icon-command.is-active {
+  transform: none;
+  background: var(--gyen-n0-selected) !important;
+  border-color: var(--gyen-n0-selected) !important;
+  color: var(--gyen-card-white) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.72) !important;
+}
+
+.gsyen-system-bus {
+  height: 30px !important;
+  background:
+    linear-gradient(180deg, var(--gyen-v7-readout-top) 0%, var(--gyen-v7-readout) 42%, var(--gyen-v7-readout-bottom) 100%) !important;
+  border-color: color-mix(in srgb, var(--gyen-v7-readout-bottom) 86%, black) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.88),
+    0 1px 0 rgba(255,255,255,0.22) !important;
+}
+
+.gsyen-system-bus-label {
+  width: 130px !important;
+  flex-basis: 130px !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-v7-gold-signal) 88%, white) 0%, var(--gyen-v7-gold-signal) 100%) !important;
+  border-right-color: color-mix(in srgb, var(--gyen-v7-readout-bottom) 74%, var(--gyen-v7-gold-signal)) !important;
+  color: var(--gyen-n0-selected) !important;
+  font-size: 8.5px !important;
+  font-weight: 980 !important;
+  letter-spacing: 0.235em !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+
+.gsyen-system-bus-window {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.038), transparent 48%) !important;
+}
+
+.gsyen-system-cell {
+  min-width: 140px !important;
+  padding: 0 14px !important;
+  border-right-color: transparent !important;
+  gap: 0 !important;
+}
+
+.gsyen-system-cell::after {
+  opacity: 0 !important;
+}
+
+.gsyen-system-cell-name {
+  margin-right: 14px !important;
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 52%, var(--gyen-v7-readout-bottom)) !important;
+  font-size: 8px !important;
+  font-weight: 860 !important;
+  letter-spacing: 0.16em !important;
+}
+
+.gsyen-system-cell-value {
+  margin-right: 5px !important;
+  color: var(--gyen-v7-gold-signal) !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.045em !important;
+  text-shadow: 0 0 5px color-mix(in srgb, var(--gyen-v7-gold-signal) 9%, transparent) !important;
+}
+
+.gsyen-system-cell-unit,
+.gsyen-system-cell:hover .gsyen-system-cell-unit,
+.gsyen-system-count,
+.gsyen-system-count span,
+.gsyen-system-count svg,
+.gsyen-pulse-panel-row > span:nth-child(3) {
+  color: var(--gyen-v7-gold-muted) !important;
+}
+
+.gsyen-system-cell-unit {
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.048em !important;
+}
+
+.gsyen-system-count {
+  width: 50px !important;
+  flex-basis: 50px !important;
+  padding: 0 7px 0 8px !important;
+  justify-content: flex-end !important;
+  gap: 5px !important;
+  background:
+    linear-gradient(180deg, var(--gyen-v7-readout-top), var(--gyen-v7-readout-bottom)) !important;
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.025) !important;
+}
+
+.gsyen-system-count span {
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+.gsyen-model-strip {
+  height: 34px !important;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--gyen-v7-paper-rail) 94%, white) 0%, var(--gyen-v7-paper-rail) 100%) !important;
+  border-left-color: transparent !important;
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,0.52),
+    inset -1px 0 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-model-label {
+  margin-left: 12px !important;
+  color: var(--gyen-n6-weak) !important;
+}
+
+.gsyen-model-selector {
+  height: 30px !important;
+  background: var(--gyen-v7-paper-lift) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 70%, var(--gyen-n7-retreat)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.78) !important;
+}
+
+.gsyen-model-option {
+  height: 30px !important;
+  background: var(--gyen-v7-paper-lift) !important;
+  color: var(--gyen-n5-control) !important;
+  border-right-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, transparent) !important;
+}
+
+.gsyen-model-option.is-active {
+  background: var(--gyen-n0-selected) !important;
+  border-color: var(--gyen-n0-selected) !important;
+  color: var(--gyen-card-white) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.76) !important;
+}
+
+.gsyen-model-status-button {
+  height: 30px !important;
+  background: color-mix(in srgb, var(--gyen-v7-paper-lift) 76%, var(--gyen-n9-card)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, var(--gyen-n7-retreat)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.76) !important;
+}
+
+.gsyen-pulse-panel {
+  background:
+    linear-gradient(180deg, #25231F 0%, var(--gyen-v7-readout) 10%, #1B1A17 100%) !important;
+  border-top: 1px solid color-mix(in srgb, var(--gyen-v7-gold-muted) 30%, transparent) !important;
+  border-bottom-color: color-mix(in srgb, black 48%, var(--gyen-v7-readout)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.055),
+    inset 0 -1px 0 rgba(0,0,0,0.74) !important;
+}
+
+.gsyen-pulse-panel > div {
+  padding-top: 10px !important;
+  padding-bottom: 12px !important;
+}
+
+.gsyen-pulse-panel-head {
+  height: 30px !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-v7-gold-muted) 20%, transparent) !important;
+  color: color-mix(in srgb, var(--gyen-v7-gold-signal) 76%, var(--gyen-n7-retreat)) !important;
+}
+
+.gsyen-pulse-panel-row {
+  min-height: 32px !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n7-retreat) 8%, transparent) !important;
+}
+
+.gsyen-pulse-panel-row:hover {
+  background: linear-gradient(90deg, rgba(201,162,39,0.045), transparent 58%) !important;
+}
+
+.gsyen-pulse-panel-row > span:first-child {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 68%, var(--gyen-v7-readout)) !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(2) {
+  color: var(--gyen-v7-gold-signal) !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(4) {
+  color: color-mix(in srgb, var(--gyen-card-white) 78%, var(--gyen-n7-retreat)) !important;
+  font-size: 11.2px !important;
+  font-weight: 680 !important;
+  line-height: 1.26 !important;
+}
+
+.gsyen-pulse-panel-action {
+  height: 25px !important;
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 68%, var(--gyen-v7-readout)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n7-retreat) 18%, transparent) !important;
+}
+
+.gsyen-pulse-panel-action:hover {
+  transform: translateX(-1px);
+  color: var(--gyen-v7-gold-signal) !important;
+  border-color: color-mix(in srgb, var(--gyen-v7-gold-signal) 42%, transparent) !important;
+}
+
+.gsyen-archive-sidebar {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gyen-n10-page) 92%, white), color-mix(in srgb, var(--gyen-n10-page) 82%, var(--gyen-n9-card))) !important;
+  border-right-color: color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.48) !important;
+}
+
+.gsyen-archive-header,
+.gsyen-archive-section,
+.gsyen-archive-bottom {
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+}
+
+.gsyen-archive-empty,
+.gsyen-standby-ledger,
