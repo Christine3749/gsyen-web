@@ -31,7 +31,7 @@ function PdfPage({ doc, pageNum, scale }: {
       const ctx = canvas.getContext('2d')!;
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      await page.render({ canvas, canvasContext: ctx, viewport }).promise;
     })();
     return () => { cancelled = true; };
   }, [doc, pageNum, scale]);
@@ -67,7 +67,7 @@ export function PdfViewer({ entry, P, dark }: Props) {
         setLoading(false);
       }
     })();
-    return () => { currentDoc?.destroy(); };
+    return () => { void currentDoc?.cleanup(); };
   }, [entry.path]);
 
   const scale = SCALES[scaleIdx];

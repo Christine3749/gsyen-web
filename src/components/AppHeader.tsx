@@ -1,109 +1,20 @@
-import React, { ComponentType, useState, useEffect } from 'react';
-import { Sparkles, Mail, Globe, Users, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Globe, Users, User } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 import VintageCar from './VintageCar';
-import { WinCtrlButton, KanbanIcon } from '../gsyen-designer';
+import { WinCtrlButton } from '../gsyen-designer';
 import AboutDialog from './AboutDialog';
 import AuthModal from '../auth/AuthModal';
 import ResetPasswordModal from '../auth/ResetPasswordModal';
 import EmailVerifiedModal from '../auth/EmailVerifiedModal';
 import { useAuth } from '../auth/useAuth';
 import { useIsMaximized } from '../hooks/useIsMaximized';
+import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
+import { KanbanOutlineIcon, SPACES, type ActiveSpace } from './AppHeaderSpaces';
 
-/** 自定义 icon 公共 props — strokeWidth 按渲染尺寸反算可保持 1.5px 实际笔触 */
-interface GsIconProps { className?: string; strokeWidth?: number }
-
-/** Kanban 线框版 — 同 gsyen-designer KanbanIcon 剪影，1.5 笔触线条风格 */
-function KanbanOutlineIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="3" width="7" height="18" rx="1.5" />
-      <rect x="13" y="3" width="7" height="11" rx="1.5" />
-    </svg>
-  );
-}
-
-/** ReportMoney icon — 精确复刻 Tabler ti-report-money（账簿 + $） */
-function ReportMoneyIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <g>
-        <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
-        <path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2" />
-        <path d="M14 11h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" />
-        <path d="M12 17v1m0 -8v1" />
-      </g>
-    </svg>
-  );
-}
-
-/** ShieldLock icon — 精确复刻 Tabler ti-shield-lock（护盾 + 钥匙孔） */
-function ShieldLockIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <g transform="translate(0,-1)">
-        <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
-        <path d="M11 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M12 12l0 2.5" />
-      </g>
-    </svg>
-  );
-}
-
-
-/** Prism icon — 等腰三角形，底角 70°，顶角 40°（viewBox 24 与全系一致，笔触等宽） */
-function PrismIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
-      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12,2 5.45,20 18.55,20" />
-    </svg>
-  );
-}
-
-/** Google Calendar 风格：显示当天日期数字的动态日历 icon */
-function CalendarDateIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
-  const day = new Date().getDate();
-  return (
-    <svg viewBox="0 0 24 24" className={className}
-      style={{ fill: 'none', stroke: 'currentColor', strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round' }}>
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <text x="12" y="20" textAnchor="middle" fontSize="9.5" fontWeight="700"
-        fill="currentColor" stroke="none" style={{ fontFamily: 'system-ui,sans-serif', fontVariantNumeric: 'tabular-nums' }}>
-        {day}
-      </text>
-    </svg>
-  );
-}
-
-export type ActiveSpace = 'chat' | 'mail' | 'schedule' | 'calendar' | 'finance' | 'password' | 'brand';
-
-interface SpaceTab {
-  value: ActiveSpace;
-  Icon: ComponentType<any>;
-  iconClass: string;
-  zh: string; en: string;
-  shortZh: string; shortEn: string;
-  subtitle: string; // 模块副标题（logo 区展示）
-}
-
-const SPACES: SpaceTab[] = [
-  { value: 'chat',     Icon: Sparkles,         iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁',     en: 'GSYEN Muse',     shortZh: '灵阁', shortEn: 'Muse',   subtitle: '' },
-  { value: 'mail',     Icon: Mail,             iconClass: 'scale-90',                     zh: '工作邮件',     en: 'Mailbox',        shortZh: '邮件', shortEn: 'Mail',   subtitle: 'Hermes · 极雅私密邮件信道' },
-  { value: 'schedule', Icon: KanbanIcon,       iconClass: 'animate-pulse scale-[1.3]',   zh: '项目看板',     en: 'Kanban',         shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
-  { value: 'calendar', Icon: CalendarDateIcon, iconClass: 'scale-90',                     zh: '日程日历',     en: 'Calendar',       shortZh: '日历', shortEn: 'Cal',    subtitle: 'Chronos · 极速格栅日程空间' },
-  { value: 'finance',  Icon: ReportMoneyIcon,  iconClass: '',                             zh: '复试账簿',   en: 'Atelier Ledger', shortZh: '账簿', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
-  { value: 'password', Icon: ShieldLockIcon,   iconClass: '',                             zh: '军工密钥',   en: 'Citadel Key',    shortZh: '密钥', shortEn: 'Keys',   subtitle: 'Citadel · 军事级密匙生成与保管箱' },
-  { value: 'brand',    Icon: PrismIcon,        iconClass: '',                             zh: 'PRISM实验',  en: 'Brand Lab',      shortZh: '品牌', shortEn: 'Brand',  subtitle: 'Prism · 品牌基因折射实验室' },
-];
+export type { ActiveSpace } from './AppHeaderSpaces';
 
 interface AppHeaderProps {
   lang: 'zh' | 'en';
@@ -121,8 +32,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
   const { user, tier, emailVerified, loading: authLoading, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
-  const isElectron = !!(window as any).electronAPI?.isElectron;
-  const isMac = (window as any).electronAPI?.platform === 'darwin';
+  const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
 
   useEffect(() => {
@@ -138,8 +48,13 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
 
   return (
     <>
-      <header className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 flex items-start justify-between ${isMac ? 'pl-20 pr-8' : 'px-8'}`} id="app-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
-        <div className="gsyen-brand-lockup flex items-center gap-4 w-[200px] shrink-0 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+      <header
+        className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
+        id="app-header"
+        data-shell-platform={platform}
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      >
+        <div className="gsyen-brand-lockup flex min-w-0 items-center gap-4 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
             const isHome = activeSpace === 'chat';
@@ -180,7 +95,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
               key={value}
               onClick={() => setActiveSpace(value)}
               className={`gsyen-space-tab min-w-[80px] px-3 py-1.5 rounded-none fs-sm font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
-                activeSpace === value ? 'bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
+                activeSpace === value ? 'is-active bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
               }`}
             >
               <Icon strokeWidth={1.5} className={`${compact ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconClass}`} />
@@ -190,7 +105,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
         </div>
 
         {/* 窗口控制：Windows 专属，Mac 用原生红绿灯 */}
-        {(window as any).electronAPI?.platform === 'win32' && (
+        {isWindows && (
           <div style={{ position:'absolute', top:0, right:0, display:'flex', alignItems:'center',
             WebkitAppRegion:'no-drag' } as React.CSSProperties}>
             {(['minimize', 'maximize', 'close'] as const).map(action => (

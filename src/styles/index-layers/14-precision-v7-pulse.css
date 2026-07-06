@@ -178,12 +178,12 @@
   border-right: 0;
 }
 
-.gsyen-space-tab:not([class*="bg-[#1A1A1A]"]):hover {
+.gsyen-space-tab:not(.is-active):hover {
   background: color-mix(in srgb, var(--gyen-card-white) 68%, var(--gyen-n9-card)) !important;
   color: var(--gyen-n3-content) !important;
 }
 
-.gsyen-space-tab[class~="bg-[#1A1A1A]"] {
+.gsyen-space-tab.is-active {
   background: var(--gyen-n0-selected) !important;
   color: var(--gyen-card-white) !important;
   border-color: var(--gyen-n0-selected) !important;
@@ -199,7 +199,7 @@
   opacity: 0.78;
 }
 
-.gsyen-space-tab[class*="bg-[#1A1A1A]"] svg {
+.gsyen-space-tab.is-active svg {
   color: var(--gyen-gold-dark) !important;
   opacity: 1;
 }

@@ -5,13 +5,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useLibraryStore, libraryStore } from '../stores/canvasLibraryStore';
 import type { SortSettings } from '../stores/canvasLibraryStore';
-import type { FileEntry } from '../hooks/useFileSystem';
+import { fsAdapter, type FileEntry } from '../hooks/useFileSystem';
 import { SYS_FONT, TITLE_H, MENU_H } from './CanvasEditorTypes';
 import type { Palette } from './CanvasEditorTypes';
 import { useCanvasPanelWidths } from '../hooks/useCanvasPanelWidths';
 import { CanvasDocListMenu } from './CanvasDocListMenu';
 import { CanvasDocListPreview } from './CanvasDocListPreview';
-import { prefetchFile, prefetchCache, relativeDate, fileIcon, SKEL_WIDTHS, MEDIA_RE } from './CanvasDocListUtils';
+import { prefetchFile, prefetchCache, invalidatePrefetch, relativeDate, fileIcon, SKEL_WIDTHS, MEDIA_RE } from './CanvasDocListUtils';
 
 export { invalidatePrefetch } from './CanvasDocListUtils';
 

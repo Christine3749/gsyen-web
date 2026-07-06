@@ -36,6 +36,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [recentsOpen, setRecentsOpen] = useState(true);
   const [pulseOpen, setPulseOpen] = useState(false);
+  const [pulseDocked, setPulseDocked] = useState(false);
   const [modelPanelOpen, setModelPanelOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
   const [toast, setToast] = useState<string | null>(null);
@@ -56,6 +57,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottom = useRef(true);
+  const pulseDockLock = useRef(false);
 
   useEffect(() => {
     const toggle = () => setShowFriends(v => !v);
@@ -155,6 +157,14 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setTimeout(() => setIsCopiedId(null), 2000);
   };
 
+  const handlePulseDockToggle = () => {
+    if (pulseDockLock.current) return;
+    pulseDockLock.current = true;
+    setPulseDocked(v => !v);
+    setPulseOpen(false);
+    window.setTimeout(() => { pulseDockLock.current = false; }, 920);
+  };
+
   return (
     <>
       <div className="flex-1 flex flex-col min-h-0 bg-[#F9F8F6]" id="ai-chat-root-workspace">
@@ -169,15 +179,23 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
           lang={lang}
           sidebarOpen={sidebarOpen}
           pulseOpen={pulseOpen}
+          pulseDocked={pulseDocked}
           modelPanelOpen={modelPanelOpen}
           selectedModel={selectedModel}
           modelScrollRef={modelScrollRef}
           onToggleSidebar={() => setSidebarOpen(o => !o)}
           onNewChat={handleNewChat}
           onOpenCreativeKingdom={openCreativeKingdom}
-          onTogglePulse={() => setPulseOpen(v => !v)}
+          onTogglePulse={() => {
+            setPulseOpen(v => !v);
+            setModelPanelOpen(false);
+          }}
+          onTogglePulseDock={handlePulseDockToggle}
           onClosePulse={() => setPulseOpen(false)}
-          onToggleModelPanel={() => setModelPanelOpen(v => !v)}
+          onToggleModelPanel={() => {
+            setModelPanelOpen(v => !v);
+            setPulseOpen(false);
+          }}
           onSelectModel={setSelectedModel}
           onMsDragStart={onMsDragStart}
           onMsDragMove={onMsDragMove}

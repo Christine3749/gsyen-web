@@ -1,0 +1,125 @@
+/* Pulse dock: central instrument can retreat into the left tool group. */
+.gsyen-pulse-dock-toggle,
+.gsyen-pulse-window,
+.gsyen-system-count,
+.gsyen-pulse-dock-slot,
+.gsyen-pulse-dock-button {
+  appearance: none;
+  border-radius: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.gsyen-pulse-window,
+.gsyen-system-count {
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.gsyen-command-pulse .gsyen-system-bus {
+  border-color: rgba(17, 16, 15, 0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.72) !important;
+}
+
+.gsyen-command-pulse .gsyen-pulse-dock-toggle.gsyen-system-bus-label {
+  border: 0 !important;
+  border-right: 1px solid rgba(17, 16, 15, 0.42) !important;
+  background: var(--gyen-gold-dark, #D0AA2A) !important;
+  color: var(--gyen-n0-selected, #11100E) !important;
+  box-shadow: none !important;
+  outline-offset: 0;
+}
+
+.gsyen-pulse-window {
+  min-width: 0;
+  text-align: inherit;
+}
+
+.gsyen-pulse-dock-toggle:focus-visible,
+.gsyen-pulse-window:focus-visible,
+.gsyen-system-count:focus-visible,
+.gsyen-pulse-dock-button:focus-visible {
+  outline: 1px solid rgba(201, 162, 39, 0.78);
+  outline-offset: 2px;
+}
+
+.gsyen-pulse-dock-toggle {
+  transition:
+    background-color 180ms var(--gsyen-ease-ui),
+    color 180ms var(--gsyen-ease-ui);
+}
+
+.gsyen-pulse-dock-toggle:hover,
+.gsyen-pulse-dock-button:hover {
+  background: color-mix(in srgb, #D7B56D 92%, #F9F8F6) !important;
+}
+
+.gsyen-pulse-dock-slot {
+  display: flex;
+  width: var(--gsyen-command-button-width, 88px);
+  height: 30px;
+  flex: 0 0 var(--gsyen-command-button-width, 88px);
+  min-width: var(--gsyen-command-button-width, 88px);
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: left center;
+}
+
+.gsyen-command-deck.has-pulse-docked .gsyen-pulse-dock-slot {
+  pointer-events: auto;
+}
+
+.gsyen-pulse-dock-button.gsyen-command-button {
+  width: var(--gsyen-command-button-width, 88px) !important;
+  flex-basis: var(--gsyen-command-button-width, 88px) !important;
+  height: 30px !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  border-color: #C3BEB3 !important;
+  background: #D0AA2A !important;
+  color: #11100E !important;
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 1 !important;
+  overflow: hidden !important;
+  transform-origin: left center;
+  white-space: nowrap !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.62),
+    0 1px 0 rgba(17,16,15,0.035) !important;
+}
+
+.gsyen-pulse-dock-button.gsyen-command-button:hover {
+  border-color: #C3BEB3 !important;
+  color: #11100E !important;
+}
+
+.gsyen-command-deck.has-pulse-docked .gsyen-command-core {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+.gsyen-command-deck.has-pulse-docked .gsyen-command-model {
+  margin-left: auto !important;
+}
+
+@media (max-width: 1320px) {
+}
+
+@media (max-width: 1180px) {
+  .gsyen-pulse-dock-button.gsyen-command-button {
+    width: var(--gsyen-command-button-width, 34px) !important;
+  }
+
+  .gsyen-pulse-dock-button.gsyen-command-button::before {
+    content: "P";
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+}

@@ -8,6 +8,7 @@ import { useBrandTeams } from '../../hooks/useBrandTeams';
 import { createTeam } from '../../hooks/useTeams';
 import BrandTeam from './BrandTeam';
 import { ContactRow, Contact, TYPE_CFG, STATUS_CFG } from './BrandContactRow';
+import type { ContactType } from './BrandContactRow';
 import { CreateTeamModal } from './CreateTeamModal';
 import { CreateContactModal } from './CreateContactModal';
 

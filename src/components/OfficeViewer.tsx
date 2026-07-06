@@ -168,7 +168,7 @@ export function OfficeViewer({ entry, P, dark }: Props) {
     <div style={center}>
       <div>无法预览此文件</div>
       <div style={{ fontSize: 12, color: P.dim, maxWidth: 340, textAlign: 'center' }}>
-        {!result ? '未知错误' : result.error}
+        {!result ? '未知错误' : 'error' in result ? result.error : '未知错误'}
       </div>
     </div>
   );

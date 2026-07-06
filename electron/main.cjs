@@ -1,9 +1,11 @@
-const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, globalShortcut, dialog } = require('electron');
-const { autoUpdater } = require('electron-updater');
+const { app, BrowserWindow, ipcMain, shell, globalShortcut } = require('electron');
 const Sentry = require('@sentry/electron/main');
 const path = require('path');
 const fs   = require('fs');
 const { startV2ray, stopV2ray, switchNode, getNodes, getStatus, setKey, setSub, getSubUrl, getGatewayMode, setGatewayMode } = require('./v2ray.cjs');
+const { createFullscreenController } = require('./fullscreen.cjs');
+const { createTray } = require('./tray.cjs');
+const { registerUpdaterIpc, setupAutoUpdater } = require('./updater.cjs');
 
 Sentry.init({
   dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
@@ -17,92 +19,7 @@ const CANVAS_DIR = path.join(app.getPath('userData'), 'canvas');
 let win  = null;
 let tray = null;
 let forceQuit = false;
-
-let savedBounds     = null;   // Windows 手动全屏时保存原始窗口尺寸
-let fsTransitioning = false;  // 淡入淡出期间加锁，防连按乱序
-
-// ── 全屏切换（Win + Mac 统一淡入淡出）────────────────────────────────────────
-// 流程：fade-out 100ms → 做 resize → fade-in
-// Windows：手动 setBounds(display.bounds) 覆盖任务栏
-// macOS  ：native setFullScreen，enter/leave-full-screen 事件触发 fade-in
-function toggleFullscreen(w) {
-  if (fsTransitioning) return;
-  fsTransitioning = true;
-
-  w.webContents.send('fullscreen:change', { phase: 'out' });
-
-  setTimeout(() => {
-    // 窗口可能在 100ms 内被关闭，必须检查
-    if (w.isDestroyed()) { fsTransitioning = false; return; }
-    if (process.platform === 'win32') {
-      if (savedBounds !== null) {
-        w.setAlwaysOnTop(false);
-        w.setBounds(savedBounds);
-        savedBounds = null;
-      } else {
-        savedBounds = w.getBounds();
-        const d = screen.getDisplayNearestPoint({ x: savedBounds.x, y: savedBounds.y });
-        w.setAlwaysOnTop(true, 'screen-saver');
-        w.setBounds(d.bounds);
-        w.moveTop();
-      }
-      // Windows resize 是同步的，80ms 后直接淡入
-      setTimeout(() => {
-        if (w.isDestroyed()) { fsTransitioning = false; return; }
-        w.webContents.send('fullscreen:change', { phase: 'in' });
-        setTimeout(() => { fsTransitioning = false; }, 240);
-      }, 80);
-    } else {
-      // macOS：setFullScreen 异步，淡入由 enter/leave-full-screen 事件驱动
-      w.setFullScreen(!w.isFullScreen());
-      // 兜底：OS 若拒绝全屏（系统弹窗等），事件不触发 → 3s 后强制解锁
-      setTimeout(() => { fsTransitioning = false; }, 3000);
-    }
-  }, 100);
-}
-
-// ── 系统托盘 ──────────────────────────────────────────────────────────────────
-
-function createTray() {
-  // dev: public/icon.ico；prod: extraResources 放到 asar 外的 resources/icon.ico
-  const iconPath = isDev
-    ? path.join(__dirname, '../public/icon.ico')
-    : path.join(process.resourcesPath, 'icon.ico');
-
-  let icon;
-  try {
-    const raw = nativeImage.createFromPath(iconPath);
-    icon = raw.isEmpty() ? null : raw.resize({ width: 16, height: 16 });
-  } catch {
-    icon = null;
-  }
-
-  // Windows 托盘必须有有效图标，没有就跳过
-  if (!icon || icon.isEmpty()) return;
-
-  tray = new Tray(icon);
-  tray.setToolTip('GSYEN');
-
-  const menu = Menu.buildFromTemplate([
-    {
-      label: 'Show GSYEN',
-      click: () => showWindow(),
-    },
-    { type: 'separator' },
-    {
-      label: 'Quit',
-      click: () => {
-        forceQuit = true;
-        app.quit();
-      },
-    },
-  ]);
-
-  tray.setContextMenu(menu);
-
-  // 双击恢复窗口
-  tray.on('double-click', () => showWindow());
-}
+const fullscreen = createFullscreenController();
 
 function showWindow() {
   if (!win) return;
@@ -111,27 +28,7 @@ function showWindow() {
   win.focus();
 }
 
-// ── 自动更新 ──────────────────────────────────────────────────────────────────
-
-function setupAutoUpdater() {
-  autoUpdater.autoDownload         = true;
-  autoUpdater.autoInstallOnAppQuit = true;
-
-  autoUpdater.on('update-available',    info     => win?.webContents.send('updater:available',     info));
-  autoUpdater.on('update-not-available',()       => win?.webContents.send('updater:not-available'));
-  autoUpdater.on('download-progress',   progress => win?.webContents.send('updater:progress',      progress));
-  autoUpdater.on('update-downloaded',   info     => win?.webContents.send('updater:downloaded',    info));
-  autoUpdater.on('error',               err      => win?.webContents.send('updater:error',         err?.message ?? String(err)));
-
-  // 启动 5 秒后检查，捕获网络/配置错误防止主进程崩溃
-  setTimeout(() => autoUpdater.checkForUpdates().catch(err => {
-    console.error('[updater] checkForUpdates failed:', err?.message ?? err);
-    win?.webContents.send('updater:error', err?.message ?? String(err));
-  }), 5000);
-}
-
-ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall(true, true));
-ipcMain.handle('updater:check',   () => autoUpdater.checkForUpdates());
+registerUpdaterIpc(ipcMain);
 
 // ── v2ray IPC ─────────────────────────────────────────────────────────────────
 
@@ -186,7 +83,7 @@ ipcMain.handle('window:maximize', (e) => {
 });
 ipcMain.handle('window:fullscreen', (e) => {
   const w = BrowserWindow.fromWebContents(e.sender);
-  if (w) toggleFullscreen(w);
+  if (w) fullscreen.toggle(w);
 });
 ipcMain.handle('window:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
 ipcMain.handle('window:isMaximized',  (e) => BrowserWindow.fromWebContents(e.sender)?.isMaximized()  ?? false);
@@ -229,7 +126,7 @@ function createWindow() {
     win.loadURL('http://127.0.0.1:5173');
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
-    setupAutoUpdater();
+    setupAutoUpdater(() => win);
   }
 
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -241,21 +138,7 @@ function createWindow() {
   win.on('maximize',   () => win.webContents.send('window:maximized', true));
   win.on('unmaximize', () => win.webContents.send('window:maximized', false));
 
-  // macOS：native 全屏动画结束后触发淡入
-  if (process.platform === 'darwin') {
-    const onFsChange = () => {
-      // 只响应用户主动触发的全屏（忽略 OS/其他进程发起的事件）
-      if (!fsTransitioning) return;
-      win.webContents.send('fullscreen:change', { phase: 'in' });
-      setTimeout(() => { fsTransitioning = false; }, 240);
-    };
-    win.on('enter-full-screen', onFsChange);
-    win.on('leave-full-screen', onFsChange);
-
-    // 无论通过什么方式进入/退出全屏（绿色按钮 / IPC / 快捷键），都可靠通知渲染层
-    win.on('enter-full-screen', () => win.webContents.send('window:fullscreen-state', true));
-    win.on('leave-full-screen',  () => win.webContents.send('window:fullscreen-state', false));
-  }
+  fullscreen.wireMacEvents(win);
 
   // 关闭窗口 → 最小化到托盘，不退出
   win.on('close', (e) => {
@@ -272,13 +155,23 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
-  try { createTray(); } catch (e) { console.error('tray init failed:', e); }
+  try {
+    tray = createTray({
+      app,
+      isDev,
+      showWindow,
+      onQuit: () => {
+        forceQuit = true;
+        app.quit();
+      },
+    });
+  } catch (e) { console.error('tray init failed:', e); }
   startV2ray(app);
 
   // F11 全平台；Mac 另加 Ctrl+Cmd+F（系统惯例）
-  globalShortcut.register('F11', () => { if (win) toggleFullscreen(win); });
+  globalShortcut.register('F11', () => { if (win) fullscreen.toggle(win); });
   if (process.platform === 'darwin') {
-    globalShortcut.register('Ctrl+Command+F', () => { if (win) toggleFullscreen(win); });
+    globalShortcut.register('Ctrl+Command+F', () => { if (win) fullscreen.toggle(win); });
   }
 
   app.on('activate', () => {

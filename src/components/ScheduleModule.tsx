@@ -128,7 +128,7 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full text-[#1A1A1A] font-sans animate-fadeIn">
+    <div className="gsyen-schedule-page flex flex-col h-full text-[#1A1A1A] font-sans">
 
       {/* Toast */}
       {notification && (

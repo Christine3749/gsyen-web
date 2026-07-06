@@ -34,13 +34,13 @@ export function ScheduleToolbar(p: ToolbarProps) {
   return (
     <div className="w-full flex flex-row items-center justify-between gap-3 flex-nowrap">
       {/* 左：目录开关 + 签发事件 + 今天 / 翻页 / 日期标题（Google Calendar 惯例） */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-[7px] shrink-0">
         <button onClick={() => p.setIsSidebarOpen(o => !o)}
-          className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all flex items-center justify-center ${p.isSidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'bg-transparent text-[#1A1A1A]/70'}`}>
+          className={`gsyen-icon-command ${p.isSidebarOpen ? 'is-active' : ''}`}>
           <PanelLeft className="w-4 h-4" />
         </button>
         <button onClick={() => p.setShowAddForm(o => !o)}
-          className={`px-4 py-1.5 font-bold fs-sm font-mono tracking-widest uppercase transition-all flex items-center gap-2 rounded-none ${p.showAddForm ? 'bg-red-800 text-white hover:bg-red-900' : 'bg-[#1A1A1A] text-white hover:bg-[#2C2C2C]'}`}>
+          className={`gsyen-command-button ${p.showAddForm ? 'is-danger' : ''}`}>
           {p.showAddForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           <span>{p.showAddForm ? (lang === 'zh' ? '收回表单' : 'Collapse Scribe') : (lang === 'zh' ? '签发事件' : 'Sealed Event')}</span>
         </button>

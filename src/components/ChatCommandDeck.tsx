@@ -18,6 +18,7 @@ interface ChatCommandDeckProps {
   lang: Lang;
   sidebarOpen: boolean;
   pulseOpen: boolean;
+  pulseDocked: boolean;
   modelPanelOpen: boolean;
   selectedModel: ModelId;
   modelScrollRef: RefObject<HTMLDivElement>;
@@ -25,6 +26,7 @@ interface ChatCommandDeckProps {
   onNewChat: () => void;
   onOpenCreativeKingdom: () => void;
   onTogglePulse: () => void;
+  onTogglePulseDock: () => void;
   onClosePulse: () => void;
   onToggleModelPanel: () => void;
   onSelectModel: (model: ModelId) => void;
@@ -80,28 +82,53 @@ function buildPulseSignals(lang: Lang): PulseSignal[] {
   ];
 }
 
-function PulseTape({ lang, pulseOpen, signals, onTogglePulse }: {
+function PulseDockButton({ lang, onTogglePulseDock }: {
+  lang: Lang;
+  onTogglePulseDock: () => void;
+}) {
+  return (
+    <motion.button type="button" onClick={onTogglePulseDock}
+      className="gsyen-command-button gsyen-pulse-dock-button"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { delay: 0.64, duration: 0.32, ease: [0.16, 1, 0.3, 1] } }}
+      exit={{ opacity: 0, transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] } }}
+      aria-label={lang === 'zh' ? '展开 GYEN Pulse' : 'Expand GYEN Pulse'}>
+      <span>GYEN PULSE</span>
+    </motion.button>
+  );
+}
+
+function PulseTape({ lang, pulseOpen, signals, onTogglePulse, onTogglePulseDock }: {
   lang: Lang;
   pulseOpen: boolean;
   signals: PulseSignal[];
   onTogglePulse: () => void;
+  onTogglePulseDock: () => void;
 }) {
   return (
-    <button type="button" onClick={onTogglePulse}
+    <div
       className={`gsyen-pulse-tape gsyen-system-bus ${pulseOpen ? 'is-open' : ''}`}
-      aria-expanded={pulseOpen} aria-label={lang === 'zh' ? '展开疆域脉搏' : 'Toggle GYEN pulse'}>
-      <span className="gsyen-system-bus-label">GYEN PULSE</span>
-      <span className="gsyen-pulse-window gsyen-system-bus-window">
+      aria-label={lang === 'zh' ? '疆域脉搏' : 'GYEN pulse'}>
+      <button type="button" onClick={onTogglePulseDock}
+        className="gsyen-system-bus-label gsyen-pulse-dock-toggle"
+        aria-label={lang === 'zh' ? '收起 GYEN Pulse' : 'Dock GYEN Pulse'}>
+        GYEN PULSE
+      </button>
+      <button type="button" onClick={onTogglePulse}
+        className="gsyen-pulse-window gsyen-system-bus-window"
+        aria-expanded={pulseOpen} aria-label={lang === 'zh' ? '展开今日疆域状态' : 'Toggle GYEN pulse detail'}>
         <span className="gsyen-pulse-marquee gsyen-system-bus-track">
           {signals.map(signal => <PulseCell key={`a-${signal.label}-${signal.value}`} signal={signal} />)}
           {signals.map(signal => <PulseCell key={`b-${signal.label}-${signal.value}`} signal={signal} hidden />)}
         </span>
-      </span>
-      <span className="gsyen-system-count">
+      </button>
+      <button type="button" onClick={onTogglePulse}
+        className="gsyen-system-count"
+        aria-expanded={pulseOpen} aria-label={lang === 'zh' ? '展开今日疆域状态' : 'Toggle GYEN pulse detail'}>
         <span>{signals.length}</span>
         {pulseOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-      </span>
-    </button>
+      </button>
+    </div>
   );
 }
 
@@ -135,7 +162,8 @@ function PulsePanel({ lang, pulseOpen, signals, onClosePulse }: {
               <div className="flex items-center text-[#D7B56D]">
                 <span>{lang === 'zh' ? '今日疆域状态' : 'Today GYEN State'}</span>
               </div>
-              <button onClick={onClosePulse} className="text-[#F4F2EE]/45 transition-colors hover:text-[#D7B56D]">
+              <button type="button" onClick={onClosePulse}
+                className="gsyen-pulse-panel-collapse text-[#F4F2EE]/45 transition-colors hover:text-[#D7B56D]">
                 {lang === 'zh' ? '收起' : 'Collapse'} ▲
               </button>
             </div>
@@ -156,7 +184,7 @@ function PulsePanelRow({ signal }: { signal: PulseSignal }) {
       <span className="font-mono fs-xs font-bold tracking-widest text-[#D7B56D]/90">{signal.value}</span>
       <span className="font-mono fs-xs font-bold tracking-widest text-[#F4F2EE]/40">{signal.unit}</span>
       <span className="truncate fs-sm text-[#F4F2EE]/82">{signal.detail}</span>
-      <button className="gsyen-pulse-panel-action h-6 justify-self-end border border-[#F4F2EE]/18 px-2 font-mono fs-xs font-bold tracking-widest text-[#F4F2EE]/62 transition-colors hover:border-[#D7B56D]/70 hover:text-[#D7B56D]">
+      <button type="button" className="gsyen-pulse-panel-action h-6 justify-self-end border border-[#F4F2EE]/18 px-2 font-mono fs-xs font-bold tracking-widest text-[#F4F2EE]/62 transition-colors hover:border-[#D7B56D]/70 hover:text-[#D7B56D]">
         {signal.action}
       </button>
     </div>
@@ -167,6 +195,7 @@ export function ChatCommandDeck({
   lang,
   sidebarOpen,
   pulseOpen,
+  pulseDocked,
   modelPanelOpen,
   selectedModel,
   modelScrollRef,
@@ -174,6 +203,7 @@ export function ChatCommandDeck({
   onNewChat,
   onOpenCreativeKingdom,
   onTogglePulse,
+  onTogglePulseDock,
   onClosePulse,
   onToggleModelPanel,
   onSelectModel,
@@ -185,8 +215,8 @@ export function ChatCommandDeck({
 
   return (
     <>
-      <div className={`gsyen-command-deck relative shrink-0 h-[56px] px-8 border-y border-[#1A1A1A]/10 bg-[#ECE9E3] flex items-center justify-between text-[#1A1A1A]/70 ${pulseOpen ? 'has-pulse-open' : ''} ${modelPanelOpen ? 'has-model-open' : ''}`}>
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-6">
+      <div className={`gsyen-command-deck relative shrink-0 h-[56px] px-8 border-y border-[#1A1A1A]/10 bg-[#ECE9E3] grid items-center text-[#1A1A1A]/70 ${pulseOpen ? 'has-pulse-open' : ''} ${pulseDocked ? 'has-pulse-docked' : ''} ${modelPanelOpen ? 'has-model-open' : ''}`}>
+        <div className="gsyen-command-tools">
           <button onClick={onToggleSidebar} aria-label={lang === 'zh' ? '切换档案库' : 'Toggle archive'} aria-pressed={sidebarOpen} className={`gsyen-icon-command ${sidebarOpen ? 'is-active' : ''}`}>
             <PanelLeft className="w-4 h-4" />
           </button>
@@ -197,23 +227,53 @@ export function ChatCommandDeck({
             <MessageSquare className="w-3.5 h-3.5" />
             <span>{lang === 'zh' ? '创意灵感' : 'Muse'}</span>
           </button>
-          <PulseTape lang={lang} pulseOpen={pulseOpen} signals={signals} onTogglePulse={onTogglePulse} />
+          <div className="gsyen-pulse-dock-slot" aria-hidden={!pulseDocked}>
+            <AnimatePresence initial={false}>
+              {pulseDocked && <PulseDockButton lang={lang} onTogglePulseDock={onTogglePulseDock} />}
+            </AnimatePresence>
+          </div>
         </div>
 
-        <div className="gsyen-model-strip">
-          <div className="flex items-center gap-2">
-            <span className="gsyen-model-label">MODEL</span>
-            <div ref={modelScrollRef} onMouseDown={onMsDragStart} onMouseMove={onMsDragMove} onMouseUp={onMsDragEnd} onMouseLeave={onMsDragEnd}
-              className="gsyen-model-selector" style={{ maxWidth: 224, cursor: 'grab' }}>
-              {MODELS.map(m => (
-                <button key={m.id} onClick={() => !m.disabled && onSelectModel(m.id as ModelId)} disabled={m.disabled}
-                  className={`gsyen-model-option ${m.disabled ? 'is-disabled' : selectedModel === m.id ? 'is-active' : ''}`}>
-                  {m.label}
-                </button>
-              ))}
+        <div className="gsyen-command-core">
+          <motion.div
+            className="gsyen-command-pulse"
+            initial={false}
+            animate={pulseDocked
+              ? {
+                opacity: 0,
+                clipPath: 'inset(0 100% 0 0)',
+                x: '-50%',
+                y: '-50%',
+                transitionEnd: { visibility: 'hidden' },
+              }
+              : { visibility: 'visible', opacity: 1, clipPath: 'inset(0 0% 0 0)', x: '-50%', y: '-50%' }}
+            transition={pulseDocked
+              ? { duration: 0.62, ease: [0.16, 1, 0.3, 1] }
+              : { delay: 0.22, duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
+            style={{ pointerEvents: pulseDocked ? 'none' : 'auto', clipPath: 'inset(0 0% 0 0)' }}
+            aria-hidden={pulseDocked}>
+            <PulseTape lang={lang} pulseOpen={pulseOpen} signals={signals}
+              onTogglePulse={onTogglePulse} onTogglePulseDock={onTogglePulseDock} />
+          </motion.div>
+
+          <div className="gsyen-command-model gsyen-model-strip">
+            <div className="gsyen-model-dock">
+              <span className="gsyen-model-label" aria-label="MODEL">
+                <span className="gsyen-model-label-full">MODEL</span>
+                <span className="gsyen-model-label-short" aria-hidden="true">M</span>
+              </span>
+              <div ref={modelScrollRef} onMouseDown={onMsDragStart} onMouseMove={onMsDragMove} onMouseUp={onMsDragEnd} onMouseLeave={onMsDragEnd}
+                className="gsyen-model-selector" style={{ cursor: 'grab' }}>
+                {MODELS.map(m => (
+                  <button key={m.id} onClick={() => !m.disabled && onSelectModel(m.id as ModelId)} disabled={m.disabled}
+                    className={`gsyen-model-option ${m.disabled ? 'is-disabled' : selectedModel === m.id ? 'is-active' : ''}`}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
             </div>
+            <ModelStatusLight selectedModel={selectedModel} active={modelPanelOpen} onClick={onToggleModelPanel} />
           </div>
-          <ModelStatusLight selectedModel={selectedModel} active={modelPanelOpen} onClick={onToggleModelPanel} />
         </div>
       </div>
       <PulsePanel lang={lang} pulseOpen={pulseOpen} signals={signals} onClosePulse={onClosePulse} />

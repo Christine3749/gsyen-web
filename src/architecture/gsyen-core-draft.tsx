@@ -248,4 +248,4 @@ export async function injectKnowledgeToMiao(
 // 导出：供测试文件引用
 // ============================================================
 
-export type { GsyenStreamMessage, GsyenCard, DevourChunk, ChatContextPayload, UserTier };
+export type { GsyenStreamMessage, GsyenCard, DevourChunk, UserTier };

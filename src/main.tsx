@@ -23,6 +23,10 @@ import './styles/index-layers/18-module-ledger-citadel.css';
 import './styles/index-layers/19-member-responsive.css';
 import './styles/index-layers/20-final-overrides.css';
 import './styles/index-layers/21-final-overrides.css';
+import './styles/index-layers/22-shell-layout.css';
+import './styles/index-layers/22-shell-responsive.css';
+import './styles/index-layers/23-pulse-dock.css';
+import './styles/index-layers/24-surface-harmony.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
