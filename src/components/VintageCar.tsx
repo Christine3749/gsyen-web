@@ -13,7 +13,9 @@ const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarPro
   const [kicking, setKicking] = useState(false);
   const [fallback, setFallback] = useState(false);
   const isLight = tone === 'light';
-  const svgSrc = isLight ? '/brand/gsyen-logo-car-light.svg' : '/brand/gsyen-logo-car-ink.svg';
+  const transparentSrc = isLight
+    ? '/brand/gsyen-logo-car-light-transparent.png'
+    : '/brand/gsyen-logo-car-ink-transparent.png';
   const pngSrc = isLight ? '/brand/gsyen-logo-car-light.png' : '/brand/gsyen-logo-car-ink.png';
   const logoRatio = isLight ? 360 / 272 : 489 / 304;
 
@@ -24,7 +26,7 @@ const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarPro
 
   return (
     <img
-      src={fallback ? pngSrc : svgSrc}
+      src={fallback ? pngSrc : transparentSrc}
       alt="GSYEN vintage frontier automobile"
       className={`${className ?? ''} gsyen-vintage-car ${kicking ? 'is-kicking' : ''}`}
       width={Math.round(size * logoRatio)}
