@@ -3,6 +3,7 @@ import { useTypewriter } from '../hooks/useTypewriter';
 import { motion, AnimatePresence } from 'motion/react';
 import { Github } from 'lucide-react';
 import VintageCar from './VintageCar';
+import BrandWordmark from './BrandWordmark';
 import { version } from '../../package.json';
 import AuthModal from '../auth/AuthModal';
 
@@ -150,13 +151,8 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="flex flex-col items-center gap-3"
         >
-          <div className="flex items-baseline gap-4">
-            <span className="font-serif-sc text-5xl font-black tracking-[0.15em] text-[#F9F8F6] leading-none">
-              疆域
-            </span>
-            <span className="font-cinzel text-2xl font-bold tracking-[0.3em] text-[#F9F8F6]/70 uppercase leading-none">
-              GSYEN
-            </span>
+          <div className="flex items-center gap-4">
+            <BrandWordmark tone="light" height={78} className="opacity-95" />
             <span className="font-mono text-[9px] tracking-[0.2em] uppercase px-1.5 py-0.5 border border-[#4A90D9]/60 text-[#4A90D9] leading-none self-center">
               BETA · v{version}
             </span>

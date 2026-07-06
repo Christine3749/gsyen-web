@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="GSYEN wordmark 06 balanced grid">
+  <rect width="1200" height="360" fill="#F9F8F6"/>
+  <g stroke="#1A1A1A" stroke-opacity=".08">
+    <line x1="100" y1="92" x2="1100" y2="92"/>
+    <line x1="100" y1="268" x2="1100" y2="268"/>
+    <line x1="600" y1="92" x2="600" y2="268"/>
+  </g>
+  <text x="350" y="202" text-anchor="middle" font-family="'Microsoft YaHei','SimSun',serif" font-size="96" font-weight="800" fill="#1A1A1A" letter-spacing="10">疆域</text>
+  <text x="850" y="198" text-anchor="middle" font-family="Georgia,serif" font-size="78" fill="#1A1A1A" letter-spacing="22">GSYEN</text>
+  <text x="600" y="308" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#A77D24" letter-spacing="9">TWO NAME LOCKUP · FIELD AND SYSTEM</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="GSYEN wordmark 03 engineering">
+  <rect width="1200" height="360" fill="#F9F8F6"/>
+  <rect x="88" y="82" width="1024" height="196" fill="none" stroke="#1A1A1A" stroke-opacity=".18"/>
+  <text x="132" y="180" font-family="'Microsoft YaHei',Arial,sans-serif" font-size="70" font-weight="800" fill="#1A1A1A" letter-spacing="6">疆域</text>
+  <text x="132" y="226" font-family="Consolas,'JetBrains Mono',monospace" font-size="22" fill="#1A1A1A" fill-opacity=".62" letter-spacing="8">FIELD OPERATING SYSTEM</text>
+  <text x="618" y="196" font-family="Consolas,'JetBrains Mono',monospace" font-size="74" font-weight="700" fill="#1A1A1A" letter-spacing="18">GSYEN</text>
+  <circle cx="1050" cy="178" r="9" fill="#A77D24"/>
+</svg>

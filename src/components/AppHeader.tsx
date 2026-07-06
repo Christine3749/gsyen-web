@@ -3,6 +3,7 @@ import { Globe, Users, User } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 import VintageCar from './VintageCar';
+import BrandWordmark from './BrandWordmark';
 import { WinCtrlButton } from '../gsyen-designer';
 import AboutDialog from './AboutDialog';
 import AuthModal from '../auth/AuthModal';
@@ -75,9 +76,8 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
                   }
                 </div>
                 <div className="gsyen-brand-copy flex flex-col">
-                  <div className="gsyen-brand-title flex items-baseline gap-2.5 flex-nowrap whitespace-nowrap">
-                    <span className="gsyen-brand-cn text-xl md:text-2xl font-black font-serif-sc tracking-[0.12em] text-[#111111] leading-none select-none">疆域</span>
-                    <span className="gsyen-brand-latin font-cinzel text-xs md:fs-lg font-bold tracking-[0.22em] text-[#111111]/85 uppercase leading-none select-none ml-0.5">GSYEN</span>
+                  <div className="gsyen-brand-title flex items-center flex-nowrap whitespace-nowrap">
+                    <BrandWordmark height={30} className="gsyen-wordmark-primary" />
                   </div>
                   <p className="gsyen-brand-subtitle text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5 truncate">
                     {isHome ? t.headerSubtitle : space?.subtitle}
