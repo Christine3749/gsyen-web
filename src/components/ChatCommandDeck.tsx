@@ -1,18 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronDown, ChevronUp, MessageSquare, PanelLeft, Plus } from 'lucide-react';
-import type { MouseEventHandler, RefObject } from 'react';
+import { memo, type MouseEventHandler, type RefObject } from 'react';
 import { MODELS, type ModelId } from '../config/models';
+import { getPulseSignals, type PulseLang, type PulseSignal } from '../config/pulseSignals';
 import { ModelStatusLight } from './ModelStatusLight';
 
-type Lang = 'zh' | 'en';
-
-interface PulseSignal {
-  label: string;
-  value: string;
-  unit: string;
-  detail: string;
-  action: string;
-}
+type Lang = PulseLang;
 
 interface ChatCommandDeckProps {
   lang: Lang;
@@ -29,62 +22,17 @@ interface ChatCommandDeckProps {
   onTogglePulseDock: () => void;
   onClosePulse: () => void;
   onToggleModelPanel: () => void;
+  onPulseDockAnimationComplete: (docked: boolean) => void;
   onSelectModel: (model: ModelId) => void;
   onMsDragStart: MouseEventHandler<HTMLDivElement>;
   onMsDragMove: MouseEventHandler<HTMLDivElement>;
   onMsDragEnd: MouseEventHandler<HTMLDivElement>;
 }
 
-function buildPulseSignals(lang: Lang): PulseSignal[] {
-  return [
-    {
-      label: 'GYENBOX',
-      value: '3',
-      unit: lang === 'zh' ? '文件' : 'FILES',
-      detail: lang === 'zh' ? '桌面端未提交 Rust 修改' : 'desktop pending Rust changes',
-      action: lang === 'zh' ? '进入项目' : 'Open',
-    },
-    {
-      label: 'DGWM',
-      value: '3',
-      unit: lang === 'zh' ? '候选' : 'CANDIDATES',
-      detail: lang === 'zh' ? 'canonical 候选待裁决' : 'canonical candidates to decide',
-      action: lang === 'zh' ? '转任务' : 'Task',
-    },
-    {
-      label: 'PRISM',
-      value: 'V2',
-      unit: lang === 'zh' ? '冻结' : 'FROZEN',
-      detail: lang === 'zh' ? 'Prism-Edge 等待 DGWM adapter' : 'Prism-Edge waits for DGWM adapter',
-      action: lang === 'zh' ? '进入项目' : 'Open',
-    },
-    {
-      label: lang === 'zh' ? '小纸笺' : 'ZHIJIAN',
-      value: '94',
-      unit: lang === 'zh' ? '改动' : 'CHANGES',
-      detail: lang === 'zh' ? '设计系统今日改动，建议冻结版本' : 'design system changes, freeze version',
-      action: lang === 'zh' ? '归档' : 'Archive',
-    },
-    {
-      label: 'TEMPORA',
-      value: '7D',
-      unit: lang === 'zh' ? '停滞' : 'IDLE',
-      detail: lang === 'zh' ? 'Tempora Find 7 天无动作，保持 frozen' : 'Tempora Find idle, keep frozen',
-      action: lang === 'zh' ? '忽略' : 'Ignore',
-    },
-    {
-      label: lang === 'zh' ? '今日推进' : 'FOCUS',
-      value: '2',
-      unit: lang === 'zh' ? '项目' : 'PROJECTS',
-      detail: 'GyenBox + Prism-Edge',
-      action: lang === 'zh' ? '置顶' : 'Pin',
-    },
-  ];
-}
-
-function PulseDockButton({ lang, onTogglePulseDock }: {
+function PulseDockButton({ lang, onTogglePulseDock, onAnimationComplete }: {
   lang: Lang;
   onTogglePulseDock: () => void;
+  onAnimationComplete: (docked: boolean) => void;
 }) {
   return (
     <motion.button type="button" onClick={onTogglePulseDock}
@@ -92,6 +40,7 @@ function PulseDockButton({ lang, onTogglePulseDock }: {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { delay: 0.64, duration: 0.32, ease: [0.16, 1, 0.3, 1] } }}
       exit={{ opacity: 0, transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] } }}
+      onAnimationComplete={() => onAnimationComplete(true)}
       aria-label={lang === 'zh' ? '展开 GYEN Pulse' : 'Expand GYEN Pulse'}>
       <span>GYEN PULSE</span>
     </motion.button>
@@ -191,7 +140,7 @@ function PulsePanelRow({ signal }: { signal: PulseSignal }) {
   );
 }
 
-export function ChatCommandDeck({
+export const ChatCommandDeck = memo(function ChatCommandDeck({
   lang,
   sidebarOpen,
   pulseOpen,
@@ -206,12 +155,13 @@ export function ChatCommandDeck({
   onTogglePulseDock,
   onClosePulse,
   onToggleModelPanel,
+  onPulseDockAnimationComplete,
   onSelectModel,
   onMsDragStart,
   onMsDragMove,
   onMsDragEnd,
 }: ChatCommandDeckProps) {
-  const signals = buildPulseSignals(lang);
+  const signals = getPulseSignals(lang);
 
   return (
     <>
@@ -229,7 +179,7 @@ export function ChatCommandDeck({
           </button>
           <div className="gsyen-pulse-dock-slot" aria-hidden={!pulseDocked}>
             <AnimatePresence initial={false}>
-              {pulseDocked && <PulseDockButton lang={lang} onTogglePulseDock={onTogglePulseDock} />}
+              {pulseDocked && <PulseDockButton lang={lang} onTogglePulseDock={onTogglePulseDock} onAnimationComplete={onPulseDockAnimationComplete} />}
             </AnimatePresence>
           </div>
         </div>
@@ -250,6 +200,7 @@ export function ChatCommandDeck({
             transition={pulseDocked
               ? { duration: 0.62, ease: [0.16, 1, 0.3, 1] }
               : { delay: 0.22, duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
+            onAnimationComplete={() => { if (!pulseDocked) onPulseDockAnimationComplete(false); }}
             style={{ pointerEvents: pulseDocked ? 'none' : 'auto', clipPath: 'inset(0 0% 0 0)' }}
             aria-hidden={pulseDocked}>
             <PulseTape lang={lang} pulseOpen={pulseOpen} signals={signals}
@@ -279,4 +230,4 @@ export function ChatCommandDeck({
       <PulsePanel lang={lang} pulseOpen={pulseOpen} signals={signals} onClosePulse={onClosePulse} />
     </>
   );
-}
+});

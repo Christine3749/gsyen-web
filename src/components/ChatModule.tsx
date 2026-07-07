@@ -58,6 +58,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottom = useRef(true);
   const pulseDockLock = useRef(false);
+  const pulseDockTarget = useRef(false);
 
   useEffect(() => {
     const toggle = () => setShowFriends(v => !v);
@@ -69,25 +70,36 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     if (isAtBottom.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const openCreativeKingdom = () => {
+  const openCreativeKingdom = useCallback(() => {
     const now = new Date().toISOString();
     const doc = { id: `canvas-${Date.now()}`, title: '无标题', content: '', type: 'doc' as const,
       scope: 'self' as const, createdAt: now, updatedAt: now };
     canvasStore.add(doc);
     setCreativeDocId(doc.id);
-  };
+  }, []);
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3500);
-  };
+  }, []);
 
-  const handleLoadSession = (s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); };
-  const handleNewChat = () => { newChat(selectedModel); clearTeam(); };
-  const handleSelectTeam = (team: Parameters<typeof selectTeam>[0]) => {
+  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); }, [loadSession, clearTeam]);
+  const handleNewChat = useCallback(() => { newChat(selectedModel); clearTeam(); }, [newChat, selectedModel, clearTeam]);
+  const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);
-  };
+  }, [selectTeam, openTeamSession]);
+
+  const handleToggleSidebar = useCallback(() => setSidebarOpen(o => !o), []);
+  const handleTogglePulse = useCallback(() => {
+    setPulseOpen(v => !v);
+    setModelPanelOpen(false);
+  }, []);
+  const handleClosePulse = useCallback(() => setPulseOpen(false), []);
+  const handleToggleModelPanel = useCallback(() => {
+    setModelPanelOpen(v => !v);
+    setPulseOpen(false);
+  }, []);
 
   const handleSend = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -149,21 +161,27 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
         showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
       },
     });
-  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send, currentTeamId]);
+  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
 
-  const handleCopy = (id: string, text: string) => {
+  const handleCopy = useCallback((id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setIsCopiedId(id);
     setTimeout(() => setIsCopiedId(null), 2000);
-  };
+  }, []);
 
-  const handlePulseDockToggle = () => {
+  const handlePulseDockToggle = useCallback(() => {
     if (pulseDockLock.current) return;
     pulseDockLock.current = true;
-    setPulseDocked(v => !v);
+    setPulseDocked(v => {
+      const next = !v;
+      pulseDockTarget.current = next;
+      return next;
+    });
     setPulseOpen(false);
-    window.setTimeout(() => { pulseDockLock.current = false; }, 920);
-  };
+  }, []);
+  const handlePulseDockAnimationComplete = useCallback((docked: boolean) => {
+    if (pulseDockTarget.current === docked) pulseDockLock.current = false;
+  }, []);
 
   return (
     <>
@@ -183,19 +201,14 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
           modelPanelOpen={modelPanelOpen}
           selectedModel={selectedModel}
           modelScrollRef={modelScrollRef}
-          onToggleSidebar={() => setSidebarOpen(o => !o)}
+          onToggleSidebar={handleToggleSidebar}
           onNewChat={handleNewChat}
           onOpenCreativeKingdom={openCreativeKingdom}
-          onTogglePulse={() => {
-            setPulseOpen(v => !v);
-            setModelPanelOpen(false);
-          }}
+          onTogglePulse={handleTogglePulse}
           onTogglePulseDock={handlePulseDockToggle}
-          onClosePulse={() => setPulseOpen(false)}
-          onToggleModelPanel={() => {
-            setModelPanelOpen(v => !v);
-            setPulseOpen(false);
-          }}
+          onClosePulse={handleClosePulse}
+          onToggleModelPanel={handleToggleModelPanel}
+          onPulseDockAnimationComplete={handlePulseDockAnimationComplete}
           onSelectModel={setSelectedModel}
           onMsDragStart={onMsDragStart}
           onMsDragMove={onMsDragMove}

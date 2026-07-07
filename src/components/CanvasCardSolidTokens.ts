@@ -2,8 +2,13 @@ import type { CSSProperties } from 'react';
 import { Position } from '@xyflow/react';
 import type { CardSize, ContentType } from './CanvasCardData';
 
-export const SIZE_W: Record<CardSize, number> = { S: 220, M: 300, L: 380 };
-export const SIZE_H: Record<CardSize, number> = { S: 170, M: 230, L: 320 };
+export const CARD_SIZE_DIM: Record<CardSize, { w: number; h: number }> = {
+  S: { w: 220, h: 170 },
+  M: { w: 300, h: 230 },
+  L: { w: 380, h: 320 },
+};
+export const SIZE_W: Record<CardSize, number> = { S: CARD_SIZE_DIM.S.w, M: CARD_SIZE_DIM.M.w, L: CARD_SIZE_DIM.L.w };
+export const SIZE_H: Record<CardSize, number> = { S: CARD_SIZE_DIM.S.h, M: CARD_SIZE_DIM.M.h, L: CARD_SIZE_DIM.L.h };
 export const TITLE_SIZE: Record<CardSize, number> = { S: 15.5, M: 18, L: 22 };
 export const BODY_SIZE: Record<CardSize, number> = { S: 11.5, M: 13, L: 14.5 };
 export const EMPTY_BULLETS: Record<CardSize, number> = { S: 3, M: 4, L: 5 };

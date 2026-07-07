@@ -53,9 +53,10 @@ type DirectoryHandleWithPermissions = FileSystemDirectoryHandle & {
 
 async function verifyPermission(handle: FileSystemDirectoryHandle): Promise<boolean> {
   const writableHandle = handle as DirectoryHandleWithPermissions;
-  const perm = await writableHandle.queryPermission?.({ mode: 'readwrite' });
+  if (!writableHandle.queryPermission || !writableHandle.requestPermission) return true;
+  const perm = await writableHandle.queryPermission({ mode: 'readwrite' });
   if (perm === 'granted') return true;
-  return (await writableHandle.requestPermission?.({ mode: 'readwrite' })) === 'granted';
+  return (await writableHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
 }
 
 // ── Markdown formatter ────────────────────────────────────────────────────────
@@ -94,7 +95,9 @@ export const localVaultService = {
     const handle = await idbGet<FileSystemDirectoryHandle>(HANDLE_KEY);
     if (!handle) return 'none';
     try {
-      const perm = await (handle as DirectoryHandleWithPermissions).queryPermission?.({ mode: 'readwrite' });
+      const writableHandle = handle as DirectoryHandleWithPermissions;
+      if (!writableHandle.queryPermission) return 'granted';
+      const perm = await writableHandle.queryPermission({ mode: 'readwrite' });
       return perm === 'granted' ? 'granted' : 'denied';
     } catch {
       return 'none';

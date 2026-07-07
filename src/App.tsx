@@ -18,6 +18,7 @@ import BrandLab, { type BrandTab } from './components/brand/BrandLab';
 import { FullscreenFade } from './components/FullscreenFade';
 import { useAuth } from './auth/useAuth';
 import { useTeams } from './hooks/useTeams';
+import { shellPlatform } from './hooks/useShellPlatform';
 
 /**
  * App — 工作坊外壳：语言/落地页/当前空间，外加顶栏导航与空间路由。
@@ -27,7 +28,7 @@ export default function App() {
   useTeams(); // 登录后立即预取团队数据，所有子模块拿缓存秒出
   const { user } = useAuth();
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
-  const isElectron = !!(window as any).electronAPI?.isElectron;
+  const isElectron = shellPlatform.isElectron;
   // 直接读 localStorage：比走 React 状态更早，JS 执行即确定，无任何延迟
   const hadSession = !!localStorage.getItem('gsyen_user_snap');
   const [showLanding, setShowLanding] = useState(!isElectron && !hadSession);

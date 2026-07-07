@@ -1,4 +1,5 @@
 import type { CardAccent, CardSize, CardState } from './CanvasCardData';
+import { CARD_SIZE_DIM } from './CanvasCardSolidTokens';
 
 export const FONT = '"HarmonyOS Sans SC","HarmonyOS Sans","Inter","PingFang SC","Microsoft YaHei UI",system-ui,sans-serif';
 export const LATIN = '"Inter","HarmonyOS Sans",system-ui,sans-serif';
@@ -27,11 +28,10 @@ export const ACCENTS: { v: CardAccent; bg: string; label: string; empty?: true }
   { v: 'black', bg: '#2A2C31', label: 'black' },
 ];
 
-export const SIZES: { v: CardSize; dim: string }[] = [
-  { v: 'S', dim: '220x170' },
-  { v: 'M', dim: '300x230' },
-  { v: 'L', dim: '380x320' },
-];
+export const SIZES: { v: CardSize; dim: string }[] = (['S', 'M', 'L'] as CardSize[]).map(v => ({
+  v,
+  dim: `${CARD_SIZE_DIM[v].w}x${CARD_SIZE_DIM[v].h}`,
+}));
 
 export const STATE_OPTIONS: [string, CardState][] = [
   ['Normal', 'normal'],

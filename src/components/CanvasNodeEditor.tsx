@@ -103,8 +103,8 @@ export const CanvasNodeEditor = forwardRef<CanvasNodeEditorRef, { docId: string;
         <CanvasFlowInner
           nodes={nodes}
           edges={edges}
-          onNodesChange={e => { onNodesChange(e); scheduleSave(nodes, edges); }}
-          onEdgesChange={e => { onEdgesChange(e); scheduleSave(nodes, edges); }}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeDrag={handleNodeDrag}
           onNodeDragStop={handleNodeDragStop}

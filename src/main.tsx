@@ -21,12 +21,12 @@ import './styles/index-layers/16-scoped-module-vi.css';
 import './styles/index-layers/17-module-mail-kanban.css';
 import './styles/index-layers/18-module-ledger-citadel.css';
 import './styles/index-layers/19-member-responsive.css';
-import './styles/index-layers/20-final-overrides.css';
-import './styles/index-layers/21-final-overrides.css';
+import './styles/index-layers/20-overrides-core.css';
+import './styles/index-layers/21-overrides-polish.css';
 import './styles/index-layers/22-shell-layout.css';
-import './styles/index-layers/22-shell-responsive.css';
-import './styles/index-layers/23-pulse-dock.css';
-import './styles/index-layers/24-surface-harmony.css';
+import './styles/index-layers/23-shell-responsive.css';
+import './styles/index-layers/24-pulse-dock.css';
+import './styles/index-layers/25-surface-harmony.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');

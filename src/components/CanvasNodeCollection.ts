@@ -1,11 +1,8 @@
 import type { Node } from '@xyflow/react';
 import type { BoxData, CardSize } from './CanvasCardData';
+import { CARD_SIZE_DIM } from './CanvasCardSolidTokens';
 
-export const SIZE_DIM: Record<CardSize, { w: number; h: number }> = {
-  S: { w: 220, h: 170 },
-  M: { w: 300, h: 230 },
-  L: { w: 380, h: 320 },
-};
+export const SIZE_DIM: Record<CardSize, { w: number; h: number }> = CARD_SIZE_DIM;
 
 const COLLECTION_DIM = { w: 420, h: 280 };
 export const ABSORB_PREVIEW_RATIO = 0.25;

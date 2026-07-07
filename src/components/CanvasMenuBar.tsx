@@ -4,6 +4,7 @@
  * 下行：File Edit Format Focus Authors View Help + ▷
  */
 import { useState, useEffect } from 'react';
+import { shellPlatform } from '../hooks/useShellPlatform';
 
 type EditorMode = 'write' | 'preview' | 'split';
 
@@ -25,7 +26,7 @@ interface Props {
 }
 
 const MONO = '"iA Writer Mono","Courier New","Consolas",monospace';
-const isEl = () => !!(window as any).electronAPI?.isElectron;
+const isElectron = shellPlatform.isElectron;
 
 export function CanvasMenuBar({ title, onTitle, dark, onDark, focus, onFocus, tw, onTw, mode, onMode, onImport, onExport, onClose, onWrap }: Props) {
   const [open, setOpen] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export function CanvasMenuBar({ title, onTitle, dark, onDark, focus, onFocus, tw
   const Sep = () => <div style={{ margin: '4px 0', borderTop: `1px solid ${bdr}` }} />;
 
   const fullscreen = () => {
-    if (isEl()) (window as any).electronAPI.window.fullscreen();
+    if (isElectron) (window as any).electronAPI.window.fullscreen();
     // web 版不做全屏（防止浏览器强占全屏）
   };
 
@@ -140,7 +141,7 @@ export function CanvasMenuBar({ title, onTitle, dark, onDark, focus, onFocus, tw
         <input value={title} onChange={e => onTitle(e.target.value)} placeholder="无标题" maxLength={80}
           style={{ background: 'transparent', border: 'none', outline: 'none', textAlign: 'center',
             fontFamily: MONO, fontSize: '13px', fontWeight: 600, color: fg, width: 320 }} />
-        {isEl() && (
+        {isElectron && (
           <div style={{ position: 'absolute', right: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
             {(['—', '□', '×'] as const).map((c, i) => (
               <div key={i}

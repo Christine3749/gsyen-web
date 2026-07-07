@@ -1,14 +1,16 @@
 export type ShellPlatform = 'mac' | 'windows' | 'web';
 
-export function getShellPlatform(): {
+export interface ShellPlatformInfo {
   isElectron: boolean;
   isMac: boolean;
   isWeb: boolean;
   isWindows: boolean;
   platform: ShellPlatform;
   rawPlatform?: string;
-} {
-  const api = (window as any).electronAPI;
+}
+
+export function getShellPlatform(): ShellPlatformInfo {
+  const api = typeof window === 'undefined' ? undefined : (window as any).electronAPI;
   const rawPlatform = api?.platform as string | undefined;
   const platform: ShellPlatform = rawPlatform === 'darwin'
     ? 'mac'
@@ -26,6 +28,8 @@ export function getShellPlatform(): {
   };
 }
 
+export const shellPlatform = getShellPlatform();
+
 export function useShellPlatform() {
-  return getShellPlatform();
+  return shellPlatform;
 }
