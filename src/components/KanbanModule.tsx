@@ -150,7 +150,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
   };
 
   return (
-    <div className="gsyen-kanban-page flex flex-col h-full text-[#1A1A1A] font-sans animate-fadeIn">
+    <div className="gsyen-kanban-page flex flex-col h-full text-[#1A1A1A] font-sans">
       {notification && (
         <div className="fixed bottom-6 right-6 bg-[#1A1A1A] text-[#F9F8F6] px-5 py-3 border border-amber-900/40 text-xs font-mono uppercase tracking-widest z-50 flex items-center gap-3">
           <CheckCircle2 className="w-4 h-4 text-emerald-500 animate-bounce" /><span>{notification}</span>
@@ -158,11 +158,11 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
       )}
 
       {/* Toolbar */}
-      <div className="relative shrink-0 h-[52px] flex items-center gap-2 px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
-        <button onClick={() => setSidebarOpen(o => !o)} className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all shrink-0 ${sidebarOpen ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'text-[#1A1A1A]/70'}`}>
+      <div className="relative shrink-0 h-[52px] flex items-center gap-[7px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
+        <button onClick={() => setSidebarOpen(o => !o)} className={`gsyen-icon-command shrink-0 ${sidebarOpen ? 'is-active' : ''}`}>
           <PanelLeft className="w-4 h-4" />
         </button>
-        <button onClick={handleNewSession} className="flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] rounded-none transition-all fs-sm font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 shrink-0">
+        <button onClick={handleNewSession} className="gsyen-command-button shrink-0">
           <Plus className="w-3 h-3" /><span>NEW</span>
         </button>
         <div className="flex-1" />
@@ -192,7 +192,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
       <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
 
         {/* 往来侧边栏 */}
-        <aside className={`shrink-0 flex flex-col border-r border-[#1A1A1A]/10 bg-[#F4F2EE] transition-all duration-300 overflow-hidden ${sidebarOpen ? 'w-[240px] 2xl:w-[320px] p-6 opacity-100' : 'w-0 p-0 opacity-0 pointer-events-none'}`}>
+        <aside className={`shrink-0 flex flex-col bg-[#F4F2EE] transition-all duration-300 overflow-hidden ${sidebarOpen ? 'w-[240px] 2xl:w-[320px] p-6 opacity-100 border-r border-[#1A1A1A]/10' : 'w-0 p-0 opacity-0 pointer-events-none border-r-0'}`}>
           <div className="flex flex-col h-full min-w-[208px] 2xl:min-w-[272px] gap-4">
             <div className="flex items-center justify-between w-full">
               <h2 className="fs-md font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70">{lang === 'zh' ? '往来' : 'Recents'}</h2>

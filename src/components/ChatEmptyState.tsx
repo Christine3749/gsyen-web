@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { Send, Sparkles } from 'lucide-react';
 import VintageCar from './VintageCar';
 import { PRESET_QUERIES, PRESET_SHORT_LABELS } from '../config/presets';
+import { PULSE_FOCUS_LABEL, getPulseSignal, getStandbyPulseSignals } from '../config/pulseSignals';
 
 interface ChatEmptyStateProps {
   lang: 'zh' | 'en';
@@ -16,17 +17,14 @@ interface ChatEmptyStateProps {
 
 export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmptyStateProps) {
   const zh = lang === 'zh';
+  const dgwmSignal = getPulseSignal(lang, 'DGWM');
   const standbyRows = [
     { label: zh ? '上下文' : 'CONTEXT', value: zh ? '灵阁 / 创意灵感' : 'Muse / Creative Signal' },
-    { label: zh ? '今日焦点' : 'FOCUS', value: zh ? 'GyenBox + Prism-Edge' : 'GyenBox + Prism-Edge', tone: 'primary' },
-    { label: zh ? '待裁决' : 'UNRESOLVED', value: zh ? <>DGWM 3 个 canonical <em>候选</em></> : <>DGWM 3 canonical <em>candidates</em></>, tone: 'warn' },
+    { label: zh ? '今日焦点' : 'FOCUS', value: PULSE_FOCUS_LABEL, tone: 'primary' },
+    { label: zh ? '待裁决' : 'UNRESOLVED', value: dgwmSignal.summary, tone: 'warn' },
     { label: zh ? '本地' : 'LOCAL', value: zh ? '档案可写入 / 云同步就绪' : 'archive writable / sync ready' },
   ];
-  const liveSignals = [
-    { label: 'GYENBOX', value: zh ? '3 文件未提交' : '3 files pending', tone: 'primary' },
-    { label: 'PRISM', value: zh ? 'V2 冻结' : 'V2 frozen', tone: 'warn' },
-    { label: 'TEMPORA', value: zh ? '7D 停滞' : '7D idle' },
-  ];
+  const standbySignals = getStandbyPulseSignals(lang);
 
   return (
     <motion.div key="empty" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24 }}
@@ -59,12 +57,12 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
           <div className="gsyen-standby-feed">
             <div className="gsyen-standby-feed-title">
               <span>{zh ? '疆域信号' : 'GYEN SIGNALS'}</span>
-              <span>LIVE</span>
+              <span>{zh ? '静态' : 'STATIC'}</span>
             </div>
-            {liveSignals.map(signal => (
+            {standbySignals.map(signal => (
               <div key={signal.label} className={`gsyen-standby-signal ${signal.tone ? `is-${signal.tone}` : ''}`}>
                 <span>{signal.label}</span>
-                <strong>{signal.value}</strong>
+                <strong>{signal.summary}</strong>
               </div>
             ))}
           </div>

@@ -1,0 +1,106 @@
+/* Shell responsive geometry kept next to the base layout layer. */
+@media (max-width: 1599px) {
+  :root {
+    --gsyen-model-label-width: 34px;
+    --gsyen-model-tabs-width: 92px;
+  }
+
+  .gsyen-command-deck,
+  .gsyen-pulse-panel {
+    --gsyen-pulse-clearance: 36px;
+  }
+
+  .gsyen-model-label-full {
+    display: none !important;
+  }
+
+  .gsyen-model-label-short {
+    display: inline !important;
+  }
+
+  .gsyen-command-model .gsyen-model-selector {
+    overflow-x: hidden !important;
+  }
+
+  .gsyen-command-model .gsyen-model-option:not(.is-active) {
+    display: none !important;
+  }
+
+  .gsyen-command-model .gsyen-model-option.is-active {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .gsyen-system-panel {
+    display: flex !important;
+    position: fixed !important;
+    top: 148px !important;
+    right: 0 !important;
+    bottom: 24px !important;
+    z-index: 8 !important;
+    width: min(310px, calc(100vw - 32px)) !important;
+    box-shadow: -16px 0 30px rgba(20, 18, 14, 0.10) !important;
+  }
+}
+
+@media (min-width: 1780px) {
+  :root {
+    --gsyen-model-status-width: 168px;
+  }
+
+  .gsyen-command-model .gsyen-model-status-button {
+    justify-content: flex-start !important;
+    padding: 0 12px !important;
+  }
+
+  .gsyen-command-model .gsyen-model-status-label {
+    display: inline !important;
+  }
+}
+
+@media (max-width: 1320px) {
+  :root {
+    --gsyen-command-gap: 12px;
+    --gsyen-model-label-width: 34px;
+    --gsyen-model-status-width: 52px;
+  }
+
+  .gsyen-command-deck {
+    --gsyen-command-pad-x: 24px;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .gsyen-pulse-panel {
+    --gsyen-command-gap: 12px;
+    --gsyen-command-pad-x: 24px;
+    --gsyen-model-label-width: 34px;
+    --gsyen-model-status-width: 52px;
+  }
+}
+
+@media (max-width: 1180px) {
+  #app-header.gsyen-app-header {
+    column-gap: 16px !important;
+  }
+
+  .gsyen-command-deck {
+    --gsyen-command-button-width: 34px;
+    --gsyen-command-tools-width: 153px;
+    --gsyen-pulse-clearance: 0px;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  .gsyen-pulse-panel {
+    --gsyen-command-tools-width: 153px;
+    --gsyen-pulse-clearance: 0px;
+  }
+
+  .gsyen-command-tools .gsyen-command-button {
+    width: var(--gsyen-command-button-width, 34px) !important;
+  }
+
+  .gsyen-command-tools .gsyen-command-button span {
+    display: none !important;
+  }
+}

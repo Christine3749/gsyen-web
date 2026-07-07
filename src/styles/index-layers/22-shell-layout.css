@@ -1,0 +1,231 @@
+/* Final shell geometry: centered header nav + instrument command rail. */
+:root {
+  --gsyen-shell-gap: 24px;
+  --gsyen-command-gap: 16px;
+  --gsyen-model-label-width: 58px;
+  --gsyen-model-tabs-width: 176px;
+  --gsyen-model-status-width: 52px;
+}
+
+#app-header.gsyen-app-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: var(--gsyen-shell-gap) !important;
+}
+
+#app-header.gsyen-app-header.is-mac {
+  padding-left: 80px !important;
+  padding-right: 32px !important;
+}
+
+#app-header.gsyen-app-header.is-windows {
+  padding-left: 32px !important;
+  padding-right: 128px !important;
+}
+
+#app-header .gsyen-brand-lockup {
+  justify-self: start !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+#app-header .gsyen-brand-mark {
+  display: flex !important;
+  width: 88px !important;
+  height: 58px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#app-header .gsyen-brand-mark > svg {
+  width: 44px !important;
+  height: 44px !important;
+  max-width: 44px !important;
+  flex: 0 0 44px !important;
+}
+
+#app-header .gsyen-brand-mark img.gsyen-vintage-car {
+  width: 84px !important;
+  height: 58px !important;
+  object-fit: contain !important;
+}
+
+#app-header .gsyen-space-nav {
+  justify-self: center !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+}
+
+#app-header .gsyen-space-nav::-webkit-scrollbar {
+  display: none;
+}
+
+#app-header .gsyen-header-actions {
+  justify-self: end !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.gsyen-command-deck {
+  --gsyen-command-pad-x: 32px;
+  --gsyen-command-button-width: 88px;
+  --gsyen-command-tool-gap: 7px;
+  --gsyen-command-tools-width: 315px;
+  --gsyen-pulse-clearance: 0px;
+  --gsyen-pulse-model-gap: 32px;
+  --gsyen-model-group-width: calc(var(--gsyen-model-label-width) + var(--gsyen-model-tabs-width) + var(--gsyen-model-status-width) + 10px);
+  --gsyen-pulse-left-reserve: calc(var(--gsyen-command-pad-x) + var(--gsyen-command-tools-width) + var(--gsyen-command-gap));
+  --gsyen-pulse-right-reserve: calc(var(--gsyen-command-pad-x) + var(--gsyen-model-group-width) + var(--gsyen-pulse-model-gap));
+  --gsyen-pulse-reserve: calc(max(var(--gsyen-pulse-left-reserve), var(--gsyen-pulse-right-reserve)) + var(--gsyen-pulse-clearance));
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: var(--gsyen-command-gap) !important;
+  height: 52px !important;
+  position: relative !important;
+}
+
+.gsyen-command-button {
+  width: var(--gsyen-command-button-width, 88px) !important;
+  flex: 0 0 var(--gsyen-command-button-width, 88px) !important;
+}
+
+.gsyen-command-tools {
+  display: flex !important;
+  width: auto !important;
+  min-width: max-content !important;
+  align-items: center !important;
+  justify-self: start !important;
+  gap: var(--gsyen-command-tool-gap, 7px) !important;
+  padding-right: 0 !important;
+}
+
+.gsyen-command-core {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  column-gap: var(--gsyen-pulse-model-gap) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  justify-self: stretch !important;
+}
+
+.gsyen-command-pulse {
+  display: flex !important;
+  width: min(1160px, calc(100vw - var(--gsyen-pulse-reserve) - var(--gsyen-pulse-reserve))) !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  justify-self: stretch !important;
+  left: 50% !important;
+  position: absolute !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+  z-index: 1 !important;
+}
+
+.gsyen-command-pulse .gsyen-system-bus {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+}
+
+.gsyen-pulse-panel {
+  --gsyen-command-pad-x: 32px;
+  --gsyen-command-tools-width: 315px;
+  --gsyen-pulse-clearance: 0px;
+  --gsyen-pulse-model-gap: 32px;
+  --gsyen-model-group-width: calc(var(--gsyen-model-label-width) + var(--gsyen-model-tabs-width) + var(--gsyen-model-status-width) + 10px);
+  --gsyen-pulse-left-reserve: calc(var(--gsyen-command-pad-x) + var(--gsyen-command-tools-width) + var(--gsyen-command-gap));
+  --gsyen-pulse-right-reserve: calc(var(--gsyen-command-pad-x) + var(--gsyen-model-group-width) + var(--gsyen-pulse-model-gap));
+  --gsyen-pulse-reserve: calc(max(var(--gsyen-pulse-left-reserve), var(--gsyen-pulse-right-reserve)) + var(--gsyen-pulse-clearance));
+}
+
+.gsyen-command-pulse .gsyen-system-bus-label {
+  width: var(--gsyen-command-button-width, 88px) !important;
+  flex: 0 0 var(--gsyen-command-button-width, 88px) !important;
+}
+
+.gsyen-pulse-panel > div {
+  width: min(1160px, calc(100vw - var(--gsyen-pulse-reserve) - var(--gsyen-pulse-reserve))) !important;
+  max-width: none !important;
+  margin-inline: auto !important;
+  padding-inline: 0 !important;
+}
+
+.gsyen-command-model {
+  display: flex !important;
+  width: auto !important;
+  min-width: max-content !important;
+  align-items: center !important;
+  grid-column: 2 !important;
+  justify-self: end !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left-color: transparent !important;
+  background: transparent !important;
+  z-index: 2 !important;
+}
+
+.gsyen-model-dock {
+  display: flex !important;
+  height: 30px !important;
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+  align-items: stretch !important;
+}
+
+.gsyen-command-model .gsyen-model-label {
+  display: flex !important;
+  width: var(--gsyen-model-label-width) !important;
+  height: 30px !important;
+  flex: 0 0 var(--gsyen-model-label-width) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: 0 !important;
+  border: 1px solid rgba(26, 26, 26, 0.12) !important;
+  border-right: 0 !important;
+  background: rgba(249, 248, 246, 0.54) !important;
+  color: rgba(26, 26, 26, 0.38) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.2em !important;
+  line-height: 1 !important;
+}
+
+.gsyen-model-label-short {
+  display: none !important;
+}
+
+.gsyen-command-model .gsyen-model-selector {
+  width: var(--gsyen-model-tabs-width) !important;
+  max-width: none !important;
+  flex: 0 0 var(--gsyen-model-tabs-width) !important;
+  overflow-x: scroll !important;
+}
+
+.gsyen-command-model .gsyen-model-status-button {
+  width: var(--gsyen-model-status-width) !important;
+  min-width: var(--gsyen-model-status-width) !important;
+  flex: 0 0 var(--gsyen-model-status-width) !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.gsyen-command-model .gsyen-model-status-label {
+  display: none !important;
+}
+
+.gsyen-pulse-panel-collapse {
+  position: relative !important;
+  z-index: 3 !important;
+  pointer-events: auto !important;
+}

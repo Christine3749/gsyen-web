@@ -1,7 +1,9 @@
 {
   "name": "gsyen",
   "private": true,
-  "version": "2.80.204",
+  "version": "2.81.208",
+  "description": "GSYEN AI atelier workspace",
+  "author": "GSYEN",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {

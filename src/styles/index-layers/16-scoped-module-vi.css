@@ -1,0 +1,240 @@
+/* GYEN Logo Surface Rule - logo never sits in a framed tile */
+.gsyen-vintage-car {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.gsyen-brand-mark,
+.gsyen-standby-mark {
+  background: transparent !important;
+  border-color: transparent !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+}
+
+.gsyen-standby-mark {
+  width: 48px !important;
+  height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.gsyen-standby-mark img.gsyen-vintage-car {
+  width: 43px !important;
+  height: 30px !important;
+}
+
+/* GYEN Frontier Car V1.4 - slightly larger placement */
+.gsyen-brand-mark {
+  width: 88px !important;
+  height: 58px !important;
+}
+
+.gsyen-brand-mark img.gsyen-vintage-car {
+  width: 84px !important;
+  height: 58px !important;
+}
+
+.gsyen-standby-mark img.gsyen-vintage-car {
+  width: 49px !important;
+  height: 34px !important;
+}
+
+/* GYEN Pulse V6 - complete the signal readout: label / value / unit */
+.gsyen-system-bus {
+  border-color: color-mix(in srgb, var(--gyen-n1-readout) 70%, black) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.075),
+    inset 0 -1px 0 rgba(0,0,0,0.92),
+    0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+.gsyen-system-bus-label {
+  width: 132px !important;
+  flex-basis: 132px !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gyen-gold-dark) 92%, white), var(--gyen-gold-dark)) !important;
+  border-right: 1px solid color-mix(in srgb, var(--gyen-n0-selected) 82%, var(--gyen-gold-dark)) !important;
+  color: var(--gyen-n0-selected) !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.23em !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 -1px 0 rgba(0,0,0,0.24) !important;
+}
+
+.gsyen-system-bus-window {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), transparent 44%),
+    repeating-linear-gradient(90deg, transparent 0 131px, rgba(255,255,255,0.035) 131px 132px) !important;
+}
+
+.gsyen-system-bus-track {
+  animation-duration: 42s !important;
+}
+
+.gsyen-system-cell {
+  min-width: 136px !important;
+  gap: 7px !important;
+  padding: 0 13px !important;
+  border-right-color: color-mix(in srgb, var(--gyen-n7-retreat) 11%, transparent) !important;
+  letter-spacing: 0.13em !important;
+}
+
+.gsyen-system-cell::after {
+  top: 5px !important;
+  bottom: 5px !important;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.10), transparent) !important;
+  opacity: 1 !important;
+}
+
+.gsyen-system-cell-name {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 50%, var(--gyen-n1-readout)) !important;
+  font-weight: 850 !important;
+}
+
+.gsyen-system-cell-value {
+  color: var(--gyen-gold-light) !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.045em !important;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--gyen-gold-light) 16%, transparent) !important;
+}
+
+.gsyen-system-cell-unit {
+  color: color-mix(in srgb, var(--gyen-card-white) 72%, var(--gyen-gold-dim)) !important;
+  font-weight: 920 !important;
+  letter-spacing: 0.095em !important;
+  text-shadow: 0 0 6px rgba(255,255,255,0.035) !important;
+}
+
+.gsyen-system-cell:hover .gsyen-system-cell-name {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 78%, var(--gyen-n1-readout)) !important;
+}
+
+.gsyen-system-cell:hover .gsyen-system-cell-unit {
+  color: color-mix(in srgb, var(--gyen-card-white) 86%, var(--gyen-gold-light)) !important;
+}
+
+.gsyen-system-count {
+  width: 48px !important;
+  flex-basis: 48px !important;
+  border-left-color: color-mix(in srgb, var(--gyen-n7-retreat) 14%, transparent) !important;
+  color: var(--gyen-gold-light) !important;
+}
+
+.gsyen-system-count span {
+  color: var(--gyen-gold-light) !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+}
+
+/* GYEN Pulse V6.2 - value and unit share one chroma family */
+.gsyen-system-cell {
+  gap: 0 !important;
+  padding: 0 12px !important;
+}
+
+.gsyen-system-cell-name {
+  margin-right: 13px !important;
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 56%, var(--gyen-n1-readout)) !important;
+  font-weight: 850 !important;
+}
+
+.gsyen-system-cell-value {
+  margin-right: 4px !important;
+  color: #C9A227 !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.045em !important;
+  text-shadow: 0 0 5px color-mix(in srgb, #C9A227 10%, transparent) !important;
+}
+
+.gsyen-system-cell-unit {
+  color: color-mix(in srgb, #B8935E 68%, var(--gyen-n7-retreat)) !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.052em !important;
+  transform: translateY(0.05px) !important;
+  text-shadow: none !important;
+}
+
+.gsyen-system-cell:hover .gsyen-system-cell-unit {
+  color: color-mix(in srgb, #B8935E 76%, var(--gyen-n7-retreat)) !important;
+}
+
+
+
+
+/* GYEN Pulse Panel V6.3 - expanded state is a workbench, not a ticker */
+.gsyen-pulse-panel {
+  color: var(--gyen-card-white) !important;
+}
+
+.gsyen-pulse-panel-head {
+  color: color-mix(in srgb, #C9A227 82%, var(--gyen-n7-retreat)) !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.14em !important;
+}
+
+.gsyen-pulse-panel-row {
+  min-height: 34px !important;
+}
+
+.gsyen-pulse-panel-row > span:first-child {
+  color: color-mix(in srgb, var(--gyen-n7-retreat) 82%, var(--gyen-card-white)) !important;
+  font-size: 9px !important;
+  font-weight: 920 !important;
+  letter-spacing: 0.14em !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(2) {
+  color: #C9A227 !important;
+  font-size: 10.5px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  text-shadow: 0 0 5px color-mix(in srgb, #C9A227 10%, transparent) !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(3) {
+  color: color-mix(in srgb, #B8935E 68%, var(--gyen-n7-retreat)) !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.055em !important;
+}
+
+.gsyen-pulse-panel-row > span:nth-child(4) {
+  color: color-mix(in srgb, var(--gyen-card-white) 84%, var(--gyen-n7-retreat)) !important;
+  font-size: 12.5px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.005em !important;
+  line-height: 1.3 !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.22) !important;
+}
+
+.gsyen-pulse-panel-action {
+  color: color-mix(in srgb, var(--gyen-card-white) 72%, var(--gyen-n7-retreat)) !important;
+  border-color: color-mix(in srgb, var(--gyen-card-white) 20%, transparent) !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.12em !important;
+}
+
+.gsyen-pulse-panel-action:hover {
+  color: #C9A227 !important;
+  border-color: color-mix(in srgb, #C9A227 58%, transparent) !important;
+}
+
+/* GYEN Pulse V6.4 - right end cap completes the readout tape */
+.gsyen-system-count {
+  width: 58px !important;
+  flex-basis: 58px !important;
+  padding: 0 12px 0 10px !important;
+  gap: 6px !important;
+  justify-content: center !important;
+  border-right: 1px solid color-mix(in srgb, #C9A227 32%, var(--gyen-n1-readout)) !important;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.035) !important;
+}

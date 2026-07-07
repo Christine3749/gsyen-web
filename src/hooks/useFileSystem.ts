@@ -3,6 +3,8 @@
  * 上层组件只调用 fsAdapter，平台差异完全隔离在此文件内。
  */
 
+import { shellPlatform } from './useShellPlatform';
+
 export interface FileEntry {
   name:          string;
   path:          string;
@@ -22,7 +24,7 @@ export interface FolderSource {
   env:     'web' | 'electron';
 }
 
-const _isElectron = !!(window as any).electronAPI?.isElectron;
+const _isElectron = shellPlatform.isElectron;
 
 // ── Electron: preview first line, max 512 bytes ───────────────────────────────
 

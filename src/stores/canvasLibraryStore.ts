@@ -6,42 +6,12 @@
 import type { FolderSource, FileEntry } from '../hooks/useFileSystem';
 import { fsAdapter, _entriesToFileEntries } from '../hooks/useFileSystem';
 import { useState, useEffect } from 'react';
+import { SORT_KEY, loadSort, sortFiles } from './canvasLibrarySort';
+import type { SortSettings } from './canvasLibrarySort';
+export type { SortSettings } from './canvasLibrarySort';
 
 const EL_PATHS_KEY    = 'gsyen_library_paths';
 const EL_SELECTED_KEY = 'gsyen_library_selected';
-const SORT_KEY        = 'gsyen_library_sort';
-
-export interface SortSettings {
-  foldersOnTop: boolean;
-  sortBy:       'date' | 'name';
-  newestOnTop:  boolean;
-}
-
-const DEFAULT_SORT: SortSettings = { foldersOnTop: true, sortBy: 'date', newestOnTop: true };
-
-function _loadSort(): SortSettings {
-  try { return { ...DEFAULT_SORT, ...JSON.parse(localStorage.getItem(SORT_KEY) ?? '{}') }; }
-  catch { return DEFAULT_SORT; }
-}
-
-function _sortFiles(files: FileEntry[], s: SortSettings): FileEntry[] {
-  const sortFn = (a: FileEntry, b: FileEntry): number => {
-    if (s.sortBy === 'name') {
-      const na = a.name.replace(/\.[^.]+$/, '');
-      const nb = b.name.replace(/\.[^.]+$/, '');
-      const cmp = na.localeCompare(nb);
-      return s.newestOnTop ? -cmp : cmp;
-    }
-    const diff = (b.lastModified ?? 0) - (a.lastModified ?? 0);
-    return s.newestOnTop ? diff : -diff;
-  };
-  if (s.foldersOnTop) {
-    const dirs = files.filter(f =>  f.isDirectory).sort((a, b) => a.name.localeCompare(b.name));
-    const docs = files.filter(f => !f.isDirectory).sort(sortFn);
-    return [...dirs, ...docs];
-  }
-  return [...files].sort(sortFn);
-}
 
 // readDir 原始结果缓存（未排序）：folderSource.id → FileEntry[]
 const _dirCache = new Map<string, FileEntry[]>();
@@ -65,7 +35,7 @@ interface LibraryState {
 let _s: LibraryState = {
   folders: [], selectedFolder: null, files: [], selectedFile: null, loading: false,
   navStack: [], navFiles: [], navLoading: false,
-  sortSettings: _loadSort(),
+  sortSettings: loadSort(),
 };
 
 const _listeners = new Set<(s: LibraryState) => void>();
@@ -180,7 +150,7 @@ export const libraryStore = {
     if (fsAdapter.env === 'electron') localStorage.setItem(EL_SELECTED_KEY, src.id);
     const cached = _dirCache.get(src.id);
     if (cached) {
-      _set({ selectedFolder: src, files: _sortFiles(cached, _s.sortSettings),
+      _set({ selectedFolder: src, files: sortFiles(cached, _s.sortSettings),
         loading: false, selectedFile: null, navStack: [], navFiles: [] });
       (window as any).electronAPI?.library?.watchFolder?.(src.path);
       return;
@@ -189,7 +159,7 @@ export const libraryStore = {
     try {
       const raw = await fsAdapter.readDir(src);
       _dirCache.set(src.id, raw);
-      _set({ files: _sortFiles(raw, _s.sortSettings), loading: false });
+      _set({ files: sortFiles(raw, _s.sortSettings), loading: false });
       (window as any).electronAPI?.library?.watchFolder?.(src.path);
     } catch { _set({ loading: false }); }
   },
@@ -231,8 +201,8 @@ export const libraryStore = {
     try { localStorage.setItem(SORT_KEY, JSON.stringify(sortSettings)); } catch {}
     _set({
       sortSettings,
-      files:    _sortFiles(_s.files,    sortSettings),
-      navFiles: _sortFiles(_s.navFiles, sortSettings),
+      files:    sortFiles(_s.files,    sortSettings),
+      navFiles: sortFiles(_s.navFiles, sortSettings),
     });
   },
 
@@ -242,14 +212,14 @@ export const libraryStore = {
     const navStack = [..._s.navStack, src];
     const cached = _dirCache.get(src.id);
     if (cached) {
-      _set({ navStack, navFiles: _sortFiles(cached, _s.sortSettings), navLoading: false });
+      _set({ navStack, navFiles: sortFiles(cached, _s.sortSettings), navLoading: false });
       return;
     }
     _set({ navStack, navLoading: true });
     try {
       const raw = await fsAdapter.readDir(src);
       _dirCache.set(src.id, raw);
-      _set({ navFiles: _sortFiles(raw, _s.sortSettings), navLoading: false });
+      _set({ navFiles: sortFiles(raw, _s.sortSettings), navLoading: false });
     } catch { _set({ navLoading: false }); }
   },
 
@@ -263,14 +233,14 @@ export const libraryStore = {
     const parent = navStack[navStack.length - 1];
     const cached = _dirCache.get(parent.id);
     if (cached) {
-      _set({ navStack, navFiles: _sortFiles(cached, _s.sortSettings), navLoading: false });
+      _set({ navStack, navFiles: sortFiles(cached, _s.sortSettings), navLoading: false });
       return;
     }
     _set({ navStack, navLoading: true });
     try {
       const raw = await fsAdapter.readDir(parent);
       _dirCache.set(parent.id, raw);
-      _set({ navFiles: _sortFiles(raw, _s.sortSettings), navLoading: false });
+      _set({ navFiles: sortFiles(raw, _s.sortSettings), navLoading: false });
     } catch { _set({ navLoading: false }); }
   },
 
@@ -286,11 +256,11 @@ export const libraryStore = {
       const src = _s.navStack[_s.navStack.length - 1];
       const raw = await fsAdapter.readDir(src);
       _dirCache.set(src.id, raw);
-      _set({ navFiles: _sortFiles(raw, _s.sortSettings) });
+      _set({ navFiles: sortFiles(raw, _s.sortSettings) });
     } else if (_s.selectedFolder) {
       const raw = await fsAdapter.readDir(_s.selectedFolder);
       _dirCache.set(_s.selectedFolder.id, raw);
-      _set({ files: _sortFiles(raw, _s.sortSettings) });
+      _set({ files: sortFiles(raw, _s.sortSettings) });
     }
   },
 };
@@ -308,6 +278,9 @@ if (typeof window !== 'undefined') setTimeout(_initFsWatcher, 0);
 
 export function useLibraryStore() {
   const [state, setState] = useState(_s);
-  useEffect(() => libraryStore.subscribe(setState), []);
+  useEffect(() => {
+    const unsubscribe = libraryStore.subscribe(setState);
+    return () => { unsubscribe(); };
+  }, []);
   return state;
 }

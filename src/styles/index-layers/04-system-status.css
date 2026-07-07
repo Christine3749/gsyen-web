@@ -1,0 +1,235 @@
+.gsyen-standby-actions button:hover {
+  border-color: #1A1A1A;
+  background: #1A1A1A;
+  color: #F9F8F6;
+}
+
+.gsyen-system-panel {
+  width: 244px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(26, 26, 26, 0.12);
+  background: #F1EFEA;
+  color: #1A1A1A;
+}
+
+.gsyen-system-panel-head {
+  height: 72px;
+  padding: 16px 16px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.36), rgba(26,26,26,0.015));
+}
+
+.gsyen-system-panel-head p {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(26, 26, 26, 0.32);
+}
+
+.gsyen-system-panel-head h3 {
+  margin-top: 5px;
+  font-family: var(--font-serif-sc);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.80);
+}
+
+.gsyen-system-panel-head button {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(26, 26, 26, 0.28);
+}
+
+.gsyen-system-panel-head button:hover {
+  color: rgba(26, 26, 26, 0.72);
+}
+
+.gsyen-system-panel-readout {
+  min-height: 72px;
+  margin: 16px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(26, 26, 26, 0.14);
+  background: #11100F;
+  padding: 13px 14px;
+}
+
+.gsyen-system-panel-dot,
+.gsyen-model-status-dot,
+.gsyen-system-panel-mini-dot {
+  display: inline-block;
+  border-radius: 999px;
+  background: #5f5f5f;
+}
+
+.gsyen-system-panel-dot {
+  width: 9px;
+  height: 9px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.16), 0 0 8px rgba(255,255,255,0.08);
+}
+
+.gsyen-system-panel-dot.is-online,
+.gsyen-model-status-button.is-online .gsyen-model-status-dot,
+.gsyen-system-panel-mini-dot.is-online {
+  background: #58B779;
+}
+
+.gsyen-system-panel-dot.is-checking,
+.gsyen-model-status-button.is-checking .gsyen-model-status-dot,
+.gsyen-system-panel-mini-dot.is-checking {
+  background: #D7B56D;
+}
+
+.gsyen-system-panel-readout p {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: rgba(249, 248, 246, 0.82);
+  text-transform: uppercase;
+}
+
+.gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #D7B56D;
+}
+
+.gsyen-system-panel-select {
+  margin: 0 16px 12px;
+  display: grid;
+  gap: 7px;
+}
+
+.gsyen-system-panel-select label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(26, 26, 26, 0.34);
+}
+
+.gsyen-system-panel-select select {
+  height: 30px;
+  width: 100%;
+  border: 1px solid rgba(26, 26, 26, 0.16);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 0 9px;
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(26, 26, 26, 0.68);
+}
+
+.gsyen-system-panel-table {
+  margin: 0 16px;
+  border-top: 1px solid rgba(26, 26, 26, 0.11);
+}
+
+.gsyen-system-panel-row {
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.gsyen-system-panel-row span {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: rgba(26, 26, 26, 0.34);
+}
+
+.gsyen-system-panel-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.62);
+}
+
+.gsyen-system-panel-mini-dot {
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  vertical-align: 1px;
+}
+
+.gsyen-system-panel-action {
+  height: 34px;
+  margin: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(26, 26, 26, 0.13);
+  padding: 0 11px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: rgba(26, 26, 26, 0.44);
+}
+
+.gsyen-system-panel-action:hover {
+  border-color: #1A1A1A;
+  background: #1A1A1A;
+  color: #F9F8F6;
+}
+
+.gsyen-model-status-button {
+  height: 30px;
+  width: 30px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 26, 0.12);
+  background: rgba(255, 255, 255, 0.42);
+  color: rgba(26, 26, 26, 0.48);
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.gsyen-model-status-button:hover,
+.gsyen-model-status-button.is-active {
+  border-color: rgba(26, 26, 26, 0.42);
+  background: rgba(249, 248, 246, 0.82);
+}
+
+.gsyen-model-status-dot {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 0 1px rgba(26,26,26,0.10);
+}
+
+.gsyen-model-status-button.is-checking .gsyen-model-status-dot {
+  box-shadow: 0 0 0 1px rgba(183,143,54,0.24), 0 0 8px rgba(215,181,109,0.34);
+}

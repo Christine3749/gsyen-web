@@ -1,5 +1,7 @@
 /** CanvasEditorTypes — 类型、常量、调色板 */
 
+import { shellPlatform } from '../hooks/useShellPlatform';
+
 export type EditorMode = 'write' | 'preview' | 'split';
 export type FocusMode  = 'off'   | 'paragraph' | 'sentence';
 export type MenuId     = 'file'  | 'edit' | 'format' | 'focus' | 'authors' | 'view' | 'help' | null;
@@ -69,5 +71,5 @@ export const LINE_W: Record<LineLen, number> = { 64: 620, 72: 700, 80: 780 };
 export const SYS_FONT =
   '-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif';
 
-export const isElectron = !!(window as any).electronAPI?.isElectron;
-export const isMac      = (window as any).electronAPI?.platform === 'darwin';
+export const isElectron = shellPlatform.isElectron;
+export const isMac      = shellPlatform.isMac;

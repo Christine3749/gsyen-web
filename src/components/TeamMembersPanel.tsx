@@ -10,7 +10,7 @@ interface Props {
 
 export function TeamMembersPanel({ team, members, onClose }: Props) {
   const [copied, setCopied] = useState(false);
-  const timerRef = useRef<number>();
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 

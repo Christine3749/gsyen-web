@@ -11,6 +11,13 @@ interface VintageCarProps {
 
 const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarProps) => {
   const [kicking, setKicking] = useState(false);
+  const [fallback, setFallback] = useState(false);
+  const isLight = tone === 'light';
+  const transparentSrc = isLight
+    ? '/brand/gsyen-logo-car-light-transparent.png'
+    : '/brand/gsyen-logo-car-ink-transparent.png';
+  const pngSrc = isLight ? '/brand/gsyen-logo-car-light.png' : '/brand/gsyen-logo-car-ink.png';
+  const logoRatio = isLight ? 360 / 272 : 489 / 304;
 
   const handleClick = (_event: MouseEvent<HTMLImageElement>) => {
     setKicking(false);
@@ -19,17 +26,18 @@ const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarPro
 
   return (
     <img
-      src={tone === 'light' ? '/brand/gsyen-frontier-car-left-white.png' : '/brand/gsyen-frontier-car-left-transparent.png'}
+      src={fallback ? pngSrc : transparentSrc}
       alt="GSYEN vintage frontier automobile"
       className={`${className ?? ''} gsyen-vintage-car ${kicking ? 'is-kicking' : ''}`}
-      width={Math.round(size * 1.42)}
+      width={Math.round(size * logoRatio)}
       height={size}
       draggable={false}
       onClick={handleClick}
+      onError={() => setFallback(true)}
       onAnimationEnd={() => setKicking(false)}
       style={{
         display: 'block',
-        width: Math.round(size * 1.42),
+        width: Math.round(size * logoRatio),
         height: size,
         objectFit: 'contain',
         userSelect: 'none',

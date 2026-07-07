@@ -27,14 +27,14 @@ export default function MailModule({ lang }: MailModuleProps) {
     <div className="gsyen-mail-page flex flex-col h-full text-[#1A1A1A] font-sans">
       {/* Toolbar strip */}
       <div className="relative shrink-0 h-[52px] flex flex-row items-center justify-between gap-3 flex-nowrap px-8 bg-[#F4F2EE]">
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-[7px] shrink-0">
           <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
-            className={`p-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all flex items-center justify-center ${!store.isSidebarCollapsed ? 'bg-[#1A1A1A]/10 text-[#1A1A1A]' : 'bg-transparent text-[#1A1A1A]/70'}`}
+            className={`gsyen-icon-command ${!store.isSidebarCollapsed ? 'is-active' : ''}`}
           >
             <PanelLeft className="w-4 h-4" />
           </button>
           <button onClick={() => compose.setComposeState('window')}
-            className="px-4 py-1.5 bg-[#1A1A1A] text-white hover:bg-[#2C2C2C] fs-sm font-mono font-bold tracking-widest uppercase transition-all flex items-center gap-2 rounded-none"
+            className="gsyen-command-button"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{lang === 'zh' ? '亲书信函' : 'Seal New Letter'}</span>

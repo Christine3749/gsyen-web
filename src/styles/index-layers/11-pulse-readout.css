@@ -1,0 +1,237 @@
+
+@media (max-width: 900px) {
+  .gsyen-command-deck {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    column-gap: 8px;
+  }
+
+  .gsyen-command-deck > div:first-child {
+    gap: 6px;
+    padding-right: 6px !important;
+  }
+
+  .gsyen-command-button {
+    width: 34px !important;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .gsyen-command-button span {
+    display: none;
+  }
+
+  .gsyen-system-bus {
+    flex-basis: 180px;
+  }
+
+  .gsyen-system-bus-label {
+    width: 88px;
+    flex-basis: 88px;
+    font-size: 7px;
+    letter-spacing: 0.12em;
+  }
+
+  .gsyen-system-cell {
+    min-width: 96px;
+  }
+
+  .gsyen-model-selector {
+    display: none;
+  }
+
+  .gsyen-model-strip {
+    flex: 0 0 auto;
+  }
+
+  .gsyen-pulse-panel > div {
+    width: calc(100vw - 24px);
+    margin-left: 12px;
+  }
+}
+
+/* GSYEN Workbench V4.4 - remove legacy minimum width only when viewport is narrower */
+@media (max-width: 880px) {
+  #root {
+    min-width: 0 !important;
+  }
+
+  #logo-designer-root {
+    overflow-x: hidden !important;
+  }
+}
+
+/* GSYEN Workbench V4.5 - compact viewport shell */
+@media (max-width: 880px) {
+  html,
+  body {
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* GSYEN Workbench V4.6 - index readout and model clarity */
+.gsyen-standby-header {
+  grid-template-columns: 42px minmax(0, 1fr) 96px;
+  align-items: stretch;
+}
+
+.gsyen-standby-index {
+  position: relative;
+  width: 96px;
+  height: auto;
+  align-self: stretch;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding-left: 14px;
+  border-left: 1px solid rgba(15, 14, 12, 0.105);
+}
+
+.gsyen-standby-index::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.gsyen-standby-index span {
+  display: block;
+  color: #A7853F;
+  font-family: var(--font-mono);
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  transform: translateY(1px);
+}
+
+.gsyen-standby-index small {
+  display: block;
+  margin-top: 6px;
+  color: rgba(15, 14, 12, 0.36);
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.gsyen-model-strip {
+  height: 34px;
+  padding-left: 18px;
+  border-left-color: rgba(15, 14, 12, 0.20);
+  background: linear-gradient(90deg, rgba(15,14,12,0.045), rgba(248,246,241,0.42));
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,0.46),
+    inset 0 1px 0 rgba(255,255,255,0.26);
+}
+
+.gsyen-model-label {
+  color: rgba(15, 14, 12, 0.50);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+}
+
+.gsyen-model-selector {
+  height: 30px !important;
+  border: 1px solid rgba(15, 14, 12, 0.16);
+  border-right: 0;
+  background: #F3F0E8;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 0 0 1px rgba(255,255,255,0.24);
+}
+
+.gsyen-model-option {
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 1px solid rgba(15, 14, 12, 0.14);
+  background: rgba(15, 14, 12, 0.035);
+  color: rgba(15, 14, 12, 0.64);
+  font-weight: 900;
+}
+
+.gsyen-model-option:not(.is-active):not(.is-disabled):hover {
+  background: rgba(15, 14, 12, 0.075);
+  color: rgba(15, 14, 12, 0.78);
+}
+
+.gsyen-model-option.is-active {
+  background: #0F0E0C;
+  border-color: #0F0E0C;
+  color: #F8F6F1;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.82);
+}
+
+.gsyen-model-option.is-disabled {
+  color: rgba(15, 14, 12, 0.34);
+  background: rgba(15, 14, 12, 0.018);
+}
+
+.gsyen-model-status-button {
+  height: 30px !important;
+  border-color: rgba(15, 14, 12, 0.23);
+  background: #F7F4EC;
+  color: rgba(15, 14, 12, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.76),
+    0 0 0 1px rgba(255,255,255,0.22);
+}
+
+.gsyen-model-status-button:not(.is-active):not(:hover) {
+  border-color: rgba(15, 14, 12, 0.21);
+}
+
+.gsyen-model-status-button:hover,
+.gsyen-model-status-button.is-active {
+  border-color: rgba(167, 133, 63, 0.82);
+  background: #F9F7F1;
+  color: rgba(15, 14, 12, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.82),
+    0 0 0 1px rgba(167,133,63,0.28);
+}
+
+.gsyen-model-status-dot {
+  width: 7px;
+  height: 7px;
+  background: #5D5B55;
+  box-shadow:
+    0 0 0 1px rgba(15,14,12,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.24);
+}
+
+.gsyen-model-status-button.is-checking .gsyen-model-status-dot {
+  background: #C9A65C;
+  box-shadow:
+    0 0 0 1px rgba(167,133,63,0.26),
+    0 0 8px rgba(201,166,92,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.32);
+}
+
+.gsyen-model-status-button.is-online .gsyen-model-status-dot {
+  background: #3F8F63;
+  box-shadow:
+    0 0 0 1px rgba(63,143,99,0.24),
+    0 0 8px rgba(63,143,99,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.30);
+}
+
+.gsyen-model-status-label {
+  color: rgba(15, 14, 12, 0.58);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}

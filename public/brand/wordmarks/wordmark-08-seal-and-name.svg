@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="GSYEN wordmark 08 seal and name">
+  <rect width="1200" height="360" fill="#F4F2EE"/>
+  <rect x="118" y="96" width="132" height="132" fill="#11100E"/>
+  <text x="184" y="176" text-anchor="middle" font-family="'Microsoft YaHei','SimSun',serif" font-size="46" font-weight="800" fill="#D6AE36" letter-spacing="4">疆</text>
+  <text x="184" y="218" text-anchor="middle" font-family="'Microsoft YaHei','SimSun',serif" font-size="46" font-weight="800" fill="#D6AE36" letter-spacing="4">域</text>
+  <text x="312" y="174" font-family="'Microsoft YaHei','SimSun',serif" font-size="76" font-weight="800" fill="#1A1A1A" letter-spacing="10">疆域</text>
+  <text x="314" y="232" font-family="Georgia,serif" font-size="48" fill="#1A1A1A" letter-spacing="18">GSYEN</text>
+  <text x="316" y="272" font-family="Arial,sans-serif" font-size="17" fill="#1A1A1A" fill-opacity=".6" letter-spacing="7">CENTURY CARRIAGE ATELIER</text>
+</svg>

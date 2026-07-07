@@ -9,6 +9,7 @@ import type { WorkbookInstance } from '@fortune-sheet/react';
 import type { Sheet } from '@fortune-sheet/core';
 import '@fortune-sheet/react/dist/index.css';
 import { transformExcelToFortune, transformFortuneToExcel } from '@corbe30/fortune-excel';
+import type { IFileType } from '@corbe30/fortune-excel/dist/common/ICommon';
 import type { Palette } from './CanvasEditorTypes';
 import { SYS_FONT } from './CanvasEditorTypes';
 
@@ -35,6 +36,7 @@ export function ExcelEditor({ filePath, P, dark, onExit }: Props) {
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState('');
   const [saved,   setSaved]   = useState(false);
+  const [sheetKey, setSheetKey] = useState(0);
   const workbookRef = useRef<WorkbookInstance>(null);
 
   useEffect(() => {
@@ -46,11 +48,11 @@ export function ExcelEditor({ filePath, P, dark, onExit }: Props) {
         await transformExcelToFortune(b64ToFile(b64, name), (sheets: Sheet[]) => {
           setData(sheets);
           setLoading(false);
-        });
+        }, setSheetKey, workbookRef);
       } catch {
         // transformExcelToFortune fails on blank/minimal xlsx — fall back to empty sheet
         setData([{ name: 'Sheet1', id: '1', index: '0', order: 0, status: 1,
-          row: 100, column: 26, celldata: [], config: {} }]);
+          row: 100, column: 26, celldata: [], config: {} } as Sheet]);
         setLoading(false);
       }
     })();
@@ -58,7 +60,7 @@ export function ExcelEditor({ filePath, P, dark, onExit }: Props) {
 
   const handleSave = useCallback(async () => {
     try {
-      const blob = await transformFortuneToExcel(workbookRef, 'xlsx', false) as Blob;
+      const blob = await transformFortuneToExcel(workbookRef, 'xlsx' as IFileType, false) as Blob;
       const b64  = await blobToB64(blob);
       await (window as any).electronAPI?.writeFileBuffer?.(filePath, b64);
       setSaved(true);
@@ -99,6 +101,7 @@ export function ExcelEditor({ filePath, P, dark, onExit }: Props) {
       <div style={{ flex: 1, overflow: 'hidden',
         filter: dark ? 'invert(1) hue-rotate(180deg)' : 'none' }}>
         <Workbook
+          key={sheetKey}
           ref={workbookRef}
           data={data}
           onChange={setData}

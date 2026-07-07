@@ -1,0 +1,241 @@
+
+.gsyen-pulse-panel-row:nth-child(2) { animation-delay: 24ms; }
+.gsyen-pulse-panel-row:nth-child(3) { animation-delay: 48ms; }
+.gsyen-pulse-panel-row:nth-child(4) { animation-delay: 72ms; }
+.gsyen-pulse-panel-row:nth-child(5) { animation-delay: 96ms; }
+.gsyen-pulse-panel-row:nth-child(6) { animation-delay: 120ms; }
+
+.gsyen-pulse-panel-row:hover {
+  background: rgba(215, 181, 109, 0.055);
+  border-bottom-color: rgba(215, 181, 109, 0.14);
+}
+
+.gsyen-pulse-panel-row:hover .gsyen-pulse-panel-action {
+  border-color: rgba(215, 181, 109, 0.48);
+  color: rgba(215, 181, 109, 0.92);
+}
+
+.gsyen-pulse-panel-action:hover {
+  transform: translateX(2px);
+  background: rgba(215, 181, 109, 0.08);
+}
+
+.gsyen-system-panel {
+  animation: gsyen-panel-enter 260ms var(--gsyen-ease-out) both;
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.52);
+}
+
+.gsyen-system-panel-readout {
+  position: relative;
+  overflow: hidden;
+}
+
+.gsyen-system-panel-readout::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(215, 181, 109, 0.14), transparent);
+  animation: gsyen-readout-scan 980ms var(--gsyen-ease-out) 80ms both;
+  pointer-events: none;
+}
+
+.gsyen-system-panel.is-offline .gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  color: rgba(249, 248, 246, 0.58);
+}
+
+.gsyen-system-panel.is-checking .gsyen-system-panel-readout span:not(.gsyen-system-panel-dot),
+.gsyen-system-panel.is-online .gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+  color: var(--gsyen-gold-bright);
+}
+
+.gsyen-system-panel-row {
+  transition: background-color 160ms var(--gsyen-ease-ui);
+}
+
+.gsyen-system-panel-row:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.gsyen-standby-frame {
+  animation: gsyen-standby-enter 320ms var(--gsyen-ease-out) both;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.46);
+}
+
+.gsyen-standby-row,
+.gsyen-standby-signal {
+  position: relative;
+  transition:
+    background-color 170ms var(--gsyen-ease-ui),
+    border-color 170ms var(--gsyen-ease-ui);
+}
+
+.gsyen-standby-row::before,
+.gsyen-standby-signal::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  background: transparent;
+}
+
+.gsyen-standby-row.is-primary::before,
+.gsyen-standby-signal.is-primary::before {
+  background: rgba(26, 26, 26, 0.68);
+}
+
+.gsyen-standby-row.is-warn::before,
+.gsyen-standby-signal.is-warn::before {
+  background: var(--gsyen-gold);
+}
+
+.gsyen-standby-row.is-primary strong,
+.gsyen-standby-signal.is-primary strong {
+  color: rgba(17, 16, 15, 0.86);
+  font-weight: 750;
+}
+
+.gsyen-standby-row.is-warn strong,
+.gsyen-standby-signal.is-warn strong {
+  color: #8A6F3B;
+  font-weight: 750;
+}
+
+.gsyen-standby-row:hover,
+.gsyen-standby-signal:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.gsyen-standby-input {
+  transition:
+    background-color 180ms var(--gsyen-ease-ui),
+    border-color 180ms var(--gsyen-ease-ui),
+    box-shadow 220ms var(--gsyen-ease-ui);
+}
+
+.gsyen-standby-input:focus-within {
+  box-shadow: 0 0 0 1px rgba(17, 16, 15, 0.08);
+}
+
+.gsyen-archive-item,
+.gsyen-archive-team {
+  transition:
+    background-color 160ms var(--gsyen-ease-ui),
+    border-color 160ms var(--gsyen-ease-ui),
+    color 160ms var(--gsyen-ease-ui);
+}
+
+.gsyen-archive-item:hover,
+.gsyen-archive-team:hover {
+  background: rgba(255, 255, 255, 0.42);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gsyen-pulse-marquee,
+  .gsyen-pulse-panel-row,
+  .gsyen-system-panel,
+  .gsyen-system-panel-readout::after,
+  .gsyen-standby-frame,
+  .gsyen-system-bus-label::after {
+    animation: none !important;
+  }
+
+  .gsyen-icon-command,
+  .gsyen-command-button,
+  .gsyen-standby-actions button,
+  .gsyen-system-panel-action,
+  .gsyen-pulse-panel-action {
+    transform: none !important;
+  }
+}
+
+/* ============================================================
+   GSYEN Workbench V4 - 8.5 detail discipline
+   ============================================================ */
+:root {
+  --gsyen-black: #0F0E0C;
+  --gsyen-black-soft: #151310;
+  --gsyen-rail: #E7E3DA;
+  --gsyen-panel: #F0EDE6;
+  --gsyen-panel-light: #F8F6F1;
+  --gsyen-line: rgba(17, 16, 15, 0.14);
+  --gsyen-line-strong: rgba(17, 16, 15, 0.24);
+  --gsyen-text-muted: rgba(17, 16, 15, 0.46);
+}
+
+.gsyen-command-deck {
+  height: 54px !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 30px;
+  padding: 0 32px !important;
+  background: linear-gradient(180deg, #ECE9E2 0%, var(--gsyen-rail) 100%) !important;
+  border-top-color: rgba(17, 16, 15, 0.08) !important;
+  border-bottom-color: rgba(17, 16, 15, 0.19) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.66),
+    inset 0 -1px 0 rgba(17, 16, 15, 0.055),
+    0 1px 0 rgba(17, 16, 15, 0.055);
+}
+
+.gsyen-command-deck::before {
+  height: 34px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.17), rgba(17,16,15,0.018));
+  border-top-color: rgba(255, 255, 255, 0.52);
+  border-bottom-color: rgba(17, 16, 15, 0.07);
+}
+
+.gsyen-command-deck > div:first-child {
+  height: 32px;
+  gap: 10px;
+  padding-right: 20px !important;
+}
+
+.gsyen-icon-command,
+.gsyen-command-button,
+.gsyen-model-status-button {
+  height: 30px !important;
+  background: var(--gsyen-panel-light);
+  border-color: rgba(17, 16, 15, 0.16);
+  color: rgba(17, 16, 15, 0.66);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 1px 0 rgba(17,16,15,0.035);
+}
+
+.gsyen-command-button {
+  width: 106px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.gsyen-command-button span {
+  transform: translateY(0.5px);
+}
+
+.gsyen-icon-command.is-active,
+.gsyen-icon-command:hover,
+.gsyen-command-button:hover {
+  border-color: var(--gsyen-black);
+  background: var(--gsyen-black);
+  color: #F8F6F1;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    0 0 0 1px rgba(185,154,87,0.08);
+}
+
+.gsyen-system-bus {
+  height: 30px !important;
+  min-width: 420px;
+  max-width: 900px;
+  flex: 1 1 760px;
+  margin-left: 2px;
+  border: 1px solid rgba(15, 14, 12, 0.96);
+  background: var(--gsyen-black);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.96),
+    0 0 0 1px rgba(255,255,255,0.18);
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="GSYEN wordmark 01 narrow plaque">
+  <rect width="1200" height="360" fill="#F4F2EE"/>
+  <rect x="70" y="62" width="1060" height="236" fill="#F9F8F6" stroke="#1A1A1A" stroke-opacity=".1"/>
+  <text x="150" y="190" font-family="'Microsoft YaHei','SimSun',serif" font-size="92" font-weight="800" fill="#1A1A1A" letter-spacing="8">疆域</text>
+  <line x1="404" y1="118" x2="404" y2="238" stroke="#1A1A1A" stroke-opacity=".18" stroke-width="2"/>
+  <text x="454" y="176" font-family="Georgia,serif" font-size="58" fill="#1A1A1A" letter-spacing="22">GSYEN</text>
+  <text x="458" y="226" font-family="Arial,sans-serif" font-size="18" fill="#A77D24" letter-spacing="7">FRONTIER SYSTEM ATELIER</text>
+</svg>

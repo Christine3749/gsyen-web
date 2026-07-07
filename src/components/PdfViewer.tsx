@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
-import type { PDFDocumentProxy } from 'pdfjs-dist';
+import type { PDFDocumentLoadingTask, PDFDocumentProxy } from 'pdfjs-dist';
 import type { FileEntry } from '../hooks/useFileSystem';
 import type { Palette } from './CanvasEditorTypes';
 import { SYS_FONT } from './CanvasEditorTypes';
@@ -21,19 +21,25 @@ function PdfPage({ doc, pageNum, scale }: {
 
   useEffect(() => {
     let cancelled = false;
+    let renderTask: { cancel: () => void; promise: Promise<void> } | null = null;
     (async () => {
-      const page = await doc.getPage(pageNum);
-      if (cancelled || !canvasRef.current) return;
-      const viewport = page.getViewport({ scale });
-      const canvas = canvasRef.current;
-      canvas.width  = viewport.width;
-      canvas.height = viewport.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      try {
+        const page = await doc.getPage(pageNum);
+        if (cancelled || !canvasRef.current) return;
+        const viewport = page.getViewport({ scale });
+        const canvas = canvasRef.current;
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        renderTask = page.render({ canvas, canvasContext: ctx, viewport });
+        await renderTask.promise;
+      } catch (e) {
+        if (!cancelled) console.warn('[pdf] render failed', e);
+      }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; renderTask?.cancel(); };
   }, [doc, pageNum, scale]);
 
   return (
@@ -50,24 +56,30 @@ export function PdfViewer({ entry, P, dark }: Props) {
   const [scaleIdx, setScaleIdx] = useState(2); // default 1.0×
 
   useEffect(() => {
-    let currentDoc: PDFDocumentProxy | null = null;
+    let loadingTask: PDFDocumentLoadingTask | null = null;
+    let cancelled = false;
     setDoc(null); setError(''); setLoading(true);
     (async () => {
       try {
         const b64: string = await (window as any).electronAPI?.readFileBuffer?.(entry.path) ?? '';
-        if (!b64) { setError('无法读取文件'); setLoading(false); return; }
+        if (!b64) {
+          if (!cancelled) { setError('无法读取文件'); setLoading(false); }
+          return;
+        }
         const bin = atob(b64);
         const arr = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-        currentDoc = await pdfjsLib.getDocument({ data: arr }).promise;
-        setDoc(currentDoc);
+        loadingTask = pdfjsLib.getDocument({ data: arr });
+        const loadedDoc = await loadingTask.promise;
+        if (cancelled) { void loadingTask.destroy(); return; }
+        setDoc(loadedDoc);
       } catch (e: any) {
-        setError(e?.message ?? '解析失败');
+        if (!cancelled) setError(e?.message ?? '解析失败');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-    return () => { currentDoc?.destroy(); };
+    return () => { cancelled = true; void loadingTask?.destroy(); };
   }, [entry.path]);
 
   const scale = SCALES[scaleIdx];

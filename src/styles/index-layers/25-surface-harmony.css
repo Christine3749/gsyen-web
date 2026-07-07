@@ -1,0 +1,123 @@
+/* Cross-module paper stack harmony for Mail, Schedule, and Prism. */
+.gsyen-mail-page > .flex-1 {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-n10-page) 88%, var(--gyen-n9-card)) 0%,
+      color-mix(in srgb, var(--gyen-n10-page) 72%, var(--gyen-n9-card)) 100%) !important;
+}
+
+.gsyen-mail-page > .flex-1 > .flex {
+  background: color-mix(in srgb, var(--gyen-n10-page) 68%, var(--gyen-n9-card)) !important;
+  border-top: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 76%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 52%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.58) !important;
+}
+
+.gsyen-mail-page > .flex-1 > .flex > div:first-child {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-n10-page) 84%, var(--gyen-card-white)) 0%,
+      color-mix(in srgb, var(--gyen-n10-page) 66%, var(--gyen-n9-card)) 100%) !important;
+}
+
+.gsyen-mail-page [class*="bg-white"][class*="overflow-hidden"] {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-card-white) 96%, white) 0%,
+      color-mix(in srgb, var(--gyen-card-white) 86%, var(--gyen-n9-card)) 100%) !important;
+  border-left: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+}
+
+.gsyen-mail-page [class*="bg-neutral-50"],
+.gsyen-mail-page .divide-y + div {
+  background: color-mix(in srgb, var(--gyen-n9-card) 76%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-mail-page .divide-y {
+  background: color-mix(in srgb, var(--gyen-card-white) 92%, var(--gyen-n9-card)) !important;
+}
+
+.gsyen-mail-page .divide-y > div {
+  background: color-mix(in srgb, var(--gyen-card-white) 86%, var(--gyen-n9-card)) !important;
+}
+
+.gsyen-mail-page .divide-y > div[class*="bg-[#F4F2EE]"] {
+  background: color-mix(in srgb, var(--gyen-n9-card) 72%, var(--gyen-card-white)) !important;
+}
+
+.gsyen-schedule-page,
+#main-studio-workspace {
+  background: var(--gyen-n10-page) !important;
+}
+
+.gsyen-schedule-page > .relative,
+.gsyen-brand-subnav {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-n10-page) 92%, white) 0%,
+      var(--gyen-n10-page) 100%) !important;
+  border-bottom-color: color-mix(in srgb, var(--gyen-n8-hairline) 70%, var(--gyen-n5-control)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62), inset 0 -1px 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-schedule-page > .flex-1,
+#studio-preview-main {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-n10-page) 84%, var(--gyen-n9-card)) 0%,
+      color-mix(in srgb, var(--gyen-n10-page) 72%, var(--gyen-n9-card)) 100%) !important;
+}
+
+.gsyen-schedule-page > .flex-1 > .flex {
+  background: color-mix(in srgb, var(--gyen-n10-page) 66%, var(--gyen-n9-card)) !important;
+  border-top: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 70%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.54) !important;
+}
+
+.gsyen-schedule-page aside {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-n10-page) 82%, var(--gyen-card-white)) 0%,
+      color-mix(in srgb, var(--gyen-n10-page) 68%, var(--gyen-n9-card)) 100%) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 72%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.58) !important;
+}
+
+.gsyen-schedule-page #month-grid-wrapper {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--gyen-card-white) 92%, white) 0%,
+      color-mix(in srgb, var(--gyen-card-white) 82%, var(--gyen-n9-card)) 100%) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 76%, transparent) !important;
+}
+
+.gsyen-schedule-page #month-grid-wrapper > div:first-child,
+.gsyen-brand-subnav > div {
+  background: color-mix(in srgb, var(--gyen-n9-card) 76%, var(--gyen-card-white)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 76%, transparent) !important;
+}
+
+.gsyen-schedule-page #month-grid-wrapper > div:nth-child(2) {
+  background: color-mix(in srgb, var(--gyen-n10-page) 66%, var(--gyen-n9-card)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 66%, transparent) !important;
+}
+
+.gsyen-schedule-page #month-grid-wrapper > div:nth-child(2) > div {
+  background: color-mix(in srgb, var(--gyen-card-white) 84%, var(--gyen-n9-card)) !important;
+  border-color: color-mix(in srgb, var(--gyen-n8-hairline) 62%, transparent) !important;
+}
+
+.gsyen-schedule-page #month-grid-wrapper > div:nth-child(2) > div[class*="bg-neutral-100"] {
+  background: color-mix(in srgb, var(--gyen-n10-page) 76%, var(--gyen-n9-card)) !important;
+}
+
+.gsyen-command-button.is-danger {
+  border-color: rgba(185, 28, 28, 0.22) !important;
+  color: #B91C1C !important;
+}
+
+.gsyen-command-button.is-danger:hover {
+  background: rgba(254, 242, 242, 0.92) !important;
+  border-color: rgba(185, 28, 28, 0.34) !important;
+  color: #991B1B !important;
+}

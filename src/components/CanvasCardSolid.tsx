@@ -1,116 +1,29 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react';
-import { Handle, Position, useReactFlow } from '@xyflow/react';
-import type { CardData, CardSize, ContentType, StatusColor } from './CanvasCardData';
+import type { KeyboardEvent, MouseEvent } from 'react';
+import { Handle, useReactFlow } from '@xyflow/react';
+import type { CardData, CardSize, StatusColor } from './CanvasCardData';
 import { STATUS_COLORS } from './CanvasCardData';
 import { CanvasCardPanel } from './CanvasCardPanel';
-
-const SIZE_W: Record<CardSize, number> = { S: 220, M: 300, L: 380 };
-const SIZE_H: Record<CardSize, number> = { S: 170, M: 230, L: 320 };
-const TITLE_SIZE: Record<CardSize, number> = { S: 15.5, M: 18, L: 22 };
-const BODY_SIZE: Record<CardSize, number> = { S: 11.5, M: 13, L: 14.5 };
-const EMPTY_BULLETS: Record<CardSize, number> = { S: 3, M: 4, L: 5 };
-const HANDLE_NEAR_PX = 36;
-const HANDLE_SIZE = 10.4;
-const HANDLE_HIT_SIZE = 24;
-
-const SIDES = [
-  { pos: Position.Top, id: 't' }, { pos: Position.Right, id: 'r' },
-  { pos: Position.Bottom, id: 'b' }, { pos: Position.Left, id: 'l' },
-] as const;
-type HandleSide = typeof SIDES[number]['id'];
-
-function visualHandlePosition(side: HandleSide, width: number, height: number): CSSProperties {
-  const offset = -HANDLE_SIZE / 2;
-  const centerX = width / 2 - HANDLE_SIZE / 2;
-  const centerY = height / 2 - HANDLE_SIZE / 2;
-  if (side === 't') return { top: offset, left: centerX };
-  if (side === 'r') return { right: offset, top: centerY };
-  if (side === 'b') return { bottom: offset, left: centerX };
-  return { left: offset, top: centerY };
-}
-
-const ACCENT_HEX: Record<string, { border: string; bg: string; ink: string; muted: string }> = {
-  blue:   { border: 'rgba(77, 137, 220, 0.38)', bg: 'rgba(235, 243, 255, 0.96)', ink: '#1F4F8E', muted: 'rgba(31,79,142,0.52)' },
-  green:  { border: 'rgba(87, 157, 112, 0.38)', bg: 'rgba(236, 249, 241, 0.96)', ink: '#22663B', muted: 'rgba(34,102,59,0.52)' },
-  amber:  { border: 'rgba(188, 150, 57, 0.38)', bg: 'rgba(255, 248, 224, 0.96)', ink: '#795914', muted: 'rgba(121,89,20,0.52)' },
-  red:    { border: 'rgba(195, 86, 92, 0.38)', bg: 'rgba(255, 238, 240, 0.96)', ink: '#8C2D32', muted: 'rgba(140,45,50,0.52)' },
-  purple: { border: 'rgba(145, 101, 205, 0.38)', bg: 'rgba(244, 237, 255, 0.96)', ink: '#5A3894', muted: 'rgba(90,56,148,0.52)' },
-  cyan:   { border: 'rgba(67, 151, 169, 0.38)', bg: 'rgba(235, 249, 252, 0.96)', ink: '#236B78', muted: 'rgba(35,107,120,0.52)' },
-  black:  { border: 'rgba(38, 42, 48, 0.28)', bg: 'rgba(248, 248, 249, 0.96)', ink: '#22262E', muted: 'rgba(34,38,46,0.48)' },
-};
-
-const SCRINTAL_DEFAULT = {
-  border: 'rgba(135, 146, 166, 0.36)',
-  bg: 'rgba(237, 240, 246, 0.96)',
-  ink: '#20232B',
-  muted: 'rgba(62, 70, 86, 0.48)',
-};
-
-const CT_LABEL: Record<ContentType, string> = {
-  note: 'note', code: 'code', image: 'image', link: 'link',
-  task: 'task', table: 'table', math: 'math', quote: 'quote',
-};
-
-const UI_FONT = '"HarmonyOS Sans SC","HarmonyOS Sans","Inter","PingFang SC","Microsoft YaHei UI",system-ui,sans-serif';
-const LATIN_FONT = '"Inter","HarmonyOS Sans",system-ui,sans-serif';
+import {
+  ACCENT_HEX,
+  BODY_SIZE,
+  EMPTY_BULLETS,
+  HANDLE_HIT_SIZE,
+  HANDLE_NEAR_PX,
+  HANDLE_SIZE,
+  LATIN_FONT,
+  SCRINTAL_DEFAULT,
+  SIDES,
+  SIZE_H,
+  SIZE_W,
+  TITLE_SIZE,
+  UI_FONT,
+  type HandleSide,
+  visualHandlePosition,
+} from './CanvasCardSolidTokens';
+import { buildHeaderTags, normalizeContentType, renderLines, splitDashedLeadHeading } from './CanvasCardSolidContent';
 
 export interface SolidCardProps { id: string; data: CardData; selected: boolean }
-
-function normalizeContentType(data: CardData): ContentType {
-  const raw = String(data.contentType ?? data.entitySub ?? 'note').toLowerCase();
-  return (raw in CT_LABEL ? raw : 'note') as ContentType;
-}
-
-function renderLines(text: string, fontSize: number, muted: string) {
-  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
-  return lines.map((line, i) => {
-    const bullet = /^[-*]\s+/.test(line);
-    const ordered = /^\d+[.)]\s+/.test(line);
-    const heading = /^#{1,3}\s+/.test(line);
-    const clean = line.replace(/^[-*]\s+/, '').replace(/^\d+[.)]\s+/, '').replace(/^#{1,3}\s+/, '');
-    if (heading) {
-      return <div key={i} style={{ margin: i ? '7px 0 4px' : '0 0 4px', fontSize, fontWeight: 700, color: 'rgba(24,28,38,0.86)' }}>{clean}</div>;
-    }
-    return (
-      <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginTop: i ? 4 : 0, color: 'rgba(34,39,52,0.72)' }}>
-        {(bullet || ordered) && <span style={{ width: 3.5, height: 3.5, marginTop: fontSize * 0.58, borderRadius: '50%', background: muted, flexShrink: 0 }} />}
-        <span>{clean}</span>
-      </div>
-    );
-  });
-}
-
-function splitDashedLeadHeading(text: string) {
-  const lines = text.split('\n');
-  const idx = lines.findIndex(line => line.trim().length > 0);
-  if (idx < 0) return { leadHeading: null as string | null, bodyText: text };
-
-  const first = lines[idx].trim();
-  if (!/^#{1,3}\s+/.test(first)) return { leadHeading: null as string | null, bodyText: text };
-
-  const leadHeading = first.replace(/^#{1,3}\s+/, '');
-  const rest = [...lines.slice(0, idx), ...lines.slice(idx + 1)].join('\n');
-  return { leadHeading, bodyText: rest };
-}
-
-function cleanTag(value: unknown) {
-  return String(value ?? '').trim().replace(/^#+/, '');
-}
-
-function buildHeaderTags(data: CardData, contentType: ContentType, status: string) {
-  const rawTags = Array.isArray(data.tags)
-    ? data.tags
-    : typeof data.tag === 'string'
-      ? data.tag.split(/[,\s#]+/)
-      : [];
-  const blocked = new Set([contentType, 'board', status].map(v => cleanTag(v).toLowerCase()));
-  const extra = rawTags
-    .map(cleanTag)
-    .filter(tag => tag && !blocked.has(tag.toLowerCase()));
-
-  return [`#${CT_LABEL[contentType]} board`, ...extra.map(tag => `#${tag}`)].join(' ');
-}
 
 export const CanvasCardSolid = memo(({ id, data: d, selected }: SolidCardProps) => {
   const { updateNodeData } = useReactFlow();

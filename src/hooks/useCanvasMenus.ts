@@ -8,7 +8,7 @@ interface Params {
   words: number; chars: number; readMin: number;
   mode: EditorMode; dark: boolean; tw: boolean;
   focusMode: FocusMode; lineLen: LineLen; font: FontChoice;
-  docType: 'doc' | 'canvas' | 'nodes';
+  docType: 'doc' | 'canvas' | 'nodes' | 'image' | 'office';
   setMode:      React.Dispatch<React.SetStateAction<EditorMode>>;
   setDark:      (v: (p: boolean) => boolean) => void;
   setTw:        (v: (p: boolean) => boolean) => void;

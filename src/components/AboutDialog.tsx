@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, RefreshCw } from 'lucide-react';
 import VintageCar from './VintageCar';
+import BrandWordmark from './BrandWordmark';
 
 interface AboutDialogProps {
   lang: 'zh' | 'en';
@@ -54,9 +55,8 @@ export default function AboutDialog({ lang, onClose }: AboutDialogProps) {
         </div>
 
         {/* 品牌名 */}
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="font-serif-sc text-xl font-black tracking-[0.1em] text-[#111]">疆域</span>
-          <span className="font-cinzel text-sm font-bold tracking-[0.2em] text-[#111]/80 uppercase">GSYEN</span>
+        <div className="flex items-center gap-2 mb-1">
+          <BrandWordmark height={26} />
           <span className="font-cinzel text-sm font-bold tracking-[0.15em] text-[#111]/60">for Windows</span>
         </div>
 
