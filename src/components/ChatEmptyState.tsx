@@ -34,7 +34,7 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
           <div className="gsyen-standby-mark">
             <VintageCar size={30} strokeWidth={1.5} className="text-[#1A1A1A]/90" />
           </div>
-          <div className="min-w-0">
+          <div className="gsyen-standby-copy min-w-0">
             <p className="gsyen-standby-kicker">{zh ? 'ATELIER AI / SIGNAL READY' : 'ATELIER AI / SIGNAL READY'}</p>
             <h2 className="gsyen-standby-title">{zh ? '灵阁待命' : 'Muse Standby'}</h2>
           </div>
