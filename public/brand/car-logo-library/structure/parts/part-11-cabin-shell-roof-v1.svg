@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="GSYEN editable cabin shell roof part v1">
+  <title>GSYEN editable part 11 - cabin shell and roof v1</title>
+  <defs>
+    <style>
+      .ink { fill:#171716; }
+      .cut { fill:none; stroke:#f4f2ee; stroke-linecap:round; stroke-linejoin:round; }
+      .guide { fill:none; stroke:#c09f5c; stroke-width:1; opacity:.28; }
+    </style>
+  </defs>
+
+  <g id="cabin-shell" class="ink">
+    <path id="roof-cap" d="M73 41 C119 28 213 29 266 45 C275 48 278 55 272 62 C266 68 209 58 151 58 C119 58 91 61 72 65 C66 66 62 63 63 59 C64 53 67 47 73 41Z"/>
+    <path id="rear-cabin-mass" d="M206 63 C227 64 249 69 266 78 C263 111 262 143 266 172 C242 180 213 182 186 178 C184 142 184 104 186 66 C192 64 199 63 206 63Z"/>
+    <path id="front-post" d="M79 62 C85 61 91 63 92 68 C93 105 93 143 91 181 C89 188 78 190 75 183 C73 145 73 104 75 70 C75 66 76 64 79 62Z"/>
+    <path id="rear-post" d="M181 64 C187 64 191 67 191 72 C190 107 190 145 192 179 C189 185 180 186 176 181 C174 144 174 106 176 70 C177 67 178 65 181 64Z"/>
+    <path id="lower-belt" d="M77 169 C121 165 176 166 260 166 C263 170 263 175 259 179 C199 183 137 184 76 181 C72 177 72 173 77 169Z"/>
+  </g>
+
+  <g id="window-frame-cuts" class="cut" stroke-width="4">
+    <path id="upper-roof-highlight" d="M83 56 C124 49 209 52 258 66"/>
+    <path id="inner-roof-line" d="M88 75 C126 70 190 71 230 81"/>
+    <path id="rear-window-arc" d="M229 80 C269 104 265 150 221 171"/>
+    <path id="front-window-post-cut" d="M92 66 C94 103 94 141 92 178"/>
+    <path id="cabin-base-cut" d="M79 170 C132 173 206 170 260 166"/>
+  </g>
+</svg>

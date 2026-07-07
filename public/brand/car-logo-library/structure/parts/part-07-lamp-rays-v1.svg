@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" role="img" aria-label="GSYEN editable lamp rays part v1">
+  <title>GSYEN editable part 07 - lamp rays v1</title>
+  <g id="lamp-rays" fill="none" stroke="#c09f5c" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M34 50 C88 70 140 93 230 134" stroke-width="4.5"/>
+    <path d="M28 92 C89 93 144 100 232 124" stroke-width="4.2"/>
+    <path d="M36 133 C92 122 150 113 234 119" stroke-width="4.2"/>
+    <path d="M55 158 C100 136 154 120 236 113" stroke-width="4.5"/>
+  </g>
+</svg>

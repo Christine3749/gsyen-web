@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="GSYEN editable steering wheel part v1">
+  <title>GSYEN editable part 14 - steering wheel v1</title>
+  <g id="steering-wheel" fill="#171716">
+    <path id="steering-column" d="M52 191 C86 145 124 96 164 47 L177 58 C135 108 96 157 61 203Z"/>
+    <ellipse id="steering-ring" cx="179" cy="42" rx="49" ry="15" transform="rotate(43 179 42)"/>
+    <circle id="steering-hub-cut" cx="168" cy="56" r="8" fill="#f4f2ee"/>
+    <path id="steering-crossbar" d="M154 69 L206 32 L214 42 L162 78Z"/>
+  </g>
+</svg>

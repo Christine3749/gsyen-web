@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 170" role="img" aria-label="GSYEN editable chassis step part v1">
+  <title>GSYEN editable part 10 - chassis step v1</title>
+  <g id="chassis-step" fill="#171716">
+    <path id="chassis-plate" d="M35 52 C116 63 230 62 323 50 L323 91 C236 102 126 101 73 89 C57 76 45 63 35 52Z"/>
+    <rect id="lower-step" x="77" y="121" width="238" height="17" rx="8"/>
+    <rect id="inner-step" x="150" y="96" width="114" height="16" rx="2"/>
+    <rect id="front-step" x="61" y="99" width="62" height="13" rx="5"/>
+  </g>
+</svg>

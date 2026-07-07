@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="GSYEN editable front wheel part v1">
+  <title>GSYEN editable part 02 - front wheel v1</title>
+  <defs>
+    <path id="front-wheel-spoke" d="M116.1 101.2 C114.9 94.3 113.8 86.6 115.0 80.8 Q120 76.8 125.0 80.8 C126.2 86.6 125.1 94.3 123.9 101.2 Q120 103.7 116.1 101.2Z"/>
+  </defs>
+
+  <g id="front-wheel" fill="#171716">
+    <path id="front-tire-outer-ring" fill-rule="evenodd" d="M120 43 A77 77 0 1 1 120 197 A77 77 0 1 1 120 43Z M120 63 A57 57 0 1 0 120 177 A57 57 0 1 0 120 63Z"/>
+    <g id="front-spokes">
+      <use href="#front-wheel-spoke"/>
+      <use href="#front-wheel-spoke" transform="rotate(36 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(72 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(108 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(144 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(180 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(216 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(252 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(288 120 120)"/>
+      <use href="#front-wheel-spoke" transform="rotate(324 120 120)"/>
+    </g>
+    <path id="front-rim-ring" fill-rule="evenodd" d="M120 70 A50 50 0 1 1 120 170 A50 50 0 1 1 120 70Z M120 76 A44 44 0 1 0 120 164 A44 44 0 1 0 120 76Z"/>
+    <path id="front-hub-ring" fill-rule="evenodd" d="M120 99 A21 21 0 1 1 119.9 99 M120 108 A12 12 0 1 0 120 132 A12 12 0 1 0 120 108Z"/>
+  </g>
+</svg>

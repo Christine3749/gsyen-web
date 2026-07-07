@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="GSYEN editable rear wheel part v1">
+  <title>GSYEN editable part 03 - rear wheel v1</title>
+  <defs>
+    <path id="rear-wheel-spoke" d="M115 98.5 C113.8 89.6 113.2 80.6 114.6 72.8 Q120 68.0 125.4 72.8 C126.8 80.6 126.2 89.6 125 98.5 Q120 101.5 115 98.5Z"/>
+  </defs>
+
+  <g id="rear-wheel" fill="#171716">
+    <path id="rear-tire-outer-ring" fill-rule="evenodd" d="M120 28 A92 92 0 1 1 120 212 A92 92 0 1 1 120 28Z M120 52 A68 68 0 1 0 120 188 A68 68 0 1 0 120 52Z"/>
+    <g id="rear-spokes">
+      <use href="#rear-wheel-spoke"/>
+      <use href="#rear-wheel-spoke" transform="rotate(36 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(72 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(108 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(144 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(180 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(216 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(252 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(288 120 120)"/>
+      <use href="#rear-wheel-spoke" transform="rotate(324 120 120)"/>
+    </g>
+    <path id="rear-rim-ring" fill-rule="evenodd" d="M120 60 A60 60 0 1 1 120 180 A60 60 0 1 1 120 60Z M120 67 A53 53 0 1 0 120 173 A53 53 0 1 0 120 67Z"/>
+    <path id="rear-hub-ring" fill-rule="evenodd" d="M120 96 A24 24 0 1 1 119.9 96 M120 106 A14 14 0 1 0 120 134 A14 14 0 1 0 120 106Z"/>
+  </g>
+</svg>
