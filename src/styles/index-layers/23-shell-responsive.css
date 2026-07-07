@@ -77,6 +77,43 @@
     --gsyen-model-label-width: 34px;
     --gsyen-model-status-width: 52px;
   }
+
+  #app-header .gsyen-brand-lockup {
+    gap: 8px !important;
+  }
+
+  #app-header .gsyen-brand-mark {
+    width: 60px !important;
+    height: 42px !important;
+  }
+
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 58px !important;
+    height: 38px !important;
+  }
+
+  #app-header .gsyen-brand-copy {
+    width: 136px !important;
+    padding-bottom: 5px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    display: block !important;
+    max-width: 128px !important;
+    margin-top: 4px !important;
+    font-size: 7px !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  #app-header .gsyen-brand-copy::after {
+    display: block !important;
+    width: 128px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 128px;
+    height: 27px;
+  }
 }
 
 @media (max-width: 1180px) {

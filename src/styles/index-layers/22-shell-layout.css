@@ -28,12 +28,13 @@
   justify-self: start !important;
   width: auto !important;
   max-width: 100% !important;
+  gap: 11px !important;
 }
 
 #app-header .gsyen-brand-mark {
   display: flex !important;
-  width: 88px !important;
-  height: 58px !important;
+  width: 72px !important;
+  height: 48px !important;
   align-items: center !important;
   justify-content: center !important;
 }
@@ -46,9 +47,51 @@
 }
 
 #app-header .gsyen-brand-mark img.gsyen-vintage-car {
-  width: 84px !important;
-  height: 58px !important;
+  width: 70px !important;
+  height: 46px !important;
   object-fit: contain !important;
+}
+
+#app-header .gsyen-brand-copy {
+  width: 170px !important;
+  min-width: 0 !important;
+  padding-bottom: 7px !important;
+}
+
+#app-header .gsyen-brand-copy::after {
+  display: block !important;
+  right: auto !important;
+  width: 154px !important;
+  background: linear-gradient(90deg, rgba(26,26,26,0.14), rgba(26,26,26,0.02)) !important;
+}
+
+#app-header .gsyen-brand-subtitle {
+  max-width: 154px !important;
+  margin-top: 6px !important;
+  letter-spacing: 0.19em !important;
+}
+
+.gsyen-header-wordmark {
+  display: block;
+  width: 156px;
+  height: 32px;
+  overflow: visible;
+}
+
+.gsyen-header-wordmark-cn {
+  fill: #1A1A1A;
+  font-family: var(--font-serif-sc);
+  font-size: 46px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+}
+
+.gsyen-header-wordmark-en {
+  fill: rgba(26, 26, 26, 0.86);
+  font-family: var(--font-cinzel);
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
 }
 
 #app-header .gsyen-space-nav {
