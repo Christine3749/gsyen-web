@@ -26,11 +26,10 @@ async function fetchJsonWithTimeout(url: string, timeoutMs: number): Promise<any
   }
 }
 
-export async function probeLocalChatGptBridge(timeoutMs = 2500): Promise<LocalBridgeProbe | null> {
+export async function probeLocalChatGptBridge(timeoutMs = 4000): Promise<LocalBridgeProbe | null> {
   for (const base of LOCAL_BRIDGE_BASES) {
     try {
-      const data = await fetchJsonWithTimeout(`${base}/api/health`, timeoutMs);
-      const model = data.models?.['chatgpt-pro'];
+      const model = await fetchJsonWithTimeout(`${base}/api/codex/health`, timeoutMs);
       if (!model || typeof model !== 'object') continue;
       return {
         base,
@@ -46,7 +45,7 @@ export async function probeLocalChatGptBridge(timeoutMs = 2500): Promise<LocalBr
 }
 
 export async function localChatGptGatewayBase(): Promise<string> {
-  const probe = await probeLocalChatGptBridge(1800);
+  const probe = await probeLocalChatGptBridge(4000);
   return probe?.health.status === 'online' ? probe.base : '';
 }
 

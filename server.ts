@@ -127,7 +127,7 @@ async function startServer() {
   // Chat proxy — model-agnostic
   app.post('/api/chat', async (req, res) => {
     try {
-      const { messages, model = 'kimi', events = [], clientDate, scheduleIntent = null, domain = null, chatGptTier = null } = req.body;
+      const { messages, model = 'kimi', events = [], clientDate, scheduleIntent = null, domain = null, chatGptModel = null } = req.body;
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: 'Missing or invalid messages array' });
       }
@@ -142,7 +142,7 @@ async function startServer() {
           messages,
           systemPrompt: SYSTEM_PROMPT,
           domain,
-          chatGptTier,
+          chatGptModel,
         });
         return res.json({ text, action: 'none', event: null });
       }

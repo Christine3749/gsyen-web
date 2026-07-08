@@ -13,7 +13,7 @@ interface CodexBridgeInput {
   messages: CodexMessage[];
   systemPrompt: string;
   domain?: string | null;
-  chatGptTier?: string | null;
+  chatGptModel?: string | null;
   timeoutMs?: number;
 }
 
@@ -189,7 +189,7 @@ function roleLabel(role: string): string {
   return 'USER';
 }
 
-function buildPrompt({ messages, systemPrompt, domain, chatGptTier }: CodexBridgeInput): string {
+function buildPrompt({ messages, systemPrompt, domain, chatGptModel }: CodexBridgeInput): string {
   const transcript = messages
     .slice(-12)
     .map(m => `${roleLabel(m.role)}: ${m.content}`)
@@ -207,7 +207,7 @@ GSYEN 基础系统规则：
 ${systemPrompt}
 
 当前模块：${domain || 'MUSE'}
-ChatGPT 档位：${chatGptTier || 'pro'}
+ChatGPT 模型：${chatGptModel || 'gpt-5-5'}
 
 最近对话：
 ${transcript}

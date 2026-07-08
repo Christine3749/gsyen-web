@@ -17,6 +17,23 @@ export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000, refr
 
   const check = async () => {
     try {
+      if (selectedModel === 'chatgpt-pro') {
+        const local = await probeLocalChatGptBridge();
+        if (local) {
+          setHealth(local.health);
+          checkCountRef.current = local.health.status === 'online' ? 0 : checkCountRef.current + 1;
+          return;
+        }
+
+        checkCountRef.current++;
+        if (checkCountRef.current >= 2) {
+          setHealth({ status: 'offline', error: 'LOCAL BRIDGE OFFLINE' });
+        } else {
+          setHealth({ status: 'checking' });
+        }
+        return;
+      }
+
       const base = window.location.protocol === 'file:' ? 'https://gsyen.com' : '';
       const r = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(5000) });
       const d = await r.json();
@@ -32,15 +49,6 @@ export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000, refr
       const authMode = typeof modelStatus === 'object'
         ? modelStatus?.authMode
         : undefined;
-
-      if (selectedModel === 'chatgpt-pro' && !isAvailable) {
-        const local = await probeLocalChatGptBridge();
-        if (local) {
-          setHealth(local.health);
-          checkCountRef.current = local.health.status === 'online' ? 0 : checkCountRef.current + 1;
-          return;
-        }
-      }
 
       if (isAvailable) {
         setHealth({ status: 'online', authMode });

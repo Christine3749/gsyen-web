@@ -4,7 +4,7 @@ export interface ModelConfig {
   disabled?: boolean;
 }
 
-export interface ChatGptTierConfig {
+export interface ChatGptModelConfig {
   id: string;
   label: string;
 }
@@ -20,9 +20,9 @@ export const MODELS: ModelConfig[] = [
   { id: 'gemini',   label: 'GEMINI' },
 ];
 
-export const CHATGPT_TIERS: ChatGptTierConfig[] = [
-  { id: 'pro', label: 'PRO' },
+export const CHATGPT_MODELS: ChatGptModelConfig[] = [
   { id: 'gpt-5-5', label: '5.5' },
+  { id: 'gpt-5-5-mini', label: '5.5 MINI' },
   { id: 'mini', label: 'MINI' },
 ];
 
