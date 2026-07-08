@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronRight, X } from 'lucide-react';
-import { MODELS, ModelId } from '../config/models';
+import { CHATGPT_TIERS, MODELS, ModelId } from '../config/models';
 import { useModelHealth } from '../hooks/useModelHealth';
 import { startLocalChatGptBind } from '../services/localBridge';
 
@@ -18,10 +18,13 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   const [binding, setBinding] = useState<'idle' | 'opening' | 'opened'>('idle');
   const [loginCode, setLoginCode] = useState<{ url: string; code: string; expiresInMinutes?: number } | null>(null);
   const [loginNotice, setLoginNotice] = useState<string | null>(null);
+  const [chatGptTier, setChatGptTier] = useState(() => localStorage.getItem('gsyen-chatgpt-tier') ?? 'pro');
   const health = useModelHealth(selectedModel, binding === 'opened' ? 5_000 : 30_000, refreshKey);
   const selected = MODELS.find(m => m.id === selectedModel) ?? { id: selectedModel, label: selectedModel };
   const isChatGptPro = selectedModel === 'chatgpt-pro';
   const isBound = isChatGptPro && health.status === 'online' && health.authMode === 'chatgpt';
+  const selectedTier = CHATGPT_TIERS.find(t => t.id === chatGptTier) ?? CHATGPT_TIERS[0];
+  const displayLabel = isChatGptPro ? 'CHATGPT' : selected.label;
   const statusLabel = health.status === 'online'
     ? (zh ? '在线' : 'ONLINE')
     : health.status === 'checking'
@@ -34,8 +37,9 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
     : statusLabel;
 
   const rows = [
-    { label: zh ? '模型ID' : 'MODEL ID', value: `${selected.label}-DEF` },
+    { label: zh ? '模型ID' : 'MODEL ID', value: isChatGptPro ? 'CHATGPT-DEF' : `${selected.label}-DEF` },
     { label: zh ? '状态' : 'STATUS', value: authLabel, dot: true },
+    ...(isChatGptPro ? [{ label: zh ? '档位' : 'TIER', value: selectedTier.label }] : []),
     ...(isChatGptPro ? [{ label: zh ? '认证' : 'AUTH', value: isBound ? 'ChatGPT' : (health.error ?? 'LOCAL ONLY') }] : []),
     { label: zh ? '上下文' : 'CONTEXT', value: contextLabel || (zh ? '灵阁' : 'MUSE') },
     { label: zh ? '记忆' : 'MEMORY', value: zh ? '已启用' : 'ENABLED' },
@@ -55,6 +59,10 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
     setLoginCode(null);
     setLoginNotice(null);
   }, [isBound]);
+
+  useEffect(() => {
+    localStorage.setItem('gsyen-chatgpt-tier', chatGptTier);
+  }, [chatGptTier]);
 
   const handleAction = async () => {
     if (!isChatGptPro) return;
@@ -105,7 +113,7 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
       <div className="gsyen-system-panel-readout">
         <span className={`gsyen-system-panel-dot is-${health.status}`} />
         <div>
-          <p>{selected.label}</p>
+          <p>{displayLabel}</p>
           <span>{isChatGptPro ? authLabel : statusLabel}</span>
         </div>
       </div>
@@ -118,6 +126,16 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
           ))}
         </select>
       </div>
+      {isChatGptPro && (
+        <div className="gsyen-system-panel-select">
+          <label>{zh ? 'ChatGPT 档位' : 'CHATGPT TIER'}</label>
+          <select value={chatGptTier} onChange={e => setChatGptTier(e.target.value)} disabled={!isBound}>
+            {CHATGPT_TIERS.map(t => (
+              <option key={t.id} value={t.id}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="gsyen-system-panel-table">
         {rows.map(row => (

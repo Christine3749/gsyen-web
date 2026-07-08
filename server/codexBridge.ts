@@ -13,6 +13,7 @@ interface CodexBridgeInput {
   messages: CodexMessage[];
   systemPrompt: string;
   domain?: string | null;
+  chatGptTier?: string | null;
   timeoutMs?: number;
 }
 
@@ -188,13 +189,13 @@ function roleLabel(role: string): string {
   return 'USER';
 }
 
-function buildPrompt({ messages, systemPrompt, domain }: CodexBridgeInput): string {
+function buildPrompt({ messages, systemPrompt, domain, chatGptTier }: CodexBridgeInput): string {
   const transcript = messages
     .slice(-12)
     .map(m => `${roleLabel(m.role)}: ${m.content}`)
     .join('\n\n');
 
-  return `你是 GSYEN 里的 CHATGPT PRO 本地桥接模型。
+  return `你是 GSYEN 里的 CHATGPT 本地桥接模型。
 
 请遵守：
 - 只回答当前对话，不读取文件，不运行命令，不修改系统。
@@ -206,6 +207,7 @@ GSYEN 基础系统规则：
 ${systemPrompt}
 
 当前模块：${domain || 'MUSE'}
+ChatGPT 档位：${chatGptTier || 'pro'}
 
 最近对话：
 ${transcript}

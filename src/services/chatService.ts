@@ -15,6 +15,7 @@ export async function sendToGateway(
   const clientDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
   const bridgeBase = model === 'chatgpt-pro' ? await localChatGptGatewayBase() : '';
+  const chatGptTier = model === 'chatgpt-pro' ? localStorage.getItem('gsyen-chatgpt-tier') ?? 'pro' : null;
   const res = await fetch(`${bridgeBase}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -25,6 +26,7 @@ export async function sendToGateway(
       clientDate,
       scheduleIntent: scheduleIntent ?? null,
       domain: domain ?? null,
+      chatGptTier,
     }),
   });
   if (!res.ok) throw new Error(`Gateway error: ${res.status}`);

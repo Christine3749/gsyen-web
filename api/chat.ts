@@ -50,7 +50,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     if (model === 'chatgpt-pro') {
       return json({
-        text: 'CHATGPT PRO 是本机 Codex 订阅桥接模型，只能在本地桌面服务中运行。网页版请使用 CHATGPT API、KIMI、GEMINI 或 疆域·思。',
+        text: 'CHATGPT 是本机 Codex 订阅桥接模型，只能在本地桌面服务中运行。网页版请使用 KIMI、GEMINI 或 疆域·思。',
         action: 'none',
         event: null,
       });

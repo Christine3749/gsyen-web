@@ -10,6 +10,6 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     localOnly: true,
     url: 'https://chatgpt.com',
     error: 'LOCAL_BRIDGE_REQUIRED',
-    message: 'ChatGPT Pro binding requires the desktop app or local bridge.',
+    message: 'ChatGPT binding requires the desktop app or local bridge.',
   });
 }
