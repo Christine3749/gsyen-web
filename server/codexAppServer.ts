@@ -1,7 +1,8 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
-import { buildPrompt, getCodexBridgeHealth, resolveCodexCliPath, type CodexBridgeInput } from './codexBridge';
+import { getCodexBridgeHealth, resolveCodexCliPath, type CodexBridgeInput } from './codexBridge';
 import { chatGptModelName } from './codexModelMap';
+import { buildCodexTurnInput } from './codexTurnInput';
 type PendingRpc = { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> };
 interface CodexSession {
   ws: WebSocket;
@@ -253,18 +254,23 @@ async function runTurn(
     session.ws.onclose = () => reject(new Error('APP SERVER WS CLOSED'));
   });
 
-  const turn = await rpc(session, 'turn/start', {
-    threadId: session.threadId,
-    input: [{ type: 'text', text: buildPrompt(input), text_elements: [] }],
-    approvalPolicy: 'never',
-    model: session.model,
-    serviceTier: 'default',
-    effort: 'low',
-    personality: 'pragmatic',
-  });
-  turnId = turn.turn.id;
+  const payload = buildCodexTurnInput(input);
+  try {
+    const turn = await rpc(session, 'turn/start', {
+      threadId: session.threadId,
+      input: payload.parts,
+      approvalPolicy: 'never',
+      model: session.model,
+      serviceTier: 'default',
+      effort: 'low',
+      personality: 'pragmatic',
+    });
+    turnId = turn.turn.id;
 
-  return completed;
+    return await completed;
+  } finally {
+    payload.cleanup();
+  }
 }
 
 export async function streamCodexAppServer(

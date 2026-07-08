@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 
-import { ChatMessage, ActionCard } from '../types/chat';
+import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
 import { ModelId } from '../config/models';
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
@@ -101,14 +101,15 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setPulseOpen(false);
   }, []);
 
-  const handleSend = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
+  const handleSend = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
+    if ((!text.trim() && attachments.length === 0) || isLoading) return;
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
       content: text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      attachments,
     };
     const history = [...messages, userMsg];
 
@@ -119,17 +120,18 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
 
     const aiId = `ai-${Date.now()}`;
     const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setMessages([...history, { id: aiId, role: 'model', content: '▍', timestamp: aiTime }]);
+    setMessages([...history, { id: aiId, role: 'model', content: '', timestamp: aiTime, streaming: true }]);
 
     await send({
       text,
+      attachments,
       model: selectedModel,
       history: messages,
       lang,
       onToken: (partial) => {
         setMessages([...history, {
           id: aiId, role: 'model', content: partial, timestamp: aiTime,
-          card: pendingCard.current ?? undefined,
+          card: pendingCard.current ?? undefined, streaming: true,
         }]);
       },
       onActionCard: (card) => {

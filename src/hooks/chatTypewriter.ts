@@ -29,7 +29,7 @@ export async function typewrite(
   for (const char of text) {
     if (signal?.aborted) return;
     displayed += char;
-    onToken(displayed + '▍');
+    onToken(displayed);
     await sleep(charDelay(char), signal);
   }
 }
@@ -73,7 +73,7 @@ export async function streamWithTypewriter(
     const chunk = queue.slice(0, take);
     queue = queue.slice(take);
     displayed += chunk;
-    onToken(displayed + '▍');
+    onToken(displayed);
     await sleep(charDelay(chunk[chunk.length - 1], backlog), signal);
   }
 

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { streamCodexAppServer } from './codexAppServer';
 import { runCodexBridge, type CodexBridgeInput } from './codexBridge';
+import { hasImageAttachments } from '../shared/providerMessages';
 
 const FIRST_DELTA_TIMEOUT_MS = Number(process.env.CODEX_FIRST_DELTA_TIMEOUT_MS || 12_000);
 const KEEP_ALIVE_MS = 5_000;
@@ -29,6 +30,7 @@ export async function streamCodexChatResponse(req: Request, res: Response, input
   let finished = false;
   let wroteAny = false;
   let clientClosed = false;
+  const hasImages = hasImageAttachments(input.messages);
   const keepAlive = setInterval(() => writeKeepAlive(res), KEEP_ALIVE_MS);
   const firstDeltaTimer = setTimeout(() => {
     if (!wroteAny && !finished && !clientClosed) {
@@ -50,7 +52,7 @@ export async function streamCodexChatResponse(req: Request, res: Response, input
     if (!text.trim()) writeSse(res, '我在，但这次没有生成有效回复。');
   } catch (err: any) {
     console.error('Codex app-server stream failed:', err);
-    if (!clientClosed && !wroteAny && canFallback(err?.message)) {
+    if (!clientClosed && !wroteAny && !hasImages && canFallback(err?.message)) {
       try {
         const text = await runCodexBridge({ ...input, timeoutMs: 45_000 });
         writeSse(res, text);

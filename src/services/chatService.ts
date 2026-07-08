@@ -45,7 +45,11 @@ export async function sendToGateway(
     signal,
     body: JSON.stringify({
       model,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content,
+        attachments: m.attachments ?? [],
+      })),
       events: events ?? [],
       clientDate,
       scheduleIntent: scheduleIntent ?? null,

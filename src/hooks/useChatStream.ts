@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { ChatMessage, ActionCard } from '../types/chat';
+import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
 import { ModelId } from '../config/models';
 import { ChatGptBridgeUnavailableError, sendToGateway, readSSEStream } from '../services/chatService';
 import { askPredictionExpert } from '../services/predictService';
@@ -29,6 +29,7 @@ interface UseChatStreamReturn {
   isLoading: boolean;
   send: (opts: {
     text: string;
+    attachments?: ChatAttachment[];
     model: ModelId;
     history: ChatMessage[];
     lang: 'zh' | 'en';
@@ -83,7 +84,7 @@ export function useChatStream(): UseChatStreamReturn {
   const activeRequest = useRef<AbortController | null>(null);
 
   const send = useCallback(async ({
-    text, model, history, lang,
+    text, attachments = [], model, history, lang,
     onToken, onDone, onError, onScheduleAction, onActionCard,
   }: Parameters<UseChatStreamReturn['send']>[0]) => {
     activeRequest.current?.abort();
@@ -107,12 +108,14 @@ export function useChatStream(): UseChatStreamReturn {
 
     try {
       // 1. Local prediction expert
-      const localAnswer = await askPredictionExpert(text);
-      if (localAnswer) {
-        setIsLoading(false);
-        await typewrite(localAnswer, onToken, controller.signal);
-        onDone(localAnswer);
-        return;
+      if (attachments.length === 0) {
+        const localAnswer = await askPredictionExpert(text);
+        if (localAnswer) {
+          setIsLoading(false);
+          await typewrite(localAnswer, onToken, controller.signal);
+          onDone(localAnswer);
+          return;
+        }
       }
 
       // 2. 待确认行程处理
@@ -153,6 +156,7 @@ export function useChatStream(): UseChatStreamReturn {
         role:      'user',
         content:   text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        attachments,
       };
       const apiMessages = [...history, { ...userMsg, content: enrichedText }];
 

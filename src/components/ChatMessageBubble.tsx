@@ -16,6 +16,9 @@ interface ChatMessageBubbleProps {
 /** 单条聊天气泡：头像 + 内容 + 神机百炼卡片 + 复制/导出动作。 */
 export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessageBubbleProps): ReactElement {
   const isAI = msg.role === 'model';
+  const isStreaming = !!msg.streaming;
+  const copyText = msg.content.trim();
+  const copied = isCopiedId === msg.id;
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       className={`flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto flex-row-reverse'}`}>
@@ -28,13 +31,27 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
           <span className="font-bold text-[#1A1A1A]/50">{isAI ? (lang === 'zh' ? 'Atelier AI' : 'ATELIER AI') : (lang === 'zh' ? '您' : 'CLIENT')}</span>
           <span>·</span><span>{msg.timestamp}</span>
         </div>
-        <div className={`text-left leading-relaxed ${isAI ? 'pt-0.5' : 'px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
-          <div className="space-y-1">{renderMessageContent(msg.content, isAI)}</div>
-          {isAI && msg.card && <ActionCardView card={msg.card} lang={lang} />}
-          {isAI && (
+        <div className={`text-left leading-relaxed select-text ${isAI ? 'pt-0.5' : 'px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
+          {!!msg.attachments?.length && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {msg.attachments.map(item => (
+                <img key={item.id} src={item.dataUrl} alt={item.name}
+                  className="h-24 w-32 object-cover border border-white/20 bg-white/10" />
+              ))}
+            </div>
+          )}
+          <div className="space-y-1">
+            {msg.content ? renderMessageContent(msg.content, isAI) : null}
+            {isStreaming && (
+              <span className="inline-block h-4 w-[2px] translate-y-0.5 bg-[#1A1A1A]/80 animate-pulse" />
+            )}
+          </div>
+          {isAI && !isStreaming && msg.card && <ActionCardView card={msg.card} lang={lang} />}
+          {isAI && !isStreaming && (
             <div className="mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
-              <button onClick={() => onCopy(msg.id, msg.content)} className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
-                {isCopiedId === msg.id ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
+              <button onClick={() => onCopy(msg.id, copyText)} disabled={!copyText}
+                className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
+                {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
               </button>
               <button onClick={() => exportQuoteCard(msg, lang)} className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
                 <Download className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '灵感卡片' : 'CARD'}</span>
@@ -42,6 +59,14 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
             </div>
           )}
         </div>
+        {!isAI && copyText && (
+          <div className="flex justify-end pt-1">
+            <button onClick={() => onCopy(msg.id, copyText)}
+              className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
+              {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -22,6 +22,7 @@ import { getCodexBridgeHealth } from './server/codexBridge';
 import { streamCodexChatResponse } from './server/codexChatStream';
 import { registerCodexRoutes } from './server/codexRoutes';
 import { registerLocalBridgeCors } from './server/localBridgeCors';
+import { toOpenAiMessages } from './shared/providerMessages';
 
 dotenv.config();
 
@@ -40,7 +41,7 @@ function domainSuffix(domain: string | null, scheduleIntent: unknown, today: str
 async function startServer() {
   const app = express();
   registerLocalBridgeCors(app);
-  app.use(express.json());
+  app.use(express.json({ limit: '18mb' }));
   registerCodexRoutes(app);
 
   // Health probe — real API verification
@@ -202,7 +203,7 @@ async function startServer() {
       // ── All other models: SSE streaming ───────────────────────────────
       const payload = [
         { role: 'system', content: SYSTEM_PROMPT },
-        ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })),
+        ...toOpenAiMessages(messages, model === 'chatgpt'),
       ];
 
       res.setHeader('Content-Type', 'text/event-stream');

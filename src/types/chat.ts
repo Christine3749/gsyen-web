@@ -11,12 +11,22 @@ export interface ActionCard {
                        // 不是所有卡片都有——纯查询类（如"今日日程"汇总卡）就没有单一对应记录。
 }
 
+export interface ChatAttachment {
+  id:       string;
+  type:     'image';
+  name:     string;
+  mimeType: string;
+  dataUrl:  string;
+}
+
 export interface ChatMessage {
   id:        string;
   role:      'user' | 'model';
   content:   string;
   timestamp: string;
   card?:     ActionCard;   // 神机百炼操作卡片（可选）
+  attachments?: ChatAttachment[];
+  streaming?: boolean;
 }
 
 export interface StoredSession {

@@ -12,6 +12,7 @@ import {
   MODEL_ROUTES,
   INJECTION_PATTERNS,
 } from '../shared/chatConfig';
+import { toOpenAiMessages } from '../shared/providerMessages';
 
 /** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
 function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
@@ -115,7 +116,7 @@ export default async function handler(req: Request): Promise<Response> {
     // ── All other models: SSE streaming ───────────────────────────────
     const payload = [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })),
+      ...toOpenAiMessages(messages, model === 'chatgpt'),
     ];
 
     const upstream = await fetch(route.url, {
