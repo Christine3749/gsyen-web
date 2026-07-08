@@ -138,7 +138,7 @@ async function startServer() {
       }
 
       if (model === 'chatgpt-pro') {
-        return streamCodexChatResponse(res, {
+        return streamCodexChatResponse(req, res, {
           messages,
           systemPrompt: SYSTEM_PROMPT,
           domain,

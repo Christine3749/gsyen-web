@@ -105,11 +105,15 @@ function resolveHandler(
 export function useChatStream(): UseChatStreamReturn {
   const [isLoading, setIsLoading] = useState(false);
   const pendingConfirmation = useRef<PendingConfirmation | null>(null);
+  const activeRequest = useRef<AbortController | null>(null);
 
   const send = useCallback(async ({
     text, model, history, lang,
     onToken, onDone, onError, onScheduleAction, onActionCard,
   }: Parameters<UseChatStreamReturn['send']>[0]) => {
+    activeRequest.current?.abort();
+    const controller = new AbortController();
+    activeRequest.current = controller;
     setIsLoading(true);
 
     /** Apply a domain handler's result: render card, notify, optionally typewrite a reply. */
@@ -182,15 +186,28 @@ export function useChatStream(): UseChatStreamReturn {
         ? domainHandlers.map(h => h.buildContext()).find((ctx): ctx is NonNullable<typeof ctx> => ctx != null)
         : undefined;
 
-      const response = await sendToGateway(model, apiMessages, eventsCtx, streamIntent, streamHandler?.module ?? null);
+      const response = await sendToGateway(
+        model,
+        apiMessages,
+        eventsCtx,
+        streamIntent,
+        streamHandler?.module ?? null,
+        controller.signal,
+      );
       setIsLoading(false);
 
       const contentType = response.headers.get('content-type') ?? '';
 
       if (contentType.includes('text/event-stream')) {
         // ── SSE 流式路径 ─────────────────────────────────────────
+        const isFastLocalStream = model === 'chatgpt-pro';
         let fullText = '';
         for await (const delta of readSSEStream(response)) {
+          if (isFastLocalStream) {
+            fullText += delta;
+            onToken(fullText + '▍');
+            continue;
+          }
           for (const char of delta) {
             fullText += char;
             onToken(fullText + '▍');
@@ -242,11 +259,14 @@ export function useChatStream(): UseChatStreamReturn {
 
     } catch (err) {
       setIsLoading(false);
+      if (controller.signal.aborted) return;
       onError(
         lang === 'zh'
           ? '⚠️ **通讯失败**：模型响应超时或连接中断，请稍后重试。'
           : '⚠️ **Connection Failed**: Model timed out or was interrupted. Please retry.'
       );
+    } finally {
+      if (activeRequest.current === controller) activeRequest.current = null;
     }
   }, []);
 

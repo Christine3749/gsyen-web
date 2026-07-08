@@ -8,7 +8,8 @@ export async function sendToGateway(
   events?: Array<{ id: string; title: string; date: string; time: string }>,
   scheduleIntent?: string | null,
   /** Which domain module owns this request — tells the backend which system suffix to inject */
-  domain?: string | null
+  domain?: string | null,
+  signal?: AbortSignal,
 ): Promise<Response> {
   // 传客户端本地日期，避免 Vercel UTC 和中国时区差8小时
   const d = new Date();
@@ -19,6 +20,7 @@ export async function sendToGateway(
   const res = await fetch(`${bridgeBase}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal,
     body: JSON.stringify({
       model,
       messages: messages.map(m => ({ role: m.role, content: m.content })),
