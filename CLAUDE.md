@@ -2,8 +2,8 @@
 
 ## 项目结构
 本目录 `C:\Users\Ethan\Desktop\01-Projects\GSYEN` 包含以下子项目：
-- `gsyen-web/` — 前端 + 内嵌后端（React 19 + Vite 6 + Express），GitHub: Christine2031/gsyen-web
-- `gsyen-api/` — 独立后端（Express on GCP Cloud Run，CodexAgent），GitHub: Christine2031/gsyen-api
+- `gsyen-web/` — 前端 + 内嵌后端（React 19 + Vite 6 + Express），GitHub: Christine3749/gsyen-web
+- `gsyen-api/` — 独立后端（Express on GCP Cloud Run，CodexAgent），GitHub: Christine3749/gsyen-api
 - `laochen-demo/` — Python ML 预测服务（备货预测 + 顾客流失），本地运行在 http://127.0.0.1:8000
 - `gsyen-native/` — 移动端
 - `tasks/` — 任务记录

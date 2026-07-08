@@ -52,7 +52,7 @@ GSYEN 是由**雍彻科技**开发的本地优先全功能工作套件，支持 
 
 ```bash
 # 克隆
-git clone https://github.com/Christine2031/gsyen-web.git
+git clone https://github.com/Christine3749/gsyen-web.git
 cd gsyen-web
 
 # 安装依赖

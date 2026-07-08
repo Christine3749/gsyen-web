@@ -67,8 +67,8 @@ const R2_BASE        = 'https://pub-e31e040936184655b82ef435a00e4676.r2.dev';
 const WINDOWS_R2     = `${R2_BASE}/GSYEN-Setup-Windows.exe`;
 const MAC_R2_ARM64   = `${R2_BASE}/GSYEN-Setup-Mac-arm64.dmg`;
 const MAC_R2_X64     = `${R2_BASE}/GSYEN-Setup-Mac-x64.dmg`;
-const WINDOWS_GITHUB = 'https://github.com/Christine2031/gsyen-web/releases/latest';
-const GITHUB_URL     = 'https://github.com/Christine2031/gsyen-web';
+const WINDOWS_GITHUB = 'https://github.com/Christine3749/gsyen-web/releases/latest';
+const GITHUB_URL     = 'https://github.com/Christine3749/gsyen-web';
 const YOUTUBE_URL    = 'https://www.youtube.com/@iSgsyenTt';
 const DISCORD_SERVER = 'https://discord.gg/338tsy2Dup';
 
