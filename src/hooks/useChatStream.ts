@@ -5,6 +5,7 @@ import { ChatGptBridgeUnavailableError, sendToGateway, readSSEStream } from '../
 import { askPredictionExpert } from '../services/predictService';
 import { domainHandlers } from '../domains/registry';
 import { DomainHandler, DomainActionResult } from '../domains/types';
+import { streamWithTypewriter, typewrite } from './chatTypewriter';
 
 // Models that return application/json with {text, action, event} instead of SSE.
 const STRUCTURED_MODELS = new Set<ModelId>(['ethan', 'fast'] as ModelId[]);
@@ -22,32 +23,6 @@ function isConfirmation(text: string): boolean {
 function isDenial(text: string): boolean {
   const t = text.trim().toLowerCase();
   return DENY_WORDS.some(w => t.startsWith(w));
-}
-
-// Typewriter delays (ms)
-const DELAY = {
-  sentenceEnd: () => 300 + Math.random() * 250,
-  comma:       () => 120 + Math.random() * 100,
-  newline:     () => 200 + Math.random() * 200,
-  rare:        () => 100 + Math.random() * 150,
-  normal:      () => 30  + Math.random() * 25,
-};
-
-function charDelay(char: string): number {
-  if ('。！？…'.includes(char)) return DELAY.sentenceEnd();
-  if ('，、；：'.includes(char)) return DELAY.comma();
-  if (char === '\n')             return DELAY.newline();
-  if (Math.random() < 0.05)     return DELAY.rare();
-  return DELAY.normal();
-}
-
-async function typewrite(text: string, onToken: (t: string) => void): Promise<void> {
-  let displayed = '';
-  for (const char of text) {
-    displayed += char;
-    onToken(displayed + '▍');
-    await new Promise(r => setTimeout(r, charDelay(char)));
-  }
 }
 
 interface UseChatStreamReturn {
@@ -122,7 +97,7 @@ export function useChatStream(): UseChatStreamReturn {
       if (result.card) onActionCard?.(result.card);
       if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
       if (result.reply) {
-        await typewrite(result.reply, onToken);
+        await typewrite(result.reply, onToken, controller.signal);
         setIsLoading(false);
         onDone(result.reply);
         return true;
@@ -135,7 +110,7 @@ export function useChatStream(): UseChatStreamReturn {
       const localAnswer = await askPredictionExpert(text);
       if (localAnswer) {
         setIsLoading(false);
-        await typewrite(localAnswer, onToken);
+        await typewrite(localAnswer, onToken, controller.signal);
         onDone(localAnswer);
         return;
       }
@@ -200,20 +175,7 @@ export function useChatStream(): UseChatStreamReturn {
 
       if (contentType.includes('text/event-stream')) {
         // ── SSE 流式路径 ─────────────────────────────────────────
-        const isFastLocalStream = model === 'chatgpt-pro';
-        let fullText = '';
-        for await (const delta of readSSEStream(response)) {
-          if (isFastLocalStream) {
-            fullText += delta;
-            onToken(fullText + '▍');
-            continue;
-          }
-          for (const char of delta) {
-            fullText += char;
-            onToken(fullText + '▍');
-            await new Promise(r => setTimeout(r, charDelay(char)));
-          }
-        }
+        const fullText = await streamWithTypewriter(readSSEStream(response), onToken, controller.signal);
         if (streamHandler && streamIntent) {
           await applyResult(streamHandler.handleStreamResult(streamIntent, fullText));
         }
@@ -253,7 +215,7 @@ export function useChatStream(): UseChatStreamReturn {
           }
         }
 
-        await typewrite(reply, onToken);
+        await typewrite(reply, onToken, controller.signal);
         onDone(reply);
       }
 
