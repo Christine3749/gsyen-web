@@ -16,6 +16,7 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   const [refreshKey, setRefreshKey] = useState(0);
   const [binding, setBinding] = useState<'idle' | 'opening' | 'opened'>('idle');
   const [loginCode, setLoginCode] = useState<{ url: string; code: string; expiresInMinutes?: number } | null>(null);
+  const [loginNotice, setLoginNotice] = useState<string | null>(null);
   const health = useModelHealth(selectedModel, binding === 'opened' ? 5_000 : 30_000, refreshKey);
   const selected = MODELS.find(m => m.id === selectedModel) ?? { id: selectedModel, label: selectedModel };
   const isChatGptPro = selectedModel === 'chatgpt-pro';
@@ -54,16 +55,28 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
     try {
       const r = await fetch('/api/codex/login/start', { method: 'POST' });
       const data = await r.json();
+      if (data.localOnly && data.url) {
+        if (loginWindow) loginWindow.location.href = data.url;
+        else window.open(data.url, '_blank');
+        setLoginCode(null);
+        setLoginNotice(zh
+          ? '网页端无法启动本机 Codex。请在桌面版或本地版完成 ChatGPT 绑定。'
+          : 'Web cannot start local Codex. Bind ChatGPT in the desktop or local app.');
+        setBinding('idle');
+        return;
+      }
       if (!r.ok || !data.url || !data.code) throw new Error(data.error || 'LOGIN_START_FAILED');
       if (loginWindow) loginWindow.location.href = data.url;
       else window.open(data.url, '_blank');
       setLoginCode({ url: data.url, code: data.code, expiresInMinutes: data.expiresInMinutes });
+      setLoginNotice(null);
       setBinding('opened');
       setRefreshKey(k => k + 1);
       window.setTimeout(() => setRefreshKey(k => k + 1), 5000);
       window.setTimeout(() => setRefreshKey(k => k + 1), 12000);
     } catch {
       loginWindow?.close();
+      setLoginNotice(zh ? '绑定启动失败，请使用桌面版或本地版重试。' : 'Bind failed. Try the desktop or local app.');
       setBinding('idle');
     }
   };
@@ -115,6 +128,13 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
           <a href={loginCode.url} target="_blank" rel="noreferrer">
             {zh ? '打开 OpenAI 登录页' : 'OPEN OPENAI LOGIN'}
           </a>
+        </div>
+      )}
+      {isChatGptPro && loginNotice && (
+        <div className="gsyen-system-panel-bind-code">
+          <span>{zh ? '绑定提示' : 'BINDING NOTE'}</span>
+          <strong>{zh ? 'LOCAL ONLY' : 'LOCAL ONLY'}</strong>
+          <a href="https://chatgpt.com" target="_blank" rel="noreferrer">{loginNotice}</a>
         </div>
       )}
 
