@@ -20,10 +20,13 @@ import {
   GEMINI_RESPONSE_SCHEMA,
   MODEL_ROUTES,
 } from './shared/chatConfig';
+import { getCodexBridgeHealth, runCodexBridge } from './server/codexBridge';
+import { registerCodexRoutes } from './server/codexRoutes';
 
 dotenv.config();
 
 const PORT = 3000;
+type HealthResult = { available: boolean; error?: string; authMode?: string };
 
 /** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
 function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
@@ -37,19 +40,24 @@ function domainSuffix(domain: string | null, scheduleIntent: unknown, today: str
 async function startServer() {
   const app = express();
   app.use(express.json());
+  registerCodexRoutes(app);
 
   // Health probe — real API verification
-  const healthCache: Record<string, { available: boolean; error?: string; timestamp: number }> = {};
+  const healthCache: Record<string, HealthResult & { timestamp: number }> = {};
   const HEALTH_CACHE_TTL = 30_000; // 30s cache
 
-  async function verifyModel(modelId: string, route: any): Promise<{ available: boolean; error?: string }> {
+  async function verifyModel(modelId: string, route: any): Promise<HealthResult> {
     const now = Date.now();
     const cached = healthCache[modelId];
     if (cached && now - cached.timestamp < HEALTH_CACHE_TTL) {
-      return { available: cached.available, error: cached.error };
+      return { available: cached.available, error: cached.error, authMode: cached.authMode };
     }
 
-    if (modelId === 'ethan' || modelId === 'fast') {
+    if (modelId === 'chatgpt-pro') {
+      const result = await getCodexBridgeHealth();
+      healthCache[modelId] = { ...result, timestamp: now };
+      return result;
+    } else if (modelId === 'ethan' || modelId === 'fast') {
       // 本地模型：检查 Ollama 服务
       const ollamaBase = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
       try {
@@ -78,6 +86,8 @@ async function startServer() {
           testUrl = 'https://api.moonshot.cn/v1/models';
         } else if (modelId === 'deepseek') {
           testUrl = 'https://api.deepseek.com/v1/models';
+        } else if (modelId === 'chatgpt') {
+          testUrl = 'https://api.openai.com/v1/models';
         } else if (modelId === 'gemini') {
           testUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
         }
@@ -123,6 +133,15 @@ async function startServer() {
       const route = MODEL_ROUTES[model];
       if (!route) {
         return res.status(400).json({ error: `Unknown model: ${model}` });
+      }
+
+      if (model === 'chatgpt-pro') {
+        const text = await runCodexBridge({
+          messages,
+          systemPrompt: SYSTEM_PROMPT,
+          domain,
+        });
+        return res.json({ text, action: 'none', event: null });
       }
 
       const apiKey = process.env[route.envKey];
@@ -255,10 +274,11 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  const apiOnly = process.env.API_ONLY === 'true';
+  if (!apiOnly && process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
-  } else {
+  } else if (!apiOnly) {
     const dist = path.join(process.cwd(), 'dist');
     app.use(express.static(dist));
     app.get('*', (_req, res) => res.sendFile(path.join(dist, 'index.html')));

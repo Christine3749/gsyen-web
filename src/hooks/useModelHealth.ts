@@ -6,9 +6,10 @@ type HealthStatus = 'online' | 'checking' | 'offline';
 export interface ModelHealth {
   status: HealthStatus;
   error?: string;
+  authMode?: string;
 }
 
-export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000): ModelHealth {
+export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000, refreshKey = 0): ModelHealth {
   const [health, setHealth] = useState<ModelHealth>({ status: 'checking' });
   const checkStartRef = useRef<number>(0);
   const checkCountRef = useRef<number>(0);
@@ -27,9 +28,12 @@ export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000): Mod
       const errorMsg = typeof modelStatus === 'object'
         ? modelStatus?.error
         : undefined;
+      const authMode = typeof modelStatus === 'object'
+        ? modelStatus?.authMode
+        : undefined;
 
       if (isAvailable) {
-        setHealth({ status: 'online' });
+        setHealth({ status: 'online', authMode });
         checkCountRef.current = 0; // Reset on success
       } else {
         checkCountRef.current++;
@@ -55,7 +59,7 @@ export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000): Mod
     check();
     const t = setInterval(check, intervalMs);
     return () => clearInterval(t);
-  }, [selectedModel, intervalMs]);
+  }, [selectedModel, intervalMs, refreshKey]);
 
   return health;
 }

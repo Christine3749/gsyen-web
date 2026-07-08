@@ -130,6 +130,7 @@ export const MODEL_ROUTES: Record<string, { url: string; envKey: string; modelId
   deepseek: { url: 'https://api.deepseek.com/v1/chat/completions',    envKey: 'DEEPSEEK_API_KEY',  modelId: 'deepseek-chat' },
   claude:   { url: 'https://api.anthropic.com/v1/messages',          envKey: 'ANTHROPIC_API_KEY', modelId: 'claude-sonnet-4-6' },
   chatgpt:  { url: 'https://api.openai.com/v1/chat/completions',      envKey: 'OPENAI_API_KEY',    modelId: 'gpt-4o' },
+  'chatgpt-pro': { url: 'local:codex',                                envKey: 'CODEX_CLI_PATH',    modelId: 'codex-local' },
   gemini:   { url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', envKey: 'GEMINI_API_KEY', modelId: 'gemini-2.0-flash' },
   ethan:    { url: `${OLLAMA_BASE_URL}/v1/chat/completions`,          envKey: 'OLLAMA_BASE_URL',   modelId: 'qwen2.5:7b' },
   fast:     { url: `${OLLAMA_BASE_URL}/v1/chat/completions`,          envKey: 'OLLAMA_BASE_URL',   modelId: 'qwen2.5:3b' },

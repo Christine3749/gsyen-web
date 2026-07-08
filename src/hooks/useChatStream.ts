@@ -7,7 +7,7 @@ import { domainHandlers } from '../domains/registry';
 import { DomainHandler, DomainActionResult } from '../domains/types';
 
 // Models that return application/json with {text, action, event} instead of SSE.
-const STRUCTURED_MODELS = new Set<ModelId>(['gemini', 'ethan', 'fast'] as ModelId[]);
+const STRUCTURED_MODELS = new Set<ModelId>(['gemini', 'ethan', 'fast', 'chatgpt-pro'] as ModelId[]);
 
 export type ScheduleActionType = 'create' | 'update' | 'delete' | 'query';
 

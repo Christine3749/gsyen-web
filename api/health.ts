@@ -3,6 +3,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 const MODEL_ROUTES: Record<string, { envKey: string; testUrl?: string }> = {
   kimi:     { envKey: 'MOONSHOT_API_KEY',  testUrl: 'https://api.moonshot.cn/v1/models' },
   deepseek: { envKey: 'DEEPSEEK_API_KEY',  testUrl: 'https://api.deepseek.com/v1/models' },
+  chatgpt:  { envKey: 'OPENAI_API_KEY',    testUrl: 'https://api.openai.com/v1/models' },
+  'chatgpt-pro': { envKey: 'CODEX_CLI_PATH' },
   gemini:   { envKey: 'GEMINI_API_KEY',    testUrl: 'https://generativelanguage.googleapis.com/v1beta/models' },
   ethan:    { envKey: 'OLLAMA_BASE_URL' },
   fast:     { envKey: 'OLLAMA_BASE_URL' },
@@ -34,6 +36,11 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
 
   await Promise.all(
     Object.entries(MODEL_ROUTES).map(async ([modelId, route]) => {
+      if (modelId === 'chatgpt-pro') {
+        models[modelId] = { available: false, error: 'LOCAL ONLY' };
+        return;
+      }
+
       if (modelId === 'ethan' || modelId === 'fast') {
         models[modelId] = ollamaAlive ? { available: true } : { available: false, error: 'MODEL UNAVAILABLE' };
         return;
