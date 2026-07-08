@@ -26,7 +26,7 @@ export default function MailModule({ lang }: MailModuleProps) {
   return (
     <div className="gsyen-mail-page flex flex-col h-full text-[#1A1A1A] font-sans">
       {/* Toolbar strip */}
-      <div className="relative shrink-0 h-[52px] flex flex-row items-center justify-between gap-3 flex-nowrap px-8 bg-[#F4F2EE]">
+      <div className="gsyen-module-toolbar relative shrink-0 h-[52px] flex flex-row items-center justify-between gap-3 flex-nowrap px-8 bg-[#F4F2EE]">
         <div className="flex items-center gap-[7px] shrink-0">
           <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
             className={`gsyen-icon-command ${!store.isSidebarCollapsed ? 'is-active' : ''}`}

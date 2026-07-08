@@ -30,6 +30,7 @@ interface AppHeaderProps {
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
   const [compact, setCompact] = useState(window.innerWidth < 1100);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
   const { user, tier, emailVerified, loading: authLoading, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
@@ -46,15 +47,31 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
     return () => { window.removeEventListener('resize', fn); cancelAnimationFrame(raf); };
   }, []);
 
+  useEffect(() => {
+    const handleToolbarDoubleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest('.gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
+      if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
+      setHeaderHidden(v => !v);
+    };
+    document.addEventListener('dblclick', handleToolbarDoubleClick);
+    return () => document.removeEventListener('dblclick', handleToolbarDoubleClick);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.headerHidden = headerHidden ? 'true' : 'false';
+    return () => { delete document.documentElement.dataset.headerHidden; };
+  }, [headerHidden]);
 
   return (
     <>
-      <header
-        className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
-        id="app-header"
-        data-shell-platform={platform}
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-      >
+      {!headerHidden && (
+        <header
+          className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
+          id="app-header"
+          data-shell-platform={platform}
+          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        >
         <div className="gsyen-brand-lockup flex min-w-0 items-center gap-4 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
@@ -184,7 +201,8 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           )}
 
         </div>
-      </header>
+        </header>
+      )}
 
       {showAbout && <AboutDialog lang={lang} onClose={() => setShowAbout(false)} />}
       <AnimatePresence>
