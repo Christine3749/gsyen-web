@@ -1,7 +1,7 @@
 {
   "name": "gsyen",
   "private": true,
-  "version": "2.82.0",
+  "version": "2.82.239",
   "description": "GSYEN AI atelier workspace",
   "author": "GSYEN",
   "type": "module",
@@ -16,10 +16,10 @@
     "electron:build": "npm run build && electron-builder",
     "electron:preview": "cross-env NODE_ENV=production electron .",
     "design:lock": "node scripts/check-gsyen-design-lock.cjs",
-    "version:help": "node -e \"console.log('\\n发布流程\\n──────────────────────────────────────\\n1. 改完代码\\n2. npm run version:fix    (小修：patch++，如 2.81.231 → 2.81.232)\\n   npm run version:feat   (新功能：功能点++，patch 归零，如 2.81.231 → 2.82.0)\\n   npm run version:era    (里程碑：大版本++，归零，如 2.81.231 → 3.0.0)\\n3. npm run version:release  ← 一键：stage all + commit + tag + push\\n   → GitHub Actions 自动打 Windows .exe + Mac .dmg\\n   → Vercel 同步更新 Web\\n\\n版本规则  v{大版本}.{功能点}.{patch}\\n')\"",
+    "version:help": "node -e \"console.log('\\n发布流程\\n──────────────────────────────────────\\n1. 改完代码\\n2. npm run version:fix    (小修：patch++，如 2.81.238 → 2.81.239)\\n   npm run version:feat   (新功能：功能点++，patch++，如 2.81.238 → 2.82.239)\\n   npm run version:era    (里程碑：大版本++，功能点++，patch 归零，如 2.82.239 → 3.83.0)\\n3. npm run version:release  ← 一键：stage all + commit + tag + push\\n   → GitHub Actions 自动打 Windows .exe + Mac .dmg\\n   → Vercel 同步更新 Web\\n\\n版本规则  v{大版本}.{功能点}.{patch}\\n')\"",
     "version:fix": "npm version patch --no-git-tag-version",
-    "version:feat": "node -e \"const v=require('./package.json').version.split('.');v[1]=String(Number(v[1])+1);v[2]='0';const nv=v.join('.');require('child_process').execSync('npm version '+nv+' --no-git-tag-version',{stdio:'inherit'});\"",
-    "version:era": "node -e \"const v=require('./package.json').version.split('.');v[0]=String(Number(v[0])+1);v[1]='0';v[2]='0';const nv=v.join('.');require('child_process').execSync('npm version '+nv+' --no-git-tag-version',{stdio:'inherit'});\"",
+    "version:feat": "node -e \"const v=require('./package.json').version.split('.');v[1]=String(Number(v[1])+1);v[2]=String(Number(v[2])+1);const nv=v.join('.');require('child_process').execSync('npm version '+nv+' --no-git-tag-version',{stdio:'inherit'});\"",
+    "version:era": "node -e \"const v=require('./package.json').version.split('.');v[0]=String(Number(v[0])+1);v[1]=String(Number(v[1])+1);v[2]='0';const nv=v.join('.');require('child_process').execSync('npm version '+nv+' --no-git-tag-version',{stdio:'inherit'});\"",
     "version:release": "node -e \"const v=require('./package.json').version;require('child_process').execSync('git add -A && git commit -m \\\"release: v'+v+'\\\" && git tag v'+v+' && git push && git push --tags',{stdio:'inherit'});\"",
     "smoke:chatgpt": "node scripts/smoke-chatgpt-windows.cjs",
     "smoke:chatgpt:desktop": "npm run build && node scripts/smoke-chatgpt-windows.cjs --desktop"
