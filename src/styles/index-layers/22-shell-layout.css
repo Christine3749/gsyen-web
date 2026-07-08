@@ -32,6 +32,9 @@
 }
 
 #app-header .gsyen-brand-mark {
+  --gsyen-brand-icon-size: 42px;
+  --gsyen-brand-icon-stroke: 1.08;
+  --gsyen-brand-module-shift: 9px;
   display: flex !important;
   width: 78px !important;
   height: 52px !important;
@@ -40,10 +43,24 @@
 }
 
 #app-header .gsyen-brand-mark > svg {
-  width: 44px !important;
-  height: 44px !important;
-  max-width: 44px !important;
-  flex: 0 0 44px !important;
+  width: var(--gsyen-brand-icon-size) !important;
+  height: var(--gsyen-brand-icon-size) !important;
+  max-width: var(--gsyen-brand-icon-size) !important;
+  flex: 0 0 var(--gsyen-brand-icon-size) !important;
+  shape-rendering: auto !important;
+  stroke-width: var(--gsyen-brand-icon-stroke) !important;
+}
+
+#app-header .gsyen-brand-mark.is-module-brand > svg {
+  transform: translate(var(--gsyen-brand-module-shift), -3px) !important;
+}
+
+#app-header .gsyen-brand-mark.is-mail-brand > svg {
+  transform: translate(var(--gsyen-brand-module-shift), -5px) !important;
+}
+
+#app-header .gsyen-brand-mark.is-prism-brand > svg {
+  transform: translate(var(--gsyen-brand-module-shift), -4px) !important;
 }
 
 #app-header .gsyen-brand-mark img.gsyen-vintage-car {
@@ -66,6 +83,8 @@
 }
 
 #app-header .gsyen-brand-subtitle {
+  color: rgba(26, 26, 26, 0.46) !important;
+  font-weight: 780 !important;
   max-width: 164px !important;
   margin-top: 6px !important;
   letter-spacing: 0.19em !important;

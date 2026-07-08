@@ -64,6 +64,9 @@
   }
 
   #app-header .gsyen-brand-mark {
+    --gsyen-brand-icon-size: 40px;
+    --gsyen-brand-icon-stroke: 1.10;
+    --gsyen-brand-module-shift: 8px;
     width: 72px !important;
     height: 48px !important;
   }
@@ -117,6 +120,9 @@
   }
 
   #app-header .gsyen-brand-mark {
+    --gsyen-brand-icon-size: 36px;
+    --gsyen-brand-icon-stroke: 1.14;
+    --gsyen-brand-module-shift: 6px;
     width: 60px !important;
     height: 42px !important;
   }

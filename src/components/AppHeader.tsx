@@ -13,7 +13,7 @@ import { useAuth } from '../auth/useAuth';
 import { useIsMaximized } from '../hooks/useIsMaximized';
 import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
-import { KanbanOutlineIcon, SPACES, type ActiveSpace } from './AppHeaderSpaces';
+import { SPACES, type ActiveSpace } from './AppHeaderSpaces';
 
 export type { ActiveSpace } from './AppHeaderSpaces';
 
@@ -59,20 +59,20 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
             const isHome = activeSpace === 'chat';
-            // Google Material 惯例：大尺寸 logo 用 outline，小尺寸 tab 用 filled
-            const Icon = activeSpace === 'schedule' ? KanbanOutlineIcon : space?.Icon;
+            const BrandIcon = space?.BrandIcon;
+            const brandClass = isHome
+              ? 'is-home-brand'
+              : `is-module-brand is-${activeSpace === 'brand' ? 'prism' : activeSpace}-brand`;
             return (
               <>
                 <div
-                  className={`gsyen-brand-mark shrink-0 -mt-1 transition-transform duration-500 ${isElectron ? 'cursor-pointer' : ''}`}
+                  className={`gsyen-brand-mark ${brandClass} shrink-0 -mt-1 transition-transform duration-500 ${isElectron ? 'cursor-pointer' : ''}`}
                   onClick={() => isElectron && setShowAbout(true)}
                   title={isElectron ? (lang === 'zh' ? '关于 GSYEN' : 'About GSYEN') : undefined}
                 >
                   {isHome
                     ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
-                    : Icon && <Icon strokeWidth={0.9} className={`w-10 h-10 text-[#1A1A1A]/90 ${
-                        { mail: 'scale-90', calendar: 'scale-90' }[activeSpace as string] ?? ''
-                      }`} />
+                    : BrandIcon && <BrandIcon strokeWidth={1.14} className="gsyen-brand-module-icon w-10 h-10 text-[#1A1A1A]/90" />
                   }
                 </div>
                 <div className="gsyen-brand-copy flex flex-col">
