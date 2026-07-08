@@ -6,7 +6,6 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
-import { createServer as createViteServer } from 'vite';
 
 // 共享真源（与 api/chat.ts 同源，改 shared/ 即两端同时生效）
 import { SYSTEM_PROMPT } from './shared/systemPrompt';
@@ -20,7 +19,8 @@ import {
   GEMINI_RESPONSE_SCHEMA,
   MODEL_ROUTES,
 } from './shared/chatConfig';
-import { getCodexBridgeHealth, runCodexBridge } from './server/codexBridge';
+import { getCodexBridgeHealth } from './server/codexBridge';
+import { streamCodexChatResponse } from './server/codexChatStream';
 import { registerCodexRoutes } from './server/codexRoutes';
 import { registerLocalBridgeCors } from './server/localBridgeCors';
 
@@ -138,13 +138,12 @@ async function startServer() {
       }
 
       if (model === 'chatgpt-pro') {
-        const text = await runCodexBridge({
+        return streamCodexChatResponse(res, {
           messages,
           systemPrompt: SYSTEM_PROMPT,
           domain,
           chatGptModel,
         });
-        return res.json({ text, action: 'none', event: null });
       }
 
       const apiKey = process.env[route.envKey];
@@ -279,6 +278,7 @@ async function startServer() {
 
   const apiOnly = process.env.API_ONLY === 'true';
   if (!apiOnly && process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
   } else if (!apiOnly) {

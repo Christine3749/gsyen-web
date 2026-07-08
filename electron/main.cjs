@@ -6,6 +6,7 @@ const { startV2ray, stopV2ray, switchNode, getNodes, getStatus, setKey, setSub, 
 const { createFullscreenController } = require('./fullscreen.cjs');
 const { createTray } = require('./tray.cjs');
 const { registerUpdaterIpc, setupAutoUpdater } = require('./updater.cjs');
+const { startLocalServer, stopLocalServer } = require('./local-server.cjs');
 
 Sentry.init({
   dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
@@ -154,6 +155,7 @@ function createWindow() {
 // ── 启动 ──────────────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
+  startLocalServer(app).catch(e => console.error('local server init failed:', e));
   createWindow();
   try {
     tray = createTray({
@@ -193,5 +195,6 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   forceQuit = true;
   stopV2ray();
+  stopLocalServer();
   require('./ipc-library-cache.cjs').stopAll();
 });

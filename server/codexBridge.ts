@@ -9,7 +9,7 @@ interface CodexMessage {
   content: string;
 }
 
-interface CodexBridgeInput {
+export interface CodexBridgeInput {
   messages: CodexMessage[];
   systemPrompt: string;
   domain?: string | null;
@@ -33,6 +33,7 @@ interface CodexDeviceLogin {
 }
 
 let activeLogin: ReturnType<typeof spawn> | null = null;
+let cachedHealth: { result: { available: boolean; error?: string; authMode?: string }; timestamp: number } | null = null;
 
 function codexCliCandidates(): string[] {
   const localAppData = process.env.LOCALAPPDATA;
@@ -99,21 +100,36 @@ export async function getCodexBridgeHealth(): Promise<{
   error?: string;
   authMode?: string;
 }> {
+  const now = Date.now();
+  const ttl = cachedHealth?.result.available ? 30_000 : 3_000;
+  if (cachedHealth && now - cachedHealth.timestamp < ttl) return cachedHealth.result;
+
   const codexPath = resolveCodexCliPath();
-  if (!codexPath) return { available: false, error: 'CODEX CLI MISSING' };
+  if (!codexPath) {
+    cachedHealth = { result: { available: false, error: 'CODEX CLI MISSING' }, timestamp: now };
+    return cachedHealth.result;
+  }
 
   const status = await runCodexCommand(codexPath, [
     'login',
     'status',
-    '-c', 'service_tier="flex"',
+    '-c', 'service_tier="default"',
   ]);
-  if (status.timedOut) return { available: false, error: 'CODEX LOGIN TIMEOUT' };
-  if (status.code !== 0) return { available: false, error: 'CODEX LOGIN REQUIRED' };
+  if (status.timedOut) {
+    cachedHealth = { result: { available: false, error: 'CODEX LOGIN TIMEOUT' }, timestamp: now };
+    return cachedHealth.result;
+  }
+  if (status.code !== 0) {
+    cachedHealth = { result: { available: false, error: 'CODEX LOGIN REQUIRED' }, timestamp: now };
+    return cachedHealth.result;
+  }
   const statusText = `${status.stdout}\n${status.stderr}`;
   if (!/Logged in using ChatGPT/i.test(statusText)) {
-    return { available: false, error: 'CHATGPT LOGIN REQUIRED' };
+    cachedHealth = { result: { available: false, error: 'CHATGPT LOGIN REQUIRED' }, timestamp: now };
+    return cachedHealth.result;
   }
-  return { available: true, authMode: 'chatgpt' };
+  cachedHealth = { result: { available: true, authMode: 'chatgpt' }, timestamp: now };
+  return cachedHealth.result;
 }
 
 function stripAnsi(text: string): string {
@@ -131,6 +147,7 @@ export async function startCodexDeviceLogin(): Promise<CodexDeviceLogin> {
   const codexPath = resolveCodexCliPath();
   if (!codexPath) return { started: false, error: 'CODEX CLI MISSING' };
 
+  cachedHealth = null;
   activeLogin?.kill();
   const child = spawn(codexPath, [
     'login',
@@ -189,7 +206,7 @@ function roleLabel(role: string): string {
   return 'USER';
 }
 
-function buildPrompt({ messages, systemPrompt, domain, chatGptModel }: CodexBridgeInput): string {
+export function buildPrompt({ messages, systemPrompt, domain, chatGptModel }: CodexBridgeInput): string {
   const transcript = messages
     .slice(-12)
     .map(m => `${roleLabel(m.role)}: ${m.content}`)

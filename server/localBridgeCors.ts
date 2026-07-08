@@ -3,6 +3,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://www.gsyen.com',
   'http://127.0.0.1:5173',
   'http://localhost:5173',
+  'null',
 ]);
 
 export function registerLocalBridgeCors(app: any) {
