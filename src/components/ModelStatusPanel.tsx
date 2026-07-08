@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronRight, X } from 'lucide-react';
 import { MODELS, ModelId } from '../config/models';
 import { useModelHealth } from '../hooks/useModelHealth';
@@ -48,6 +48,13 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
       ? (zh ? '正在打开官方登录...' : 'OPENING LOGIN...')
       : (zh ? '绑定 ChatGPT' : 'BIND CHATGPT')
     : (zh ? '查看模型详情' : 'MODEL DETAILS');
+
+  useEffect(() => {
+    if (!isBound) return;
+    setBinding('idle');
+    setLoginCode(null);
+    setLoginNotice(null);
+  }, [isBound]);
 
   const handleAction = async () => {
     if (!isChatGptPro) return;
