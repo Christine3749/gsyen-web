@@ -1,5 +1,15 @@
 import { ChatMessage } from '../types/chat';
-import { localChatGptGatewayBase } from './localBridge';
+import { probeLocalChatGptBridge } from './localBridge';
+
+export class ChatGptBridgeUnavailableError extends Error {
+  detail?: string;
+
+  constructor(detail?: string) {
+    super('CHATGPT_LOCAL_BRIDGE_OFFLINE');
+    this.name = 'ChatGptBridgeUnavailableError';
+    this.detail = detail;
+  }
+}
 
 /** POST to the AI gateway, returns the raw Response */
 export async function sendToGateway(
@@ -15,7 +25,14 @@ export async function sendToGateway(
   const d = new Date();
   const clientDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const bridgeBase = model === 'chatgpt-pro' ? await localChatGptGatewayBase() : '';
+  let bridgeBase = '';
+  if (model === 'chatgpt-pro') {
+    const probe = await probeLocalChatGptBridge();
+    if (probe?.health.status !== 'online') {
+      throw new ChatGptBridgeUnavailableError(probe?.health.error);
+    }
+    bridgeBase = probe.base;
+  }
   const chatGptModel = model === 'chatgpt-pro' ? localStorage.getItem('gsyen-chatgpt-model') ?? 'gpt-5-5' : null;
   const res = await fetch(`${bridgeBase}/api/chat`, {
     method: 'POST',

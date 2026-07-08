@@ -73,16 +73,23 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
     setBinding('opening');
     const loginWindow = window.open('about:blank', '_blank');
     try {
-      const r = await startLocalChatGptBind()
-        ?? await fetch('/api/codex/login/start', { method: 'POST' });
-      const data = await r.json();
-      if (data.localOnly && data.url) {
-        if (loginWindow) loginWindow.location.href = data.url;
-        else window.open(data.url, '_blank');
+      const r = await startLocalChatGptBind();
+      if (!r) {
+        loginWindow?.close();
         setLoginCode(null);
         setLoginNotice(zh
-          ? '网页端无法启动本机 Codex。请在桌面版或本地版完成 ChatGPT 绑定。'
-          : 'Web cannot start local Codex. Bind ChatGPT in the desktop or local app.');
+          ? '未检测到本机 GSYEN Bridge。请先打开 Windows 桌面版，再回到网页绑定 ChatGPT。'
+          : 'Local GSYEN Bridge was not detected. Open the Windows app first, then bind ChatGPT from the web app.');
+        setBinding('idle');
+        return;
+      }
+      const data = await r.json();
+      if (data.localOnly && data.url) {
+        loginWindow?.close();
+        setLoginCode(null);
+        setLoginNotice(zh
+          ? '网页端不能直接启动 ChatGPT 订阅桥。请打开 Windows 桌面版完成本机绑定。'
+          : 'Web cannot start the ChatGPT subscription bridge directly. Complete binding in the Windows app.');
         setBinding('idle');
         return;
       }

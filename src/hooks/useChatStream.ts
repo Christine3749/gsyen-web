@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { ChatMessage, ActionCard } from '../types/chat';
 import { ModelId } from '../config/models';
-import { sendToGateway, readSSEStream } from '../services/chatService';
+import { ChatGptBridgeUnavailableError, sendToGateway, readSSEStream } from '../services/chatService';
 import { askPredictionExpert } from '../services/predictService';
 import { domainHandlers } from '../domains/registry';
 import { DomainHandler, DomainActionResult } from '../domains/types';
@@ -260,6 +260,14 @@ export function useChatStream(): UseChatStreamReturn {
     } catch (err) {
       setIsLoading(false);
       if (controller.signal.aborted) return;
+      if (err instanceof ChatGptBridgeUnavailableError) {
+        onError(
+          lang === 'zh'
+            ? '⚠️ **ChatGPT 未连接**：请先打开 GSYEN Windows 桌面版并完成 ChatGPT 绑定，网页版会连接本机桥。'
+            : '⚠️ **ChatGPT Not Connected**: Open the GSYEN Windows app and bind ChatGPT first; the web app connects through the local bridge.'
+        );
+        return;
+      }
       onError(
         lang === 'zh'
           ? '⚠️ **通讯失败**：模型响应超时或连接中断，请稍后重试。'

@@ -18,7 +18,7 @@ export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000, refr
   const check = async () => {
     try {
       if (selectedModel === 'chatgpt-pro') {
-        const local = await probeLocalChatGptBridge();
+        const local = await probeLocalChatGptBridge(1200);
         if (local) {
           setHealth(local.health);
           checkCountRef.current = local.health.status === 'online' ? 0 : checkCountRef.current + 1;
