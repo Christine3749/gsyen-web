@@ -56,7 +56,6 @@
 | id | 实际模型 | 走哪 |
 |---|---|---|
 | `ethan` / `fast` | **GSYEN-QW7B-Instruct**（Qwen2.5 7B） | `OLLAMA_BASE_URL`=llm.gsyen.com |
-| `gemini` | Gemini 2.0 Flash | Google API |
 | `kimi` / `deepseek` / `claude` / `chatgpt` | 各家云模型 | 各自 API |
 
 > Android v1 默认用 `ethan`(GSYEN-QW7B，自有模型)，聊天界面顶部 chip 可切其他。
@@ -100,7 +99,7 @@
    - 响应是 text/event-stream（SSE），逐 token 追加到当前 AI 气泡，打字机效果
    - 发送时先插入一个空 AI 气泡 + 「正在输入…」三点动画，收到首 token 后开始填充
    - AI 气泡渲染 Markdown（加粗/列表/代码块高亮）；用户气泡纯文本右对齐
-   - 顶部模型 chip 可切 ethan / gemini / claude / kimi，切换即改 body.model
+   - 顶部模型 chip 可切 ethan / kimi / deepseek / chatgpt，切换即改 body.model
 
 2. 卡片上下文弹泡（GSYEN 核心交互）：
    - 从工作台点某张卡片（订单/日程/联系人）发起对话时，

@@ -74,7 +74,6 @@ KIMI_API_KEY=
 DEEPSEEK_API_KEY=
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
-GEMINI_API_KEY=
 ```
 
 ## 技术栈
@@ -86,7 +85,7 @@ GEMINI_API_KEY=
 桌面端    Electron 42 · electron-builder 26
 后端      Express · Vercel Serverless
 数据库    Supabase (PostgreSQL)
-AI        Kimi · DeepSeek · Claude · GPT · Gemini · Qwen2.5 (本地)
+AI        Kimi · DeepSeek · Claude · GPT · Qwen2.5 (本地)
 监控      Sentry
 分发      阿里云 OSS · GitHub Releases
 ```
