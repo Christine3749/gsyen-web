@@ -11,7 +11,6 @@ export const MODELS: ModelConfig[] = [
   { id: 'ethan',    label: '疆域·思' },
   { id: 'kimi',     label: 'KIMI-K2.5' },
   { id: 'deepseek', label: 'DEEPSEEK' },
-  { id: 'chatgpt',  label: 'CHATGPT' },
   { id: 'chatgpt-pro', label: 'CHATGPT PRO' },
   { id: 'gemini',   label: 'GEMINI' },
 ];
