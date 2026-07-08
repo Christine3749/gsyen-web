@@ -58,6 +58,40 @@
   }
 }
 
+@media (max-width: 1536px) {
+  #app-header .gsyen-brand-lockup {
+    gap: 11px !important;
+  }
+
+  #app-header .gsyen-brand-mark {
+    width: 72px !important;
+    height: 48px !important;
+  }
+
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 70px !important;
+    height: 46px !important;
+  }
+
+  #app-header .gsyen-brand-copy {
+    width: 170px !important;
+    padding-bottom: 7px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    max-width: 154px !important;
+  }
+
+  #app-header .gsyen-brand-copy::after {
+    width: 154px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 156px;
+    height: 32px;
+  }
+}
+
 @media (max-width: 1320px) {
   :root {
     --gsyen-command-gap: 12px;
