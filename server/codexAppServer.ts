@@ -11,7 +11,6 @@ interface CodexSession {
   stale: boolean;
 }
 interface StreamOptions { signal?: AbortSignal }
-
 const PORT = Number(process.env.CODEX_APP_SERVER_PORT || 37139);
 const HTTP_BASE = `http://127.0.0.1:${PORT}`;
 const WS_URL = `ws://127.0.0.1:${PORT}`;
@@ -19,7 +18,7 @@ const TURN_TIMEOUT_MS = 90_000;
 let child: ChildProcess | null = null;
 let booting: Promise<void> | null = null;
 const sessions = new Map<string, CodexSession>();
-const warming = new Map<string, Promise<void>>();
+const creating = new Map<string, Promise<CodexSession>>();
 async function isReady(): Promise<boolean> {
   try {
     const res = await fetch(`${HTTP_BASE}/readyz`, { signal: AbortSignal.timeout(1500) });
@@ -187,17 +186,19 @@ async function createSession(model: string): Promise<CodexSession> {
 async function getSession(model: string): Promise<CodexSession> {
   const existing = sessions.get(model);
   if (existing && !existing.stale && !existing.busy) return existing;
-  return createSession(model);
+  const pending = creating.get(model);
+  if (pending) return pending;
+  const task = createSession(model).finally(() => creating.delete(model));
+  creating.set(model, task);
+  return task;
 }
 
 export function warmCodexAppServer(modelHint = 'gpt-5-5'): void {
   const model = chatGptModelName(modelHint);
-  if (sessions.has(model) || warming.has(model)) return;
-  const task = getCodexBridgeHealth()
+  if (sessions.has(model) || creating.has(model)) return;
+  getCodexBridgeHealth()
     .then(health => health.available ? getSession(model) : null)
-    .catch(err => console.warn('Codex warm-up skipped:', err?.message || err))
-    .finally(() => warming.delete(model));
-  warming.set(model, task.then(() => undefined));
+    .catch(err => console.warn('Codex warm-up skipped:', err?.message || err));
 }
 
 async function interruptTurn(session: CodexSession, turnId: string | null) {
