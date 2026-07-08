@@ -65,13 +65,14 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
 
   return (
     <>
-      {!headerHidden && (
-        <header
-          className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
-          id="app-header"
-          data-shell-platform={platform}
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-        >
+      <header
+        className={`gsyen-app-header ${headerHidden ? 'is-header-hidden' : 'is-header-visible'} relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
+        id="app-header"
+        data-shell-platform={platform}
+        aria-hidden={headerHidden}
+        data-header-motion={headerHidden ? 'hidden' : 'visible'}
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      >
         <div className="gsyen-brand-lockup flex min-w-0 items-center gap-4 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
@@ -201,8 +202,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           )}
 
         </div>
-        </header>
-      )}
+      </header>
 
       {showAbout && <AboutDialog lang={lang} onClose={() => setShowAbout(false)} />}
       <AnimatePresence>
