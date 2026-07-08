@@ -16,7 +16,6 @@ import {
   ledgerSystemSuffix,
   mailSystemSuffix,
   vaultSystemSuffix,
-  GEMINI_RESPONSE_SCHEMA,
   MODEL_ROUTES,
 } from './shared/chatConfig';
 import { getCodexBridgeHealth } from './server/codexBridge';
@@ -90,8 +89,6 @@ async function startServer() {
           testUrl = 'https://api.deepseek.com/v1/models';
         } else if (modelId === 'chatgpt') {
           testUrl = 'https://api.openai.com/v1/models';
-        } else if (modelId === 'gemini') {
-          testUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
         }
 
         if (testUrl) {
@@ -151,44 +148,6 @@ async function startServer() {
         return res.json({
           text: `后台未检测到 \`${route.envKey}\` 密钥，请在环境变量中配置后重启服务。`,
         });
-      }
-
-      // ── Gemini native API (JSON mode, structured output) ──────────────
-      if (model === 'gemini') {
-        const today = todayDateStr();
-        const geminiMessages = messages.map((m: any) => ({
-          role: m.role === 'model' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }));
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-        const geminiRes = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: geminiMessages,
-            systemInstruction: { parts: [{ text: SYSTEM_PROMPT + domainSuffix(domain, scheduleIntent, today, events) }] },
-            generationConfig: {
-              responseMimeType: 'application/json',
-              responseSchema: GEMINI_RESPONSE_SCHEMA,
-            },
-          }),
-        });
-        if (!geminiRes.ok) {
-          const err = await geminiRes.text().catch(() => geminiRes.statusText);
-          return res.status(502).json({ error: `Gemini API error: ${err}` });
-        }
-        const geminiData = await geminiRes.json();
-        const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
-        try {
-          const parsed = JSON.parse(rawText);
-          return res.json({
-            text:   parsed.reply  ?? rawText,
-            action: parsed.action ?? 'none',
-            event:  parsed.event?.title ? parsed.event : null,
-          });
-        } catch {
-          return res.json({ text: rawText, action: 'none', event: null });
-        }
       }
 
       // ── Ollama JSON mode (ethan / fast) — 原生 /api/chat 接口 ──────────

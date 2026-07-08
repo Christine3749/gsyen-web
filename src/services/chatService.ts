@@ -33,7 +33,12 @@ export async function sendToGateway(
     }
     bridgeBase = probe.base;
   }
-  const chatGptModel = model === 'chatgpt-pro' ? localStorage.getItem('gsyen-chatgpt-model') ?? 'gpt-5-5' : null;
+  const savedChatGptModel = localStorage.getItem('gsyen-chatgpt-model') ?? 'gpt-5-5';
+  const chatGptModel = model === 'chatgpt-pro'
+    ? savedChatGptModel === 'mini' || savedChatGptModel === 'gpt-5-5-mini'
+      ? 'gpt-5-4-mini'
+      : savedChatGptModel
+    : null;
   const res = await fetch(`${bridgeBase}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

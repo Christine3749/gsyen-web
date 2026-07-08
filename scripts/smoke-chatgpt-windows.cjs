@@ -3,6 +3,8 @@ const { startLocalServer, stopLocalServer } = require('../electron/local-server.
 const BASE = process.env.GSYEN_SMOKE_BASE || 'http://127.0.0.1:3000';
 const DESKTOP = process.argv.includes('--desktop');
 const MAX_FIRST_MS = Number(process.env.GSYEN_SMOKE_MAX_FIRST_MS || 4500);
+const SMOKE_ALL_MODELS = process.env.GSYEN_SMOKE_ALL_MODELS === '1';
+const CHATGPT_MODELS = ['gpt-5-5', 'gpt-5-4', 'gpt-5-4-mini', 'gpt-5-3-codex-spark'];
 let startedDesktopServer = false;
 
 function sleep(ms) {
@@ -65,7 +67,7 @@ async function chat(prompt, options = {}) {
         model: 'chatgpt-pro',
         messages: [{ role: 'user', content: prompt }],
         lang: 'zh',
-        chatGptModel: 'gpt-5-5',
+        chatGptModel: options.chatGptModel || 'gpt-5-5',
       }),
     });
     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -120,10 +122,31 @@ async function main() {
   const recover = await chat('只回答两个字：恢复');
   assertReply('recover', recover, '恢复');
 
-  const pass = (warm2.firstDeltaMs ?? Infinity) <= MAX_FIRST_MS;
-  const summary = { mode: DESKTOP ? 'desktop' : 'local', maxFirstMs: MAX_FIRST_MS, health, warm1, warm2, abort, recover, pass };
+  const modelChecks = [];
+  if (SMOKE_ALL_MODELS) {
+    for (const chatGptModel of CHATGPT_MODELS) {
+      const result = await chat('只回答两个字：通过', { chatGptModel });
+      assertReply(chatGptModel, result, '通过');
+      modelChecks.push({ chatGptModel, ...result });
+    }
+  }
+
+  const timedResults = [warm2, recover, ...modelChecks];
+  const pass = timedResults.every(result => (result.firstDeltaMs ?? Infinity) <= MAX_FIRST_MS);
+  const summary = {
+    mode: DESKTOP ? 'desktop' : 'local',
+    maxFirstMs: MAX_FIRST_MS,
+    allModels: SMOKE_ALL_MODELS,
+    health,
+    warm1,
+    warm2,
+    abort,
+    recover,
+    modelChecks,
+    pass,
+  };
   console.log(JSON.stringify(summary, null, 2));
-  if (!pass) throw new Error(`First delta too slow: ${warm2.firstDeltaMs}ms > ${MAX_FIRST_MS}ms`);
+  if (!pass) throw new Error(`First delta too slow in one or more checks: max ${MAX_FIRST_MS}ms`);
 }
 
 main().catch(err => {

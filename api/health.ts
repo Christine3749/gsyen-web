@@ -5,7 +5,6 @@ const MODEL_ROUTES: Record<string, { envKey: string; testUrl?: string }> = {
   deepseek: { envKey: 'DEEPSEEK_API_KEY',  testUrl: 'https://api.deepseek.com/v1/models' },
   chatgpt:  { envKey: 'OPENAI_API_KEY',    testUrl: 'https://api.openai.com/v1/models' },
   'chatgpt-pro': { envKey: 'CODEX_CLI_PATH' },
-  gemini:   { envKey: 'GEMINI_API_KEY',    testUrl: 'https://generativelanguage.googleapis.com/v1beta/models' },
   ethan:    { envKey: 'OLLAMA_BASE_URL' },
   fast:     { envKey: 'OLLAMA_BASE_URL' },
 };

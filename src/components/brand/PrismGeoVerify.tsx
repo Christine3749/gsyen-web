@@ -86,7 +86,7 @@ export default function PrismGeoVerify({ lang }: Props) {
       </div>
       <p className="fs-sm text-[#1A1A1A]/50 font-mono">
         {zh
-          ? '模拟生成式 AI 搜索引擎（ChatGPT / Perplexity / Gemini）如何引用此品牌语料。'
+          ? '模拟生成式 AI 搜索引擎（ChatGPT / Perplexity / DeepSeek）如何引用此品牌语料。'
           : 'Simulates how generative search engines cite this brand corpus.'}
       </p>
 

@@ -20,6 +20,7 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   const [loginNotice, setLoginNotice] = useState<string | null>(null);
   const [chatGptModel, setChatGptModel] = useState(() => {
     const saved = localStorage.getItem('gsyen-chatgpt-model') ?? localStorage.getItem('gsyen-chatgpt-tier');
+    if (saved === 'mini' || saved === 'gpt-5-5-mini') return 'gpt-5-4-mini';
     return CHATGPT_MODELS.some(m => m.id === saved) ? saved! : CHATGPT_MODELS[0].id;
   });
   const health = useModelHealth(selectedModel, binding === 'opened' ? 5_000 : 30_000, refreshKey);

@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { buildPrompt, getCodexBridgeHealth, resolveCodexCliPath, type CodexBridgeInput } from './codexBridge';
+import { chatGptModelName } from './codexModelMap';
 type PendingRpc = { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> };
 interface CodexSession {
   ws: WebSocket;
@@ -27,7 +28,6 @@ async function isReady(): Promise<boolean> {
     return false;
   }
 }
-
 async function waitUntilReady(): Promise<void> {
   for (let i = 0; i < 50; i++) {
     if (await isReady()) return;
@@ -46,7 +46,6 @@ function clearSession(session: CodexSession) {
   session.pending.clear();
   try { session.ws.close(); } catch {}
 }
-
 function clearAllSessions() {
   for (const session of sessions.values()) clearSession(session);
   sessions.clear();
@@ -92,11 +91,6 @@ export async function ensureCodexAppServer(forceRestart = false): Promise<void> 
   });
 
   return booting;
-}
-
-function chatGptModelName(model?: string | null): string {
-  if (model === 'gpt-5-5-mini' || model === 'mini') return 'gpt-5.5-mini';
-  return 'gpt-5.5';
 }
 
 function connect(): Promise<WebSocket> {
@@ -225,7 +219,9 @@ async function runTurn(
     const abort = async () => {
       clearTimeout(timeout);
       await interruptTurn(session, turnId);
-      reject(new Error('CLIENT ABORTED'));
+      const reason = signal?.reason;
+      const message = reason instanceof Error ? reason.message : typeof reason === 'string' ? reason : 'CLIENT ABORTED';
+      reject(new Error(message));
     };
     signal?.addEventListener('abort', abort, { once: true });
 
