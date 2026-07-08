@@ -185,8 +185,8 @@ html[data-font="ji"] {
 .fs-lg   { font-size: var(--fs-lg);   }
 
 html[data-header-hidden="true"] .gsyen-module-toolbar {
-  height: 44px !important;
-  min-height: 44px !important;
+  height: 38px !important;
+  min-height: 38px !important;
 }
 
 html[data-header-hidden="true"] .gsyen-module-toolbar .gsyen-icon-command,
