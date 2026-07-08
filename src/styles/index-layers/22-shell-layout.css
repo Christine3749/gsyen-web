@@ -59,8 +59,11 @@
   transform: translate(var(--gsyen-brand-module-shift), -5px) !important;
 }
 
+#app-header .gsyen-brand-mark.is-calendar-brand > svg,
+#app-header .gsyen-brand-mark.is-finance-brand > svg,
+#app-header .gsyen-brand-mark.is-password-brand > svg,
 #app-header .gsyen-brand-mark.is-prism-brand > svg {
-  transform: translate(var(--gsyen-brand-module-shift), -4px) !important;
+  transform: translate(calc(var(--gsyen-brand-module-shift) - 1px), -3px) !important;
 }
 
 #app-header .gsyen-brand-mark img.gsyen-vintage-car {
