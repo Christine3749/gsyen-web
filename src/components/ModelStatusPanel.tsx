@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronRight, X } from 'lucide-react';
 import { MODELS, ModelId } from '../config/models';
 import { useModelHealth } from '../hooks/useModelHealth';
+import { startLocalChatGptBind } from '../services/localBridge';
 
 interface ModelStatusPanelProps {
   lang: 'zh' | 'en';
@@ -53,7 +54,8 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
     setBinding('opening');
     const loginWindow = window.open('about:blank', '_blank');
     try {
-      const r = await fetch('/api/codex/login/start', { method: 'POST' });
+      const r = await startLocalChatGptBind()
+        ?? await fetch('/api/codex/login/start', { method: 'POST' });
       const data = await r.json();
       if (data.localOnly && data.url) {
         if (loginWindow) loginWindow.location.href = data.url;

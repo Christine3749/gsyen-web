@@ -22,6 +22,7 @@ import {
 } from './shared/chatConfig';
 import { getCodexBridgeHealth, runCodexBridge } from './server/codexBridge';
 import { registerCodexRoutes } from './server/codexRoutes';
+import { registerLocalBridgeCors } from './server/localBridgeCors';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ function domainSuffix(domain: string | null, scheduleIntent: unknown, today: str
 
 async function startServer() {
   const app = express();
+  registerLocalBridgeCors(app);
   app.use(express.json());
   registerCodexRoutes(app);
 

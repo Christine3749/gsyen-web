@@ -1,4 +1,5 @@
 import { ChatMessage } from '../types/chat';
+import { localChatGptGatewayBase } from './localBridge';
 
 /** POST to the AI gateway, returns the raw Response */
 export async function sendToGateway(
@@ -13,7 +14,8 @@ export async function sendToGateway(
   const d = new Date();
   const clientDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const res = await fetch('/api/chat', {
+  const bridgeBase = model === 'chatgpt-pro' ? await localChatGptGatewayBase() : '';
+  const res = await fetch(`${bridgeBase}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

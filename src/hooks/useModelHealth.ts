@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ModelId } from '../config/models';
+import { probeLocalChatGptBridge } from '../services/localBridge';
 
 type HealthStatus = 'online' | 'checking' | 'offline';
 
@@ -31,6 +32,15 @@ export function useModelHealth(selectedModel: ModelId, intervalMs = 30_000, refr
       const authMode = typeof modelStatus === 'object'
         ? modelStatus?.authMode
         : undefined;
+
+      if (selectedModel === 'chatgpt-pro' && !isAvailable) {
+        const local = await probeLocalChatGptBridge();
+        if (local) {
+          setHealth(local.health);
+          checkCountRef.current = local.health.status === 'online' ? 0 : checkCountRef.current + 1;
+          return;
+        }
+      }
 
       if (isAvailable) {
         setHealth({ status: 'online', authMode });
