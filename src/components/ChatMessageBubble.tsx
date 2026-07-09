@@ -1,7 +1,7 @@
-import type { ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, User, Copy, Check, Download } from 'lucide-react';
-import { ChatMessage } from '../types/chat';
+import { ChatAttachment, ChatMessage } from '../types/chat';
 import { renderMessageContent } from '../utils/renderMessage';
 import { exportQuoteCard } from '../utils/exportCard';
 import { ActionCardView } from './ActionCardView';
@@ -16,33 +16,92 @@ interface ChatMessageBubbleProps {
 /** 单条聊天气泡：头像 + 内容 + 神机百炼卡片 + 复制/导出动作。 */
 export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessageBubbleProps): ReactElement {
   const isAI = msg.role === 'model';
+  const isStreaming = !!msg.streaming;
+  const copyText = msg.content.trim();
+  const copied = isCopiedId === msg.id;
+  const [preview, setPreview] = useState<ChatAttachment | null>(null);
+
+  useEffect(() => {
+    if (!preview) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPreview(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [preview]);
+
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className={`flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto flex-row-reverse'}`}>
-      {/* 头像 */}
-      <div className={`w-7 h-7 flex items-center justify-center shrink-0 mt-1 ${isAI ? 'rounded-full bg-[#1A1A1A] text-[#F9F8F6]' : 'rounded-full bg-[#E8E6E1] text-[#1A1A1A]'}`}>
-        {isAI ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
-      </div>
-      <div className="space-y-1 max-w-[88%]">
-        <div className={`flex items-center gap-1.5 fs-xs font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
-          <span className="font-bold text-[#1A1A1A]/50">{isAI ? (lang === 'zh' ? 'Atelier AI' : 'ATELIER AI') : (lang === 'zh' ? '您' : 'CLIENT')}</span>
-          <span>·</span><span>{msg.timestamp}</span>
+    <>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        className={`gsyen-message-row ${isAI ? 'is-ai' : 'is-user'} flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto mr-6 max-w-[min(42rem,calc(100%-3rem))] flex-row-reverse md:mr-10'}`}>
+        {/* 头像 */}
+        <div className={`gsyen-message-avatar w-7 h-7 flex items-center justify-center shrink-0 mt-1 ${isAI ? 'rounded-full bg-[#1A1A1A] text-[#F9F8F6]' : 'rounded-full bg-[#E8E6E1] text-[#1A1A1A]'}`}>
+          {isAI ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
         </div>
-        <div className={`text-left leading-relaxed ${isAI ? 'pt-0.5' : 'px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
-          <div className="space-y-1">{renderMessageContent(msg.content, isAI)}</div>
-          {isAI && msg.card && <ActionCardView card={msg.card} lang={lang} />}
-          {isAI && (
-            <div className="mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
-              <button onClick={() => onCopy(msg.id, msg.content)} className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
-                {isCopiedId === msg.id ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
-              </button>
-              <button onClick={() => exportQuoteCard(msg, lang)} className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
-                <Download className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '灵感卡片' : 'CARD'}</span>
+        <div className="gsyen-message-stack space-y-1 max-w-[88%] min-w-0">
+          <div className={`gsyen-message-meta flex items-center gap-1.5 fs-xs font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
+            <span className="font-bold text-[#1A1A1A]/50">{isAI ? (lang === 'zh' ? 'Atelier AI' : 'ATELIER AI') : (lang === 'zh' ? '您' : 'CLIENT')}</span>
+            <span>·</span><span>{msg.timestamp}</span>
+          </div>
+          <div className={`gsyen-message-body text-left leading-relaxed select-text break-words [overflow-wrap:anywhere] ${isAI ? 'pt-0.5' : 'max-w-full px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
+            {!!msg.attachments?.length && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {msg.attachments.map(item => (
+                  <button key={item.id} type="button" onClick={() => setPreview(item)}
+                    className={`gsyen-message-thumb block overflow-hidden border bg-white/10 cursor-zoom-in transition-opacity hover:opacity-80 ${isAI ? 'border-[#1A1A1A]/10' : 'border-white/20'}`}
+                    aria-label={lang === 'zh' ? '放大图片' : 'Open image'}>
+                    <img src={item.dataUrl} alt={item.name}
+                      className="h-24 w-32 max-w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="space-y-1">
+              {msg.content ? renderMessageContent(msg.content, isAI) : null}
+              {isStreaming && (
+                <span className="inline-block h-4 w-[2px] translate-y-0.5 bg-[#1A1A1A]/80 animate-pulse" />
+              )}
+            </div>
+            {isAI && !isStreaming && msg.card && <ActionCardView card={msg.card} lang={lang} />}
+            {isAI && !isStreaming && (
+              <div className="gsyen-message-actions mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
+                <button onClick={() => onCopy(msg.id, copyText)} disabled={!copyText}
+                  className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
+                  {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
+                </button>
+                <button onClick={() => exportQuoteCard(msg, lang)} className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
+                  <Download className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '灵感卡片' : 'CARD'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+          {!isAI && copyText && (
+            <div className="gsyen-user-copy-row flex justify-end pt-1">
+              <button onClick={() => onCopy(msg.id, copyText)}
+                className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
+                {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
               </button>
             </div>
           )}
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      {preview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1A1A1A]/85 px-5 py-6"
+          onClick={() => setPreview(null)}>
+          <div className="max-w-[92vw] max-h-[92vh] space-y-3" onClick={event => event.stopPropagation()}>
+            <img src={preview.dataUrl} alt={preview.name}
+              className="max-w-[92vw] max-h-[84vh] object-contain bg-[#0F0F0F] border border-white/15 shadow-2xl" />
+            <div className="flex items-center justify-between gap-4 text-white/70">
+              <span className="truncate fs-xs font-mono tracking-widest uppercase">{preview.name}</span>
+              <button type="button" onClick={() => setPreview(null)}
+                className="shrink-0 border border-white/20 px-3 py-1.5 fs-xs font-mono uppercase tracking-widest hover:bg-white hover:text-[#1A1A1A] transition">
+                {lang === 'zh' ? '关闭' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -6,7 +6,6 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
-import { createServer as createViteServer } from 'vite';
 
 // 共享真源（与 api/chat.ts 同源，改 shared/ 即两端同时生效）
 import { SYSTEM_PROMPT } from './shared/systemPrompt';
@@ -17,13 +16,18 @@ import {
   ledgerSystemSuffix,
   mailSystemSuffix,
   vaultSystemSuffix,
-  GEMINI_RESPONSE_SCHEMA,
   MODEL_ROUTES,
 } from './shared/chatConfig';
+import { getCodexBridgeHealth } from './server/codexBridge';
+import { streamCodexChatResponse } from './server/codexChatStream';
+import { registerCodexRoutes } from './server/codexRoutes';
+import { registerLocalBridgeCors } from './server/localBridgeCors';
+import { toOpenAiMessages } from './shared/providerMessages';
 
 dotenv.config();
 
 const PORT = 3000;
+type HealthResult = { available: boolean; error?: string; authMode?: string };
 
 /** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
 function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
@@ -36,20 +40,26 @@ function domainSuffix(domain: string | null, scheduleIntent: unknown, today: str
 
 async function startServer() {
   const app = express();
-  app.use(express.json());
+  registerLocalBridgeCors(app);
+  app.use(express.json({ limit: '18mb' }));
+  registerCodexRoutes(app);
 
   // Health probe — real API verification
-  const healthCache: Record<string, { available: boolean; error?: string; timestamp: number }> = {};
+  const healthCache: Record<string, HealthResult & { timestamp: number }> = {};
   const HEALTH_CACHE_TTL = 30_000; // 30s cache
 
-  async function verifyModel(modelId: string, route: any): Promise<{ available: boolean; error?: string }> {
+  async function verifyModel(modelId: string, route: any): Promise<HealthResult> {
     const now = Date.now();
     const cached = healthCache[modelId];
     if (cached && now - cached.timestamp < HEALTH_CACHE_TTL) {
-      return { available: cached.available, error: cached.error };
+      return { available: cached.available, error: cached.error, authMode: cached.authMode };
     }
 
-    if (modelId === 'ethan' || modelId === 'fast') {
+    if (modelId === 'chatgpt-pro') {
+      const result = await getCodexBridgeHealth();
+      healthCache[modelId] = { ...result, timestamp: now };
+      return result;
+    } else if (modelId === 'ethan' || modelId === 'fast') {
       // 本地模型：检查 Ollama 服务
       const ollamaBase = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
       try {
@@ -78,8 +88,8 @@ async function startServer() {
           testUrl = 'https://api.moonshot.cn/v1/models';
         } else if (modelId === 'deepseek') {
           testUrl = 'https://api.deepseek.com/v1/models';
-        } else if (modelId === 'gemini') {
-          testUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+        } else if (modelId === 'chatgpt') {
+          testUrl = 'https://api.openai.com/v1/models';
         }
 
         if (testUrl) {
@@ -115,7 +125,7 @@ async function startServer() {
   // Chat proxy — model-agnostic
   app.post('/api/chat', async (req, res) => {
     try {
-      const { messages, model = 'kimi', events = [], clientDate, scheduleIntent = null, domain = null } = req.body;
+      const { messages, model = 'kimi', events = [], clientDate, scheduleIntent = null, domain = null, chatGptModel = null } = req.body;
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: 'Missing or invalid messages array' });
       }
@@ -125,49 +135,20 @@ async function startServer() {
         return res.status(400).json({ error: `Unknown model: ${model}` });
       }
 
+      if (model === 'chatgpt-pro') {
+        return streamCodexChatResponse(req, res, {
+          messages,
+          systemPrompt: SYSTEM_PROMPT,
+          domain,
+          chatGptModel,
+        });
+      }
+
       const apiKey = process.env[route.envKey];
       if (!apiKey) {
         return res.json({
           text: `后台未检测到 \`${route.envKey}\` 密钥，请在环境变量中配置后重启服务。`,
         });
-      }
-
-      // ── Gemini native API (JSON mode, structured output) ──────────────
-      if (model === 'gemini') {
-        const today = todayDateStr();
-        const geminiMessages = messages.map((m: any) => ({
-          role: m.role === 'model' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }));
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-        const geminiRes = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: geminiMessages,
-            systemInstruction: { parts: [{ text: SYSTEM_PROMPT + domainSuffix(domain, scheduleIntent, today, events) }] },
-            generationConfig: {
-              responseMimeType: 'application/json',
-              responseSchema: GEMINI_RESPONSE_SCHEMA,
-            },
-          }),
-        });
-        if (!geminiRes.ok) {
-          const err = await geminiRes.text().catch(() => geminiRes.statusText);
-          return res.status(502).json({ error: `Gemini API error: ${err}` });
-        }
-        const geminiData = await geminiRes.json();
-        const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
-        try {
-          const parsed = JSON.parse(rawText);
-          return res.json({
-            text:   parsed.reply  ?? rawText,
-            action: parsed.action ?? 'none',
-            event:  parsed.event?.title ? parsed.event : null,
-          });
-        } catch {
-          return res.json({ text: rawText, action: 'none', event: null });
-        }
       }
 
       // ── Ollama JSON mode (ethan / fast) — 原生 /api/chat 接口 ──────────
@@ -222,7 +203,7 @@ async function startServer() {
       // ── All other models: SSE streaming ───────────────────────────────
       const payload = [
         { role: 'system', content: SYSTEM_PROMPT },
-        ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })),
+        ...toOpenAiMessages(messages, model === 'chatgpt'),
       ];
 
       res.setHeader('Content-Type', 'text/event-stream');
@@ -255,10 +236,12 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  const apiOnly = process.env.API_ONLY === 'true';
+  if (!apiOnly && process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
-  } else {
+  } else if (!apiOnly) {
     const dist = path.join(process.cwd(), 'dist');
     app.use(express.static(dist));
     app.get('*', (_req, res) => res.sendFile(path.join(dist, 'index.html')));

@@ -3,13 +3,14 @@ import { ActionCard } from '../types/chat';
 import { scheduleStore } from '../stores/scheduleStore';
 import { detectScheduleIntent, enrichMessageForSchedule } from '../stores/scheduleIntent';
 import { DomainHandler, DomainActionResult } from './types';
+import { ChronosEventDraft, parseChronosAIBlock, parseChronosNatural } from './chronosParser';
 
 /** Build a ready-to-save EventItem from raw AI structured data. */
-function buildEventItem(data: any): EventItem {
+function buildEventItem(data: ChronosEventDraft | any): EventItem {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   return {
-    id:       `ai-${Date.now()}`,
+    id:       `ai-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     title:    data.title,
     subtitle: data.subtitle  || '',
     time:     data.time      || '09:00',
@@ -45,6 +46,12 @@ function commit(item: EventItem): void {
   window.dispatchEvent(new CustomEvent('schedule-updated'));
 }
 
+function createResult(data: ChronosEventDraft | any): DomainActionResult {
+  const item = buildEventItem(data);
+  commit(item);
+  return { card: buildCard('create', item), notify: { action: 'create', title: item.title } };
+}
+
 export const chronosHandler: DomainHandler = {
   module: 'CHRONOS',
 
@@ -53,7 +60,20 @@ export const chronosHandler: DomainHandler = {
   },
 
   enrichMessage(text, intent, lang) {
+    if (intent === 'add' && parseChronosNatural(text)) {
+      return lang === 'zh'
+        ? `${text}\n\n[系统指令] 对应日程卡片已由本地系统创建。不要输出 JSON、schedule 代码块或重复结构化数据；只用一句自然语言确认即可。`
+        : `${text}\n\n[System] The calendar card has already been created locally. Do not output JSON, schedule code blocks, or duplicate structured data; only confirm naturally in one sentence.`;
+    }
     return enrichMessageForSchedule(text, intent as any, lang);
+  },
+
+  eagerCard(text): ActionCard | null {
+    const draft = parseChronosNatural(text);
+    if (!draft) return null;
+    const item = buildEventItem(draft);
+    commit(item);
+    return buildCard('create', item);
   },
 
   buildContext() {
@@ -65,9 +85,7 @@ export const chronosHandler: DomainHandler = {
 
     switch (action) {
       case 'create': {
-        const item = buildEventItem(ev);
-        commit(item);
-        return { card: buildCard('create', item), notify: { action: 'create', title: item.title } };
+        return createResult(ev);
       }
       case 'confirm':
         return { pending: ev };
@@ -127,9 +145,8 @@ export const chronosHandler: DomainHandler = {
 
   handleStreamResult(intent, fullText): DomainActionResult | null {
     if (intent !== 'add') return null;
-    const event = scheduleStore.parseFromAIResponse(fullText);
+    const event = scheduleStore.parseFromAIResponse(fullText) ?? parseChronosAIBlock(fullText);
     if (!event) return null;
-    commit(event);
-    return { card: buildCard('create', event), notify: { action: 'create', title: event.title } };
+    return createResult(event);
   },
 };

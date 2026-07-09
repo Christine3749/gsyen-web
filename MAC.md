@@ -11,8 +11,8 @@
 
 | 子项目 | 是什么 | 仓库 |
 |---|---|---|
-| **gsyen-web** | 前端(React 19+Vite 6) + 内嵌 Express + **Electron 桌面端**(Win/Mac) | Christine2031/gsyen-web |
-| gsyen-api | 独立后端(Cloud Run) | Christine2031/gsyen-api |
+| **gsyen-web** | 前端(React 19+Vite 6) + 内嵌 Express + **Electron 桌面端**(Win/Mac) | Christine3749/gsyen-web |
+| gsyen-api | 独立后端(Cloud Run) | Christine3749/gsyen-api |
 | gsyen-native | 移动端(未来 Android/iOS) | — |
 
 **Mac 客户端 = `gsyen-web` 里的 Electron 部分**，和 Windows 共用同一套 React 代码，只在少数地方按平台分叉。你要改的就是这些分叉点。

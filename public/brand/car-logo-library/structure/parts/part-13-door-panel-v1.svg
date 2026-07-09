@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220" role="img" aria-label="GSYEN editable door panel part v1">
+  <title>GSYEN editable part 13 - door panel v1</title>
+  <path id="door-panel" fill="#171716" d="M54 45 L243 45 C238 105 204 150 154 167 C116 180 82 177 54 171Z"/>
+  <rect id="door-handle" x="156" y="82" width="47" height="11" rx="5" fill="#f4f2ee"/>
+  <g id="door-panel-cuts" fill="none" stroke="#f4f2ee" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M55 171 C112 176 188 170 224 142" stroke-width="4"/>
+    <path d="M55 46 C52 90 52 132 54 171" stroke-width="4"/>
+  </g>
+</svg>

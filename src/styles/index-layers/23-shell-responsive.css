@@ -58,6 +58,43 @@
   }
 }
 
+@media (max-width: 1536px) {
+  #app-header .gsyen-brand-lockup {
+    gap: 11px !important;
+  }
+
+  #app-header .gsyen-brand-mark {
+    --gsyen-brand-icon-size: 40px;
+    --gsyen-brand-icon-stroke: 1.10;
+    --gsyen-brand-module-shift: 8px;
+    width: 72px !important;
+    height: 48px !important;
+  }
+
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 70px !important;
+    height: 46px !important;
+  }
+
+  #app-header .gsyen-brand-copy {
+    width: 170px !important;
+    padding-bottom: 7px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    max-width: 154px !important;
+  }
+
+  #app-header .gsyen-brand-copy::after {
+    width: 154px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 156px;
+    height: 32px;
+  }
+}
+
 @media (max-width: 1320px) {
   :root {
     --gsyen-command-gap: 12px;
@@ -76,6 +113,46 @@
     --gsyen-command-pad-x: 24px;
     --gsyen-model-label-width: 34px;
     --gsyen-model-status-width: 52px;
+  }
+
+  #app-header .gsyen-brand-lockup {
+    gap: 8px !important;
+  }
+
+  #app-header .gsyen-brand-mark {
+    --gsyen-brand-icon-size: 36px;
+    --gsyen-brand-icon-stroke: 1.14;
+    --gsyen-brand-module-shift: 6px;
+    width: 60px !important;
+    height: 42px !important;
+  }
+
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 58px !important;
+    height: 38px !important;
+  }
+
+  #app-header .gsyen-brand-copy {
+    width: 136px !important;
+    padding-bottom: 5px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    display: block !important;
+    max-width: 128px !important;
+    margin-top: 4px !important;
+    font-size: 7px !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  #app-header .gsyen-brand-copy::after {
+    display: block !important;
+    width: 128px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 128px;
+    height: 27px;
   }
 }
 

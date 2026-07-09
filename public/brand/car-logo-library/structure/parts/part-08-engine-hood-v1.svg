@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 190" role="img" aria-label="GSYEN editable engine hood part v1">
+  <title>GSYEN editable part 08 - engine hood v1</title>
+  <g id="engine-hood">
+    <path id="hood-body" fill="#171716" d="M52 86 C61 54 88 39 128 42 C182 44 237 48 287 59 L296 151 C218 156 132 154 48 147 L48 105 C48 98 49 91 52 86Z"/>
+    <rect id="hood-cap-base" x="105" y="30" width="92" height="15" rx="7" fill="#171716"/>
+    <rect id="hood-cap-top" x="128" y="15" width="44" height="19" rx="7" fill="#171716"/>
+    <rect id="rear-pillar" x="296" y="50" width="22" height="108" rx="10" fill="#171716"/>
+  </g>
+</svg>

@@ -27,6 +27,8 @@ import './styles/index-layers/22-shell-layout.css';
 import './styles/index-layers/23-shell-responsive.css';
 import './styles/index-layers/24-pulse-dock.css';
 import './styles/index-layers/25-surface-harmony.css';
+import './styles/index-layers/26-compact-shell.css';
+import './styles/index-layers/27-laptop-workstation.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
@@ -40,11 +42,12 @@ const isElectronEnv =
   navigator.userAgent.toLowerCase().includes('electron');
 
 if (isElectronEnv) {
-  import('@sentry/electron/renderer').then((Sentry) => {
+  const sentryRenderer = '@sentry/electron/renderer';
+  import(/* @vite-ignore */ sentryRenderer).then((Sentry) => {
     Sentry.init({
       dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
     });
-  });
+  }).catch(() => {});
 }
 
 createRoot(document.getElementById('root')!).render(

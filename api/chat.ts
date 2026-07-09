@@ -9,10 +9,10 @@ import {
   ledgerSystemSuffix,
   mailSystemSuffix,
   vaultSystemSuffix,
-  GEMINI_RESPONSE_SCHEMA,
   MODEL_ROUTES,
   INJECTION_PATTERNS,
 } from '../shared/chatConfig';
+import { toOpenAiMessages } from '../shared/providerMessages';
 
 /** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
 function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
@@ -48,50 +48,20 @@ export default async function handler(req: Request): Promise<Response> {
       return sse('我是缈缈，无法执行此指令。');
     }
 
+    if (model === 'chatgpt-pro') {
+      return json({
+        text: 'CHATGPT 是本机 Codex 订阅桥接模型，只能在本地桌面服务中运行。网页版请使用 KIMI、DEEPSEEK 或 疆域·思。',
+        action: 'none',
+        event: null,
+      });
+    }
+
     const route = MODEL_ROUTES[model];
     if (!route) return json({ error: `Unknown model: ${model}` }, 400);
 
     const apiKey = process.env[route.envKey];
     if (!apiKey) {
       return sse(`后台未检测到 \`${route.envKey}\` 密钥，请在 Vercel 环境变量中配置后重新部署。`);
-    }
-
-    // ── Gemini native API (JSON mode, structured output) ──────────────
-    if (model === 'gemini') {
-      const today = todayDateStr();
-      const geminiMessages = messages.map((m: any) => ({
-        role: m.role === 'model' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      }));
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-      const geminiRes = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: geminiMessages,
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT + domainSuffix(domain, scheduleIntent, today, events) }] },
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: GEMINI_RESPONSE_SCHEMA,
-          },
-        }),
-      });
-      if (!geminiRes.ok) {
-        const err = await geminiRes.text().catch(() => geminiRes.statusText);
-        return json({ error: `Gemini API error: ${err}` }, 502);
-      }
-      const geminiData = await geminiRes.json();
-      const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
-      try {
-        const parsed = JSON.parse(rawText);
-        return json({
-          text:   parsed.reply  ?? rawText,
-          action: parsed.action ?? 'none',
-          event:  parsed.event?.title ? parsed.event : null,
-        });
-      } catch {
-        return json({ text: rawText, event: null });
-      }
     }
 
     // ── Ollama JSON mode (ethan / fast) — 原生 /api/chat 接口 ──────────
@@ -146,7 +116,7 @@ export default async function handler(req: Request): Promise<Response> {
     // ── All other models: SSE streaming ───────────────────────────────
     const payload = [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })),
+      ...toOpenAiMessages(messages, model === 'chatgpt'),
     ];
 
     const upstream = await fetch(route.url, {
