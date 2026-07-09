@@ -253,10 +253,15 @@
     max-width: 860px !important;
   }
 
-  .gsyen-landing-platforms a,
-  .gsyen-landing-platforms > div {
+  .gsyen-landing-platforms > a,
+  .gsyen-landing-platforms > div:not(.gsyen-landing-platform-stack),
+  .gsyen-landing-platform-stack > a {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
+  }
+
+  .gsyen-landing-platform-stack {
+    align-self: flex-start !important;
   }
 
   .gsyen-landing-footer {

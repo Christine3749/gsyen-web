@@ -207,7 +207,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           className="gsyen-landing-platforms flex items-start gap-2 mt-1"
         >
           {/* Windows + GitHub stacked */}
-          <div className="flex flex-col gap-1">
+          <div className="gsyen-landing-platform-stack flex flex-col gap-1">
             <a
               href={WINDOWS_R2}
               download
