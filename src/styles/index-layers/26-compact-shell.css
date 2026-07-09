@@ -1,0 +1,265 @@
+/* 13/14 inch compact shell.
+   Keep the full-size GSYEN language on large displays, but recover height
+   when browser chrome and the Windows taskbar squeeze the workspace. */
+
+@media (max-width: 1440px), (max-height: 820px) {
+  #app-header.gsyen-app-header.is-header-visible {
+    min-height: 68px !important;
+    max-height: 76px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  #app-header.gsyen-app-header.is-windows {
+    padding-left: 24px !important;
+    padding-right: 104px !important;
+  }
+
+  #app-header.gsyen-app-header {
+    --gsyen-shell-gap: 14px;
+    column-gap: 14px !important;
+  }
+
+  #app-header .gsyen-brand-lockup {
+    gap: 8px !important;
+  }
+
+  #app-header .gsyen-brand-mark {
+    width: 58px !important;
+    height: 38px !important;
+  }
+
+  #app-header .gsyen-brand-mark > svg {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 56px !important;
+    height: 36px !important;
+  }
+
+  #app-header .gsyen-brand-copy {
+    width: 136px !important;
+    padding-bottom: 4px !important;
+  }
+
+  #app-header .gsyen-brand-copy::after {
+    width: 128px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 132px !important;
+    height: 27px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    max-width: 128px !important;
+    margin-top: 3px !important;
+    font-size: 6.5px !important;
+    letter-spacing: 0.14em !important;
+  }
+
+  #app-header .gsyen-space-nav {
+    padding: 3px !important;
+  }
+
+  #app-header .gsyen-space-tab {
+    min-width: 72px !important;
+    height: 30px !important;
+    padding: 0 8px !important;
+    gap: 5px !important;
+    font-size: 9px !important;
+  }
+
+  #app-header .gsyen-space-tab svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  #app-header .gsyen-header-actions {
+    gap: 6px !important;
+  }
+
+  #app-header .gsyen-header-actions button {
+    min-height: 28px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .gsyen-command-deck {
+    --gsyen-command-pad-x: 20px;
+    --gsyen-command-gap: 10px;
+    --gsyen-command-button-width: 70px;
+    --gsyen-command-tool-gap: 5px;
+    --gsyen-command-tools-width: 246px;
+    --gsyen-pulse-model-gap: 18px;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .gsyen-command-deck .gsyen-icon-command,
+  .gsyen-command-deck .gsyen-command-button,
+  .gsyen-pulse-dock-slot,
+  .gsyen-pulse-dock-button.gsyen-command-button {
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .gsyen-command-button {
+    width: var(--gsyen-command-button-width, 70px) !important;
+    flex-basis: var(--gsyen-command-button-width, 70px) !important;
+  }
+
+  .gsyen-command-tools {
+    gap: 5px !important;
+  }
+
+  .gsyen-command-pulse .gsyen-system-bus-label,
+  .gsyen-system-bus-label {
+    width: 92px !important;
+    flex-basis: 92px !important;
+    font-size: 7px !important;
+  }
+
+  .gsyen-system-cell {
+    min-width: 108px !important;
+    padding: 0 10px !important;
+    gap: 6px !important;
+  }
+
+  .gsyen-system-cell-name,
+  .gsyen-system-cell-unit {
+    font-size: 7px !important;
+  }
+
+  .gsyen-system-cell-value {
+    font-size: 10px !important;
+  }
+
+  .gsyen-system-count {
+    width: 34px !important;
+    flex-basis: 34px !important;
+  }
+
+  .gsyen-command-model {
+    gap: 7px !important;
+  }
+
+  .gsyen-model-dock,
+  .gsyen-command-model .gsyen-model-label,
+  .gsyen-command-model .gsyen-model-selector,
+  .gsyen-command-model .gsyen-model-status-button,
+  .gsyen-model-selector,
+  .gsyen-model-option {
+    height: 28px !important;
+  }
+
+  .gsyen-command-model .gsyen-model-label {
+    font-size: 8px !important;
+  }
+
+  .gsyen-model-option {
+    min-width: 56px !important;
+    font-size: 7px !important;
+  }
+
+  .gsyen-system-panel {
+    top: 112px !important;
+    bottom: 16px !important;
+    width: min(292px, calc(100vw - 24px)) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  html[data-header-hidden="true"] .gsyen-system-panel {
+    top: 54px !important;
+  }
+
+  .gsyen-system-panel-head {
+    height: 54px !important;
+    padding: 12px 14px 8px !important;
+  }
+
+  .gsyen-system-panel-readout {
+    min-height: 58px !important;
+    margin: 12px 14px !important;
+    padding: 10px 12px !important;
+  }
+
+  .gsyen-system-panel-select {
+    margin: 0 14px 10px !important;
+    gap: 5px !important;
+  }
+
+  .gsyen-system-panel-select select {
+    height: 28px !important;
+  }
+
+  .gsyen-system-panel-table {
+    margin: 0 14px !important;
+  }
+
+  .gsyen-system-panel-row {
+    min-height: 32px !important;
+  }
+
+  .gsyen-system-panel-action {
+    height: 32px !important;
+    margin: 12px 14px 14px !important;
+  }
+
+  .gsyen-system-panel-bind-code {
+    margin: 0 14px 10px !important;
+    padding: 10px !important;
+  }
+}
+
+@media (max-height: 820px) {
+  .gsyen-landing-hero {
+    justify-content: flex-start !important;
+    padding-top: 62px !important;
+    padding-bottom: 86px !important;
+    overflow-y: auto !important;
+  }
+
+  .gsyen-landing-center {
+    gap: 22px !important;
+    transform: scale(0.86);
+    transform-origin: top center;
+  }
+
+  .gsyen-landing-center > div:first-child svg {
+    width: 96px !important;
+    height: 96px !important;
+  }
+
+  .gsyen-landing-enter {
+    margin-top: 0 !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .gsyen-landing-platforms {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 860px !important;
+  }
+
+  .gsyen-landing-platforms a,
+  .gsyen-landing-platforms > div {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .gsyen-landing-footer {
+    bottom: 18px !important;
+  }
+}

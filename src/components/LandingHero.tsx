@@ -98,7 +98,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed inset-0 z-50 bg-[#111111] flex flex-col items-center justify-center select-none"
+      className="gsyen-landing-hero fixed inset-0 z-50 bg-[#111111] flex flex-col items-center justify-center select-none"
     >
       {/* Subtle grid texture */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#F9F8F608_1px,transparent_1px),linear-gradient(to_bottom,#F9F8F608_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
@@ -128,7 +128,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
       </AnimatePresence>
 
       {/* Center block */}
-      <div className="relative z-10 flex flex-col items-center gap-10">
+      <div className="gsyen-landing-center relative z-10 flex flex-col items-center gap-10">
 
         {/* VintageCar logo */}
         <motion.div
@@ -194,7 +194,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0, duration: 0.5 }}
           onClick={onEnter}
-          className="mt-4 px-10 py-3 border border-[#F9F8F6]/25 text-[#F9F8F6]/60 font-mono text-[10px] tracking-[0.35em] uppercase hover:bg-[#F9F8F6]/8 hover:text-[#F9F8F6] hover:border-[#F9F8F6]/50 transition-all duration-300 rounded-none"
+          className="gsyen-landing-enter mt-4 px-10 py-3 border border-[#F9F8F6]/25 text-[#F9F8F6]/60 font-mono text-[10px] tracking-[0.35em] uppercase hover:bg-[#F9F8F6]/8 hover:text-[#F9F8F6] hover:border-[#F9F8F6]/50 transition-all duration-300 rounded-none"
         >
           {lang === 'zh' ? '进入工作坊' : 'ENTER ATELIER'}
         </motion.button>
@@ -204,7 +204,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className="flex items-start gap-2 mt-1"
+          className="gsyen-landing-platforms flex items-start gap-2 mt-1"
         >
           {/* Windows + GitHub stacked */}
           <div className="flex flex-col gap-1">
@@ -255,7 +255,7 @@ export default function LandingHero({ lang, onEnter }: LandingHeroProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.5 }}
-        className="absolute bottom-8 flex flex-col items-center gap-2"
+        className="gsyen-landing-footer absolute bottom-8 flex flex-col items-center gap-2"
       >
         {/* Social links */}
         <div className="flex items-center gap-4">
