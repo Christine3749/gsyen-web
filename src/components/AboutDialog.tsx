@@ -38,37 +38,37 @@ export default function AboutDialog({ lang, onClose }: AboutDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-[#F9F8F6] border border-[#1A1A1A]/12 w-72 flex flex-col items-center gap-0 shadow-xl"
+    <div className="fixed inset-0 z-[200] flex items-start justify-end bg-[#1A1A1A]/12 backdrop-blur-[1px] pt-20 pr-10" onClick={onClose}>
+      <div className="bg-[#F9F8F6] border border-[#1A1A1A]/14 w-[318px] flex flex-col items-center gap-0 shadow-[0_18px_46px_rgba(26,26,26,0.16)]"
         onClick={e => e.stopPropagation()}>
 
         {/* 关闭按钮 */}
-        <div className="w-full flex justify-end px-3 pt-3">
+        <div className="w-full flex justify-end px-3 pt-3 pb-1">
           <button onClick={onClose} className="p-1 text-[#1A1A1A]/30 hover:text-[#1A1A1A] transition-colors">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Logo */}
-        <div className="mt-2 mb-4">
-          <VintageCar size={56} className="text-[#1A1A1A]/90" />
+        <div className="mt-1 mb-3">
+          <VintageCar size={38} className="text-[#1A1A1A]/90" />
         </div>
 
         {/* 品牌名 */}
-        <div className="flex items-center gap-2 mb-1">
-          <BrandWordmark height={26} />
-          <span className="font-cinzel text-sm font-bold tracking-[0.15em] text-[#111]/60">for Windows</span>
+        <div className="flex items-center gap-2 mb-1 px-6 max-w-full">
+          <BrandWordmark height={20} />
+          <span className="font-cinzel text-[11px] font-bold tracking-[0.18em] text-[#111]/48 whitespace-nowrap">for Windows</span>
         </div>
 
         {/* 版本号 */}
-        <p className="fs-sm font-mono text-[#1A1A1A]/40 tracking-wider mb-6">
+        <p className="fs-xs font-mono text-[#1A1A1A]/38 tracking-wider mb-5">
           Version {version || '…'} ({__GIT_SHA__})
         </p>
 
         {/* 检查更新按钮 */}
-        <div className="w-full px-6 mb-3">
+        <div className="w-full px-5 mb-3">
           <button onClick={checkUpdate} disabled={checking}
-            className="w-full flex items-center justify-center gap-2 py-2 border border-[#1A1A1A]/15 bg-white fs-sm font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 hover:text-[#1A1A1A] hover:border-[#1A1A1A]/30 transition-all disabled:opacity-50">
+            className="w-full flex items-center justify-center gap-2 py-2 border border-[#1A1A1A]/12 bg-white/70 fs-xs font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 hover:text-[#1A1A1A] hover:border-[#1A1A1A]/30 transition-all disabled:opacity-50">
             <RefreshCw className={`w-3 h-3 ${checking ? 'animate-spin' : ''}`} />
             {checking ? (lang === 'zh' ? '检查中…' : 'Checking…') : (lang === 'zh' ? '检查更新' : 'Check for Updates')}
           </button>
@@ -78,9 +78,9 @@ export default function AboutDialog({ lang, onClose }: AboutDialogProps) {
         </div>
 
         {/* 支持链接 */}
-        <div className="w-full px-6 mb-6">
+        <div className="w-full px-5 mb-5">
           <a href="mailto:Ethan7586@gsyen.com"
-            className="w-full flex items-center justify-center py-2 border border-[#1A1A1A]/10 bg-white/60 fs-sm font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A] transition-all">
+            className="w-full flex items-center justify-center py-2 border border-[#1A1A1A]/8 bg-white/45 fs-xs font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A] transition-all">
             {lang === 'zh' ? '联系支持' : 'Get Support'}
           </a>
         </div>

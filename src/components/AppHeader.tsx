@@ -50,13 +50,17 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   useEffect(() => {
     const handleToolbarDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      if (!target?.closest('.gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
+      if (headerHidden && event.clientY <= 24) {
+        setHeaderHidden(false);
+        return;
+      }
+      if (!target?.closest('#app-header, .gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
       if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
       setHeaderHidden(v => !v);
     };
     document.addEventListener('dblclick', handleToolbarDoubleClick);
     return () => document.removeEventListener('dblclick', handleToolbarDoubleClick);
-  }, []);
+  }, [headerHidden]);
 
   useEffect(() => {
     document.documentElement.dataset.headerHidden = headerHidden ? 'true' : 'false';
@@ -85,8 +89,10 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
               <>
                 <div
                   className={`gsyen-brand-mark ${brandClass} shrink-0 -mt-1 transition-transform duration-500 ${isElectron ? 'cursor-pointer' : ''}`}
-                  onClick={() => isElectron && setShowAbout(true)}
-                  title={isElectron ? (lang === 'zh' ? '关于 GSYEN' : 'About GSYEN') : undefined}
+                  onClick={event => {
+                    if (isElectron && event.altKey) setShowAbout(true);
+                  }}
+                  title={isElectron ? 'Double-click top bar to hide; Alt-click About GSYEN' : undefined}
                 >
                   {isHome
                     ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
