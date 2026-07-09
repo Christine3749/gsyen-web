@@ -180,7 +180,7 @@ export function useChatStream(): UseChatStreamReturn {
       if (contentType.includes('text/event-stream')) {
         // ── SSE 流式路径 ─────────────────────────────────────────
         const fullText = await streamWithTypewriter(readSSEStream(response), onToken, controller.signal);
-        if (streamHandler && streamIntent) {
+        if (streamHandler && streamIntent && !eagerCardEmitted) {
           await applyResult(streamHandler.handleStreamResult(streamIntent, fullText));
         }
         onDone(fullText || '…');
