@@ -152,14 +152,132 @@
   }
 
   .gsyen-system-panel {
-    top: 102px !important;
-    bottom: 22px !important;
-    width: min(286px, calc(100vw - 20px)) !important;
+    top: 144px !important;
+    right: 18px !important;
+    bottom: auto !important;
+    width: min(318px, calc(100vw - 28px)) !important;
+    max-height: calc(100vh - 184px) !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(26,26,26,0.12) !important;
+    background:
+      linear-gradient(180deg, rgba(249,248,246,0.98) 0%, rgba(242,239,232,0.96) 100%) !important;
+    box-shadow:
+      0 22px 54px rgba(24,22,18,0.16),
+      0 4px 14px rgba(24,22,18,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.78) !important;
+    transform-origin: top right !important;
   }
 
   html[data-header-hidden="true"] .gsyen-system-panel {
-    top: 48px !important;
-    bottom: 22px !important;
+    top: 58px !important;
+    bottom: auto !important;
+  }
+
+  .gsyen-system-panel-head {
+    min-height: auto !important;
+    padding: 16px 18px 12px !important;
+    border-bottom: 1px solid rgba(26,26,26,0.08) !important;
+  }
+
+  .gsyen-system-panel-head p {
+    font-size: 8px !important;
+    letter-spacing: 0.32em !important;
+  }
+
+  .gsyen-system-panel-head h3 {
+    margin-top: 4px !important;
+    font-size: 18px !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1.05 !important;
+  }
+
+  .gsyen-system-panel-head button {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .gsyen-system-panel-readout {
+    min-height: 72px !important;
+    margin: 16px 18px 14px !important;
+    grid-template-columns: 22px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 14px 16px !important;
+    border-color: rgba(26,26,26,0.20) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 8px 20px rgba(24,22,18,0.10) !important;
+  }
+
+  .gsyen-system-panel-dot {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .gsyen-system-panel-readout p {
+    font-size: 13px !important;
+    letter-spacing: 0.14em !important;
+  }
+
+  .gsyen-system-panel-readout span:not(.gsyen-system-panel-dot) {
+    margin-top: 5px !important;
+    font-size: 8px !important;
+    letter-spacing: 0.18em !important;
+  }
+
+  .gsyen-system-panel-select {
+    margin: 0 18px 10px !important;
+  }
+
+  .gsyen-system-panel-select label {
+    margin-bottom: 5px !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.24em !important;
+  }
+
+  .gsyen-system-panel-select select {
+    height: 34px !important;
+    padding-left: 12px !important;
+    padding-right: 34px !important;
+    font-size: 9.5px !important;
+    background-color: rgba(255,255,255,0.52) !important;
+  }
+
+  .gsyen-system-panel-select::after {
+    right: 13px !important;
+    bottom: 11px !important;
+  }
+
+  .gsyen-system-panel-table {
+    margin: 8px 18px 0 !important;
+    border-top-color: rgba(26,26,26,0.08) !important;
+  }
+
+  .gsyen-system-panel-row {
+    min-height: 34px !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    border-bottom-color: rgba(26,26,26,0.07) !important;
+  }
+
+  .gsyen-system-panel-row span {
+    font-size: 9px !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  .gsyen-system-panel-row strong {
+    font-size: 9.5px !important;
+    letter-spacing: 0.10em !important;
+  }
+
+  .gsyen-system-panel-mini-dot {
+    width: 8px !important;
+    height: 8px !important;
+  }
+
+  .gsyen-system-panel-action {
+    height: 34px !important;
+    margin: 16px 18px 18px !important;
+    background: rgba(255,255,255,0.58) !important;
   }
 
   .gsyen-chat-scroll {
