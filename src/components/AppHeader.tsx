@@ -50,17 +50,13 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   useEffect(() => {
     const handleToolbarDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      if (headerHidden && event.clientY <= 24) {
-        setHeaderHidden(false);
-        return;
-      }
-      if (!target?.closest('#app-header, .gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
+      if (!target?.closest('.gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
       if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
       setHeaderHidden(v => !v);
     };
     document.addEventListener('dblclick', handleToolbarDoubleClick);
     return () => document.removeEventListener('dblclick', handleToolbarDoubleClick);
-  }, [headerHidden]);
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.headerHidden = headerHidden ? 'true' : 'false';
