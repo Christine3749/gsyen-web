@@ -73,24 +73,50 @@
     padding-right: 20px !important;
   }
 
-  .gsyen-mail-toolbar {
+  .gsyen-mail-toolbar,
+  .gsyen-kanban-toolbar,
+  .gsyen-schedule-toolbar,
+  .gsyen-ledger-toolbar,
+  .gsyen-citadel-toolbar,
+  .gsyen-prism-toolbar {
     border-top: 1px solid rgba(26,26,26,0.08) !important;
     border-bottom: 1px solid rgba(26,26,26,0.10) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.62) !important;
   }
 
   .gsyen-mail-toolbar .gsyen-icon-command,
-  .gsyen-mail-toolbar .gsyen-command-button {
+  .gsyen-mail-toolbar .gsyen-command-button,
+  .gsyen-kanban-toolbar .gsyen-icon-command,
+  .gsyen-kanban-toolbar .gsyen-command-button,
+  .gsyen-schedule-toolbar .gsyen-icon-command,
+  .gsyen-schedule-toolbar .gsyen-command-button {
     height: 28px !important;
     min-height: 28px !important;
   }
 
-  .gsyen-mail-status-strip {
+  .gsyen-kanban-toolbar input,
+  .gsyen-kanban-toolbar select,
+  .gsyen-kanban-toolbar button:not(.gsyen-icon-command):not(.gsyen-command-button),
+  .gsyen-schedule-toolbar button:not(.gsyen-icon-command):not(.gsyen-command-button),
+  .gsyen-prism-toolbar button {
+    min-height: 28px !important;
+    height: 28px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .gsyen-mail-status-strip,
+  .gsyen-schedule-toolbar .hidden.sm\:flex {
     height: 28px !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     gap: 10px !important;
     white-space: nowrap !important;
+  }
+
+  .gsyen-schedule-toolbar > div,
+  .gsyen-prism-toolbar > div {
+    min-height: 28px !important;
   }
 
   .gsyen-command-deck {
@@ -227,6 +253,40 @@
   #app-header.gsyen-app-header.is-browser {
     min-height: 58px !important;
     max-height: 62px !important;
+  }
+
+  .gsyen-module-toolbar:not(.gsyen-command-deck) {
+    min-height: 38px !important;
+    height: 38px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .gsyen-mail-toolbar .gsyen-icon-command,
+  .gsyen-mail-toolbar .gsyen-command-button,
+  .gsyen-kanban-toolbar .gsyen-icon-command,
+  .gsyen-kanban-toolbar .gsyen-command-button,
+  .gsyen-schedule-toolbar .gsyen-icon-command,
+  .gsyen-schedule-toolbar .gsyen-command-button {
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+
+  .gsyen-kanban-toolbar input,
+  .gsyen-kanban-toolbar select,
+  .gsyen-kanban-toolbar button:not(.gsyen-icon-command):not(.gsyen-command-button),
+  .gsyen-schedule-toolbar button:not(.gsyen-icon-command):not(.gsyen-command-button),
+  .gsyen-prism-toolbar button {
+    min-height: 26px !important;
+    height: 26px !important;
+  }
+
+  .gsyen-mail-status-strip,
+  .gsyen-schedule-toolbar .hidden.sm\:flex {
+    height: 26px !important;
+    gap: 8px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
   }
 
   .gsyen-command-deck {
