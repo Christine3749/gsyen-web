@@ -29,7 +29,6 @@ import './styles/index-layers/24-pulse-dock.css';
 import './styles/index-layers/25-surface-harmony.css';
 import './styles/index-layers/26-compact-shell.css';
 import './styles/index-layers/27-laptop-workstation.css';
-import './styles/index-layers/28-laptop-chat.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
