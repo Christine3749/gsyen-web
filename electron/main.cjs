@@ -22,6 +22,18 @@ let tray = null;
 let forceQuit = false;
 const fullscreen = createFullscreenController();
 
+function getWindowIconPath() {
+  if (process.platform === 'win32') {
+    return isDev
+      ? path.join(__dirname, '../public/icon.ico')
+      : path.join(process.resourcesPath, 'icon.ico');
+  }
+
+  return isDev
+    ? path.join(__dirname, '../public/icon.png')
+    : path.join(process.resourcesPath, 'icon.ico');
+}
+
 function showWindow() {
   if (!win) return;
   if (win.isMinimized()) win.restore();
@@ -99,8 +111,9 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     backgroundColor: '#F9F8F6',
-    icon: path.join(__dirname, '../public/icon.png'),
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+    icon: getWindowIconPath(),
+    frame: process.platform === 'win32' ? false : true,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
     trafficLightPosition: process.platform === 'darwin' ? { x: 14, y: 10 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),

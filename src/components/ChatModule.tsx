@@ -239,7 +239,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
               const el = chatContainerRef.current;
               if (!el) return;
               isAtBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
-            }} className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
+            }} className="gsyen-chat-scroll flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
               {messages.length === 0 && !isLoading && (
                 <ChatEmptyState lang={lang} inputVal={inputVal} setInputVal={setInputVal} onSend={handleSend} />
               )}
