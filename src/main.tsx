@@ -42,11 +42,12 @@ const isElectronEnv =
   navigator.userAgent.toLowerCase().includes('electron');
 
 if (isElectronEnv) {
-  import('@sentry/electron/renderer').then((Sentry) => {
+  const sentryRenderer = '@sentry/electron/renderer';
+  import(/* @vite-ignore */ sentryRenderer).then((Sentry) => {
     Sentry.init({
       dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
     });
-  });
+  }).catch(() => {});
 }
 
 createRoot(document.getElementById('root')!).render(
