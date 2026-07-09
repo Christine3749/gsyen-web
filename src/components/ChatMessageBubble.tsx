@@ -33,22 +33,22 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
   return (
     <>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className={`flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto mr-6 max-w-[min(42rem,calc(100%-3rem))] flex-row-reverse md:mr-10'}`}>
+        className={`gsyen-message-row ${isAI ? 'is-ai' : 'is-user'} flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto mr-6 max-w-[min(42rem,calc(100%-3rem))] flex-row-reverse md:mr-10'}`}>
         {/* 头像 */}
-        <div className={`w-7 h-7 flex items-center justify-center shrink-0 mt-1 ${isAI ? 'rounded-full bg-[#1A1A1A] text-[#F9F8F6]' : 'rounded-full bg-[#E8E6E1] text-[#1A1A1A]'}`}>
+        <div className={`gsyen-message-avatar w-7 h-7 flex items-center justify-center shrink-0 mt-1 ${isAI ? 'rounded-full bg-[#1A1A1A] text-[#F9F8F6]' : 'rounded-full bg-[#E8E6E1] text-[#1A1A1A]'}`}>
           {isAI ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
         </div>
-        <div className="space-y-1 max-w-[88%] min-w-0">
-          <div className={`flex items-center gap-1.5 fs-xs font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
+        <div className="gsyen-message-stack space-y-1 max-w-[88%] min-w-0">
+          <div className={`gsyen-message-meta flex items-center gap-1.5 fs-xs font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
             <span className="font-bold text-[#1A1A1A]/50">{isAI ? (lang === 'zh' ? 'Atelier AI' : 'ATELIER AI') : (lang === 'zh' ? '您' : 'CLIENT')}</span>
             <span>·</span><span>{msg.timestamp}</span>
           </div>
-          <div className={`text-left leading-relaxed select-text break-words [overflow-wrap:anywhere] ${isAI ? 'pt-0.5' : 'max-w-full px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
+          <div className={`gsyen-message-body text-left leading-relaxed select-text break-words [overflow-wrap:anywhere] ${isAI ? 'pt-0.5' : 'max-w-full px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
             {!!msg.attachments?.length && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {msg.attachments.map(item => (
                   <button key={item.id} type="button" onClick={() => setPreview(item)}
-                    className={`block overflow-hidden border bg-white/10 cursor-zoom-in transition-opacity hover:opacity-80 ${isAI ? 'border-[#1A1A1A]/10' : 'border-white/20'}`}
+                    className={`gsyen-message-thumb block overflow-hidden border bg-white/10 cursor-zoom-in transition-opacity hover:opacity-80 ${isAI ? 'border-[#1A1A1A]/10' : 'border-white/20'}`}
                     aria-label={lang === 'zh' ? '放大图片' : 'Open image'}>
                     <img src={item.dataUrl} alt={item.name}
                       className="h-24 w-32 max-w-full object-cover" />
@@ -64,7 +64,7 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
             </div>
             {isAI && !isStreaming && msg.card && <ActionCardView card={msg.card} lang={lang} />}
             {isAI && !isStreaming && (
-              <div className="mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
+              <div className="gsyen-message-actions mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
                 <button onClick={() => onCopy(msg.id, copyText)} disabled={!copyText}
                   className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
                   {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
@@ -76,7 +76,7 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
             )}
           </div>
           {!isAI && copyText && (
-            <div className="flex justify-end pt-1">
+            <div className="gsyen-user-copy-row flex justify-end pt-1">
               <button onClick={() => onCopy(msg.id, copyText)}
                 className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
                 {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}

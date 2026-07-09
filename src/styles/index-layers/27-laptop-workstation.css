@@ -1,160 +1,209 @@
-/* Laptop workstation pass: 13/14 inch Web + Windows desktop.
-   This layer only reclaims cramped workspace chrome; brand language stays intact. */
+/* Laptop workstation pass: deliberate 13/14 inch layout for Web + Windows.
+   This layer avoids scaled-down desktop chrome: it preserves readable type,
+   trims secondary density, and gives chat/card work the strongest priority. */
 
-@media (max-width: 1440px), (max-height: 820px) {
-  #app-header.gsyen-app-header.is-windows {
-    min-height: 58px !important;
-    max-height: 64px !important;
-    padding: 7px 112px 7px 18px !important;
+@media (max-width: 1440px), (max-height: 840px) {
+  :root {
+    --gsyen-laptop-header: 66px;
+    --gsyen-laptop-command: 40px;
+    --gsyen-laptop-pad-x: 18px;
+    --gsyen-laptop-brand-w: 214px;
+    --gsyen-laptop-actions-w: 180px;
+    --gsyen-laptop-nav-w: 548px;
+    --gsyen-command-pad-x: 18px;
+    --gsyen-command-gap: 10px;
+    --gsyen-command-button-width: 70px;
+    --gsyen-command-tools-width: 248px;
+    --gsyen-command-tool-gap: 6px;
+    --gsyen-pulse-model-gap: 18px;
   }
 
-  #app-header.gsyen-app-header.is-browser {
-    min-height: 62px !important;
-    max-height: 68px !important;
+  #app-header.gsyen-app-header.is-header-visible {
+    min-height: var(--gsyen-laptop-header) !important;
+    max-height: var(--gsyen-laptop-header) !important;
+    grid-template-columns:
+      minmax(0, var(--gsyen-laptop-brand-w))
+      minmax(480px, var(--gsyen-laptop-nav-w))
+      minmax(0, var(--gsyen-laptop-actions-w)) !important;
+    column-gap: 16px !important;
     padding-top: 8px !important;
     padding-bottom: 8px !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-brand-mark {
-    width: 52px !important;
-    height: 34px !important;
+  #app-header.gsyen-app-header.is-browser {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-brand-mark img.gsyen-vintage-car {
-    width: 52px !important;
-    height: 34px !important;
+  #app-header.gsyen-app-header.is-windows {
+    padding-left: 20px !important;
+    padding-right: 112px !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-brand-copy {
-    width: 124px !important;
-    padding-bottom: 3px !important;
+  #app-header .gsyen-brand-lockup {
+    gap: 9px !important;
+    max-width: var(--gsyen-laptop-brand-w) !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-brand-copy::after {
-    width: 120px !important;
+  #app-header .gsyen-brand-mark {
+    --gsyen-brand-icon-size: 38px;
+    --gsyen-brand-icon-stroke: 1.10;
+    --gsyen-brand-module-shift: 7px;
+    width: 60px !important;
+    height: 42px !important;
+    margin-top: 0 !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-header-wordmark {
-    width: 122px !important;
-    height: 25px !important;
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 58px !important;
+    height: 38px !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-brand-subtitle {
-    max-width: 120px !important;
-    margin-top: 2px !important;
-    font-size: 6px !important;
-    letter-spacing: 0.12em !important;
+  #app-header .gsyen-brand-copy {
+    width: 140px !important;
+    padding-bottom: 5px !important;
   }
 
-  #app-header.gsyen-app-header.is-windows .gsyen-space-tab,
-  #app-header.gsyen-app-header.is-browser .gsyen-space-tab {
-    min-width: 68px !important;
+  #app-header .gsyen-brand-copy::after {
+    width: 132px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 132px !important;
     height: 28px !important;
-    padding: 0 7px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    max-width: 132px !important;
+    margin-top: 3px !important;
+    font-size: 6.8px !important;
+    letter-spacing: 0.15em !important;
+    font-weight: 720 !important;
+  }
+
+  #app-header .gsyen-space-nav {
+    width: min(var(--gsyen-laptop-nav-w), 100%) !important;
+    justify-self: center !important;
+    padding: 3px !important;
+  }
+
+  #app-header .gsyen-space-tab {
+    min-width: 70px !important;
+    height: 30px !important;
+    padding: 0 8px !important;
+    gap: 5px !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.105em !important;
+  }
+
+  #app-header .gsyen-space-tab svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  #app-header .gsyen-header-actions {
+    width: var(--gsyen-laptop-actions-w) !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+  }
+
+  #app-header .gsyen-header-actions button {
+    min-height: 28px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  #app-header .gsyen-header-actions .gsyen-auth-login {
+    padding-inline: 4px !important;
   }
 
   .gsyen-command-deck {
-    --gsyen-command-pad-x: 16px;
-    --gsyen-command-gap: 8px;
-    --gsyen-command-button-width: 66px;
-    --gsyen-command-tool-gap: 5px;
-    --gsyen-command-tools-width: 232px;
-    --gsyen-pulse-model-gap: 14px;
-    height: 38px !important;
-    min-height: 38px !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    height: var(--gsyen-laptop-command) !important;
+    min-height: var(--gsyen-laptop-command) !important;
+    padding-left: var(--gsyen-laptop-pad-x) !important;
+    padding-right: var(--gsyen-laptop-pad-x) !important;
   }
 
   .gsyen-command-deck .gsyen-icon-command,
   .gsyen-command-deck .gsyen-command-button,
   .gsyen-pulse-dock-slot,
   .gsyen-pulse-dock-button.gsyen-command-button {
-    height: 26px !important;
-    min-height: 26px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .gsyen-command-button {
+    font-size: 9.5px !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  .gsyen-command-tools {
+    gap: var(--gsyen-command-tool-gap) !important;
+  }
+
+  .gsyen-command-pulse {
+    width: min(760px, calc(100vw - 560px)) !important;
   }
 
   .gsyen-command-pulse .gsyen-system-bus-label,
   .gsyen-system-bus-label {
-    width: 84px !important;
-    flex-basis: 84px !important;
+    width: 88px !important;
+    flex-basis: 88px !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.16em !important;
   }
 
   .gsyen-system-cell {
-    min-width: 98px !important;
-    padding: 0 8px !important;
-  }
-
-  .gsyen-system-panel {
-    top: 102px !important;
-    bottom: 22px !important;
-    width: min(286px, calc(100vw - 20px)) !important;
-  }
-
-  html[data-header-hidden="true"] .gsyen-system-panel {
-    top: 48px !important;
-    bottom: 22px !important;
-  }
-
-  .gsyen-chat-scroll {
-    padding: 18px 22px !important;
-  }
-
-  .gsyen-chat-input-bar {
-    padding: 10px 12px !important;
-  }
-
-  .gsyen-chat-input-form {
+    min-width: 104px !important;
+    padding: 0 9px !important;
     gap: 6px !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.12em !important;
   }
 
-  .gsyen-chat-input-button {
-    padding: 9px !important;
+  .gsyen-system-cell-value {
+    font-size: 10.5px !important;
   }
 
-  .gsyen-chat-input-field {
-    min-height: 38px !important;
-    padding: 9px 12px !important;
+  .gsyen-system-count {
+    width: 36px !important;
+    flex-basis: 36px !important;
   }
 
-  .gsyen-standby-shell {
-    padding-top: 20px !important;
-  }
-
-  .gsyen-standby-frame {
-    max-width: 720px !important;
-  }
-
-  .gsyen-standby-header {
-    padding-top: 14px !important;
-    padding-bottom: 14px !important;
-  }
-
-  .gsyen-standby-grid {
-    gap: 12px !important;
-    margin-top: 14px !important;
-  }
-
-  .gsyen-standby-input {
-    margin-top: 14px !important;
-  }
-
-  .gsyen-standby-input textarea {
-    min-height: 74px !important;
-    padding: 10px 14px !important;
-    font-size: 12px !important;
-    line-height: 1.55 !important;
-  }
-
-  .gsyen-standby-input-footer {
-    min-height: 36px !important;
-    padding: 0 10px 10px !important;
+  .gsyen-command-model {
     gap: 8px !important;
   }
 
-  .gsyen-standby-input-footer button {
-    width: 28px !important;
+  .gsyen-model-dock,
+  .gsyen-command-model .gsyen-model-label,
+  .gsyen-command-model .gsyen-model-selector,
+  .gsyen-command-model .gsyen-model-status-button,
+  .gsyen-model-selector,
+  .gsyen-model-option {
     height: 28px !important;
+  }
+
+  .gsyen-command-model .gsyen-model-label {
+    font-size: 8px !important;
+    letter-spacing: 0.18em !important;
+  }
+
+  .gsyen-model-option {
+    min-width: 58px !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  .gsyen-system-panel {
+    top: 108px !important;
+    bottom: 22px !important;
+    width: min(300px, calc(100vw - 22px)) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  html[data-header-hidden="true"] .gsyen-system-panel {
+    top: 50px !important;
   }
 
   #app-footer-other {
@@ -165,56 +214,69 @@
   }
 }
 
-@media (max-width: 1366px), (max-height: 760px) {
-  #app-header.gsyen-app-header.is-windows {
-    min-height: 54px !important;
-    max-height: 58px !important;
-    padding: 6px 104px 6px 16px !important;
+@media (max-width: 1400px), (max-height: 780px) {
+  :root {
+    --gsyen-laptop-header: 62px;
+    --gsyen-laptop-command: 38px;
+    --gsyen-laptop-brand-w: 206px;
+    --gsyen-laptop-actions-w: 172px;
+    --gsyen-laptop-nav-w: 512px;
+    --gsyen-command-button-width: 64px;
+    --gsyen-command-tools-width: 226px;
+    --gsyen-pulse-model-gap: 14px;
   }
 
-  #app-header.gsyen-app-header.is-browser {
-    min-height: 58px !important;
-    max-height: 62px !important;
+  #app-header.gsyen-app-header.is-windows {
+    padding-left: 18px !important;
+    padding-right: 104px !important;
+  }
+
+  #app-header .gsyen-brand-mark {
+    width: 56px !important;
+    height: 40px !important;
+  }
+
+  #app-header .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 54px !important;
+    height: 36px !important;
+  }
+
+  #app-header .gsyen-brand-copy {
+    width: 134px !important;
+  }
+
+  .gsyen-header-wordmark {
+    width: 126px !important;
+    height: 27px !important;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    font-size: 6.6px !important;
+  }
+
+  #app-header .gsyen-space-tab {
+    min-width: 66px !important;
+    height: 28px !important;
+    font-size: 9px !important;
   }
 
   .gsyen-command-deck {
-    --gsyen-command-button-width: 58px;
-    --gsyen-command-tools-width: 210px;
-    height: 36px !important;
-    min-height: 36px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
   }
 
-  .gsyen-chat-scroll {
-    padding: 14px 18px !important;
+  .gsyen-command-pulse {
+    width: min(690px, calc(100vw - 510px)) !important;
   }
 
-  .gsyen-chat-input-bar {
-    padding: 8px 10px !important;
+  .gsyen-command-pulse .gsyen-system-bus-label,
+  .gsyen-system-bus-label {
+    width: 82px !important;
+    flex-basis: 82px !important;
   }
 
-  .gsyen-standby-shell {
-    padding-top: 14px !important;
+  .gsyen-system-cell {
+    min-width: 98px !important;
   }
 
-  .gsyen-standby-frame {
-    max-width: 660px !important;
-  }
-
-  .gsyen-standby-header {
-    padding-top: 12px !important;
-    padding-bottom: 12px !important;
-  }
-
-  .gsyen-standby-grid {
-    margin-top: 12px !important;
-  }
-
-  .gsyen-standby-input textarea {
-    min-height: 68px !important;
-    padding: 9px 12px !important;
-  }
-
-  .gsyen-standby-input-footer {
-    min-height: 34px !important;
-  }
 }
