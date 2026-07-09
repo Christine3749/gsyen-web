@@ -26,7 +26,7 @@ export default function MailModule({ lang }: MailModuleProps) {
   return (
     <div className="gsyen-mail-page flex flex-col h-full text-[#1A1A1A] font-sans">
       {/* Toolbar strip */}
-      <div className="gsyen-module-toolbar relative shrink-0 h-[52px] flex flex-row items-center justify-between gap-3 flex-nowrap px-8 bg-[#F4F2EE]">
+      <div className="gsyen-module-toolbar gsyen-mail-toolbar relative shrink-0 h-[52px] flex flex-row items-center justify-between gap-3 flex-nowrap px-8 bg-[#F4F2EE]">
         <div className="flex items-center gap-[7px] shrink-0">
           <button onClick={() => store.setIsSidebarCollapsed(!store.isSidebarCollapsed)}
             className={`gsyen-icon-command ${!store.isSidebarCollapsed ? 'is-active' : ''}`}
@@ -41,7 +41,7 @@ export default function MailModule({ lang }: MailModuleProps) {
           </button>
         </div>
         <div className="flex items-center gap-2 flex-nowrap min-w-0">
-          <div className="hidden sm:flex gap-3 items-center px-3 py-1 border border-[#1A1A1A]/10 fs-xs font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
+          <div className="gsyen-mail-status-strip hidden sm:flex gap-3 items-center px-3 py-1 border border-[#1A1A1A]/10 fs-xs font-mono text-[#1A1A1A]/70 uppercase tracking-widest rounded-none">
             <div>{lang === 'zh' ? '未读:' : 'UNREAD:'} <strong className="text-amber-800 font-bold">{store.unreadInboxCount}</strong></div>
             <div className="w-[1px] h-3 bg-[#1A1A1A]/10" />
             <div>{lang === 'zh' ? '归档/推迟:' : 'ARCH/SNOOZE:'} <strong className="text-[#1A1A1A]">{store.emails.length}/{store.snoozedCount}</strong></div>

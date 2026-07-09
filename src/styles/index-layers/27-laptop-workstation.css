@@ -65,6 +65,34 @@
     padding: 0 7px !important;
   }
 
+
+  .gsyen-module-toolbar:not(.gsyen-command-deck) {
+    min-height: 42px !important;
+    height: 42px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .gsyen-mail-toolbar {
+    border-top: 1px solid rgba(26,26,26,0.08) !important;
+    border-bottom: 1px solid rgba(26,26,26,0.10) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.62) !important;
+  }
+
+  .gsyen-mail-toolbar .gsyen-icon-command,
+  .gsyen-mail-toolbar .gsyen-command-button {
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .gsyen-mail-status-strip {
+    height: 28px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
+  }
+
   .gsyen-command-deck {
     --gsyen-command-pad-x: 16px;
     --gsyen-command-gap: 8px;
