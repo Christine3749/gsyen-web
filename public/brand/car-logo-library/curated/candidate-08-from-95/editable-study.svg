@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1956 1216" role="img" aria-label="GSYEN refined editable vintage car logo candidate 08">
+  <title>GSYEN Vintage Car Logo - Candidate 08 Refined Editable</title>
+  <defs>
+    <style>
+      .ink{fill:#1A1A1A}.paper{fill:#F8F5EC}.gold{fill:#C09F5C}.gold-line{stroke:#C09F5C}
+      .cut{fill:none;stroke:#F8F5EC;stroke-linecap:round;stroke-linejoin:round}
+      .line{fill:none;stroke:#1A1A1A;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+    <g id="wheel-clean">
+      <circle class="ink" cx="0" cy="0" r="116"/>
+      <circle class="paper" cx="0" cy="0" r="86"/>
+      <circle class="ink" cx="0" cy="0" r="72"/>
+      <circle class="paper" cx="0" cy="0" r="34"/>
+      <circle class="ink" cx="0" cy="0" r="22"/>
+      <g stroke="#F8F5EC" stroke-width="16" stroke-linecap="round">
+        <line x1="0" y1="-36" x2="0" y2="-72"/>
+        <line x1="0" y1="36" x2="0" y2="72"/>
+        <line x1="-36" y1="0" x2="-72" y2="0"/>
+        <line x1="36" y1="0" x2="72" y2="0"/>
+        <line x1="25" y1="-25" x2="54" y2="-54"/>
+        <line x1="-25" y1="-25" x2="-54" y2="-54"/>
+        <line x1="25" y1="25" x2="54" y2="54"/>
+        <line x1="-25" y1="25" x2="-54" y2="54"/>
+        <line x1="13" y1="-34" x2="26" y2="-68"/>
+        <line x1="-13" y1="-34" x2="-26" y2="-68"/>
+        <line x1="13" y1="34" x2="26" y2="68"/>
+        <line x1="-13" y1="34" x2="-26" y2="68"/>
+      </g>
+      <circle class="cut" cx="0" cy="0" r="94" stroke-width="7"/>
+    </g>
+  </defs>
+
+  <g id="ground-line">
+    <path class="ink" d="M264 982C518 967 1350 966 1712 981C1726 982 1725 988 1710 989C1292 1004 516 1002 264 991C249 990 249 983 264 982Z"/>
+  </g>
+
+  <g id="lamp-rays" class="gold-line" stroke-width="7" stroke-linecap="round" fill="none">
+    <path d="M148 508C222 536 278 557 344 577"/>
+    <path d="M128 568C212 575 282 581 350 590"/>
+    <path d="M142 636C220 611 285 596 354 587"/>
+    <path d="M170 702C232 662 293 621 354 592"/>
+  </g>
+
+  <g id="front-lamp">
+    <path class="ink" d="M367 492C400 480 431 506 439 552C447 598 428 638 392 645C356 652 332 620 329 573C326 533 340 502 367 492Z"/>
+    <ellipse class="gold" cx="361" cy="568" rx="19" ry="61"/>
+    <path class="cut" d="M391 510C415 526 424 575 409 612" stroke-width="8"/>
+    <path class="ink" d="M382 638C392 668 385 682 356 693C340 699 330 701 326 693C322 686 333 680 346 673C358 666 363 657 361 643Z"/>
+  </g>
+
+  <g id="front-wheel" transform="translate(566 800) scale(.92)">
+    <use href="#wheel-clean"/>
+  </g>
+
+  <g id="rear-wheel" transform="translate(1555 760) scale(1.32)">
+    <use href="#wheel-clean"/>
+  </g>
+
+  <g id="engine-hood">
+    <path class="ink" d="M565 430C612 404 872 405 1004 431C1027 436 1039 451 1038 474L1031 664C1030 690 1017 704 991 704H610C580 704 565 688 565 659Z"/>
+    <path class="cut" d="M610 453C705 444 889 449 999 468" stroke-width="9"/>
+    <path class="cut" d="M608 503C707 494 884 498 997 517" stroke-width="7"/>
+    <g class="cut" stroke-width="9">
+      <path d="M650 532L650 640"/>
+      <path d="M696 529L696 645"/>
+      <path d="M742 527L742 649"/>
+      <path d="M790 527L790 652"/>
+      <path d="M838 529L838 648"/>
+      <path d="M886 533L886 641"/>
+      <path d="M934 538L934 632"/>
+    </g>
+    <path class="ink" d="M651 374H710C722 374 728 382 728 391C728 402 719 406 707 406H657C644 406 636 401 637 390C638 380 642 374 651 374Z"/>
+    <path class="ink" d="M678 336H707C718 336 724 343 724 351C724 361 717 365 706 365H676C664 365 657 361 657 352C657 343 666 336 678 336Z"/>
+  </g>
+
+  <g id="front-fender">
+    <path class="ink" d="M414 666C508 594 690 596 837 722C893 770 952 796 1002 799C1022 800 1028 812 1012 822C924 876 813 838 729 745C640 647 529 651 418 725C399 738 382 730 390 709C394 696 403 678 414 666Z"/>
+    <path class="cut" d="M448 684C552 626 666 652 759 742" stroke-width="8"/>
+  </g>
+
+  <g id="chassis-step">
+    <path class="ink" d="M765 817H1260C1275 817 1283 826 1282 839C1281 852 1273 859 1256 859H766C750 859 741 851 742 838C743 826 750 817 765 817Z"/>
+    <path class="ink" d="M915 890H1276C1293 890 1300 897 1299 910C1298 923 1289 929 1274 929H914C899 929 891 922 892 909C893 897 900 890 915 890Z"/>
+    <path class="cut" d="M790 852H870M918 852H1002" stroke-width="7"/>
+  </g>
+
+  <g id="cabin-shell">
+    <path class="ink" d="M1070 128C1190 96 1472 102 1596 138C1626 147 1638 158 1635 178C1631 202 1612 204 1581 196C1528 181 1448 174 1344 175C1244 176 1142 184 1078 198C1048 204 1029 200 1026 178C1023 154 1040 137 1070 128Z"/>
+    <path class="ink" d="M1090 195H1582V486C1508 477 1438 478 1368 488H1090Z"/>
+    <path class="paper" d="M1144 221H1360C1375 221 1382 227 1383 243L1388 471H1140Z"/>
+    <path class="paper" d="M1434 224C1519 235 1572 294 1566 356C1561 410 1510 450 1438 463Z"/>
+    <path class="ink" d="M1452 245C1510 260 1544 300 1541 349C1538 392 1508 425 1461 441Z"/>
+    <path class="cut" d="M1088 198C1200 181 1457 176 1577 196" stroke-width="8"/>
+    <path class="cut" d="M1093 487C1225 495 1434 492 1585 474" stroke-width="7"/>
+  </g>
+
+  <g id="door-panel">
+    <path class="ink" d="M1127 486H1397C1418 486 1428 498 1426 520C1422 626 1384 704 1305 742C1263 761 1196 765 1127 758Z"/>
+    <path class="cut" d="M1133 493H1390C1405 493 1411 501 1409 517C1400 659 1320 740 1134 735Z" stroke-width="7"/>
+    <path class="cut" d="M1274 566H1312" stroke-width="10"/>
+  </g>
+
+  <g id="rear-fender">
+    <path class="ink" d="M1370 675C1440 570 1625 542 1760 626C1802 652 1834 684 1854 722C1863 739 1852 752 1833 743C1678 668 1504 681 1435 807C1412 848 1404 893 1402 930H1304C1309 836 1328 738 1370 675Z"/>
+    <path class="cut" d="M1425 707C1528 617 1688 631 1812 707" stroke-width="9"/>
+  </g>
+
+  <g id="steering-wheel">
+    <path class="line" d="M1046 602L1188 414" stroke-width="16"/>
+    <ellipse class="ink" cx="1214" cy="384" rx="67" ry="25" transform="rotate(38 1214 384)"/>
+    <circle class="paper" cx="1214" cy="384" r="9"/>
+    <path class="line" d="M1188 414L1249 416" stroke-width="9"/>
+  </g>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 220" role="img" aria-label="GSYEN editable front lamp part v1">
+  <title>GSYEN editable part 06 - front lamp v1</title>
+  <g id="front-lamp">
+    <path id="lamp-shell" fill="#171716" d="M72 36 C92 24 127 31 140 65 C150 91 133 117 104 121 C78 124 60 104 58 79 C56 62 61 44 72 36Z"/>
+    <ellipse id="lamp-gold-glass" cx="86" cy="79" rx="12" ry="40" fill="#c09f5c"/>
+    <path id="lamp-white-glint" d="M107 43 C130 65 130 96 108 115" fill="none" stroke="#f4f2ee" stroke-width="6" stroke-linecap="round"/>
+    <path id="lamp-stand" fill="#171716" d="M88 120 L69 163 C66 170 73 175 81 170 L111 137Z"/>
+  </g>
+</svg>

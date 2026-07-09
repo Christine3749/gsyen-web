@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const RELEASES_URL = 'https://github.com/Christine2031/gsyen-web/releases/latest';
+const RELEASES_URL = 'https://github.com/Christine3749/gsyen-web/releases/latest';
 const CINZEL = '"Cinzel", "Times New Roman", serif';
 const MONO   = 'var(--font-mono, "SF Mono", "Cascadia Code", monospace)';
 

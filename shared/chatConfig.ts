@@ -1,5 +1,5 @@
 // 神机百炼配置 —— server.ts 与 api/chat.ts 共享的唯一真源。
-// 日期助手、各领域 system 后缀、模型路由表、Gemini schema、注入过滤规则。
+// 日期助手、各领域 system 后缀、模型路由表、注入过滤规则。
 
 // ── 司辰 · 日期助手 ────────────────────────────────────────────────────────
 // 优先读环境变量时区，兜底北京时间。Intl 在 Node 与 Edge 运行时均可用。
@@ -96,28 +96,6 @@ category 枚举（根据描述判断）：
 amount 必须是纯数字（不含单位），"100美金" → 100，"500元" → 500。`;
 }
 
-// ── Gemini responseSchema（action 变体，与 Chronos 对齐） ───────────────────
-export const GEMINI_RESPONSE_SCHEMA = {
-  type: 'OBJECT',
-  properties: {
-    reply:  { type: 'STRING' },
-    action: { type: 'STRING', enum: ['none', 'create', 'update', 'delete', 'query'] },
-    event: {
-      type: 'OBJECT',
-      nullable: true,
-      properties: {
-        title:    { type: 'STRING' },
-        date:     { type: 'STRING' },
-        time:     { type: 'STRING' },
-        category: { type: 'STRING' },
-        location: { type: 'STRING' },
-        subtitle: { type: 'STRING' },
-      },
-    },
-  },
-  required: ['reply', 'action'],
-};
-
 // ── 模型路由表（新增模型：加一条 + 配环境变量即可） ─────────────────────────
 // 开发/内网：OLLAMA_BASE_URL=http://100.117.152.101:11434 (Tailscale)
 // 生产/公网：OLLAMA_BASE_URL=https://llm.gsyen.com         (Cloudflare Tunnel)
@@ -130,7 +108,7 @@ export const MODEL_ROUTES: Record<string, { url: string; envKey: string; modelId
   deepseek: { url: 'https://api.deepseek.com/v1/chat/completions',    envKey: 'DEEPSEEK_API_KEY',  modelId: 'deepseek-chat' },
   claude:   { url: 'https://api.anthropic.com/v1/messages',          envKey: 'ANTHROPIC_API_KEY', modelId: 'claude-sonnet-4-6' },
   chatgpt:  { url: 'https://api.openai.com/v1/chat/completions',      envKey: 'OPENAI_API_KEY',    modelId: 'gpt-4o' },
-  gemini:   { url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', envKey: 'GEMINI_API_KEY', modelId: 'gemini-2.0-flash' },
+  'chatgpt-pro': { url: 'local:codex',                                envKey: 'CODEX_CLI_PATH',    modelId: 'codex-local' },
   ethan:    { url: `${OLLAMA_BASE_URL}/v1/chat/completions`,          envKey: 'OLLAMA_BASE_URL',   modelId: 'qwen2.5:7b' },
   fast:     { url: `${OLLAMA_BASE_URL}/v1/chat/completions`,          envKey: 'OLLAMA_BASE_URL',   modelId: 'qwen2.5:3b' },
 };

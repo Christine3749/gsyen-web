@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 190" role="img" aria-label="GSYEN editable radiator lines part v1">
+  <title>GSYEN editable part 09 - radiator lines v1</title>
+  <path id="radiator-base" fill="#171716" d="M52 57 C115 51 224 54 287 65 L295 151 C217 157 132 156 48 148 L48 86 C48 73 49 63 52 57Z"/>
+  <g id="radiator-white-cuts" fill="none" stroke="#f4f2ee" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M75 74 C126 69 220 71 272 78" stroke-width="5"/>
+    <path d="M74 102 C132 98 223 101 274 107" stroke-width="5"/>
+    <path d="M96 119 C93 139 94 158 98 173" stroke-width="5"/>
+    <path d="M124 116 C121 141 121 160 124 176" stroke-width="5"/>
+    <path d="M153 116 C150 142 150 161 153 177" stroke-width="5"/>
+    <path d="M182 116 C179 142 179 161 182 177" stroke-width="5"/>
+    <path d="M211 118 C208 141 208 160 211 175" stroke-width="5"/>
+    <path d="M238 120 C235 139 235 157 238 172" stroke-width="5"/>
+  </g>
+</svg>

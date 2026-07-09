@@ -87,7 +87,7 @@ export default function BrandLab({ lang, requestedTab, onTabConsumed }: BrandLab
   return (
     <>
       {/* 品牌子标签条 — 透明无色带，切换器样式与日历视图切换统一 */}
-      <div className="gsyen-brand-subnav relative shrink-0 h-[52px] flex items-center px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
+      <div className="gsyen-brand-subnav gsyen-module-toolbar relative shrink-0 h-[52px] flex items-center px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
         <div className="flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40">
           {tabBtn('orders', lang === 'zh' ? '订单' : 'Orders')}
           {tabBtn('contacts', lang === 'zh' ? '往来' : 'Contacts')}

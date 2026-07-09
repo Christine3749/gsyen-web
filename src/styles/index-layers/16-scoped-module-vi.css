@@ -42,6 +42,46 @@
   height: 34px !important;
 }
 
+/* Standby masthead: keep the car as a quiet brand mark, not a loose icon. */
+.gsyen-standby-header {
+  min-height: 78px !important;
+  grid-template-columns: 76px minmax(0, 1fr) 124px !important;
+  align-items: center !important;
+  column-gap: 18px !important;
+  padding: 17px 0 16px !important;
+}
+
+.gsyen-standby-mark {
+  width: 76px !important;
+  height: 44px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.gsyen-standby-mark img.gsyen-vintage-car {
+  width: 66px !important;
+  height: 41px !important;
+  object-fit: contain !important;
+  transform: translateY(1px);
+}
+
+.gsyen-standby-copy {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  transform: translateY(-1px);
+}
+
+.gsyen-standby-kicker {
+  letter-spacing: 0.21em !important;
+  line-height: 1 !important;
+}
+
+.gsyen-standby-title {
+  margin-top: 0 !important;
+  line-height: 1.08 !important;
+}
+
 /* GYEN Pulse V6 - complete the signal readout: label / value / unit */
 .gsyen-system-bus {
   border-color: color-mix(in srgb, var(--gyen-n1-readout) 70%, black) !important;

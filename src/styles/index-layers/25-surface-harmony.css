@@ -121,3 +121,52 @@
   border-color: rgba(185, 28, 28, 0.34) !important;
   color: #991B1B !important;
 }
+
+/* Mac-like shell drawer: top brand rail glides away instead of flashing off. */
+#app-header.gsyen-app-header {
+  max-height: 128px !important;
+  overflow: hidden !important;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    min-height 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-top 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-bottom 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 170ms ease-out,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 240ms ease-out,
+    box-shadow 240ms ease-out !important;
+  will-change: max-height, min-height, padding, opacity, transform;
+}
+
+#app-header.gsyen-app-header > * {
+  transition:
+    opacity 160ms ease-out,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#app-header.gsyen-app-header.is-header-hidden {
+  max-height: 0 !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
+
+#app-header.gsyen-app-header.is-header-hidden > * {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.gsyen-module-toolbar {
+  transition:
+    height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    min-height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease-out,
+    border-color 220ms ease-out;
+}

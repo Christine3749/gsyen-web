@@ -6,6 +6,7 @@ const { startV2ray, stopV2ray, switchNode, getNodes, getStatus, setKey, setSub, 
 const { createFullscreenController } = require('./fullscreen.cjs');
 const { createTray } = require('./tray.cjs');
 const { registerUpdaterIpc, setupAutoUpdater } = require('./updater.cjs');
+const { startLocalServer, stopLocalServer } = require('./local-server.cjs');
 
 Sentry.init({
   dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
@@ -20,6 +21,18 @@ let win  = null;
 let tray = null;
 let forceQuit = false;
 const fullscreen = createFullscreenController();
+
+function getWindowIconPath() {
+  if (process.platform === 'win32') {
+    return isDev
+      ? path.join(__dirname, '../public/icon.ico')
+      : path.join(process.resourcesPath, 'icon.ico');
+  }
+
+  return isDev
+    ? path.join(__dirname, '../public/icon.png')
+    : path.join(process.resourcesPath, 'icon.ico');
+}
 
 function showWindow() {
   if (!win) return;
@@ -98,8 +111,9 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     backgroundColor: '#F9F8F6',
-    icon: path.join(__dirname, '../public/icon.png'),
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+    icon: getWindowIconPath(),
+    frame: process.platform === 'win32' ? false : true,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
     trafficLightPosition: process.platform === 'darwin' ? { x: 14, y: 10 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -154,6 +168,7 @@ function createWindow() {
 // ── 启动 ──────────────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
+  startLocalServer(app).catch(e => console.error('local server init failed:', e));
   createWindow();
   try {
     tray = createTray({
@@ -193,5 +208,6 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   forceQuit = true;
   stopV2ray();
+  stopLocalServer();
   require('./ipc-library-cache.cjs').stopAll();
 });

@@ -31,9 +31,9 @@ export function defaultCredentials(lang: 'zh' | 'en'): CredentialRow[] {
     },
     {
       id: 'p2',
-      serviceName: lang === 'zh' ? 'Gemini AI 极速接入令牌' : 'Gemini AI Core Service API Key',
+      serviceName: lang === 'zh' ? 'AI 核心服务接入令牌' : 'AI Core Service API Key',
       username: 'system_atelier_api',
-      secretVal: 'AIzaSyChrOnos_PaS5wordLab_G3m1n1_R3s0urce_v3',
+      secretVal: 'AI-Core-Atelier-KeyChain-Secured-2026',
       category: 'api',
       lastUpdated: '2026-05-25',
     },

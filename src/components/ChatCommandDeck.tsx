@@ -165,7 +165,7 @@ export const ChatCommandDeck = memo(function ChatCommandDeck({
 
   return (
     <>
-      <div className={`gsyen-command-deck relative shrink-0 h-[56px] px-8 border-y border-[#1A1A1A]/10 bg-[#ECE9E3] grid items-center text-[#1A1A1A]/70 ${pulseOpen ? 'has-pulse-open' : ''} ${pulseDocked ? 'has-pulse-docked' : ''} ${modelPanelOpen ? 'has-model-open' : ''}`}>
+      <div className={`gsyen-command-deck gsyen-module-toolbar relative shrink-0 h-[56px] px-8 border-y border-[#1A1A1A]/10 bg-[#ECE9E3] grid items-center text-[#1A1A1A]/70 ${pulseOpen ? 'has-pulse-open' : ''} ${pulseDocked ? 'has-pulse-docked' : ''} ${modelPanelOpen ? 'has-model-open' : ''}`}>
         <div className="gsyen-command-tools">
           <button onClick={onToggleSidebar} aria-label={lang === 'zh' ? '切换档案库' : 'Toggle archive'} aria-pressed={sidebarOpen} className={`gsyen-icon-command ${sidebarOpen ? 'is-active' : ''}`}>
             <PanelLeft className="w-4 h-4" />

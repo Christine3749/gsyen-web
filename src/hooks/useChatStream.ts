@@ -1,13 +1,14 @@
 import { useState, useCallback, useRef } from 'react';
-import { ChatMessage, ActionCard } from '../types/chat';
+import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
 import { ModelId } from '../config/models';
-import { sendToGateway, readSSEStream } from '../services/chatService';
+import { ChatGptBridgeUnavailableError, sendToGateway, readSSEStream } from '../services/chatService';
 import { askPredictionExpert } from '../services/predictService';
 import { domainHandlers } from '../domains/registry';
 import { DomainHandler, DomainActionResult } from '../domains/types';
+import { streamWithTypewriter, typewrite } from './chatTypewriter';
 
 // Models that return application/json with {text, action, event} instead of SSE.
-const STRUCTURED_MODELS = new Set<ModelId>(['gemini', 'ethan', 'fast'] as ModelId[]);
+const STRUCTURED_MODELS = new Set<ModelId>(['ethan', 'fast'] as ModelId[]);
 
 export type ScheduleActionType = 'create' | 'update' | 'delete' | 'query';
 
@@ -24,36 +25,11 @@ function isDenial(text: string): boolean {
   return DENY_WORDS.some(w => t.startsWith(w));
 }
 
-// Typewriter delays (ms)
-const DELAY = {
-  sentenceEnd: () => 300 + Math.random() * 250,
-  comma:       () => 120 + Math.random() * 100,
-  newline:     () => 200 + Math.random() * 200,
-  rare:        () => 100 + Math.random() * 150,
-  normal:      () => 30  + Math.random() * 25,
-};
-
-function charDelay(char: string): number {
-  if ('。！？…'.includes(char)) return DELAY.sentenceEnd();
-  if ('，、；：'.includes(char)) return DELAY.comma();
-  if (char === '\n')             return DELAY.newline();
-  if (Math.random() < 0.05)     return DELAY.rare();
-  return DELAY.normal();
-}
-
-async function typewrite(text: string, onToken: (t: string) => void): Promise<void> {
-  let displayed = '';
-  for (const char of text) {
-    displayed += char;
-    onToken(displayed + '▍');
-    await new Promise(r => setTimeout(r, charDelay(char)));
-  }
-}
-
 interface UseChatStreamReturn {
   isLoading: boolean;
   send: (opts: {
     text: string;
+    attachments?: ChatAttachment[];
     model: ModelId;
     history: ChatMessage[];
     lang: 'zh' | 'en';
@@ -105,11 +81,15 @@ function resolveHandler(
 export function useChatStream(): UseChatStreamReturn {
   const [isLoading, setIsLoading] = useState(false);
   const pendingConfirmation = useRef<PendingConfirmation | null>(null);
+  const activeRequest = useRef<AbortController | null>(null);
 
   const send = useCallback(async ({
-    text, model, history, lang,
+    text, attachments = [], model, history, lang,
     onToken, onDone, onError, onScheduleAction, onActionCard,
   }: Parameters<UseChatStreamReturn['send']>[0]) => {
+    activeRequest.current?.abort();
+    const controller = new AbortController();
+    activeRequest.current = controller;
     setIsLoading(true);
 
     /** Apply a domain handler's result: render card, notify, optionally typewrite a reply. */
@@ -118,7 +98,7 @@ export function useChatStream(): UseChatStreamReturn {
       if (result.card) onActionCard?.(result.card);
       if (result.notify) onScheduleAction?.(result.notify.action, result.notify.title);
       if (result.reply) {
-        await typewrite(result.reply, onToken);
+        await typewrite(result.reply, onToken, controller.signal);
         setIsLoading(false);
         onDone(result.reply);
         return true;
@@ -128,12 +108,14 @@ export function useChatStream(): UseChatStreamReturn {
 
     try {
       // 1. Local prediction expert
-      const localAnswer = await askPredictionExpert(text);
-      if (localAnswer) {
-        setIsLoading(false);
-        await typewrite(localAnswer, onToken);
-        onDone(localAnswer);
-        return;
+      if (attachments.length === 0) {
+        const localAnswer = await askPredictionExpert(text);
+        if (localAnswer) {
+          setIsLoading(false);
+          await typewrite(localAnswer, onToken, controller.signal);
+          onDone(localAnswer);
+          return;
+        }
       }
 
       // 2. 待确认行程处理
@@ -174,6 +156,7 @@ export function useChatStream(): UseChatStreamReturn {
         role:      'user',
         content:   text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        attachments,
       };
       const apiMessages = [...history, { ...userMsg, content: enrichedText }];
 
@@ -182,21 +165,21 @@ export function useChatStream(): UseChatStreamReturn {
         ? domainHandlers.map(h => h.buildContext()).find((ctx): ctx is NonNullable<typeof ctx> => ctx != null)
         : undefined;
 
-      const response = await sendToGateway(model, apiMessages, eventsCtx, streamIntent, streamHandler?.module ?? null);
+      const response = await sendToGateway(
+        model,
+        apiMessages,
+        eventsCtx,
+        streamIntent,
+        streamHandler?.module ?? null,
+        controller.signal,
+      );
       setIsLoading(false);
 
       const contentType = response.headers.get('content-type') ?? '';
 
       if (contentType.includes('text/event-stream')) {
         // ── SSE 流式路径 ─────────────────────────────────────────
-        let fullText = '';
-        for await (const delta of readSSEStream(response)) {
-          for (const char of delta) {
-            fullText += char;
-            onToken(fullText + '▍');
-            await new Promise(r => setTimeout(r, charDelay(char)));
-          }
-        }
+        const fullText = await streamWithTypewriter(readSSEStream(response), onToken, controller.signal);
         if (streamHandler && streamIntent) {
           await applyResult(streamHandler.handleStreamResult(streamIntent, fullText));
         }
@@ -236,17 +219,28 @@ export function useChatStream(): UseChatStreamReturn {
           }
         }
 
-        await typewrite(reply, onToken);
+        await typewrite(reply, onToken, controller.signal);
         onDone(reply);
       }
 
     } catch (err) {
       setIsLoading(false);
+      if (controller.signal.aborted) return;
+      if (err instanceof ChatGptBridgeUnavailableError) {
+        onError(
+          lang === 'zh'
+            ? '⚠️ **ChatGPT 未连接**：请先打开 GSYEN Windows 桌面版并完成 ChatGPT 绑定，网页版会连接本机桥。'
+            : '⚠️ **ChatGPT Not Connected**: Open the GSYEN Windows app and bind ChatGPT first; the web app connects through the local bridge.'
+        );
+        return;
+      }
       onError(
         lang === 'zh'
           ? '⚠️ **通讯失败**：模型响应超时或连接中断，请稍后重试。'
           : '⚠️ **Connection Failed**: Model timed out or was interrupted. Please retry.'
       );
+    } finally {
+      if (activeRequest.current === controller) activeRequest.current = null;
     }
   }, []);
 

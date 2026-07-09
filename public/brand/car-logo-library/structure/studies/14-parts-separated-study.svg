@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="GSYEN vintage carriage logo - 14 separated parts study">
+  <title>GSYEN vintage carriage logo - 14 separated parts study</title>
+  <defs>
+    <style>
+      .paper { fill:#f4f2ee; }
+      .ink { fill:#171716; }
+      .cut { fill:none; stroke:#f4f2ee; stroke-linecap:round; stroke-linejoin:round; }
+      .stroke { fill:none; stroke:#171716; stroke-linecap:round; stroke-linejoin:round; }
+      .gold { fill:none; stroke:#c09f5c; stroke-linecap:round; stroke-linejoin:round; }
+      .gold-fill { fill:#c09f5c; }
+      .label { fill:#817d73; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; font-weight:700; letter-spacing:3px; }
+      .tile { fill:#f9f8f6; stroke:#dfd9ce; stroke-width:1; }
+    </style>
+
+    <symbol id="part-wheel" viewBox="0 0 240 240">
+      <defs>
+        <mask id="part-wheel-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="240" style="mask-type:luminance">
+          <rect width="240" height="240" fill="black"/>
+          <circle cx="120" cy="120" r="92" fill="white"/>
+          <circle cx="120" cy="120" r="69" fill="black"/>
+          <circle cx="120" cy="120" r="61" fill="white"/>
+          <circle cx="120" cy="120" r="57" fill="none" stroke="black" stroke-width="3.2"/>
+          <g fill="black">
+            <path d="M117.82 96.10 C113.63 81.52 110.98 67.77 110.98 67.77 Q120.00 63.00 129.02 67.77 C129.02 67.77 126.37 81.52 122.18 96.10 Q120.00 98.00 117.82 96.10Z"/>
+            <path d="M132.29 99.38 C137.46 85.13 143.40 72.45 143.40 72.45 Q153.50 73.89 158.00 83.05 C158.00 83.05 147.77 92.62 135.81 101.94 Q132.93 102.20 132.29 99.38Z"/>
+            <path d="M142.06 110.55 C154.62 102.05 166.88 95.28 166.88 95.28 Q174.21 102.39 172.46 112.44 C172.46 112.44 158.56 114.17 143.40 114.68 Q140.92 113.20 142.06 110.55Z"/>
+            <path d="M143.40 125.32 C158.56 125.83 172.46 127.56 172.46 127.56 Q174.21 137.61 166.88 144.72 C166.88 144.72 154.62 137.95 142.06 129.45 Q140.92 126.80 143.40 125.32Z"/>
+            <path d="M135.81 138.06 C147.77 147.38 158.00 156.95 158.00 156.95 Q153.50 166.11 143.40 167.55 C143.40 167.55 137.46 154.87 132.29 140.62 Q132.93 137.80 135.81 138.06Z"/>
+            <path d="M122.18 143.90 C126.37 158.48 129.02 172.23 129.02 172.23 Q120.00 177.00 110.98 172.23 C110.98 172.23 113.63 158.48 117.82 143.90 Q120.00 142.00 122.18 143.90Z"/>
+            <path d="M107.71 140.62 C102.54 154.87 96.60 167.55 96.60 167.55 Q86.50 166.11 82.00 156.95 C82.00 156.95 92.23 147.38 104.19 138.06 Q107.07 137.80 107.71 140.62Z"/>
+            <path d="M97.94 129.45 C85.38 137.95 73.12 144.72 73.12 144.72 Q65.79 137.61 67.54 127.56 C67.54 127.56 81.44 125.83 96.60 125.32 Q99.08 126.80 97.94 129.45Z"/>
+            <path d="M96.60 114.68 C81.44 114.17 67.54 112.44 67.54 112.44 Q65.79 102.39 73.12 95.28 C73.12 95.28 85.38 102.05 97.94 110.55 Q99.08 113.20 96.60 114.68Z"/>
+            <path d="M104.19 101.94 C92.23 92.62 82.00 83.05 82.00 83.05 Q86.50 73.89 96.60 72.45 C96.60 72.45 102.54 85.13 107.71 99.38 Q107.07 102.20 104.19 101.94Z"/>
+          </g>
+          <circle cx="120" cy="120" r="22" fill="white"/>
+          <circle cx="120" cy="120" r="14" fill="black"/>
+          <circle cx="120" cy="120" r="7.8" fill="white"/>
+        </mask>
+      </defs>
+      <rect width="240" height="240" fill="#171716" mask="url(#part-wheel-mask)"/>
+    </symbol>
+  </defs>
+
+  <rect class="paper" width="1200" height="900"/>
+  <text class="label" x="42" y="44">GSYEN CAR LOGO / 14 SEPARATED STRUCTURES</text>
+
+  <g id="tile-grid">
+    <rect class="tile" x="40" y="70" width="250" height="180"/>
+    <rect class="tile" x="310" y="70" width="250" height="180"/>
+    <rect class="tile" x="580" y="70" width="250" height="180"/>
+    <rect class="tile" x="850" y="70" width="250" height="180"/>
+    <rect class="tile" x="40" y="270" width="250" height="180"/>
+    <rect class="tile" x="310" y="270" width="250" height="180"/>
+    <rect class="tile" x="580" y="270" width="250" height="180"/>
+    <rect class="tile" x="850" y="270" width="250" height="180"/>
+    <rect class="tile" x="40" y="470" width="250" height="180"/>
+    <rect class="tile" x="310" y="470" width="250" height="180"/>
+    <rect class="tile" x="580" y="470" width="250" height="180"/>
+    <rect class="tile" x="850" y="470" width="250" height="180"/>
+    <rect class="tile" x="40" y="670" width="250" height="180"/>
+    <rect class="tile" x="310" y="670" width="250" height="180"/>
+  </g>
+
+  <g id="ground-line" transform="translate(40 70)">
+    <text class="label" x="20" y="28">01 GROUND LINE</text>
+    <path class="ink" d="M42 112 C91 107 179 107 213 111 C216 112 216 115 212 116 C167 118 87 118 42 116 C38 115 38 113 42 112Z"/>
+  </g>
+
+  <g id="front-wheel" transform="translate(310 70)">
+    <text class="label" x="20" y="28">02 FRONT WHEEL</text>
+    <g transform="translate(61 34) scale(.54)"><use href="#part-wheel" width="240" height="240"/></g>
+  </g>
+
+  <g id="rear-wheel" transform="translate(580 70)">
+    <text class="label" x="20" y="28">03 REAR WHEEL</text>
+    <g transform="translate(48 24) scale(.64)"><use href="#part-wheel" width="240" height="240"/></g>
+  </g>
+
+  <g id="front-fender" transform="translate(850 70)">
+    <text class="label" x="20" y="28">04 FRONT FENDER</text>
+    <path class="ink" d="M38 118 C58 79 113 72 167 93 C184 100 200 113 214 129 C194 130 177 121 159 108 C132 90 86 92 57 121 C49 129 34 131 38 118Z"/>
+    <path class="cut" d="M58 114 C91 86 140 88 174 108" stroke-width="4"/>
+  </g>
+
+  <g id="rear-fender" transform="translate(40 270)">
+    <text class="label" x="20" y="28">05 REAR FENDER</text>
+    <path class="ink" d="M33 131 C43 82 85 52 137 55 C174 57 205 75 224 104 C226 108 222 112 217 112 C202 112 188 99 166 91 C126 76 83 91 62 130 C56 142 48 153 38 151 C31 149 29 142 33 131Z"/>
+    <path class="cut" d="M58 130 C75 88 115 70 158 82 C175 87 188 96 200 106" stroke-width="4"/>
+  </g>
+
+  <g id="front-lamp" transform="translate(310 270)">
+    <text class="label" x="20" y="28">06 FRONT LAMP</text>
+    <path class="ink" d="M91 68 C109 57 137 63 148 91 C156 115 141 137 116 140 C94 143 80 126 78 107 C76 92 81 75 91 68Z"/>
+    <ellipse class="gold-fill" cx="102" cy="104" rx="10" ry="36"/>
+    <path class="cut" d="M119 72 C139 91 138 118 119 135" stroke-width="5"/>
+    <path class="ink" d="M101 139 L86 169 C84 174 90 178 96 174 L120 151Z"/>
+  </g>
+
+  <g id="lamp-rays" transform="translate(580 270)">
+    <text class="label" x="20" y="28">07 LAMP RAYS</text>
+    <g class="gold" stroke-width="4">
+      <path d="M43 70 C83 86 128 105 174 130"/>
+      <path d="M38 111 C83 112 129 117 179 126"/>
+      <path d="M43 151 C89 142 133 135 179 129"/>
+      <path d="M57 172 C96 155 136 140 181 132"/>
+    </g>
+  </g>
+
+  <g id="engine-hood" transform="translate(850 270)">
+    <text class="label" x="20" y="28">08 ENGINE HOOD</text>
+    <path class="ink" d="M54 83 C62 60 81 49 110 51 C151 53 190 56 224 62 L231 145 C169 147 110 145 50 140 L50 101 C50 94 51 88 54 83Z"/>
+    <rect class="ink" x="91" y="39" width="72" height="12" rx="6"/>
+    <rect class="ink" x="108" y="25" width="35" height="18" rx="6"/>
+  </g>
+
+  <g id="radiator-lines" transform="translate(40 470)">
+    <text class="label" x="20" y="28">09 RADIATOR LINES</text>
+    <path class="ink" d="M42 54 C96 51 170 53 213 59 L220 139 C167 143 96 143 42 139Z"/>
+    <g class="cut" stroke-width="5">
+      <path d="M58 69 C99 65 161 67 204 72"/>
+      <path d="M58 91 C99 89 161 90 205 94"/>
+      <path d="M76 105 C74 122 74 137 76 150"/>
+      <path d="M100 103 C98 125 98 142 100 153"/>
+      <path d="M124 103 C122 125 122 142 124 153"/>
+      <path d="M148 103 C146 125 146 142 148 153"/>
+      <path d="M172 105 C170 124 170 140 172 151"/>
+    </g>
+  </g>
+
+  <g id="chassis-step" transform="translate(310 470)">
+    <text class="label" x="20" y="28">10 CHASSIS STEP</text>
+    <path class="ink" d="M36 80 C92 86 155 86 215 79 L215 114 C168 119 102 120 56 113 C47 104 40 93 36 80Z"/>
+    <rect class="ink" x="55" y="134" width="154" height="14" rx="7"/>
+    <rect class="ink" x="90" y="116" width="84" height="13" rx="2"/>
+    <rect class="ink" x="43" y="119" width="44" height="10" rx="4"/>
+  </g>
+
+  <g id="cabin-shell" transform="translate(580 470)">
+    <text class="label" x="20" y="28">11 CABIN SHELL</text>
+    <path class="ink" d="M58 46 C104 31 182 35 219 52 C225 55 225 62 219 66 C216 111 216 139 218 160 L146 167 C114 163 85 164 57 167 C55 124 55 84 58 46Z"/>
+    <rect class="ink" x="45" y="78" width="18" height="98" rx="7"/>
+    <rect class="ink" x="145" y="71" width="17" height="105" rx="7"/>
+  </g>
+
+  <g id="window-frame" transform="translate(850 470)">
+    <text class="label" x="20" y="28">12 WINDOW FRAME</text>
+    <path class="ink" d="M40 46 C84 32 164 36 211 55 C218 58 219 66 211 70 L209 160 C152 164 93 164 41 162Z"/>
+    <g class="cut" stroke-width="5">
+      <path d="M60 58 C103 52 166 55 203 69"/>
+      <path d="M61 83 C102 78 152 80 185 90"/>
+      <path d="M186 88 C224 111 220 148 181 169"/>
+      <path d="M50 166 L209 160"/>
+      <path d="M52 53 C54 91 54 128 52 162"/>
+    </g>
+  </g>
+
+  <g id="door-panel" transform="translate(40 670)">
+    <text class="label" x="20" y="28">13 DOOR PANEL</text>
+    <path class="ink" d="M42 62 L192 62 C188 110 161 142 123 152 C92 159 65 158 42 155Z"/>
+    <rect x="123" y="89" width="36" height="9" rx="4" fill="#f4f2ee"/>
+    <path class="cut" d="M43 154 C88 156 148 153 178 134" stroke-width="4"/>
+    <path class="cut" d="M43 62 C41 97 41 130 42 155" stroke-width="4"/>
+  </g>
+
+  <g id="steering-wheel" transform="translate(310 670)">
+    <text class="label" x="20" y="28">14 STEERING WHEEL</text>
+    <path class="ink" d="M61 136 C95 97 119 66 145 36 L155 45 C130 81 102 118 72 153Z"/>
+    <ellipse class="ink" cx="161" cy="32" rx="41" ry="13" transform="rotate(43 161 32)"/>
+    <circle cx="153" cy="42" r="7" fill="#f4f2ee"/>
+    <path class="ink" d="M141 51 L183 21 L190 29 L148 59Z"/>
+  </g>
+</svg>

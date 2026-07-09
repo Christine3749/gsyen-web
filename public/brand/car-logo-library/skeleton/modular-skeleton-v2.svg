@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 489 304" role="img" aria-label="GSYEN modular vintage carriage logo skeleton v2">
+  <title>GSYEN modular vintage carriage logo skeleton v2</title>
+  <defs>
+    <style>
+      .ink{fill:#171716}.cut{fill:none;stroke:#f4f2ee;stroke-linecap:round;stroke-linejoin:round}.gold{fill:none;stroke:#c09f5c;stroke-linecap:round;stroke-linejoin:round}.gold-fill{fill:#c09f5c}.mark{fill:#f4f2ee}
+    </style>
+    <symbol id="wheel-clean-r4" viewBox="0 0 240 240">
+  
+  <defs>
+    <mask id="wheelCleanR4Mask" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="240" style="mask-type:luminance">
+      <rect width="240" height="240" fill="black"/>
+      <circle cx="120" cy="120" r="92" fill="white"/>
+      <circle cx="120" cy="120" r="69" fill="black"/>
+      <circle cx="120" cy="120" r="61" fill="white"/>
+      <circle cx="120" cy="120" r="57" fill="none" stroke="black" stroke-width="3.2"/>
+      <g fill="black" stroke="none">
+      <path d="M117.82 96.10 C113.63 81.52 110.98 67.77 110.98 67.77 Q120.00 63.00 129.02 67.77 C129.02 67.77 126.37 81.52 122.18 96.10 Q120.00 98.00 117.82 96.10Z"/>
+      <path d="M132.29 99.38 C137.46 85.13 143.40 72.45 143.40 72.45 Q153.50 73.89 158.00 83.05 C158.00 83.05 147.77 92.62 135.81 101.94 Q132.93 102.20 132.29 99.38Z"/>
+      <path d="M142.06 110.55 C154.62 102.05 166.88 95.28 166.88 95.28 Q174.21 102.39 172.46 112.44 C172.46 112.44 158.56 114.17 143.40 114.68 Q140.92 113.20 142.06 110.55Z"/>
+      <path d="M143.40 125.32 C158.56 125.83 172.46 127.56 172.46 127.56 Q174.21 137.61 166.88 144.72 C166.88 144.72 154.62 137.95 142.06 129.45 Q140.92 126.80 143.40 125.32Z"/>
+      <path d="M135.81 138.06 C147.77 147.38 158.00 156.95 158.00 156.95 Q153.50 166.11 143.40 167.55 C143.40 167.55 137.46 154.87 132.29 140.62 Q132.93 137.80 135.81 138.06Z"/>
+      <path d="M122.18 143.90 C126.37 158.48 129.02 172.23 129.02 172.23 Q120.00 177.00 110.98 172.23 C110.98 172.23 113.63 158.48 117.82 143.90 Q120.00 142.00 122.18 143.90Z"/>
+      <path d="M107.71 140.62 C102.54 154.87 96.60 167.55 96.60 167.55 Q86.50 166.11 82.00 156.95 C82.00 156.95 92.23 147.38 104.19 138.06 Q107.07 137.80 107.71 140.62Z"/>
+      <path d="M97.94 129.45 C85.38 137.95 73.12 144.72 73.12 144.72 Q65.79 137.61 67.54 127.56 C67.54 127.56 81.44 125.83 96.60 125.32 Q99.08 126.80 97.94 129.45Z"/>
+      <path d="M96.60 114.68 C81.44 114.17 67.54 112.44 67.54 112.44 Q65.79 102.39 73.12 95.28 C73.12 95.28 85.38 102.05 97.94 110.55 Q99.08 113.20 96.60 114.68Z"/>
+      <path d="M104.19 101.94 C92.23 92.62 82.00 83.05 82.00 83.05 Q86.50 73.89 96.60 72.45 C96.60 72.45 102.54 85.13 107.71 99.38 Q107.07 102.20 104.19 101.94Z"/>
+      </g>
+      <circle cx="120" cy="120" r="22" fill="white"/>
+      <circle cx="120" cy="120" r="14" fill="black"/>
+      <circle cx="120" cy="120" r="7.8" fill="white"/>
+    </mask>
+  </defs>
+  <rect width="240" height="240" fill="#171716" mask="url(#wheelCleanR4Mask)"/>
+</symbol>
+
+  </defs>
+
+  <g id="lamp-rays" class="gold" stroke-width="1.45">
+    <path d="M53 122 C66 128 80 134 94 141"/>
+    <path d="M49 137 C64 138 79 140 95 142"/>
+    <path d="M52 150 C67 148 82 146 96 144"/>
+    <path d="M57 163 C70 157 83 151 97 147"/>
+  </g>
+
+  <g id="ground-line" class="ink">
+    <path d="M88 241 C178 238 355 238 458 241 C462 241 462 243 458 244 C352 246 178 246 88 244 C84 243 84 242 88 241Z"/>
+  </g>
+
+  <g id="wheels">
+    <g id="front-wheel" transform="translate(104.4 161.4) scale(.38)"><use href="#wheel-clean-r4"/></g>
+    <g id="rear-wheel" transform="translate(334.0 132.0) scale(.51)"><use href="#wheel-clean-r4"/></g>
+  </g>
+
+  <g id="front-fender" class="ink">
+    <path d="M105 171 C120 154 149 151 177 162 C196 169 209 184 222 198 C205 198 192 190 181 180 C169 168 152 163 132 166 C119 168 111 175 104 183Z"/>
+  </g>
+
+  <g id="rear-fender" class="ink">
+    <path d="M345 170 C357 142 380 128 410 130 C430 131 448 140 458 153 C459 155 458 158 455 159 C444 161 435 153 420 149 C392 141 366 152 354 182 C350 194 350 204 347 214 L334 214 C334 199 339 182 345 170Z"/>
+  </g>
+
+  <g id="engine-hood" class="ink">
+    <path d="M141 119 C145 108 153 103 166 103 C193 103 219 105 243 108 L247 165 C209 165 172 164 137 162 L137 132 C137 126 138 122 141 119Z"/>
+    <rect x="163" y="96" width="30" height="6" rx="3"/>
+    <rect x="171" y="88" width="14" height="8" rx="3"/>
+    <rect x="249" y="104" width="13" height="61" rx="6"/>
+  </g>
+
+  <g id="radiator-lines" class="cut" stroke-width="1.65">
+    <path d="M152 115 C177 113 216 114 239 116"/>
+    <path d="M151 127 C178 126 216 127 240 129"/>
+    <path d="M160 135 C159 145 159 154 160 161"/>
+    <path d="M171 134 C170 146 170 156 171 163"/>
+    <path d="M183 134 C182 147 182 158 183 164"/>
+    <path d="M196 134 C195 147 195 158 196 164"/>
+    <path d="M209 135 C208 147 208 157 209 164"/>
+    <path d="M222 136 C221 146 221 155 222 162"/>
+  </g>
+
+  <g id="front-lamp">
+    <path class="ink" d="M91 128 C99 123 111 126 116 137 C120 147 113 156 103 157 C95 158 89 151 88 143 C87 137 88 132 91 128Z"/>
+    <ellipse class="gold-fill" cx="97" cy="142" rx="4.7" ry="15"/>
+    <path class="cut" d="M104 130 C111 137 111 148 104 155" stroke-width="1.9"/>
+    <path class="ink" d="M95 156 L89 170 C88 173 91 175 94 173 L103 163Z"/>
+  </g>
+
+  <g id="cabin-frame" class="ink">
+    <path d="M277 44 C309 37 370 38 402 49 C407 51 408 56 404 60 C402 91 402 113 403 135 L354 139 C332 137 305 137 278 138 C276 104 276 74 277 44Z"/>
+    <rect x="269" y="72" width="13" height="111" rx="5"/>
+    <rect x="354" y="65" width="12" height="116" rx="5"/>
+  </g>
+
+  <g id="cabin-cuts" class="cut" stroke-width="2">
+    <path d="M289 55 C318 51 369 53 397 62"/>
+    <path d="M288 68 C315 65 346 66 367 71"/>
+    <path d="M368 68 C394 80 398 109 368 126"/>
+    <path d="M281 138 L402 135"/>
+    <path d="M281 49 C282 79 282 109 281 137"/>
+  </g>
+
+  <g id="door" class="ink">
+    <path d="M276 141 L359 141 C357 165 343 181 323 187 C306 191 290 191 276 190Z"/>
+    <rect class="mark" x="323" y="155" width="18" height="4.5" rx="2"/>
+  </g>
+
+  <g id="door-cuts" class="cut" stroke-width="1.9">
+    <path d="M277 189 C302 190 334 189 350 179"/>
+    <path d="M276 140 C275 160 275 178 276 190"/>
+  </g>
+
+  <g id="steering-wheel" class="ink">
+    <path d="M263 142 C279 124 291 108 302 94 L307 99 C296 116 282 134 268 151Z"/>
+    <ellipse cx="309" cy="92" rx="18" ry="5.5" transform="rotate(43 309 92)"/>
+    <circle class="mark" cx="305" cy="96" r="2.7"/>
+    <path d="M299 100 L319 86 L322 90 L302 104Z"/>
+  </g>
+
+  <g id="chassis-and-step" class="ink">
+    <path d="M189 175 C220 177 248 177 276 175 L276 196 C255 197 235 197 218 196 C206 192 197 185 189 175Z"/>
+    <rect x="194" y="217" width="28" height="7" rx="3"/>
+    <rect x="238" y="224" width="106" height="9" rx="4"/>
+    <rect x="270" y="209" width="52" height="8" rx="1"/>
+  </g>
+
+  <g id="side-detail-cuts" class="cut" stroke-width="1.8">
+    <path d="M214 184 C236 183 258 183 280 184"/>
+    <path d="M218 196 C231 196 245 196 258 196"/>
+    <path d="M208 205 C218 205 229 205 240 205"/>
+    <path d="M258 211 L258 224"/>
+  </g>
+</svg>

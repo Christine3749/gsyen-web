@@ -3,6 +3,6 @@
   "description": "An exquisite multi-workspace luxury suite combining a premium dynamic vector logo studio, elegant timeline scheduler, double-entry ledger tracker, and military-grade offline dynamic key vault.",
   "requestFramePermissions": [],
   "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+    "MAJOR_CAPABILITY_SERVER_SIDE_AI_GATEWAY"
   ]
 }

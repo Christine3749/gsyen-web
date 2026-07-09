@@ -3,7 +3,7 @@ import { Globe, Users, User } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
 import VintageCar from './VintageCar';
-import BrandWordmark from './BrandWordmark';
+import AppHeaderBrandWordmark from './AppHeaderBrandWordmark';
 import { WinCtrlButton } from '../gsyen-designer';
 import AboutDialog from './AboutDialog';
 import AuthModal from '../auth/AuthModal';
@@ -13,7 +13,7 @@ import { useAuth } from '../auth/useAuth';
 import { useIsMaximized } from '../hooks/useIsMaximized';
 import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
-import { KanbanOutlineIcon, SPACES, type ActiveSpace } from './AppHeaderSpaces';
+import { SPACES, type ActiveSpace } from './AppHeaderSpaces';
 
 export type { ActiveSpace } from './AppHeaderSpaces';
 
@@ -30,6 +30,7 @@ interface AppHeaderProps {
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
   const [compact, setCompact] = useState(window.innerWidth < 1100);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
   const { user, tier, emailVerified, loading: authLoading, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
@@ -46,38 +47,55 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
     return () => { window.removeEventListener('resize', fn); cancelAnimationFrame(raf); };
   }, []);
 
+  useEffect(() => {
+    const handleToolbarDoubleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest('.gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
+      if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
+      setHeaderHidden(v => !v);
+    };
+    document.addEventListener('dblclick', handleToolbarDoubleClick);
+    return () => document.removeEventListener('dblclick', handleToolbarDoubleClick);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.headerHidden = headerHidden ? 'true' : 'false';
+    return () => { delete document.documentElement.dataset.headerHidden; };
+  }, [headerHidden]);
 
   return (
     <>
       <header
-        className={`gsyen-app-header relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
+        className={`gsyen-app-header ${headerHidden ? 'is-header-hidden' : 'is-header-visible'} relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
         id="app-header"
         data-shell-platform={platform}
+        aria-hidden={headerHidden}
+        data-header-motion={headerHidden ? 'hidden' : 'visible'}
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
         <div className="gsyen-brand-lockup flex min-w-0 items-center gap-4 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
             const isHome = activeSpace === 'chat';
-            // Google Material 惯例：大尺寸 logo 用 outline，小尺寸 tab 用 filled
-            const Icon = activeSpace === 'schedule' ? KanbanOutlineIcon : space?.Icon;
+            const BrandIcon = space?.BrandIcon;
+            const brandClass = isHome
+              ? 'is-home-brand'
+              : `is-module-brand is-${activeSpace === 'brand' ? 'prism' : activeSpace}-brand`;
             return (
               <>
                 <div
-                  className={`gsyen-brand-mark shrink-0 -mt-1 transition-transform duration-500 ${isElectron ? 'cursor-pointer' : ''}`}
+                  className={`gsyen-brand-mark ${brandClass} shrink-0 -mt-1 transition-transform duration-500 ${isElectron ? 'cursor-pointer' : ''}`}
                   onClick={() => isElectron && setShowAbout(true)}
                   title={isElectron ? (lang === 'zh' ? '关于 GSYEN' : 'About GSYEN') : undefined}
                 >
                   {isHome
                     ? <VintageCar size={44} className="text-[#1A1A1A]/95" />
-                    : Icon && <Icon strokeWidth={0.9} className={`w-10 h-10 text-[#1A1A1A]/90 ${
-                        { mail: 'scale-90', calendar: 'scale-90' }[activeSpace as string] ?? ''
-                      }`} />
+                    : BrandIcon && <BrandIcon strokeWidth={1.14} className="gsyen-brand-module-icon w-10 h-10 text-[#1A1A1A]/90" />
                   }
                 </div>
                 <div className="gsyen-brand-copy flex flex-col">
                   <div className="gsyen-brand-title flex items-center flex-nowrap whitespace-nowrap">
-                    <BrandWordmark height={30} className="gsyen-wordmark-primary" />
+                    <AppHeaderBrandWordmark />
                   </div>
                   <p className="gsyen-brand-subtitle text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5 truncate">
                     {isHome ? t.headerSubtitle : space?.subtitle}

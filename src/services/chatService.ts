@@ -1,4 +1,15 @@
 import { ChatMessage } from '../types/chat';
+import { probeLocalChatGptBridge } from './localBridge';
+
+export class ChatGptBridgeUnavailableError extends Error {
+  detail?: string;
+
+  constructor(detail?: string) {
+    super('CHATGPT_LOCAL_BRIDGE_OFFLINE');
+    this.name = 'ChatGptBridgeUnavailableError';
+    this.detail = detail;
+  }
+}
 
 /** POST to the AI gateway, returns the raw Response */
 export async function sendToGateway(
@@ -7,22 +18,43 @@ export async function sendToGateway(
   events?: Array<{ id: string; title: string; date: string; time: string }>,
   scheduleIntent?: string | null,
   /** Which domain module owns this request — tells the backend which system suffix to inject */
-  domain?: string | null
+  domain?: string | null,
+  signal?: AbortSignal,
 ): Promise<Response> {
   // 传客户端本地日期，避免 Vercel UTC 和中国时区差8小时
   const d = new Date();
   const clientDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const res = await fetch('/api/chat', {
+  let bridgeBase = '';
+  if (model === 'chatgpt-pro') {
+    const probe = await probeLocalChatGptBridge();
+    if (probe?.health.status !== 'online') {
+      throw new ChatGptBridgeUnavailableError(probe?.health.error);
+    }
+    bridgeBase = probe.base;
+  }
+  const savedChatGptModel = localStorage.getItem('gsyen-chatgpt-model') ?? 'gpt-5-5';
+  const chatGptModel = model === 'chatgpt-pro'
+    ? savedChatGptModel === 'mini' || savedChatGptModel === 'gpt-5-5-mini'
+      ? 'gpt-5-4-mini'
+      : savedChatGptModel
+    : null;
+  const res = await fetch(`${bridgeBase}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal,
     body: JSON.stringify({
       model,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content,
+        attachments: m.attachments ?? [],
+      })),
       events: events ?? [],
       clientDate,
       scheduleIntent: scheduleIntent ?? null,
       domain: domain ?? null,
+      chatGptModel,
     }),
   });
   if (!res.ok) throw new Error(`Gateway error: ${res.status}`);

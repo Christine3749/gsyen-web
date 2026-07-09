@@ -63,11 +63,82 @@ function CalendarDateIcon({ className, strokeWidth = 1.5 }: GsIconProps) {
   );
 }
 
+function MailBrandIcon({ className, strokeWidth = 1.14 }: GsIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.35" y="5.45" width="17.3" height="13.1" rx="2.05" />
+      <path d="M4.6 8.05l6.35 4.1a2.05 2.05 0 0 0 2.1 0l6.35-4.1" />
+    </svg>
+  );
+}
+
+function FlowBrandIcon({ className, strokeWidth = 1.14 }: GsIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4.35" y="3.15" width="6.35" height="17.7" rx="1.6" />
+      <rect x="13.3" y="3.15" width="6.35" height="10.9" rx="1.6" />
+    </svg>
+  );
+}
+
+function CalendarBrandIcon({ className, strokeWidth = 1.14 }: GsIconProps) {
+  const day = new Date().getDate();
+  return (
+    <svg viewBox="0 0 24 24" className={className}
+      style={{ fill: 'none', stroke: 'currentColor', strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round' }}>
+      <rect x="3.3" y="4.5" width="17.4" height="17" rx="2.05" />
+      <path d="M3.3 10h17.4" />
+      <path d="M8.1 2.6v3.6" />
+      <path d="M15.9 2.6v3.6" />
+      <text x="12" y="19.4" textAnchor="middle" fontSize="9.1" fontWeight="720"
+        fill="currentColor" stroke="none" style={{ fontFamily: 'system-ui,sans-serif', fontVariantNumeric: 'tabular-nums' }}>
+        {day}
+      </text>
+    </svg>
+  );
+}
+
+function LedgerBrandIcon({ className, strokeWidth = 1.14 }: GsIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4.3" y="3.3" width="15.4" height="17.4" rx="2.05" />
+      <path d="M8.25 3.3v17.4" />
+      <path d="M15.2 8.4h-1.75a1.45 1.45 0 0 0 0 2.9h.9a1.45 1.45 0 0 1 0 2.9H12.3" />
+      <path d="M13.8 7.55v7.5" />
+    </svg>
+  );
+}
+
+function CitadelBrandIcon({ className, strokeWidth = 1.14 }: GsIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3.4c2.65 1.9 5.15 2.5 7.55 3.1v5.3c0 4.8-2.75 7.7-7.55 9.6c-4.8-1.9-7.55-4.8-7.55-9.6V6.5c2.4-.6 4.9-1.2 7.55-3.1z" />
+      <circle cx="12" cy="11.6" r="1" />
+      <path d="M12 12.7v2.5" />
+    </svg>
+  );
+}
+
+function PrismBrandIcon({ className, strokeWidth = 1.14 }: GsIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor"
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3.35L6.35 19.7h11.3L12 3.35z" />
+      <path d="M12 6.25l-1.65 13.45" />
+    </svg>
+  );
+}
+
 export type ActiveSpace = 'chat' | 'mail' | 'schedule' | 'calendar' | 'finance' | 'password' | 'brand';
 
 export interface SpaceTab {
   value: ActiveSpace;
   Icon: ComponentType<any>;
+  BrandIcon?: ComponentType<GsIconProps>;
   iconClass: string;
   zh: string;
   en: string;
@@ -78,10 +149,10 @@ export interface SpaceTab {
 
 export const SPACES: SpaceTab[] = [
   { value: 'chat', Icon: Sparkles, iconClass: 'text-amber-500 animate-pulse', zh: '疆域灵阁', en: 'GSYEN Muse', shortZh: '灵阁', shortEn: 'Muse', subtitle: '' },
-  { value: 'mail', Icon: Mail, iconClass: 'scale-90', zh: '工作邮件', en: 'Mailbox', shortZh: '邮件', shortEn: 'Mail', subtitle: 'Hermes · 极雅私密邮件信道' },
-  { value: 'schedule', Icon: KanbanIcon, iconClass: 'animate-pulse scale-[1.3]', zh: '项目看板', en: 'Kanban', shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
-  { value: 'calendar', Icon: CalendarDateIcon, iconClass: 'scale-90', zh: '日程日历', en: 'Calendar', shortZh: '日历', shortEn: 'Cal', subtitle: 'Chronos · 极速格栅日程空间' },
-  { value: 'finance', Icon: ReportMoneyIcon, iconClass: '', zh: '复试账簿', en: 'Atelier Ledger', shortZh: '账簿', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
-  { value: 'password', Icon: ShieldLockIcon, iconClass: '', zh: '军工密钥', en: 'Citadel Key', shortZh: '密钥', shortEn: 'Keys', subtitle: 'Citadel · 军事级密匙生成与保管箱' },
-  { value: 'brand', Icon: PrismIcon, iconClass: '', zh: 'PRISM实验', en: 'Brand Lab', shortZh: '品牌', shortEn: 'Brand', subtitle: 'Prism · 品牌基因折射实验室' },
+  { value: 'mail', Icon: Mail, BrandIcon: MailBrandIcon, iconClass: 'scale-90', zh: '工作邮件', en: 'Mailbox', shortZh: '邮件', shortEn: 'Mail', subtitle: 'Hermes · 极雅私密邮件信道' },
+  { value: 'schedule', Icon: KanbanIcon, BrandIcon: FlowBrandIcon, iconClass: 'animate-pulse scale-[1.3]', zh: '项目看板', en: 'Kanban', shortZh: '看板', shortEn: 'Kanban', subtitle: 'Flow · 信息流转看板工作系统' },
+  { value: 'calendar', Icon: CalendarDateIcon, BrandIcon: CalendarBrandIcon, iconClass: 'scale-90', zh: '日程日历', en: 'Calendar', shortZh: '日历', shortEn: 'Cal', subtitle: 'Chronos · 极速格栅日程空间' },
+  { value: 'finance', Icon: ReportMoneyIcon, BrandIcon: LedgerBrandIcon, iconClass: '', zh: '复试账簿', en: 'Atelier Ledger', shortZh: '账簿', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
+  { value: 'password', Icon: ShieldLockIcon, BrandIcon: CitadelBrandIcon, iconClass: '', zh: '军工密钥', en: 'Citadel Key', shortZh: '密钥', shortEn: 'Keys', subtitle: 'Citadel · 军事级密匙生成与保管箱' },
+  { value: 'brand', Icon: PrismIcon, BrandIcon: PrismBrandIcon, iconClass: '', zh: 'PRISM实验', en: 'Brand Lab', shortZh: '品牌', shortEn: 'Brand', subtitle: 'Prism · 品牌基因折射实验室' },
 ];

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="GSYEN editable window frame part v1">
+  <title>GSYEN editable part 12 - window frame v1</title>
+  <defs>
+    <style>
+      .ink { fill:#171716; }
+      .paper-line { fill:none; stroke:#f4f2ee; stroke-linecap:round; stroke-linejoin:round; }
+      .ink-line { fill:none; stroke:#171716; stroke-linecap:round; stroke-linejoin:round; }
+    </style>
+  </defs>
+
+  <g id="window-frame">
+    <path id="front-upright" class="ink" d="M69 48 C75 47 82 49 82 55 C83 91 83 130 82 169 C81 176 70 177 67 170 C66 132 66 92 67 56 C67 52 68 50 69 48Z"/>
+    <path id="rear-upright" class="ink" d="M181 50 C187 50 192 53 192 58 C191 95 191 132 193 169 C190 176 181 176 177 170 C175 133 175 94 177 58 C178 54 179 52 181 50Z"/>
+    <path id="top-rail" class="ink" d="M75 48 C118 38 205 40 260 55 C269 58 270 64 264 69 C206 59 126 57 76 63 C70 63 68 56 75 48Z"/>
+    <path id="bottom-rail" class="ink" d="M73 163 C122 165 195 163 259 158 C264 161 264 168 259 171 C202 177 125 178 73 174 C68 171 68 166 73 163Z"/>
+    <path id="rear-window-back" class="ink" d="M198 61 C227 66 250 77 263 96 C277 118 270 146 246 164 C235 173 218 177 198 176 C196 139 196 99 198 61Z"/>
+  </g>
+
+  <g id="window-openings" class="paper-line" stroke-width="4">
+    <path id="roof-highlight" d="M84 59 C127 52 205 55 254 68"/>
+    <path id="inner-roof-arc" d="M88 79 C126 73 185 75 224 84"/>
+    <path id="rear-window-arc" d="M226 85 C264 107 260 145 221 166"/>
+    <path id="front-window-post-cut" d="M83 59 C84 93 84 131 82 168"/>
+    <path id="bottom-highlight" d="M78 165 C129 168 205 164 259 158"/>
+  </g>
+
+  <g id="inner-air-lines" class="paper-line" stroke-width="2.2" opacity=".82">
+    <path id="thin-upper-air" d="M101 72 C132 69 178 70 207 76"/>
+    <path id="thin-rear-air" d="M233 91 C252 112 249 142 226 158"/>
+  </g>
+</svg>

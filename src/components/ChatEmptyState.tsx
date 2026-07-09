@@ -2,21 +2,28 @@
  * ChatEmptyState — 灵阁待命态
  * 空会话不是欢迎页，而是当前工作台的低噪声状态面板。
  */
+import { useRef, type ClipboardEvent } from 'react';
 import { motion } from 'motion/react';
-import { Send, Sparkles } from 'lucide-react';
+import { ImagePlus, Send, Sparkles, X } from 'lucide-react';
 import VintageCar from './VintageCar';
 import { PRESET_QUERIES, PRESET_SHORT_LABELS } from '../config/presets';
 import { PULSE_FOCUS_LABEL, getPulseSignal, getStandbyPulseSignals } from '../config/pulseSignals';
+import type { ChatAttachment } from '../types/chat';
+import { useImageAttachments } from '../hooks/useImageAttachments';
+import { isImageFile } from '../utils/chatAttachments';
 
 interface ChatEmptyStateProps {
   lang: 'zh' | 'en';
   inputVal: string;
   setInputVal: (v: string) => void;
-  onSend: (text: string) => void;
+  onSend: (text: string, attachments?: ChatAttachment[]) => void;
 }
 
 export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmptyStateProps) {
   const zh = lang === 'zh';
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { attachments, addFiles, removeAttachment, clearAttachments } = useImageAttachments();
+  const canSend = inputVal.trim().length > 0 || attachments.length > 0;
   const dgwmSignal = getPulseSignal(lang, 'DGWM');
   const standbyRows = [
     { label: zh ? '上下文' : 'CONTEXT', value: zh ? '灵阁 / 创意灵感' : 'Muse / Creative Signal' },
@@ -26,6 +33,22 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
   ];
   const standbySignals = getStandbyPulseSignals(lang);
 
+  const submit = () => {
+    if (!canSend) return;
+    onSend(inputVal, attachments);
+    clearAttachments();
+  };
+  const handlePaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(e.clipboardData.items)
+      .filter(item => item.kind === 'file')
+      .map(item => item.getAsFile())
+      .filter((file): file is File => !!file);
+    if (files.some(isImageFile)) {
+      if (!e.clipboardData.getData('text/plain')) e.preventDefault();
+      void addFiles(files);
+    }
+  };
+
   return (
     <motion.div key="empty" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24 }}
       className="gsyen-standby-shell h-full px-4 pt-8 md:px-8 md:pt-10">
@@ -34,7 +57,7 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
           <div className="gsyen-standby-mark">
             <VintageCar size={30} strokeWidth={1.5} className="text-[#1A1A1A]/90" />
           </div>
-          <div className="min-w-0">
+          <div className="gsyen-standby-copy min-w-0">
             <p className="gsyen-standby-kicker">{zh ? 'ATELIER AI / SIGNAL READY' : 'ATELIER AI / SIGNAL READY'}</p>
             <h2 className="gsyen-standby-title">{zh ? '灵阁待命' : 'Muse Standby'}</h2>
           </div>
@@ -68,14 +91,35 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
           </div>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSend(inputVal); }} className="gsyen-standby-input">
+        <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="gsyen-standby-input">
+          {attachments.length > 0 && (
+            <div className="flex gap-2 px-4 pt-3">
+              {attachments.map(item => (
+                <div key={item.id} className="relative h-16 w-24 border border-[#1A1A1A]/15 bg-[#F9F8F6]">
+                  <img src={item.dataUrl} alt={item.name} className="h-full w-full object-cover" />
+                  <button type="button" aria-label={zh ? '移除图片' : 'Remove image'}
+                    onClick={() => removeAttachment(item.id)}
+                    className="absolute -right-1.5 -top-1.5 p-0.5 bg-[#1A1A1A] text-white border border-white">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <textarea autoFocus rows={3} value={inputVal} onChange={e => setInputVal(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(inputVal); } }}
+            onPaste={handlePaste}
+            onDrop={e => { e.preventDefault(); void addFiles(Array.from(e.dataTransfer.files)); }}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
             placeholder={zh ? '输入一个想法、任务、判断或需要缈缈处理的信号...' : 'Enter a thought, task, decision, or signal for Muse...'}
             className="w-full resize-none bg-transparent px-4 py-3 font-sans text-sm leading-relaxed text-[#1A1A1A] outline-none placeholder:text-[#1A1A1A]/28" />
           <div className="gsyen-standby-input-footer">
             <span>{zh ? 'ENTER 发送 / SHIFT 换行' : 'ENTER SEND / SHIFT NEW LINE'}</span>
-            <button type="submit" disabled={!inputVal.trim()} aria-label={zh ? '发送消息' : 'Send message'}>
+            <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+              onChange={e => { void addFiles(Array.from(e.target.files ?? [])); e.currentTarget.value = ''; }} />
+            <button type="button" onClick={() => fileRef.current?.click()} aria-label={zh ? '添加图片' : 'Add image'}>
+              <ImagePlus className="w-3.5 h-3.5" />
+            </button>
+            <button type="submit" disabled={!canSend} aria-label={zh ? '发送消息' : 'Send message'}>
               <Send className="w-3.5 h-3.5" />
             </button>
           </div>

@@ -2,8 +2,8 @@
 
 ## 项目结构
 本目录 `C:\Users\Ethan\Desktop\01-Projects\GSYEN` 包含以下子项目：
-- `gsyen-web/` — 前端 + 内嵌后端（React 19 + Vite 6 + Express），GitHub: Christine2031/gsyen-web
-- `gsyen-api/` — 独立后端（Express on GCP Cloud Run，CodexAgent），GitHub: Christine2031/gsyen-api
+- `gsyen-web/` — 前端 + 内嵌后端（React 19 + Vite 6 + Express），GitHub: Christine3749/gsyen-web
+- `gsyen-api/` — 独立后端（Express on GCP Cloud Run，CodexAgent），GitHub: Christine3749/gsyen-api
 - `laochen-demo/` — Python ML 预测服务（备货预测 + 顾客流失），本地运行在 http://127.0.0.1:8000
 - `gsyen-native/` — 移动端
 - `tasks/` — 任务记录
@@ -13,8 +13,8 @@
 - 写代码或评审时，如发现文件已超 300 行，主动提示并给出拆分建议。
 
 ## 架构关系
-- `gsyen-web` 自带 AI 聊天代理（kimi/deepseek/claude/chatgpt/gemini 统一路由，走 /api/chat）
-- `gsyen-api` 是独立的 CodexAgent 服务（沙盒文件系统 + Gemini + Tavily），CORS 允许 gsyen.com
+- `gsyen-web` 自带 AI 聊天代理（kimi/deepseek/claude/chatgpt/疆域自托管模型统一路由，走 /api/chat）
+- `gsyen-api` 是独立的 CodexAgent 服务（沙盒文件系统 + 搜索工具），CORS 允许 gsyen.com
 - `laochen-demo/api.py` 是本地 Python 预测专家服务，被 ChatModule.tsx 在聊天中优先调用
 
 ## 当前状态（截至 2026-06-10）
@@ -72,7 +72,7 @@
 - gsyen-api 只有 1 个 commit（2026-05-25），gsyen-web 活跃更新中
 
 ## 关键文件
-- `gsyen-web/server.ts` — 多模型路由（kimi/deepseek/claude/chatgpt/gemini）
+- `gsyen-web/server.ts` — 多模型路由（kimi/deepseek/claude/chatgpt/疆域自托管模型）
 - `gsyen-web/api/chat.ts` — Vercel serverless 版本（逻辑与 server.ts 完全相同，存在重复代码）
 - `gsyen-web/src/components/ChatModule.tsx` — 聊天 UI，含待提交的本地预测路由
 - `gsyen-api/server.ts` — CodexAgent 后端（~40KB，含沙盒工具）
