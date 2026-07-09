@@ -33,7 +33,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
-  const { user, tier, emailVerified, loading: authLoading, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
+  const { user, tier, emailVerified, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
 
@@ -179,9 +179,6 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
                 {lang === 'zh' ? '登出' : 'SIGN OUT'}
               </button>
             </>
-          ) : authLoading ? (
-            /* 快照不存在且仍在初始化：空占位防闪 */
-            <div className="w-[120px] h-6" />
           ) : (
             /* 确认未登录：登录 + 注册 */
             <>
