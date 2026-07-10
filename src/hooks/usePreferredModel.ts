@@ -2,19 +2,24 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { firstEnabledModel, isModelId, MODELS, type ModelId } from '../config/models';
 import { probeLocalChatGptBridge } from '../services/localBridge';
 
-const STORAGE_KEY = 'gsyen-selected-model';
+const LAST_MODEL_KEY = 'gsyen-last-closed-model';
+const LEGACY_STORAGE_KEY = 'gsyen-selected-model';
 
-function readStoredModel(): ModelId | null {
+function readLastClosedModel(): ModelId | null {
   try {
-    const value = localStorage.getItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    const value = localStorage.getItem(LAST_MODEL_KEY);
     if (isModelId(value)) return value;
-    if (value) localStorage.removeItem(STORAGE_KEY);
+    if (value) localStorage.removeItem(LAST_MODEL_KEY);
   } catch {}
   return null;
 }
 
-function writeStoredModel(model: ModelId) {
-  try { localStorage.setItem(STORAGE_KEY, model); } catch {}
+function writeLastClosedModel(model: ModelId) {
+  try {
+    localStorage.setItem(LAST_MODEL_KEY, model);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {}
 }
 
 async function fetchModelHealth(): Promise<Record<string, any> | null> {
@@ -63,7 +68,7 @@ export function usePreferredModel() {
   const storedAtStartRef = useRef<ModelId | null>(null);
   const userSelectedRef = useRef(false);
   const [selectedModel, setSelectedModelState] = useState<ModelId>(() => {
-    const stored = readStoredModel();
+    const stored = readLastClosedModel();
     storedAtStartRef.current = stored;
     return stored ?? firstEnabledModel();
   });
@@ -71,7 +76,7 @@ export function usePreferredModel() {
   const setSelectedModel = useCallback((model: string | null | undefined) => {
     if (!isModelId(model)) return;
     userSelectedRef.current = true;
-    writeStoredModel(model);
+    writeLastClosedModel(model);
     setSelectedModelState(model);
   }, []);
 
@@ -80,7 +85,7 @@ export function usePreferredModel() {
     let cancelled = false;
     firstOnlineModel().then(model => {
       if (cancelled || userSelectedRef.current || !model) return;
-      writeStoredModel(model);
+      writeLastClosedModel(model);
       setSelectedModelState(model);
     });
     return () => { cancelled = true; };
