@@ -26,6 +26,11 @@ interface AppHeaderProps {
   activeTeam?: boolean;
 }
 
+const SHELL_DOUBLE_CLICK_TARGETS =
+  '#app-header.gsyen-app-header, .gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav';
+const SHELL_NO_DOUBLE_CLICK_TARGETS =
+  'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-window-controls';
+
 /** 顶部导航栏 + 移动端横向标签条 */
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
@@ -36,6 +41,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const { user, tier, emailVerified, loading: authLoading, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
+  const accountName = user?.email?.split('@')[0] ?? '';
 
   useEffect(() => {
     let raf = 0;
@@ -48,14 +54,14 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   }, []);
 
   useEffect(() => {
-    const handleToolbarDoubleClick = (event: MouseEvent) => {
+    const handleShellDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      if (!target?.closest('.gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav')) return;
-      if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
+      if (!target?.closest(SHELL_DOUBLE_CLICK_TARGETS)) return;
+      if (target.closest(SHELL_NO_DOUBLE_CLICK_TARGETS)) return;
       setHeaderHidden(v => !v);
     };
-    document.addEventListener('dblclick', handleToolbarDoubleClick);
-    return () => document.removeEventListener('dblclick', handleToolbarDoubleClick);
+    document.addEventListener('dblclick', handleShellDoubleClick);
+    return () => document.removeEventListener('dblclick', handleShellDoubleClick);
   }, []);
 
   useEffect(() => {
@@ -65,6 +71,16 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
 
   return (
     <>
+      {headerHidden && (
+        <button
+          type="button"
+          className="gsyen-shell-reveal-hotzone"
+          aria-label={lang === 'zh' ? '显示顶部栏' : 'Show header'}
+          onClick={() => setHeaderHidden(false)}
+          onDoubleClick={() => setHeaderHidden(false)}
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        />
+      )}
       <header
         className={`gsyen-app-header ${headerHidden ? 'is-header-hidden' : 'is-header-visible'} relative bg-[#F4F2EE] sticky top-0 z-40 py-6 grid items-center ${isMac ? 'pl-20 pr-8 is-mac' : isWindows ? 'pl-8 pr-32 is-windows' : 'px-8 is-browser'}`}
         id="app-header"
@@ -124,7 +140,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
 
         {/* 窗口控制：Windows 专属，Mac 用原生红绿灯 */}
         {isWindows && (
-          <div style={{ position:'absolute', top:0, right:0, display:'flex', alignItems:'center',
+          <div className="gsyen-window-controls" style={{ position:'absolute', top:0, right:0, display:'flex', alignItems:'center',
             WebkitAppRegion:'no-drag' } as React.CSSProperties}>
             {(['minimize', 'maximize', 'close'] as const).map(action => (
               <WinCtrlButton key={action} action={action} redClose={action === 'close'}
@@ -135,71 +151,64 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
         )}
 
         {/* 右侧：状态 + 语言 + 登录/注册 */}
-        <div className="gsyen-header-actions flex items-center gap-2 shrink-0"
+        <div className={`gsyen-header-actions flex items-center gap-2 shrink-0 ${user ? 'has-account-user' : 'has-account-auth'}`}
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
 
-          {/* 地球仪 — 点击切换语言 */}
-          <button
-            onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
-            className="flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/10 bg-[#1A1A1A]/5 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-all shrink-0"
-          >
-            <Globe className="w-3 h-3" />
-            <span className="fs-xs font-bold tracking-wider uppercase">{lang === 'zh' ? '中文' : 'EN'}</span>
-          </button>
+          <div className="gsyen-account-tray flex items-center gap-2 shrink-0">
+            {/* 地球仪 — 点击切换语言 */}
+            <button
+              onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+              className="gsyen-account-segment gsyen-account-language flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/10 bg-[#1A1A1A]/5 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-all shrink-0"
+            >
+              <Globe className="w-3 h-3" />
+              <span className="fs-xs font-bold tracking-wider uppercase">{lang === 'zh' ? '中文' : 'EN'}</span>
+            </button>
 
-          {/* 竖线 */}
-          <div className="w-px h-3.5 bg-[#1A1A1A]/15 shrink-0" />
+            <div className="gsyen-account-divider w-px h-3.5 bg-[#1A1A1A]/15 shrink-0" />
 
-          {user ? (
-            /* 已登录（含快照预渲染）：邮箱缩写 + 等级徽章 + 登出 */
-            <>
-              {activeTeam ? (
+            {user ? (
+              /* 已登录（含快照预渲染）：邮箱缩写 + 等级徽章 + 登出 */
+              <>
                 <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('gsyen-toggle-team-panel'))}
-                  className="flex items-center gap-1.5 px-2 py-1.5 fs-xs font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A]/80 whitespace-nowrap shrink-0 font-mono transition-colors"
-                  title="团队成员"
+                  onClick={() => window.dispatchEvent(new CustomEvent(activeTeam ? 'gsyen-toggle-team-panel' : 'gsyen-toggle-friends-panel'))}
+                  className="gsyen-account-segment gsyen-account-user flex items-center gap-1.5 px-2 py-1.5 fs-xs font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A]/80 whitespace-nowrap shrink-0 font-mono transition-colors"
+                  title={activeTeam ? '团队成员' : undefined}
                 >
-                  <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  {user.email?.split('@')[0]}
+                  {activeTeam ? <Users className="w-3.5 h-3.5" strokeWidth={1.5} /> : <User className="w-3.5 h-3.5" strokeWidth={1.5} />}
+                  <span className="gsyen-account-name truncate">{accountName}</span>
                 </button>
-              ) : (
+                <div className="gsyen-account-segment gsyen-account-tier">
+                  <TierBadge tier={tier} onClick={onMemberClick} />
+                </div>
                 <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('gsyen-toggle-friends-panel'))}
-                  className="flex items-center gap-1.5 px-2 py-1.5 fs-xs font-bold tracking-wider uppercase text-[#1A1A1A]/50 hover:text-[#1A1A1A]/80 whitespace-nowrap shrink-0 font-mono transition-colors"
-                >
-                  <User className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  {user.email?.split('@')[0]}
+                  onClick={signOut}
+                  className="gsyen-account-segment gsyen-account-signout flex items-center gap-1 px-3 py-1.5 border border-[#1A1A1A]/15 text-[#1A1A1A]/50 fs-xs font-bold tracking-wider uppercase hover:text-[#1A1A1A] hover:border-[#1A1A1A]/30 transition-all whitespace-nowrap shrink-0"
+                  >
+                  {lang === 'zh' ? '登出' : 'SIGN OUT'}
                 </button>
-              )}
-              <TierBadge tier={tier} onClick={onMemberClick} />
-              <button
-                onClick={signOut}
-                className="flex items-center gap-1 px-3 py-1.5 border border-[#1A1A1A]/15 text-[#1A1A1A]/50 fs-xs font-bold tracking-wider uppercase hover:text-[#1A1A1A] hover:border-[#1A1A1A]/30 transition-all whitespace-nowrap shrink-0"
-              >
-                {lang === 'zh' ? '登出' : 'SIGN OUT'}
-              </button>
-            </>
-          ) : authLoading ? (
-            /* 快照不存在且仍在初始化：空占位防闪 */
-            <div className="w-[120px] h-6" />
-          ) : (
-            /* 确认未登录：登录 + 注册 */
-            <>
-              <button
-                onClick={() => setAuthModal('login')}
-                className="gsyen-auth-login px-2 py-1.5 fs-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap shrink-0"
-              >
-                {lang === 'zh' ? '登录' : 'LOGIN'}
-              </button>
-              <button
-                onClick={() => setAuthModal('register')}
-                className="gsyen-auth-cta flex items-center gap-1 px-3 py-1.5 fs-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap shrink-0"
-              >
-                {lang === 'zh' ? '注册' : 'REGISTER'}
-                <span className="gsyen-auth-arrow ml-0.5">→</span>
-              </button>
-            </>
-          )}
+              </>
+            ) : authLoading ? (
+              /* 快照不存在且仍在初始化：空占位防闪 */
+              <div className="w-[120px] h-6" />
+            ) : (
+              /* 确认未登录：登录 + 注册 */
+              <>
+                <button
+                  onClick={() => setAuthModal('login')}
+                  className="gsyen-account-segment gsyen-auth-login px-2 py-1.5 fs-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap shrink-0"
+                >
+                  {lang === 'zh' ? '登录' : 'LOGIN'}
+                </button>
+                <button
+                  onClick={() => setAuthModal('register')}
+                  className="gsyen-account-segment gsyen-auth-cta flex items-center gap-1 px-3 py-1.5 fs-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap shrink-0"
+                >
+                  {lang === 'zh' ? '注册' : 'REGISTER'}
+                  <span className="gsyen-auth-arrow ml-0.5">→</span>
+                </button>
+              </>
+            )}
+          </div>
 
         </div>
       </header>

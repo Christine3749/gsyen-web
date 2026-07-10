@@ -1,0 +1,15 @@
+/* Unify shell height rhythm across desktop and laptop breakpoints. */
+
+#app-header .gsyen-space-nav {
+  height: 42px !important;
+  align-items: center !important;
+}
+
+#app-header .gsyen-space-tab {
+  height: 34px !important;
+}
+
+.gsyen-module-toolbar {
+  height: 42px !important;
+  min-height: 42px !important;
+}
