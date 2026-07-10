@@ -2,7 +2,7 @@
    This layer avoids scaled-down desktop chrome: it preserves readable type,
    trims secondary density, and gives chat/card work the strongest priority. */
 
-@media (max-width: 1440px), (max-height: 840px) {
+@media (max-width: 1600px) and (max-height: 900px) {
   :root {
     --gsyen-laptop-header: 66px;
     --gsyen-laptop-command: 42px;
@@ -224,7 +224,7 @@
   }
 }
 
-@media (max-width: 1400px), (max-height: 780px) {
+@media (max-width: 1400px) and (max-height: 780px) {
   :root {
     --gsyen-laptop-header: 62px;
     --gsyen-laptop-command: 42px;

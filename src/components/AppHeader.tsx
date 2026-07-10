@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Globe, Users, User } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { translations } from '../translations';
@@ -40,6 +40,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
+  const spaceNavRef = useRef<HTMLDivElement>(null);
   const { user, tier, emailVerified, loading: authLoading, signOut, isPasswordRecovery, clearPasswordRecovery, justVerified, clearJustVerified } = useAuth();
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
@@ -73,6 +74,12 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
     document.documentElement.dataset.headerHidden = headerHidden ? 'true' : 'false';
     return () => { delete document.documentElement.dataset.headerHidden; };
   }, [headerHidden]);
+
+  useEffect(() => {
+    if (spaceNavRef.current) {
+      spaceNavRef.current.scrollLeft = 0;
+    }
+  }, [activeSpace, compact, laptopShell, lang]);
 
   return (
     <>
@@ -131,7 +138,11 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
         </div>
 
         {/* 桌面标签栏 */}
-        <div className="gsyen-space-nav flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <div
+          ref={spaceNavRef}
+          className="gsyen-space-nav flex bg-[#1A1A1A]/5 p-1 rounded-none border border-[#1A1A1A]/10 gap-1"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        >
           {SPACES.map(({ value, Icon, iconClass, zh, en, shortZh, shortEn }) => (
             <button
               key={value}

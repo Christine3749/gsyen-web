@@ -12,6 +12,7 @@
 #app-header .gsyen-space-nav {
   height: var(--gsyen-shell-nav-height) !important;
   align-items: center !important;
+  overflow-x: hidden !important;
 }
 
 #app-header .gsyen-space-tab {
@@ -36,7 +37,9 @@
 }
 
 .gsyen-command-tools,
-.gsyen-module-toolbar:not(.gsyen-command-deck) > div:first-child {
+.gsyen-module-toolbar:not(.gsyen-command-deck),
+.gsyen-module-toolbar:not(.gsyen-command-deck) > div:first-child,
+.gsyen-module-toolbar:not(.gsyen-command-deck) > div:first-child > div:first-child {
   gap: var(--gsyen-shell-tool-gap) !important;
 }
 
