@@ -12,6 +12,7 @@ import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
 import { useModelScroll } from '../hooks/useModelScroll';
 import { usePreferredModel } from '../hooks/usePreferredModel';
+import { useChatPromptQueue } from '../hooks/useChatPromptQueue';
 import { useTeams } from '../hooks/useTeams';
 import { useTeamPanel } from '../hooks/useTeamPanel';
 import { useFriends } from '../hooks/useFriends';
@@ -26,6 +27,7 @@ import { FriendsPanel } from './FriendsPanel';
 import { ChatCreateTeamModal } from './ChatCreateTeamModal';
 import { ChatSavePrompt, useChatSavePrompt } from './ChatSavePrompt';
 import { ChatInputBar } from './ChatInputBar';
+import { ChatPendingQueue } from './ChatPendingQueue';
 import { ChatCommandDeck } from './ChatCommandDeck';
 
 interface ChatModuleProps { lang: 'zh' | 'en'; onTeamChange?: (active: boolean) => void }
@@ -52,13 +54,19 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     useChatSession(lang);
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
   const { isLoading, send } = useChatStream();
+  const { queuedPrompts, queuedRef, enqueuePrompt, takeNextPrompt, clearQueue } = useChatPromptQueue();
 
   const pendingCard = useRef<ActionCard | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottom = useRef(true);
+  const isBusyRef = useRef(false);
+  const queueRunningRef = useRef(false);
+  const messagesRef = useRef<ChatMessage[]>([]);
   const pulseDockLock = useRef(false);
   const pulseDockTarget = useRef(false);
+  const hasStreamingAssistant = messages.some(msg => msg.role === 'model' && msg.streaming);
+  const isBusy = isLoading || hasStreamingAssistant;
 
   useEffect(() => {
     const toggle = () => setShowFriends(v => !v);
@@ -68,7 +76,10 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
 
   useEffect(() => {
     if (isAtBottom.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, queuedPrompts.length]);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { isBusyRef.current = isBusy; }, [isBusy]);
 
   const openCreativeKingdom = useCallback(() => {
     const now = new Date().toISOString();
@@ -84,7 +95,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   }, []);
 
   const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); setSelectedModel(s.model); clearTeam(); }, [loadSession, setSelectedModel, clearTeam]);
-  const handleNewChat = useCallback(() => { newChat(selectedModel); clearTeam(); }, [newChat, selectedModel, clearTeam]);
+  const handleNewChat = useCallback(() => { clearQueue(); newChat(selectedModel); clearTeam(); }, [clearQueue, newChat, selectedModel, clearTeam]);
   const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);
@@ -101,17 +112,18 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setPulseOpen(false);
   }, []);
 
-  const handleSend = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
-    if ((!text.trim() && attachments.length === 0) || isLoading) return;
+  const runPrompt = useCallback(async ({ text, attachments = [], timestamp }: { text: string; attachments?: ChatAttachment[]; timestamp?: string }) => {
+    if (!text.trim() && attachments.length === 0) return;
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
       content: text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: timestamp ?? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       attachments,
     };
-    const history = [...messages, userMsg];
+    const liveMessages = messagesRef.current;
+    const history = [...liveMessages, userMsg];
 
     saveChat(history, selectedModel);
     setInputVal('');
@@ -126,7 +138,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
       text,
       attachments,
       model: selectedModel,
-      history: messages,
+      history: liveMessages,
       lang,
       onToken: (partial) => {
         setMessages([...history, {
@@ -163,7 +175,25 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
         showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
       },
     });
-  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
+  }, [selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
+
+  const handleSend = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
+    if (!text.trim() && attachments.length === 0) return;
+    if (isBusyRef.current || queuedRef.current.length > 0) {
+      enqueuePrompt(text, attachments);
+      setInputVal('');
+      return;
+    }
+    await runPrompt({ text, attachments });
+  }, [enqueuePrompt, queuedRef, runPrompt]);
+
+  useEffect(() => {
+    if (isBusy || queueRunningRef.current || queuedPrompts.length === 0) return;
+    const next = takeNextPrompt();
+    if (!next) return;
+    queueRunningRef.current = true;
+    void runPrompt(next).finally(() => { queueRunningRef.current = false; });
+  }, [isBusy, queuedPrompts.length, runPrompt, takeNextPrompt]);
 
   const handleCopy = useCallback((id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -184,7 +214,6 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const handlePulseDockAnimationComplete = useCallback((docked: boolean) => {
     if (pulseDockTarget.current === docked) pulseDockLock.current = false;
   }, []);
-  const hasStreamingAssistant = messages.some(msg => msg.role === 'model' && msg.streaming);
   const showLoadingPlaceholder = isLoading && !hasStreamingAssistant;
 
   return (
@@ -272,9 +301,10 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
               <div ref={chatEndRef} />
             </div>
 
+            <ChatPendingQueue lang={lang} prompts={queuedPrompts} />
             <ChatInputBar lang={lang} inputVal={inputVal} hidden={messages.length === 0}
               onInputChange={setInputVal} onSend={handleSend}
-              onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }} />
+              onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) handleNewChat(); }} />
           </div>
 
           <AnimatePresence initial={false}>
