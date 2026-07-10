@@ -1,4 +1,4 @@
-/* Laptop workstation pass: deliberate 13/14 inch layout for Web + Windows.
+/* Laptop workstation pass: deliberate 13/14 inch layout for shell density.
    This layer avoids scaled-down desktop chrome: it preserves readable type,
    trims secondary density, and gives chat/card work the strongest priority. */
 
@@ -21,13 +21,23 @@
   #app-header.gsyen-app-header.is-header-visible {
     min-height: var(--gsyen-laptop-header) !important;
     max-height: var(--gsyen-laptop-header) !important;
-    grid-template-columns:
-      minmax(0, var(--gsyen-laptop-brand-w))
-      minmax(480px, var(--gsyen-laptop-nav-w))
-      minmax(0, var(--gsyen-laptop-actions-w)) !important;
     column-gap: 16px !important;
     padding-top: 8px !important;
     padding-bottom: 8px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser.is-header-visible {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(480px, var(--gsyen-laptop-nav-w))
+      minmax(0, 1fr) !important;
+  }
+
+  #app-header.gsyen-app-header.is-windows.is-header-visible {
+    grid-template-columns:
+      minmax(0, var(--gsyen-laptop-brand-w))
+      minmax(480px, var(--gsyen-laptop-nav-w))
+      minmax(var(--gsyen-laptop-actions-w), var(--gsyen-laptop-actions-w)) !important;
   }
 
   #app-header.gsyen-app-header.is-browser {

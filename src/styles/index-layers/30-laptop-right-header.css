@@ -1,4 +1,4 @@
-/* 13/14 inch right header: system controls above, account tray below. */
+/* Windows shell right rail: system controls above, account tray below. */
 
 .gsyen-shell-reveal-hotzone {
   position: fixed;
@@ -13,27 +13,182 @@
   cursor: n-resize;
 }
 
-#app-header.gsyen-app-header.is-windows .gsyen-account-tray {
-  min-width: 0;
-}
-
-#app-header.gsyen-app-header.is-windows .gsyen-account-segment {
-  -webkit-app-region: no-drag;
-}
-
-#app-header.gsyen-app-header.is-windows .gsyen-account-name {
-  max-width: 118px;
+#app-header.gsyen-app-header.is-windows {
+  --gsyen-account-tray-w: 300px;
+  --gsyen-auth-tray-w: 206px;
+  --gsyen-window-controls-w: 132px;
+  padding-right: 16px !important;
 }
 
 #app-header.gsyen-app-header.is-windows .gsyen-window-controls {
   z-index: 4;
+  height: 30px !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-window-controls button {
+  width: 44px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-window-controls button:focus,
+#app-header.gsyen-app-header.is-windows .gsyen-window-controls button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-window-controls svg {
+  width: 11px !important;
+  height: 11px !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions {
+  width: var(--gsyen-account-tray-w) !important;
+  max-width: var(--gsyen-account-tray-w) !important;
+  height: 32px !important;
+  align-self: end !important;
+  justify-self: end !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth {
+  width: var(--gsyen-auth-tray-w) !important;
+  max-width: var(--gsyen-auth-tray-w) !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-tray {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  align-items: center !important;
+  gap: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 26, 0.075);
+  background: linear-gradient(180deg, rgba(249, 248, 246, 0.66), rgba(244, 242, 238, 0.46));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -1px 0 rgba(26, 26, 26, 0.025);
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-divider {
+  display: none !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-segment {
+  display: flex !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-left: 1px solid rgba(26, 26, 26, 0.04) !important;
+  background: transparent !important;
+  color: rgba(26, 26, 26, 0.56) !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 760 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.095em !important;
+  -webkit-app-region: no-drag;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions button.gsyen-account-segment,
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions .gsyen-account-segment {
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-language {
+  flex: 0 0 54px !important;
+  border-left: 0 !important;
+  gap: 5px !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-user {
+  flex: 1 1 auto !important;
+  min-width: 110px !important;
+  max-width: none !important;
+  gap: 6px !important;
+  color: rgba(26, 26, 26, 0.64) !important;
+  letter-spacing: 0.10em !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-tier {
+  flex: 0 0 66px !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-signout {
+  flex: 0 0 50px !important;
+  color: rgba(26, 26, 26, 0.38) !important;
+  font-size: 9.5px !important;
+  font-weight: 720 !important;
+  letter-spacing: 0.06em !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-segment svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-name {
+  min-width: 0;
+  max-width: 118px;
+  line-height: 1 !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-tier .gsyen-tier-badge {
+  display: inline-flex !important;
+  width: 58px !important;
+  height: 18px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transform: none !important;
+  box-shadow: none !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  letter-spacing: 0.17em !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-tier .gsyen-tier-badge.is-free {
+  border-color: rgba(26, 110, 204, 0.24) !important;
+  background: rgba(26, 110, 204, 0.025) !important;
+  color: #1A6ECC !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-account-tier .gsyen-tier-badge span {
+  display: block !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  transform: translateY(0.5px);
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-auth-login,
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-auth-cta {
+  flex: 1 1 0 !important;
+  color: rgba(26, 26, 26, 0.44) !important;
+  font-size: 9.5px !important;
+  font-weight: 720 !important;
+  letter-spacing: 0.08em !important;
+}
+
+#app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-auth-cta {
+  color: rgba(26, 26, 26, 0.50) !important;
 }
 
 @media (max-width: 1600px), (max-height: 900px) {
   #app-header.gsyen-app-header.is-windows {
     --gsyen-account-tray-w: 284px;
-    --gsyen-window-controls-w: 132px;
+    --gsyen-auth-tray-w: 206px;
     --gsyen-laptop-brand-w: 246px;
+    padding-left: 18px !important;
+    padding-right: 16px !important;
   }
 
   #app-header.gsyen-app-header.is-windows.is-header-visible {
@@ -45,11 +200,6 @@
       minmax(var(--gsyen-account-tray-w), var(--gsyen-account-tray-w)) !important;
     padding-top: 6px !important;
     padding-bottom: 6px !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows {
-    padding-left: 18px !important;
-    padding-right: 16px !important;
   }
 
   #app-header.gsyen-app-header.is-windows .gsyen-brand-lockup {
@@ -77,7 +227,7 @@
 
   #app-header.gsyen-app-header.is-windows .gsyen-brand-subtitle-text {
     min-width: 0 !important;
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -86,169 +236,6 @@
   #app-header.gsyen-app-header.is-windows .gsyen-header-version {
     flex: 0 0 auto !important;
     white-space: nowrap !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-window-controls {
-    height: 30px !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-window-controls button {
-    width: 44px !important;
-    height: 30px !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    outline: none !important;
-    box-shadow: none !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-window-controls button:focus,
-  #app-header.gsyen-app-header.is-windows .gsyen-window-controls button:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-window-controls svg {
-    width: 11px !important;
-    height: 11px !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions {
-    width: var(--gsyen-account-tray-w) !important;
-    max-width: var(--gsyen-account-tray-w) !important;
-    height: 32px !important;
-    align-self: end !important;
-    justify-self: end !important;
-    justify-content: flex-end !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions {
-    align-self: end !important;
-    transform: translateY(-1px);
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-tray {
-    width: 100%;
-    height: 32px;
-    align-items: center !important;
-    gap: 0 !important;
-    overflow: hidden;
-    border: 1px solid rgba(26, 26, 26, 0.075);
-    background: linear-gradient(180deg, rgba(249, 248, 246, 0.66), rgba(244, 242, 238, 0.46));
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.62),
-      inset 0 -1px 0 rgba(26, 26, 26, 0.025);
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-divider {
-    display: none !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-segment {
-    display: flex !important;
-    box-sizing: border-box !important;
-    height: 100% !important;
-    min-height: 0 !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-left: 1px solid rgba(26, 26, 26, 0.04) !important;
-    background: transparent !important;
-    color: rgba(26, 26, 26, 0.56) !important;
-    box-shadow: none !important;
-    font-size: 10px !important;
-    font-weight: 760 !important;
-    line-height: 1 !important;
-    letter-spacing: 0.095em !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions button.gsyen-account-segment,
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions .gsyen-account-segment {
-    min-height: 0 !important;
-    padding: 0 !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-language {
-    flex: 0 0 54px !important;
-    border-left: 0 !important;
-    gap: 5px !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-user {
-    flex: 1 1 auto !important;
-    min-width: 110px !important;
-    max-width: none !important;
-    gap: 6px !important;
-    color: rgba(26, 26, 26, 0.64) !important;
-    letter-spacing: 0.10em !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-tier {
-    flex: 0 0 66px !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-signout {
-    flex: 0 0 50px !important;
-    color: rgba(26, 26, 26, 0.38) !important;
-    font-size: 9.5px !important;
-    font-weight: 720 !important;
-    letter-spacing: 0.06em !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-segment svg {
-    width: 13px !important;
-    height: 13px !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-name {
-    min-width: 0;
-    max-width: 96px;
-    line-height: 1 !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-tier .gsyen-tier-badge {
-    display: inline-flex !important;
-    width: 58px !important;
-    height: 18px !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    transform: none !important;
-    box-shadow: none !important;
-    font-size: 8px !important;
-    line-height: 1 !important;
-    letter-spacing: 0.17em !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-tier .gsyen-tier-badge.is-free {
-    border-color: rgba(26, 110, 204, 0.24) !important;
-    background: rgba(26, 110, 204, 0.025) !important;
-    color: #1A6ECC !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-account-tier .gsyen-tier-badge span {
-    display: block !important;
-    line-height: 1 !important;
-    text-shadow: none !important;
-    transform: translateY(0.5px);
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-account-tray {
-    width: 206px;
-    margin-left: auto;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-auth-login,
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-auth-cta {
-    flex: 1 1 0 !important;
-    color: rgba(26, 26, 26, 0.44) !important;
-    font-size: 9.5px !important;
-    font-weight: 720 !important;
-    letter-spacing: 0.08em !important;
-  }
-
-  #app-header.gsyen-app-header.is-windows .gsyen-header-actions.has-account-auth .gsyen-auth-cta {
-    color: rgba(26, 26, 26, 0.50) !important;
   }
 }
 
