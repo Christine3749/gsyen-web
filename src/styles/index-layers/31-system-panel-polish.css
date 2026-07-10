@@ -6,7 +6,7 @@
     inset 1px 0 0 rgba(255,255,255,0.48) !important;
   transform-origin: right center !important;
   backface-visibility: hidden;
-  will-change: opacity, transform;
+  will-change: opacity, transform, clip-path;
 }
 
 .gsyen-system-panel-head {

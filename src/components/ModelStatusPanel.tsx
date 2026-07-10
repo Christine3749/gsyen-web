@@ -120,15 +120,16 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   return (
     <motion.aside
       className={`gsyen-system-panel is-${health.status}`}
-      initial={{ opacity: 0, x: 14, scale: 0.992 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 10, scale: 0.996 }}
+      initial={{ opacity: 0, x: 20, scaleX: 0.965, clipPath: 'inset(0 0 0 100%)' }}
+      animate={{ opacity: 1, x: 0, scaleX: 1, clipPath: 'inset(0 0 0 0%)' }}
+      exit={{ opacity: 0, x: 18, scaleX: 0.975, clipPath: 'inset(0 0 0 100%)' }}
       transition={{
-        opacity: { duration: 0.34, ease: [0.25, 0.1, 0.25, 1] },
-        x: { duration: 0.44, ease: [0.16, 1, 0.3, 1] },
-        scale: { duration: 0.44, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 0.38, ease: [0.42, 0, 0.58, 1] },
+        x: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
+        scaleX: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
+        clipPath: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
       }}
-      style={{ transformOrigin: 'right center', willChange: 'opacity, transform', backfaceVisibility: 'hidden' }}
+      style={{ transformOrigin: 'right center', willChange: 'opacity, transform, clip-path', backfaceVisibility: 'hidden' }}
     >
       <div className="gsyen-system-panel-head">
         <div className="gsyen-system-panel-title min-w-0">
