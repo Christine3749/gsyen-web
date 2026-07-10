@@ -21,6 +21,19 @@
   pointer-events: none;
 }
 
+.gsyen-chat-input-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  line-height: 0;
+}
+
+.gsyen-chat-input-button svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 @media (max-width: 1440px), (max-height: 840px) {
   .gsyen-chat-scroll {
     padding: 20px 24px !important;
@@ -76,6 +89,8 @@
   .gsyen-chat-input-button {
     width: 36px !important;
     height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
     padding: 0 !important;
   }
 
