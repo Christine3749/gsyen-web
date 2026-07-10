@@ -184,6 +184,8 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const handlePulseDockAnimationComplete = useCallback((docked: boolean) => {
     if (pulseDockTarget.current === docked) pulseDockLock.current = false;
   }, []);
+  const hasStreamingAssistant = messages.some(msg => msg.role === 'model' && msg.streaming);
+  const showLoadingPlaceholder = isLoading && !hasStreamingAssistant;
 
   return (
     <>
@@ -250,7 +252,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
                 ))}
               </AnimatePresence>
 
-              {isLoading && (
+              {showLoadingPlaceholder && (
                 <div className="flex gap-3 max-w-3xl">
                   <div className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1A1A1A] text-[#F9F8F6] shrink-0 mt-1">
                     <Sparkles className="w-3 h-3" />
