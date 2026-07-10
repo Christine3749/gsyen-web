@@ -181,7 +181,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
               className="gsyen-account-segment gsyen-account-language flex items-center gap-1 px-2 py-1.5 border border-[#1A1A1A]/10 bg-[#1A1A1A]/5 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-all shrink-0"
             >
               <Globe className="w-3 h-3" />
-              <span className="gsyen-account-language-label fs-xs font-bold tracking-wider uppercase" data-compact={lang === 'zh' ? 'CN' : 'EN'}>
+              <span className="gsyen-account-language-label fs-xs font-bold tracking-wider uppercase">
                 {lang === 'zh' ? '中文' : 'EN'}
               </span>
             </button>
