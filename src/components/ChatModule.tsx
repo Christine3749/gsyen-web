@@ -53,7 +53,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { messages, sessions, currentSessionId, currentTeamId, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
     useChatSession(lang);
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
-  const { isLoading, send } = useChatStream();
+  const { isLoading, send, cancel } = useChatStream();
   const { queuedPrompts, queuedRef, enqueuePrompt, takeNextPrompt, clearQueue } = useChatPromptQueue();
 
   const pendingCard = useRef<ActionCard | null>(null);
@@ -94,8 +94,19 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setTimeout(() => setToast(null), 3500);
   }, []);
 
-  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); setSelectedModel(s.model); clearTeam(); }, [loadSession, setSelectedModel, clearTeam]);
-  const handleNewChat = useCallback(() => { clearQueue(); newChat(selectedModel); clearTeam(); }, [clearQueue, newChat, selectedModel, clearTeam]);
+  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => {
+    cancel();
+    clearQueue();
+    loadSession(s);
+    setSelectedModel(s.model);
+    clearTeam();
+  }, [cancel, clearQueue, loadSession, setSelectedModel, clearTeam]);
+  const handleNewChat = useCallback(() => {
+    cancel();
+    clearQueue();
+    newChat(selectedModel);
+    clearTeam();
+  }, [cancel, clearQueue, newChat, selectedModel, clearTeam]);
   const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);

@@ -38,8 +38,8 @@ export default function AboutDialog({ lang, onClose }: AboutDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-end bg-[#1A1A1A]/12 backdrop-blur-[1px] pt-20 pr-10" onClick={onClose}>
-      <div className="bg-[#F9F8F6] border border-[#1A1A1A]/14 w-[318px] flex flex-col items-center gap-0 shadow-[0_18px_46px_rgba(26,26,26,0.16)]"
+    <div className="fixed inset-0 z-[200] flex items-start justify-end bg-[#1A1A1A]/12 backdrop-blur-[1px] p-4 sm:pt-20 sm:pr-10" onClick={onClose}>
+      <div className="bg-[#F9F8F6] border border-[#1A1A1A]/14 w-full max-w-[318px] flex flex-col items-center gap-0 shadow-[0_18px_46px_rgba(26,26,26,0.16)]"
         onClick={e => e.stopPropagation()}>
 
         {/* 关闭按钮 */}

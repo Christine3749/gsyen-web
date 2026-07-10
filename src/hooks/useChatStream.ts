@@ -27,6 +27,7 @@ function isDenial(text: string): boolean {
 
 interface UseChatStreamReturn {
   isLoading: boolean;
+  cancel: () => void;
   send: (opts: {
     text: string;
     attachments?: ChatAttachment[];
@@ -82,6 +83,14 @@ export function useChatStream(): UseChatStreamReturn {
   const [isLoading, setIsLoading] = useState(false);
   const pendingConfirmation = useRef<PendingConfirmation | null>(null);
   const activeRequest = useRef<AbortController | null>(null);
+
+  const cancel = useCallback(() => {
+    const controller = activeRequest.current;
+    if (!controller) return;
+    activeRequest.current = null;
+    controller.abort();
+    setIsLoading(false);
+  }, []);
 
   const send = useCallback(async ({
     text, attachments = [], model, history, lang,
@@ -244,5 +253,5 @@ export function useChatStream(): UseChatStreamReturn {
     }
   }, []);
 
-  return { isLoading, send };
+  return { isLoading, send, cancel };
 }

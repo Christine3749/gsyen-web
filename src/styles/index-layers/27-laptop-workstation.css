@@ -59,6 +59,7 @@
     --gsyen-brand-icon-size: 38px;
     --gsyen-brand-icon-stroke: 1.10;
     --gsyen-brand-module-shift: 7px;
+
     width: 60px !important;
     height: 42px !important;
     margin-top: 0 !important;
@@ -402,6 +403,7 @@
     --gsyen-command-button-width: 52px;
     --gsyen-command-tools-width: 190px;
     --gsyen-pulse-model-gap: 8px;
+
     height: 34px !important;
     min-height: 34px !important;
     padding-left: 12px !important;
