@@ -292,3 +292,227 @@
   }
 
 }
+
+@media (max-width: 1280px), (max-height: 720px) {
+  #app-header.gsyen-app-header.is-browser {
+    grid-template-columns: auto minmax(320px, 1fr) max-content !important;
+    min-height: 54px !important;
+    max-height: 58px !important;
+    padding: 6px 18px !important;
+  }
+
+  #app-header.gsyen-app-header.is-windows {
+    grid-template-columns: auto minmax(260px, 1fr) max-content !important;
+    min-height: 52px !important;
+    max-height: 56px !important;
+    padding: 5px 116px 5px 12px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-lockup,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-lockup {
+    gap: 6px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-mark,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-mark {
+    width: 48px !important;
+    height: 32px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-mark > svg,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-mark > svg {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-mark img.gsyen-vintage-car,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-mark img.gsyen-vintage-car {
+    width: 48px !important;
+    height: 32px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-copy,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-copy {
+    width: 114px !important;
+    padding-bottom: 2px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-copy::after,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-copy::after {
+    width: 110px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-header-wordmark,
+  #app-header.gsyen-app-header.is-windows .gsyen-header-wordmark {
+    width: 110px !important;
+    height: 23px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-brand-subtitle,
+  #app-header.gsyen-app-header.is-windows .gsyen-brand-subtitle {
+    max-width: 108px !important;
+    margin-top: 1px !important;
+    font-size: 5.8px !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-space-nav,
+  #app-header.gsyen-app-header.is-windows .gsyen-space-nav {
+    justify-self: start !important;
+    width: 100% !important;
+    padding: 2px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-space-tab,
+  #app-header.gsyen-app-header.is-windows .gsyen-space-tab {
+    min-width: 62px !important;
+    height: 26px !important;
+    padding: 0 6px !important;
+    gap: 4px !important;
+    font-size: 8.5px !important;
+  }
+
+  #app-header.gsyen-app-header.is-browser .gsyen-space-tab svg,
+  #app-header.gsyen-app-header.is-windows .gsyen-space-tab svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  #app-header .gsyen-header-actions {
+    gap: 4px !important;
+  }
+
+  #app-header .gsyen-header-actions > button {
+    max-width: 112px !important;
+    min-height: 26px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  :root {
+    --gsyen-model-label-width: 28px;
+    --gsyen-model-tabs-width: 84px;
+    --gsyen-model-status-width: 44px;
+  }
+
+  .gsyen-command-deck {
+    --gsyen-command-pad-x: 12px;
+    --gsyen-command-gap: 8px;
+    --gsyen-command-button-width: 52px;
+    --gsyen-command-tools-width: 190px;
+    --gsyen-pulse-model-gap: 8px;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .gsyen-command-deck .gsyen-icon-command,
+  .gsyen-command-deck .gsyen-command-button,
+  .gsyen-pulse-dock-slot,
+  .gsyen-pulse-dock-button.gsyen-command-button,
+  .gsyen-model-dock,
+  .gsyen-command-model .gsyen-model-label,
+  .gsyen-command-model .gsyen-model-selector,
+  .gsyen-command-model .gsyen-model-status-button,
+  .gsyen-model-selector,
+  .gsyen-model-option {
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+
+  .gsyen-command-pulse .gsyen-system-bus-label,
+  .gsyen-system-bus-label {
+    width: 78px !important;
+    flex-basis: 78px !important;
+  }
+
+  .gsyen-system-cell {
+    min-width: 90px !important;
+    padding: 0 7px !important;
+  }
+
+  .gsyen-system-cell-name {
+    margin-right: 8px !important;
+  }
+
+  .gsyen-system-cell-unit {
+    font-size: 10px !important;
+  }
+
+  .gsyen-system-count {
+    width: 32px !important;
+    flex-basis: 32px !important;
+    padding: 0 5px !important;
+  }
+
+  .gsyen-command-model {
+    gap: 5px !important;
+  }
+
+  .gsyen-model-option {
+    min-width: 52px !important;
+  }
+
+  .gsyen-standby-shell {
+    padding-top: 10px !important;
+  }
+
+  .gsyen-standby-frame {
+    max-width: 620px !important;
+  }
+
+  .gsyen-standby-header {
+    min-height: 62px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .gsyen-standby-input textarea {
+    min-height: 62px !important;
+  }
+}
+
+@media (max-width: 1366px), (max-height: 760px) {
+  .gsyen-kanban-page aside[class*="w-[240px]"] {
+    width: 216px !important;
+    padding: 18px !important;
+  }
+
+  .gsyen-kanban-page aside [class*="min-w-[208px]"] {
+    min-width: 180px !important;
+  }
+
+  .gsyen-kanban-page .flex-1:has(> #kanban-lanes-master) {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .gsyen-kanban-page #kanban-lanes-master {
+    gap: 10px !important;
+    padding-top: 10px !important;
+    padding-right: 8px !important;
+    padding-bottom: 10px !important;
+    scroll-padding-inline: 8px;
+    scrollbar-gutter: stable both-edges;
+    overscroll-behavior-x: contain;
+  }
+
+  .gsyen-kanban-page #kanban-lanes-master > div[draggable="true"] {
+    width: 246px !important;
+  }
+
+  .gsyen-kanban-page #kanban-lanes-master .relative.border.bg-white {
+    padding: 10px !important;
+  }
+
+  .gsyen-kanban-page #kanban-lanes-master > button {
+    min-width: 198px !important;
+    width: 198px !important;
+  }
+
+  .gsyen-kanban-page .shrink-0.p-4.border-t {
+    padding: 10px 12px !important;
+  }
+}
