@@ -13,3 +13,69 @@
   height: 42px !important;
   min-height: 42px !important;
 }
+
+:root {
+  --gsyen-toolbar-pad-x: 32px;
+  --gsyen-module-command-button-min: 88px;
+}
+
+.gsyen-module-toolbar {
+  padding-left: var(--gsyen-toolbar-pad-x) !important;
+  padding-right: var(--gsyen-toolbar-pad-x) !important;
+}
+
+.gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-icon-command {
+  flex: 0 0 30px !important;
+}
+
+.gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
+  width: auto !important;
+  min-width: var(--gsyen-module-command-button-min) !important;
+  max-width: min(220px, calc(100vw - 128px)) !important;
+  flex: 0 0 auto !important;
+  gap: 8px !important;
+  padding: 0 13px !important;
+  line-height: 1 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+.gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button svg {
+  flex: 0 0 auto !important;
+}
+
+.gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button span {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  transform: translateY(0.5px);
+}
+
+@media (max-width: 1440px), (max-height: 840px) {
+  :root {
+    --gsyen-toolbar-pad-x: 18px;
+    --gsyen-module-command-button-min: 72px;
+  }
+
+  .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
+    gap: 7px !important;
+    padding: 0 11px !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.12em !important;
+  }
+}
+
+@media (max-width: 1400px), (max-height: 780px) {
+  :root {
+    --gsyen-toolbar-pad-x: 14px;
+    --gsyen-module-command-button-min: 68px;
+  }
+
+  .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
+    padding: 0 10px !important;
+    letter-spacing: 0.105em !important;
+  }
+}
