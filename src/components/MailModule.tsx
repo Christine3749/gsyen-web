@@ -37,7 +37,7 @@ export default function MailModule({ lang }: MailModuleProps) {
             className="gsyen-command-button"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '写信' : 'Write'}</span>
+            <span>{lang === 'zh' ? '撰信' : 'Write'}</span>
           </button>
         </div>
         <div className="flex items-center gap-2 flex-nowrap min-w-0">
