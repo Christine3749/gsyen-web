@@ -27,3 +27,13 @@ export const CHATGPT_MODELS: ChatGptModelConfig[] = [
 ];
 
 export const DEFAULT_MODEL: ModelId = 'kimi';
+
+const enabledModelIds = new Set(MODELS.filter(m => !m.disabled).map(m => m.id));
+
+export function isModelId(value: string | null | undefined): value is ModelId {
+  return !!value && enabledModelIds.has(value);
+}
+
+export function firstEnabledModel(): ModelId {
+  return (MODELS.find(m => !m.disabled)?.id ?? DEFAULT_MODEL) as ModelId;
+}

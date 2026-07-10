@@ -8,10 +8,10 @@ import { AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 
 import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
-import { ModelId } from '../config/models';
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
 import { useModelScroll } from '../hooks/useModelScroll';
+import { usePreferredModel } from '../hooks/usePreferredModel';
 import { useTeams } from '../hooks/useTeams';
 import { useTeamPanel } from '../hooks/useTeamPanel';
 import { useFriends } from '../hooks/useFriends';
@@ -38,7 +38,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [pulseOpen, setPulseOpen] = useState(false);
   const [pulseDocked, setPulseDocked] = useState(false);
   const [modelPanelOpen, setModelPanelOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
+  const { selectedModel, setSelectedModel } = usePreferredModel();
   const [toast, setToast] = useState<string | null>(null);
   const [creativeDocId, setCreativeDocId] = useState<string | null>(null);
   const [createTeamOpen, setCreateTeamOpen] = useState(false);
@@ -83,7 +83,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setTimeout(() => setToast(null), 3500);
   }, []);
 
-  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); }, [loadSession, clearTeam]);
+  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); setSelectedModel(s.model); clearTeam(); }, [loadSession, setSelectedModel, clearTeam]);
   const handleNewChat = useCallback(() => { newChat(selectedModel); clearTeam(); }, [newChat, selectedModel, clearTeam]);
   const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
@@ -275,12 +275,12 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
               onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }} />
           </div>
 
-          {modelPanelOpen
-            ? <ModelStatusPanel lang={lang} selectedModel={selectedModel} onSelectModel={setSelectedModel} onClose={() => setModelPanelOpen(false)} contextLabel={selectedTeam?.name} />
-            : showPanel && selectedTeam
-              ? <TeamMembersPanel team={selectedTeam} members={members} onClose={clearTeam} />
-              : showFriends && <FriendsPanel friends={friends} onClose={() => setShowFriends(false)} />
-          }
+          <AnimatePresence initial={false}>
+            {modelPanelOpen && <ModelStatusPanel key="model-status" lang={lang} selectedModel={selectedModel} onSelectModel={setSelectedModel} onClose={() => setModelPanelOpen(false)} contextLabel={selectedTeam?.name} />}
+          </AnimatePresence>
+          {!modelPanelOpen && (showPanel && selectedTeam
+            ? <TeamMembersPanel team={selectedTeam} members={members} onClose={clearTeam} />
+            : showFriends && <FriendsPanel friends={friends} onClose={() => setShowFriends(false)} />)}
         </div>
       </div>
       {creativeDocId && <CanvasEditorContent docId={creativeDocId} onClose={() => setCreativeDocId(null)} />}

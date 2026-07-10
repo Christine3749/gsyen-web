@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { ChevronRight, X } from 'lucide-react';
 import { CHATGPT_MODELS, MODELS, ModelId } from '../config/models';
 import { useModelHealth } from '../hooks/useModelHealth';
 import { startLocalChatGptBind } from '../services/localBridge';
+import { ModelStatusSelect } from './ModelStatusSelect';
 
 interface ModelStatusPanelProps {
   lang: 'zh' | 'en';
@@ -28,6 +30,8 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   const isChatGptPro = selectedModel === 'chatgpt-pro';
   const isBound = isChatGptPro && health.status === 'online' && health.authMode === 'chatgpt';
   const selectedChatGptModel = CHATGPT_MODELS.find(m => m.id === chatGptModel) ?? CHATGPT_MODELS[0];
+  const modelOptions = MODELS.map(m => ({ value: m.id as ModelId, label: m.label, disabled: m.disabled }));
+  const chatGptOptions = CHATGPT_MODELS.map(m => ({ value: m.id, label: m.label }));
   const displayLabel = isChatGptPro ? 'CHATGPT' : selected.label;
   const statusLabel = health.status === 'online'
     ? (zh ? '在线' : 'ONLINE')
@@ -39,16 +43,19 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
       ? (zh ? 'ChatGPT 已绑定' : 'CHATGPT BOUND')
       : (zh ? '未绑定' : 'NOT BOUND')
     : statusLabel;
+  const panelKicker = zh ? 'SYSTEM STATUS / 模型与状态' : 'SYSTEM STATUS / MODEL STATE';
+  const panelMeta = isChatGptPro
+    ? isBound
+      ? `PRO / ${selectedChatGptModel.label}`
+      : (zh ? '需要本地 Bridge' : 'LOCAL BRIDGE REQUIRED')
+    : (contextLabel || (zh ? '灵阁' : 'MUSE'));
 
-  const rows = [
+  const rows: { label: string; value: string; dot?: boolean }[] = [
     { label: zh ? '模型ID' : 'MODEL ID', value: isChatGptPro ? 'CHATGPT-DEF' : `${selected.label}-DEF` },
-    { label: zh ? '状态' : 'STATUS', value: authLabel, dot: true },
-    ...(isChatGptPro ? [{ label: zh ? '订阅' : 'PLAN', value: isBound ? 'PRO' : (zh ? '未绑定' : 'NOT BOUND') }] : []),
-    ...(isChatGptPro ? [{ label: zh ? '模型' : 'MODEL', value: selectedChatGptModel.label }] : []),
     ...(isChatGptPro ? [{ label: zh ? '认证' : 'AUTH', value: isBound ? 'ChatGPT' : (health.error ?? 'LOCAL ONLY') }] : []),
     { label: zh ? '上下文' : 'CONTEXT', value: contextLabel || (zh ? '灵阁' : 'MUSE') },
     { label: zh ? '记忆' : 'MEMORY', value: zh ? '已启用' : 'ENABLED' },
-    { label: zh ? '工具' : 'TOOLS', value: zh ? '4/12 就绪' : '4/12 READY' },
+    { label: zh ? '工具' : 'TOOLS', value: isChatGptPro ? (isBound ? (zh ? '本地桥接' : 'LOCAL BRIDGE') : (zh ? '待接入' : 'PENDING')) : (zh ? '云端路由' : 'CLOUD ROUTE') },
   ];
   const actionLabel = isChatGptPro
     ? isBound
@@ -111,42 +118,42 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   };
 
   return (
-    <aside className={`gsyen-system-panel is-${health.status}`}>
+    <motion.aside
+      className={`gsyen-system-panel is-${health.status}`}
+      initial={{ opacity: 0, x: 22, filter: 'blur(3px)' }}
+      animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, x: 18, filter: 'blur(2px)' }}
+      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div className="gsyen-system-panel-head">
-        <div className="min-w-0">
-          <p>{zh ? 'SYSTEM STATUS' : 'SYSTEM STATUS'}</p>
-          <h3>{zh ? '模型与状态' : 'Model State'}</h3>
+        <div className="gsyen-system-panel-title min-w-0">
+          <p>{panelKicker}</p>
+          <h3>{displayLabel}</h3>
+          <div className="gsyen-system-panel-head-status">
+            <span className={`gsyen-system-panel-dot is-${health.status}`} />
+            <strong>{isChatGptPro ? authLabel : statusLabel}</strong>
+            <em>{panelMeta}</em>
+          </div>
         </div>
         <button onClick={onClose} aria-label={zh ? '关闭模型状态' : 'Close model status'}>
           <X className="w-3 h-3" strokeWidth={1.5} />
         </button>
       </div>
 
-      <div className="gsyen-system-panel-readout">
-        <span className={`gsyen-system-panel-dot is-${health.status}`} />
-        <div>
-          <p>{displayLabel}</p>
-          <span>{isChatGptPro ? authLabel : statusLabel}</span>
-        </div>
-      </div>
-
-      <div className="gsyen-system-panel-select">
-        <label>{zh ? '当前模型' : 'CURRENT MODEL'}</label>
-        <select value={selectedModel} onChange={e => onSelectModel(e.target.value as ModelId)}>
-          {MODELS.map(m => (
-            <option key={m.id} value={m.id} disabled={m.disabled}>{m.label}</option>
-          ))}
-        </select>
-      </div>
+      <ModelStatusSelect<ModelId>
+        label={zh ? '当前模型' : 'CURRENT MODEL'}
+        value={selectedModel}
+        options={modelOptions}
+        onChange={onSelectModel}
+      />
       {isChatGptPro && (
-        <div className="gsyen-system-panel-select">
-          <label>{zh ? 'ChatGPT 模型' : 'CHATGPT MODEL'}</label>
-          <select value={chatGptModel} onChange={e => setChatGptModel(e.target.value)} disabled={!isBound}>
-            {CHATGPT_MODELS.map(m => (
-              <option key={m.id} value={m.id}>{m.label}</option>
-            ))}
-          </select>
-        </div>
+        <ModelStatusSelect
+          label={zh ? 'ChatGPT 模型' : 'CHATGPT MODEL'}
+          value={chatGptModel}
+          options={chatGptOptions}
+          onChange={setChatGptModel}
+          disabled={!isBound}
+        />
       )}
 
       <div className="gsyen-system-panel-table">
@@ -181,7 +188,7 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
         <span>{actionLabel}</span>
         <ChevronRight className="w-3 h-3" strokeWidth={1.5} />
       </button>
-    </aside>
+    </motion.aside>
   );
 }
 
