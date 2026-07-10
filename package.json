@@ -1,7 +1,7 @@
 {
   "name": "gsyen",
   "private": true,
-  "version": "2.87.246",
+  "version": "2.87.283",
   "description": "GSYEN AI atelier workspace",
   "author": "GSYEN",
   "type": "module",
@@ -107,7 +107,7 @@
     "@corbe30/fortune-excel": "^2.3.2",
     "@fortune-sheet/core": "^1.0.4",
     "@fortune-sheet/react": "^1.0.4",
-    "@sentry/electron": "^7.13.0",
+    "@sentry/electron": "^7.15.0",
     "@sentry/react": "^10.57.0",
     "@supabase/ssr": "^0.12.0",
     "@tiptap/pm": "^3.27.1",

@@ -15,11 +15,14 @@ interface ChatInputBarProps {
 
 export function ChatInputBar({ lang, inputVal, hidden, onInputChange, onSend, onClear }: ChatInputBarProps) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const composingRef = useRef(false);
+  const compositionGuardUntil = useRef(0);
   const { attachments, addFiles, removeAttachment, clearAttachments } = useImageAttachments();
   const canSend = inputVal.trim().length > 0 || attachments.length > 0;
+  const isComposing = () => composingRef.current || Date.now() < compositionGuardUntil.current;
 
   const submit = () => {
-    if (!canSend) return;
+    if (!canSend || isComposing()) return;
     onSend(inputVal, attachments);
     clearAttachments();
   };
@@ -65,6 +68,11 @@ export function ChatInputBar({ lang, inputVal, hidden, onInputChange, onSend, on
         <input type="text"
           placeholder={lang === 'zh' ? '向 Atelier AI 咨询任何品牌策划、符号创意、日程安排吧...' : 'Ask Atelier AI anything about brand, design, or schedules...'}
           value={inputVal} onChange={e => onInputChange(e.target.value)} onPaste={handlePaste}
+          onCompositionStart={() => { composingRef.current = true; }}
+          onCompositionEnd={() => {
+            composingRef.current = false;
+            compositionGuardUntil.current = Date.now() + 120;
+          }}
           onDrop={e => { e.preventDefault(); void addFiles(Array.from(e.dataTransfer.files)); }}
           className="gsyen-chat-input-field flex-grow p-3 bg-[#F9F8F6] border border-[#1A1A1A]/15 focus:border-[#1A1A1A] focus:bg-white rounded-none outline-none font-sans text-xs text-[#1A1A1A]" />
         <button type="submit" disabled={!canSend} aria-label={lang === 'zh' ? '发送消息' : 'Send message'}

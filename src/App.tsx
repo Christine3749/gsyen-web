@@ -16,6 +16,7 @@ import LandingHero from './components/LandingHero';
 import AppHeader, { ActiveSpace } from './components/AppHeader';
 import BrandLab, { type BrandTab } from './components/brand/BrandLab';
 import { FullscreenFade } from './components/FullscreenFade';
+import { ModuleViewport } from './components/ModuleViewport';
 import { useAuth } from './auth/useAuth';
 import { useTeams } from './hooks/useTeams';
 import { shellPlatform } from './hooks/useShellPlatform';
@@ -64,14 +65,14 @@ export default function App() {
         <BrandLab lang={lang} requestedTab={brandTab} onTabConsumed={() => setBrandTab(undefined)} />
       ) : (
         <main className="flex-grow flex flex-col justify-between bg-[#F9F8F6] min-h-0">
-          <div className="flex-grow flex flex-col min-h-0 overflow-hidden">
+          <ModuleViewport>
             {activeSpace === 'chat' && <ChatModule lang={lang} onTeamChange={setActiveTeam} />}
-            {activeSpace === 'mail' && <div className="h-full overflow-hidden"><MailModule lang={lang} /></div>}
-            {activeSpace === 'schedule' && <div className="h-full overflow-hidden"><KanbanModule lang={lang} /></div>}
-            {activeSpace === 'calendar' && <div className="h-full overflow-hidden"><ScheduleModule lang={lang} /></div>}
-            {activeSpace === 'finance' && <div className="h-full overflow-hidden"><FinanceModule lang={lang} /></div>}
-            {activeSpace === 'password' && <div className="h-full overflow-hidden"><PasswordModule lang={lang} /></div>}
-          </div>
+            {activeSpace === 'mail' && <MailModule lang={lang} />}
+            {activeSpace === 'schedule' && <KanbanModule lang={lang} />}
+            {activeSpace === 'calendar' && <ScheduleModule lang={lang} />}
+            {activeSpace === 'finance' && <FinanceModule lang={lang} />}
+            {activeSpace === 'password' && <PasswordModule lang={lang} />}
+          </ModuleViewport>
 
           <footer className="mt-auto pt-2 pb-1 border-t border-[#1A1A1A]/10 text-[9px] text-[#1A1A1A]/40 font-mono uppercase tracking-widest flex flex-row items-center justify-between gap-4" id="app-footer-other">
             <p>

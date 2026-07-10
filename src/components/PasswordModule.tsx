@@ -49,7 +49,7 @@ export default function PasswordModule({ lang }: PasswordModuleProps) {
   return (
     <div className="gsyen-citadel-page flex flex-col h-full">
       {/* Empty toolbar strip — 对齐其他模块的 toolbar 高度 */}
-      <div className="gsyen-module-toolbar relative shrink-0 h-[52px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
+      <div className="gsyen-module-toolbar gsyen-citadel-toolbar relative shrink-0 h-[52px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
       </div>
       <div className="flex-1 overflow-y-auto px-8 pt-0 pb-10 space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

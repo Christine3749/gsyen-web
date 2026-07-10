@@ -139,7 +139,7 @@ export default function ScheduleModule({ lang }: ScheduleModuleProps) {
       )}
 
       {/* Toolbar strip */}
-      <div className="gsyen-module-toolbar relative shrink-0 h-[52px] flex items-center px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
+      <div className="gsyen-module-toolbar gsyen-schedule-toolbar relative shrink-0 h-[52px] flex items-center px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
         <ScheduleToolbar
           total={events.length} active={activeFilteredList.length}
           selectedDate={selectedDate}

@@ -19,6 +19,13 @@ export interface ChatAttachment {
   dataUrl:  string;
 }
 
+export interface ChatQueuedPrompt {
+  id:          string;
+  text:        string;
+  attachments: ChatAttachment[];
+  timestamp:   string;
+}
+
 export interface ChatMessage {
   id:        string;
   role:      'user' | 'model';

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CSSProperties, MouseEvent } from 'react';
+import { publicAsset } from '../utils/publicAsset';
 
 interface VintageCarProps {
   size?: number;
@@ -11,15 +12,14 @@ interface VintageCarProps {
 
 const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarProps) => {
   const [kicking, setKicking] = useState(false);
-  const [fallbackLevel, setFallbackLevel] = useState(0);
+  const [fallback, setFallback] = useState(false);
   const isLight = tone === 'light';
-  const assetBase = import.meta.env.BASE_URL;
   const transparentSrc = isLight
-    ? `${assetBase}brand/gsyen-logo-car-light-transparent.png`
-    : `${assetBase}brand/gsyen-logo-car-ink-transparent.png`;
-  const pngSrc = isLight ? `${assetBase}brand/gsyen-logo-car-light.png` : `${assetBase}brand/gsyen-logo-car-ink.png`;
-  const svgSrc = isLight ? `${assetBase}brand/gsyen-logo-car-light.svg` : `${assetBase}brand/gsyen-logo-car-ink.svg`;
-  const src = fallbackLevel === 0 ? transparentSrc : fallbackLevel === 1 ? pngSrc : svgSrc;
+    ? publicAsset('brand/gsyen-logo-car-light-transparent.png')
+    : publicAsset('brand/gsyen-logo-car-ink-transparent.png');
+  const pngSrc = isLight
+    ? publicAsset('brand/gsyen-logo-car-light.png')
+    : publicAsset('brand/gsyen-logo-car-ink.png');
   const logoRatio = isLight ? 360 / 272 : 489 / 304;
 
   const handleClick = (_event: MouseEvent<HTMLImageElement>) => {
@@ -29,14 +29,14 @@ const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarPro
 
   return (
     <img
-      src={src}
+      src={fallback ? pngSrc : transparentSrc}
       alt="GSYEN vintage frontier automobile"
       className={`${className ?? ''} gsyen-vintage-car ${kicking ? 'is-kicking' : ''}`}
       width={Math.round(size * logoRatio)}
       height={size}
       draggable={false}
       onClick={handleClick}
-      onError={() => setFallbackLevel(level => Math.min(level + 1, 2))}
+      onError={() => setFallback(true)}
       onAnimationEnd={() => setKicking(false)}
       style={{
         display: 'block',

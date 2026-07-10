@@ -18,18 +18,35 @@
 }
 
 .gsyen-command-pulse .gsyen-system-bus {
-  border-color: rgba(17, 16, 15, 0.22) !important;
+  border-color: transparent !important;
+  background: var(--gyen-n1-readout, #11100F) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 -1px 0 rgba(0,0,0,0.72) !important;
+    inset 0 -1px 0 rgba(0,0,0,0.42) !important;
+}
+
+.gsyen-command-pulse .gsyen-system-bus:hover,
+.gsyen-command-pulse .gsyen-system-bus.is-open {
+  border-color: transparent !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.46) !important;
 }
 
 .gsyen-command-pulse .gsyen-pulse-dock-toggle.gsyen-system-bus-label {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  height: 100%;
+  margin: 0;
   border: 0 !important;
-  border-right: 1px solid rgba(17, 16, 15, 0.42) !important;
+  border-right: 1px solid rgba(17, 16, 15, 0.12) !important;
   background: var(--gyen-gold-dark, #D0AA2A) !important;
   color: var(--gyen-n0-selected, #11100E) !important;
-  box-shadow: none !important;
+  box-shadow:
+    inset 1px 0 0 var(--gyen-gold-dark, #D0AA2A),
+    inset 0 1px 0 color-mix(in srgb, var(--gyen-gold-dark, #D0AA2A) 86%, white),
+    inset 0 -1px 0 var(--gyen-gold-dark, #D0AA2A) !important;
   outline-offset: 0;
 }
 

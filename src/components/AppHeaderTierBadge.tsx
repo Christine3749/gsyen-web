@@ -7,7 +7,7 @@ interface TierBadgeProps {
   onClick?: () => void;
 }
 
-const base = 'px-1.5 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono shrink-0 select-none';
+const base = 'gsyen-tier-badge px-1.5 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono shrink-0 select-none';
 
 /** 蓝色升级 CTA — free MEMBER */
 function BlueCTABadge({ label, onClick }: { label: string; onClick?: () => void }) {
@@ -17,7 +17,7 @@ function BlueCTABadge({ label, onClick }: { label: string; onClick?: () => void 
       onClick={onClick}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="relative inline-flex items-center gap-0.5 px-2 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono shrink-0 cursor-pointer overflow-hidden select-none"
+      className="gsyen-tier-badge is-free relative inline-flex items-center gap-0.5 px-2 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono shrink-0 cursor-pointer overflow-hidden select-none"
       style={{ borderColor: 'rgba(26,110,204,0.45)', color: '#1A6ECC' }}
       animate={hovered
         ? { backgroundColor: '#1A6ECC', color: '#FFFFFF', y: -2, scale: 1.07,
@@ -49,7 +49,7 @@ function YellowCTABadge({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="relative inline-flex items-center px-2 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono shrink-0 cursor-pointer select-none"
+      className="gsyen-tier-badge is-unverified relative inline-flex items-center px-2 py-0.5 text-[7px] font-bold tracking-[0.22em] uppercase border font-mono shrink-0 cursor-pointer select-none"
       style={{ borderColor: 'rgba(255,211,0,0.6)', color: '#A07800' }}
       animate={hovered
         ? { backgroundColor: '#FFD300', color: '#1A1A1A', y: -1.5, scale: 1.07,
@@ -85,26 +85,26 @@ export function TierBadge({ tier, onClick }: TierBadgeProps) {
     return <BlueCTABadge label="MEMBER" onClick={onClick} />;
 
   if (tier === 'pro_month' || tier === 'pro_year') return (
-    <span onClick={onClick} className={`${base} cursor-pointer bg-[#1A1A1A] text-white border-[#1A1A1A]`}>
+    <span onClick={onClick} className={`${base} is-pro cursor-pointer bg-[#1A1A1A] text-white border-[#1A1A1A]`}>
       PRO
     </span>
   );
 
   if (tier === 'enterprise') return (
-    <span onClick={onClick} className={`${base} cursor-pointer bg-[#3B5998] text-white border-[#3B5998]`}>
+    <span onClick={onClick} className={`${base} is-enterprise cursor-pointer bg-[#3B5998] text-white border-[#3B5998]`}>
       ENTERPRISE
     </span>
   );
 
   if (tier === 'owner') return (
-    <span onClick={onClick} className={`${base} cursor-pointer border-amber-400/70 text-amber-600 bg-amber-50`}>
+    <span onClick={onClick} className={`${base} is-owner cursor-pointer border-amber-400/70 text-amber-600 bg-amber-50`}>
       OWNER
     </span>
   );
 
   // admin
   return (
-    <span onClick={onClick} className={`${base} border-[#1A1A1A]/30 text-[#1A1A1A]/70 bg-[#1A1A1A]/5`}>
+    <span onClick={onClick} className={`${base} is-admin border-[#1A1A1A]/30 text-[#1A1A1A]/70 bg-[#1A1A1A]/5`}>
       ADMIN
     </span>
   );

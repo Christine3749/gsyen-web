@@ -158,6 +158,7 @@
 }
 
 .gsyen-space-tab {
+  position: relative;
   min-width: 88px !important;
   height: 30px;
   padding: 0 12px !important;
@@ -184,6 +185,7 @@
 }
 
 .gsyen-space-tab.is-active {
+  z-index: 1;
   background: var(--gyen-n0-selected) !important;
   color: var(--gyen-card-white) !important;
   border-color: var(--gyen-n0-selected) !important;

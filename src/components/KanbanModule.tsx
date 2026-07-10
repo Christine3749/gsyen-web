@@ -158,7 +158,7 @@ export default function KanbanModule({ lang }: KanbanModuleProps) {
       )}
 
       {/* Toolbar */}
-      <div className="gsyen-module-toolbar relative shrink-0 h-[52px] flex items-center gap-[7px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
+      <div className="gsyen-module-toolbar gsyen-kanban-toolbar relative shrink-0 h-[52px] flex items-center gap-[7px] px-8 border-b border-[#1A1A1A]/8 bg-[#F4F2EE]">
         <button onClick={() => setSidebarOpen(o => !o)} className={`gsyen-icon-command shrink-0 ${sidebarOpen ? 'is-active' : ''}`}>
           <PanelLeft className="w-4 h-4" />
         </button>

@@ -175,7 +175,7 @@ export const ChatCommandDeck = memo(function ChatCommandDeck({
           </button>
           <button onClick={onOpenCreativeKingdom} className="gsyen-command-button" aria-label={lang === 'zh' ? '打开创意灵感' : 'Open muse'}>
             <MessageSquare className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '创意灵感' : 'Muse'}</span>
+            <span>{lang === 'zh' ? '创意' : 'Muse'}</span>
           </button>
           <div className="gsyen-pulse-dock-slot" aria-hidden={!pulseDocked}>
             <AnimatePresence initial={false}>

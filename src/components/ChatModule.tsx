@@ -8,10 +8,11 @@ import { AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 
 import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
-import { ModelId } from '../config/models';
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatStream } from '../hooks/useChatStream';
 import { useModelScroll } from '../hooks/useModelScroll';
+import { usePreferredModel } from '../hooks/usePreferredModel';
+import { useChatPromptQueue } from '../hooks/useChatPromptQueue';
 import { useTeams } from '../hooks/useTeams';
 import { useTeamPanel } from '../hooks/useTeamPanel';
 import { useFriends } from '../hooks/useFriends';
@@ -26,6 +27,7 @@ import { FriendsPanel } from './FriendsPanel';
 import { ChatCreateTeamModal } from './ChatCreateTeamModal';
 import { ChatSavePrompt, useChatSavePrompt } from './ChatSavePrompt';
 import { ChatInputBar } from './ChatInputBar';
+import { ChatPendingQueue } from './ChatPendingQueue';
 import { ChatCommandDeck } from './ChatCommandDeck';
 
 interface ChatModuleProps { lang: 'zh' | 'en'; onTeamChange?: (active: boolean) => void }
@@ -38,7 +40,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [pulseOpen, setPulseOpen] = useState(false);
   const [pulseDocked, setPulseDocked] = useState(false);
   const [modelPanelOpen, setModelPanelOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<ModelId>('ethan');
+  const { selectedModel, setSelectedModel } = usePreferredModel();
   const [toast, setToast] = useState<string | null>(null);
   const [creativeDocId, setCreativeDocId] = useState<string | null>(null);
   const [createTeamOpen, setCreateTeamOpen] = useState(false);
@@ -51,14 +53,20 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { messages, sessions, currentSessionId, currentTeamId, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
     useChatSession(lang);
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
-  const { isLoading, send } = useChatStream();
+  const { isLoading, send, cancel } = useChatStream();
+  const { queuedPrompts, queuedRef, enqueuePrompt, takeNextPrompt, clearQueue } = useChatPromptQueue();
 
   const pendingCard = useRef<ActionCard | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottom = useRef(true);
+  const isBusyRef = useRef(false);
+  const queueRunningRef = useRef(false);
+  const messagesRef = useRef<ChatMessage[]>([]);
   const pulseDockLock = useRef(false);
   const pulseDockTarget = useRef(false);
+  const hasStreamingAssistant = messages.some(msg => msg.role === 'model' && msg.streaming);
+  const isBusy = isLoading || hasStreamingAssistant;
 
   useEffect(() => {
     const toggle = () => setShowFriends(v => !v);
@@ -68,7 +76,10 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
 
   useEffect(() => {
     if (isAtBottom.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, queuedPrompts.length]);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { isBusyRef.current = isBusy; }, [isBusy]);
 
   const openCreativeKingdom = useCallback(() => {
     const now = new Date().toISOString();
@@ -83,8 +94,19 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setTimeout(() => setToast(null), 3500);
   }, []);
 
-  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); clearTeam(); }, [loadSession, clearTeam]);
-  const handleNewChat = useCallback(() => { newChat(selectedModel); clearTeam(); }, [newChat, selectedModel, clearTeam]);
+  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => {
+    cancel();
+    clearQueue();
+    loadSession(s);
+    setSelectedModel(s.model);
+    clearTeam();
+  }, [cancel, clearQueue, loadSession, setSelectedModel, clearTeam]);
+  const handleNewChat = useCallback(() => {
+    cancel();
+    clearQueue();
+    newChat(selectedModel);
+    clearTeam();
+  }, [cancel, clearQueue, newChat, selectedModel, clearTeam]);
   const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);
@@ -101,69 +123,93 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setPulseOpen(false);
   }, []);
 
+  const runPrompt = useCallback(async ({ text, attachments = [], timestamp }: { text: string; attachments?: ChatAttachment[]; timestamp?: string }) => {
+    if (!text.trim() && attachments.length === 0) return;
+    isBusyRef.current = true;
+
+    try {
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text,
+        timestamp: timestamp ?? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        attachments,
+      };
+      const liveMessages = messagesRef.current;
+      const history = [...liveMessages, userMsg];
+
+      saveChat(history, selectedModel);
+      setInputVal('');
+
+      if (currentTeamId && !/^@缈缈|^@miaomiao/i.test(text.trimStart())) return;
+
+      const aiId = `ai-${Date.now()}`;
+      const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setMessages([...history, { id: aiId, role: 'model', content: '', timestamp: aiTime, streaming: true }]);
+
+      await send({
+        text,
+        attachments,
+        model: selectedModel,
+        history: liveMessages,
+        lang,
+        onToken: (partial) => {
+          setMessages([...history, {
+            id: aiId, role: 'model', content: partial, timestamp: aiTime,
+            card: pendingCard.current ?? undefined, streaming: true,
+          }]);
+        },
+        onActionCard: (card) => {
+          pendingCard.current = card;
+          setMessages(prev => prev.map(m => m.id === aiId ? { ...m, card } : m));
+        },
+        onDone: (full) => {
+          const card = pendingCard.current ?? undefined;
+          pendingCard.current = null;
+          saveChat([...history, { id: aiId, role: 'model', content: full, timestamp: aiTime, card }], selectedModel);
+        },
+        onError: (errMsg) => {
+          pendingCard.current = null;
+          saveChat([...history, { id: `err-${Date.now()}`, role: 'model', content: errMsg, timestamp: aiTime }], selectedModel);
+        },
+        onScheduleAction: (action, title) => {
+          const zh: Record<string, string> = {
+            create: `✅ 日程已创建：${title}`,
+            update: `✏️ 日程已更新：${title}`,
+            delete: `🗑️ 日程已删除：${title}`,
+            query: '📅 已查询今日日程',
+          };
+          const en: Record<string, string> = {
+            create: `✅ Event created: ${title}`,
+            update: `✏️ Event updated: ${title}`,
+            delete: `🗑️ Event deleted: ${title}`,
+            query: "📅 Today's schedule retrieved",
+          };
+          showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
+        },
+      });
+    } finally {
+      isBusyRef.current = false;
+    }
+  }, [selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
+
   const handleSend = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
-    if ((!text.trim() && attachments.length === 0) || isLoading) return;
+    if (!text.trim() && attachments.length === 0) return;
+    if (isBusyRef.current || queuedRef.current.length > 0) {
+      enqueuePrompt(text, attachments);
+      setInputVal('');
+      return;
+    }
+    await runPrompt({ text, attachments });
+  }, [enqueuePrompt, queuedRef, runPrompt]);
 
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      attachments,
-    };
-    const history = [...messages, userMsg];
-
-    saveChat(history, selectedModel);
-    setInputVal('');
-
-    if (currentTeamId && !/^@缈缈|^@miaomiao/i.test(text.trimStart())) return;
-
-    const aiId = `ai-${Date.now()}`;
-    const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setMessages([...history, { id: aiId, role: 'model', content: '', timestamp: aiTime, streaming: true }]);
-
-    await send({
-      text,
-      attachments,
-      model: selectedModel,
-      history: messages,
-      lang,
-      onToken: (partial) => {
-        setMessages([...history, {
-          id: aiId, role: 'model', content: partial, timestamp: aiTime,
-          card: pendingCard.current ?? undefined, streaming: true,
-        }]);
-      },
-      onActionCard: (card) => {
-        pendingCard.current = card;
-        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, card } : m));
-      },
-      onDone: (full) => {
-        const card = pendingCard.current ?? undefined;
-        pendingCard.current = null;
-        saveChat([...history, { id: aiId, role: 'model', content: full, timestamp: aiTime, card }], selectedModel);
-      },
-      onError: (errMsg) => {
-        pendingCard.current = null;
-        saveChat([...history, { id: `err-${Date.now()}`, role: 'model', content: errMsg, timestamp: aiTime }], selectedModel);
-      },
-      onScheduleAction: (action, title) => {
-        const zh: Record<string, string> = {
-          create: `✅ 日程已创建：${title}`,
-          update: `✏️ 日程已更新：${title}`,
-          delete: `🗑️ 日程已删除：${title}`,
-          query: '📅 已查询今日日程',
-        };
-        const en: Record<string, string> = {
-          create: `✅ Event created: ${title}`,
-          update: `✏️ Event updated: ${title}`,
-          delete: `🗑️ Event deleted: ${title}`,
-          query: "📅 Today's schedule retrieved",
-        };
-        showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
-      },
-    });
-  }, [isLoading, messages, selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
+  useEffect(() => {
+    if (isBusy || queueRunningRef.current || queuedPrompts.length === 0) return;
+    const next = takeNextPrompt();
+    if (!next) return;
+    queueRunningRef.current = true;
+    void runPrompt(next).finally(() => { queueRunningRef.current = false; });
+  }, [isBusy, queuedPrompts.length, runPrompt, takeNextPrompt]);
 
   const handleCopy = useCallback((id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -184,6 +230,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const handlePulseDockAnimationComplete = useCallback((docked: boolean) => {
     if (pulseDockTarget.current === docked) pulseDockLock.current = false;
   }, []);
+  const showLoadingPlaceholder = isLoading && !hasStreamingAssistant;
 
   return (
     <>
@@ -250,7 +297,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
                 ))}
               </AnimatePresence>
 
-              {isLoading && (
+              {showLoadingPlaceholder && (
                 <div className="flex gap-3 max-w-3xl">
                   <div className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1A1A1A] text-[#F9F8F6] shrink-0 mt-1">
                     <Sparkles className="w-3 h-3" />
@@ -270,17 +317,18 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
               <div ref={chatEndRef} />
             </div>
 
+            <ChatPendingQueue lang={lang} prompts={queuedPrompts} />
             <ChatInputBar lang={lang} inputVal={inputVal} hidden={messages.length === 0}
               onInputChange={setInputVal} onSend={handleSend}
-              onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) newChat(selectedModel); }} />
+              onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) handleNewChat(); }} />
           </div>
 
-          {modelPanelOpen
-            ? <ModelStatusPanel lang={lang} selectedModel={selectedModel} onSelectModel={setSelectedModel} onClose={() => setModelPanelOpen(false)} contextLabel={selectedTeam?.name} />
-            : showPanel && selectedTeam
-              ? <TeamMembersPanel team={selectedTeam} members={members} onClose={clearTeam} />
-              : showFriends && <FriendsPanel friends={friends} onClose={() => setShowFriends(false)} />
-          }
+          <AnimatePresence initial={false}>
+            {modelPanelOpen && <ModelStatusPanel key="model-status" lang={lang} selectedModel={selectedModel} onSelectModel={setSelectedModel} onClose={() => setModelPanelOpen(false)} contextLabel={selectedTeam?.name} />}
+          </AnimatePresence>
+          {!modelPanelOpen && (showPanel && selectedTeam
+            ? <TeamMembersPanel team={selectedTeam} members={members} onClose={clearTeam} />
+            : showFriends && <FriendsPanel friends={friends} onClose={() => setShowFriends(false)} />)}
         </div>
       </div>
       {creativeDocId && <CanvasEditorContent docId={creativeDocId} onClose={() => setCreativeDocId(null)} />}
