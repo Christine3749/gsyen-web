@@ -186,7 +186,7 @@
   #app-header.gsyen-app-header.is-windows {
     --gsyen-account-tray-w: 284px;
     --gsyen-auth-tray-w: 206px;
-    --gsyen-laptop-brand-w: 246px;
+    --gsyen-laptop-brand-w: 320px;
     padding-left: 18px !important;
     padding-right: 16px !important;
   }
@@ -195,7 +195,7 @@
     min-height: 72px !important;
     max-height: 72px !important;
     grid-template-columns:
-      minmax(0, var(--gsyen-laptop-brand-w, 206px))
+      minmax(var(--gsyen-laptop-brand-w, 320px), var(--gsyen-laptop-brand-w, 320px))
       minmax(420px, 1fr)
       minmax(var(--gsyen-account-tray-w), var(--gsyen-account-tray-w)) !important;
     padding-top: 6px !important;
@@ -203,7 +203,10 @@
   }
 
   #app-header.gsyen-app-header.is-windows .gsyen-brand-lockup {
+    width: var(--gsyen-laptop-brand-w) !important;
+    min-width: var(--gsyen-laptop-brand-w) !important;
     max-width: var(--gsyen-laptop-brand-w) !important;
+    overflow: hidden !important;
   }
 
   #app-header.gsyen-app-header.is-windows .gsyen-brand-copy {
@@ -221,8 +224,14 @@
     flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 6px !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     white-space: nowrap !important;
+  }
+
+  #app-header.gsyen-app-header.is-windows .gsyen-space-nav {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
   }
 
   #app-header.gsyen-app-header.is-windows .gsyen-brand-subtitle-text {
@@ -242,12 +251,12 @@
 @media (max-width: 1320px) and (max-height: 760px) {
   #app-header.gsyen-app-header.is-windows {
     --gsyen-account-tray-w: 272px;
-    --gsyen-laptop-brand-w: 236px;
+    --gsyen-laptop-brand-w: 292px;
   }
 
   #app-header.gsyen-app-header.is-windows.is-header-visible {
     grid-template-columns:
-      minmax(0, var(--gsyen-laptop-brand-w, 198px))
+      minmax(var(--gsyen-laptop-brand-w, 292px), var(--gsyen-laptop-brand-w, 292px))
       minmax(360px, 1fr)
       minmax(var(--gsyen-account-tray-w), var(--gsyen-account-tray-w)) !important;
   }

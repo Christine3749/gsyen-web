@@ -35,7 +35,7 @@
 
   #app-header.gsyen-app-header.is-windows.is-header-visible {
     grid-template-columns:
-      minmax(0, var(--gsyen-laptop-brand-w))
+      minmax(var(--gsyen-laptop-brand-w), var(--gsyen-laptop-brand-w))
       minmax(480px, var(--gsyen-laptop-nav-w))
       minmax(var(--gsyen-laptop-actions-w), var(--gsyen-laptop-actions-w)) !important;
   }

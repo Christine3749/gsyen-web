@@ -1,5 +1,16 @@
 /* Laptop chat density: readable message rhythm for 13/14 inch work. */
 
+.gsyen-stream-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.08em;
+  margin-left: 3px;
+  vertical-align: -0.14em;
+  background: rgba(26, 26, 26, 0.72);
+  border-radius: 99px;
+  animation: gsyen-breathe 1.45s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
 @media (max-width: 1440px), (max-height: 840px) {
   .gsyen-chat-scroll {
     padding: 20px 24px !important;
