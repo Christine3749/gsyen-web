@@ -19,6 +19,20 @@
   height: var(--gsyen-shell-tab-height) !important;
 }
 
+#app-header .gsyen-space-tab svg {
+  flex: 0 0 auto !important;
+}
+
+#app-header .gsyen-space-tab span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+
+#app-header .gsyen-space-tab[data-space="brand"] span {
+  text-indent: 0.11em;
+}
+
 .gsyen-module-toolbar {
   box-sizing: border-box !important;
   height: var(--gsyen-shell-toolbar-height) !important;

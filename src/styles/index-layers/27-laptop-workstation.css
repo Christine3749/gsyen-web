@@ -98,7 +98,9 @@
   }
 
   #app-header .gsyen-space-tab {
-    min-width: 70px !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    box-sizing: border-box !important;
     height: 30px !important;
     padding: 0 8px !important;
     gap: 5px !important;
@@ -230,7 +232,7 @@
     --gsyen-laptop-command: 42px;
     --gsyen-laptop-brand-w: 206px;
     --gsyen-laptop-actions-w: 172px;
-    --gsyen-laptop-nav-w: 512px;
+    --gsyen-laptop-nav-w: 536px;
     --gsyen-command-button-width: 64px;
     --gsyen-command-tools-width: 226px;
     --gsyen-pulse-model-gap: 14px;
@@ -265,7 +267,7 @@
   }
 
   #app-header .gsyen-space-tab {
-    min-width: 66px !important;
+    min-width: 0 !important;
     height: 28px !important;
     font-size: 9px !important;
   }

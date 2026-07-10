@@ -146,6 +146,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           {SPACES.map(({ value, Icon, iconClass, zh, en, shortZh, shortEn }) => (
             <button
               key={value}
+              data-space={value}
               onClick={() => setActiveSpace(value)}
               className={`gsyen-space-tab min-w-[80px] px-3 py-1.5 rounded-none fs-sm font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
                 activeSpace === value ? 'is-active bg-[#1A1A1A] text-[#F9F8F6]' : 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
