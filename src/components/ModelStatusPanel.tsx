@@ -122,12 +122,23 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
       className={`gsyen-system-panel is-${health.status}`}
       initial={{ opacity: 0, x: 20, scaleX: 0.965, clipPath: 'inset(0 0 0 100%)' }}
       animate={{ opacity: 1, x: 0, scaleX: 1, clipPath: 'inset(0 0 0 0%)' }}
-      exit={{ opacity: 0, x: 18, scaleX: 0.975, clipPath: 'inset(0 0 0 100%)' }}
+      exit={{
+        opacity: 0,
+        x: 18,
+        scaleX: 0.975,
+        clipPath: 'inset(0 0 0 100%)',
+        transition: {
+          opacity: { duration: 0.38, ease: [0.42, 0, 0.58, 1] },
+          x: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
+          scaleX: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
+          clipPath: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
+        },
+      }}
       transition={{
-        opacity: { duration: 0.38, ease: [0.42, 0, 0.58, 1] },
-        x: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
-        scaleX: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
-        clipPath: { duration: 0.58, ease: [0.22, 1, 0.36, 1] },
+        opacity: { duration: 0.28, ease: [0.42, 0, 0.58, 1] },
+        x: { duration: 0.44, ease: [0.22, 1, 0.36, 1] },
+        scaleX: { duration: 0.44, ease: [0.22, 1, 0.36, 1] },
+        clipPath: { duration: 0.44, ease: [0.22, 1, 0.36, 1] },
       }}
       style={{ transformOrigin: 'right center', willChange: 'opacity, transform, clip-path', backfaceVisibility: 'hidden' }}
     >
