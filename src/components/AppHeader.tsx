@@ -14,6 +14,7 @@ import { useIsMaximized } from '../hooks/useIsMaximized';
 import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
 import { SPACES, type ActiveSpace } from './AppHeaderSpaces';
+import { version } from '../../package.json';
 
 export type { ActiveSpace } from './AppHeaderSpaces';
 
@@ -109,12 +110,15 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
                     : BrandIcon && <BrandIcon strokeWidth={1.14} className="gsyen-brand-module-icon w-10 h-10 text-[#1A1A1A]/90" />
                   }
                 </div>
-                <div className="gsyen-brand-copy flex flex-col">
+                <div className="gsyen-brand-copy flex min-w-0 flex-col">
                   <div className="gsyen-brand-title flex items-center flex-nowrap whitespace-nowrap">
                     <AppHeaderBrandWordmark />
                   </div>
-                  <p className="gsyen-brand-subtitle text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5 truncate">
-                    {isHome ? t.headerSubtitle : space?.subtitle}
+                  <p className="gsyen-brand-subtitle flex min-w-0 items-center gap-2 text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5">
+                    <span className="truncate">{isHome ? t.headerSubtitle : space?.subtitle}</span>
+                    <span className="gsyen-header-version shrink-0 font-mono text-[7px] tracking-[0.16em] text-[#1A1A1A]/35">
+                      V{version}
+                    </span>
                   </p>
                 </div>
               </>
