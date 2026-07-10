@@ -19,6 +19,10 @@
   height: var(--gsyen-shell-tab-height) !important;
 }
 
+#app-header .gsyen-space-tab:last-child {
+  border-right: 1px solid transparent !important;
+}
+
 #app-header .gsyen-space-tab svg {
   flex: 0 0 auto !important;
 }
