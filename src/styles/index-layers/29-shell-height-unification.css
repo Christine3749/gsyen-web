@@ -16,7 +16,7 @@
 
 :root {
   --gsyen-toolbar-pad-x: 32px;
-  --gsyen-module-command-button-min: 88px;
+  --gsyen-module-command-button-width: 88px;
 }
 
 .gsyen-module-toolbar {
@@ -29,14 +29,14 @@
 }
 
 .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
-  width: auto !important;
-  min-width: var(--gsyen-module-command-button-min) !important;
-  max-width: min(220px, calc(100vw - 128px)) !important;
-  flex: 0 0 auto !important;
+  width: var(--gsyen-module-command-button-width) !important;
+  min-width: var(--gsyen-module-command-button-width) !important;
+  max-width: var(--gsyen-module-command-button-width) !important;
+  flex: 0 0 var(--gsyen-module-command-button-width) !important;
   gap: 8px !important;
-  padding: 0 13px !important;
+  padding: 0 10px !important;
   line-height: 1 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   white-space: nowrap !important;
 }
 
@@ -47,22 +47,29 @@
 .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button span {
   display: block !important;
   min-width: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   text-align: center !important;
   line-height: 1 !important;
   white-space: nowrap !important;
+  text-overflow: clip !important;
   transform: translateY(0.5px);
 }
 
 @media (max-width: 1440px), (max-height: 840px) {
   :root {
     --gsyen-toolbar-pad-x: 18px;
-    --gsyen-module-command-button-min: 72px;
+    --gsyen-module-command-button-width: 70px;
+  }
+
+  .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-icon-command,
+  .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
+    height: 28px !important;
+    min-height: 28px !important;
   }
 
   .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
     gap: 7px !important;
-    padding: 0 11px !important;
+    padding: 0 8px !important;
     font-size: 9.5px !important;
     letter-spacing: 0.12em !important;
   }
@@ -71,11 +78,11 @@
 @media (max-width: 1400px), (max-height: 780px) {
   :root {
     --gsyen-toolbar-pad-x: 14px;
-    --gsyen-module-command-button-min: 68px;
+    --gsyen-module-command-button-width: 70px;
   }
 
   .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-command-button {
-    padding: 0 10px !important;
+    padding: 0 8px !important;
     letter-spacing: 0.105em !important;
   }
 }
