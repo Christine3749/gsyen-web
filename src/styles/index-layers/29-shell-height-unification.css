@@ -1,27 +1,61 @@
 /* Unify shell height rhythm across desktop and laptop breakpoints. */
 
-#app-header .gsyen-space-nav {
-  height: 42px !important;
-  align-items: center !important;
-}
-
-#app-header .gsyen-space-tab {
-  height: 34px !important;
-}
-
-.gsyen-module-toolbar {
-  height: 42px !important;
-  min-height: 42px !important;
-}
-
 :root {
+  --gsyen-shell-nav-height: 42px;
+  --gsyen-shell-tab-height: 34px;
+  --gsyen-shell-toolbar-height: 52px;
+  --gsyen-shell-tool-gap: 7px;
   --gsyen-toolbar-pad-x: 32px;
   --gsyen-module-command-button-width: 88px;
 }
 
+#app-header .gsyen-space-nav {
+  height: var(--gsyen-shell-nav-height) !important;
+  align-items: center !important;
+}
+
+#app-header .gsyen-space-tab {
+  height: var(--gsyen-shell-tab-height) !important;
+}
+
 .gsyen-module-toolbar {
+  box-sizing: border-box !important;
+  height: var(--gsyen-shell-toolbar-height) !important;
+  min-height: var(--gsyen-shell-toolbar-height) !important;
   padding-left: var(--gsyen-toolbar-pad-x) !important;
   padding-right: var(--gsyen-toolbar-pad-x) !important;
+}
+
+.gsyen-command-deck {
+  height: var(--gsyen-shell-toolbar-height) !important;
+  min-height: var(--gsyen-shell-toolbar-height) !important;
+}
+
+.gsyen-module-toolbar:not(.gsyen-command-deck) {
+  border-top: 1px solid transparent !important;
+}
+
+.gsyen-command-tools,
+.gsyen-module-toolbar:not(.gsyen-command-deck) > div:first-child {
+  gap: var(--gsyen-shell-tool-gap) !important;
+}
+
+#app-header .gsyen-brand-mark,
+#app-header .gsyen-brand-mark * {
+  transition: none !important;
+}
+
+#app-header .gsyen-brand-subtitle {
+  width: 164px !important;
+}
+
+#app-header .gsyen-brand-subtitle-text {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+#app-header .gsyen-header-version {
+  flex: 0 0 auto !important;
 }
 
 .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-icon-command {
@@ -55,10 +89,16 @@
   transform: translateY(0.5px);
 }
 
-@media (max-width: 1440px), (max-height: 840px) {
+@media (max-width: 1600px) and (max-height: 900px) {
   :root {
+    --gsyen-shell-toolbar-height: 42px;
+    --gsyen-shell-tool-gap: 5px;
     --gsyen-toolbar-pad-x: 18px;
     --gsyen-module-command-button-width: 70px;
+  }
+
+  #app-header .gsyen-brand-subtitle {
+    width: 132px !important;
   }
 
   .gsyen-module-toolbar:not(.gsyen-command-deck) .gsyen-icon-command,
@@ -75,7 +115,7 @@
   }
 }
 
-@media (max-width: 1400px), (max-height: 780px) {
+@media (max-width: 1400px) and (max-height: 780px) {
   :root {
     --gsyen-toolbar-pad-x: 14px;
     --gsyen-module-command-button-width: 70px;

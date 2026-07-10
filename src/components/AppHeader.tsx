@@ -36,7 +36,7 @@ const SHELL_NO_DOUBLE_CLICK_TARGETS =
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
   const [compact, setCompact] = useState(window.innerWidth < 1100);
-  const [laptopShell, setLaptopShell] = useState(window.innerWidth <= 1600 || window.innerHeight <= 900);
+  const [laptopShell, setLaptopShell] = useState(window.innerWidth <= 1600 && window.innerHeight <= 900);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
@@ -51,7 +51,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         setCompact(window.innerWidth < 1100);
-        setLaptopShell(window.innerWidth <= 1600 || window.innerHeight <= 900);
+        setLaptopShell(window.innerWidth <= 1600 && window.innerHeight <= 900);
       });
     };
     window.addEventListener('resize', fn);
