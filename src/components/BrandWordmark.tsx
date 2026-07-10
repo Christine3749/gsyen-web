@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { publicAsset } from '../utils/publicAsset';
 
 interface BrandWordmarkProps {
   tone?: 'ink' | 'light';
@@ -10,7 +11,9 @@ interface BrandWordmarkProps {
 const WORDMARK_RATIO = 760 / 136;
 
 export default function BrandWordmark({ tone = 'ink', height = 32, className, style }: BrandWordmarkProps) {
-  const src = tone === 'light' ? '/brand/gsyen-wordmark-light.svg' : '/brand/gsyen-wordmark-primary.svg';
+  const src = tone === 'light'
+    ? publicAsset('brand/gsyen-wordmark-light.svg')
+    : publicAsset('brand/gsyen-wordmark-primary.svg');
 
   return (
     <img

@@ -29,17 +29,21 @@
   z-index: 4;
 }
 
-@media (max-width: 1440px), (max-height: 840px) {
+@media (max-width: 1600px), (max-height: 900px) {
   #app-header.gsyen-app-header {
-    --gsyen-account-tray-w: 292px;
+    --gsyen-account-tray-w: 284px;
     --gsyen-window-controls-w: 132px;
   }
 
   #app-header.gsyen-app-header.is-header-visible {
+    min-height: 72px !important;
+    max-height: 72px !important;
     grid-template-columns:
       minmax(0, var(--gsyen-laptop-brand-w, 206px))
       minmax(420px, 1fr)
       minmax(var(--gsyen-account-tray-w), var(--gsyen-account-tray-w)) !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
   }
 
   #app-header.gsyen-app-header.is-windows {
@@ -48,7 +52,7 @@
   }
 
   #app-header.gsyen-app-header.is-browser {
-    --gsyen-account-tray-w: 300px;
+    --gsyen-account-tray-w: 292px;
   }
 
   #app-header .gsyen-window-controls {
@@ -70,24 +74,28 @@
   #app-header .gsyen-header-actions {
     width: var(--gsyen-account-tray-w) !important;
     max-width: var(--gsyen-account-tray-w) !important;
+    height: 32px !important;
+    align-self: end !important;
     justify-self: end !important;
     justify-content: flex-end !important;
   }
 
   #app-header.gsyen-app-header.is-windows .gsyen-header-actions {
     align-self: end !important;
-    transform: translateY(2px);
+    transform: translateY(-1px);
   }
 
   #app-header .gsyen-account-tray {
     width: 100%;
-    height: 34px;
-    align-items: stretch !important;
+    height: 32px;
+    align-items: center !important;
     gap: 0 !important;
     overflow: hidden;
-    border: 1px solid rgba(26, 26, 26, 0.12);
-    background: rgba(249, 248, 246, 0.56);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(26, 26, 26, 0.10);
+    background: linear-gradient(180deg, rgba(249, 248, 246, 0.72), rgba(244, 242, 238, 0.54));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.70),
+      inset 0 -1px 0 rgba(26, 26, 26, 0.035);
   }
 
   #app-header .gsyen-account-divider {
@@ -95,37 +103,55 @@
   }
 
   #app-header .gsyen-account-segment {
+    display: flex !important;
+    box-sizing: border-box !important;
     height: 100% !important;
     min-height: 0 !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 0 8px !important;
+    padding: 0 !important;
     border: 0 !important;
-    border-left: 1px solid rgba(26, 26, 26, 0.08) !important;
+    border-left: 1px solid rgba(26, 26, 26, 0.055) !important;
     background: transparent !important;
     color: rgba(26, 26, 26, 0.56) !important;
     box-shadow: none !important;
+    font-size: 10px !important;
+    font-weight: 760 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.095em !important;
+  }
+
+  #app-header .gsyen-header-actions button.gsyen-account-segment,
+  #app-header .gsyen-header-actions .gsyen-account-segment {
+    min-height: 0 !important;
+    padding: 0 !important;
   }
 
   #app-header .gsyen-account-language {
-    flex: 0 0 58px !important;
+    flex: 0 0 54px !important;
     border-left: 0 !important;
+    gap: 5px !important;
   }
 
   #app-header .gsyen-account-user {
     flex: 1 1 auto !important;
-    min-width: 112px !important;
-    max-width: 128px !important;
-    color: rgba(26, 26, 26, 0.66) !important;
+    min-width: 110px !important;
+    max-width: none !important;
+    gap: 6px !important;
+    color: rgba(26, 26, 26, 0.64) !important;
+    letter-spacing: 0.10em !important;
   }
 
   #app-header .gsyen-account-tier {
-    flex: 0 0 74px !important;
+    flex: 0 0 66px !important;
   }
 
   #app-header .gsyen-account-signout {
-    flex: 0 0 60px !important;
-    color: rgba(26, 26, 26, 0.42) !important;
+    flex: 0 0 50px !important;
+    color: rgba(26, 26, 26, 0.38) !important;
+    font-size: 9.5px !important;
+    font-weight: 720 !important;
+    letter-spacing: 0.06em !important;
   }
 
   #app-header .gsyen-account-segment svg {
@@ -135,27 +161,35 @@
 
   #app-header .gsyen-account-name {
     min-width: 0;
-    max-width: 92px;
+    max-width: 96px;
+    line-height: 1 !important;
   }
 
   #app-header .gsyen-account-tier .gsyen-tier-badge {
     display: inline-flex !important;
+    width: 58px !important;
     height: 18px !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 0 7px !important;
+    padding: 0 !important;
     transform: none !important;
     box-shadow: none !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+    letter-spacing: 0.17em !important;
   }
 
   #app-header .gsyen-account-tier .gsyen-tier-badge.is-free {
-    border-color: rgba(26, 110, 204, 0.28) !important;
-    background: rgba(26, 110, 204, 0.035) !important;
+    border-color: rgba(26, 110, 204, 0.24) !important;
+    background: rgba(26, 110, 204, 0.025) !important;
     color: #1A6ECC !important;
   }
 
   #app-header .gsyen-account-tier .gsyen-tier-badge span {
+    display: block !important;
+    line-height: 1 !important;
     text-shadow: none !important;
+    transform: translateY(0.5px);
   }
 
   #app-header .gsyen-header-actions.has-account-auth .gsyen-account-tray {
@@ -171,7 +205,7 @@
 
 @media (max-width: 1320px), (max-height: 760px) {
   #app-header.gsyen-app-header {
-    --gsyen-account-tray-w: 264px;
+    --gsyen-account-tray-w: 272px;
   }
 
   #app-header.gsyen-app-header.is-header-visible {
@@ -182,23 +216,26 @@
   }
 
   #app-header .gsyen-account-language {
-    flex-basis: 54px !important;
+    flex-basis: 52px !important;
   }
 
   #app-header .gsyen-account-user {
-    min-width: 100px !important;
-    max-width: 112px !important;
+    min-width: 108px !important;
   }
 
   #app-header .gsyen-account-tier {
-    flex-basis: 68px !important;
+    flex-basis: 64px !important;
   }
 
   #app-header .gsyen-account-signout {
-    flex-basis: 54px !important;
+    flex-basis: 48px !important;
   }
 
   #app-header .gsyen-account-name {
-    max-width: 76px;
+    max-width: 82px;
+  }
+
+  #app-header .gsyen-account-tier .gsyen-tier-badge {
+    width: 56px !important;
   }
 }

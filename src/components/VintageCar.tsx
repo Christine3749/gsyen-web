@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CSSProperties, MouseEvent } from 'react';
+import { publicAsset } from '../utils/publicAsset';
 
 interface VintageCarProps {
   size?: number;
@@ -14,9 +15,11 @@ const VintageCar = ({ size = 24, className, style, tone = 'ink' }: VintageCarPro
   const [fallback, setFallback] = useState(false);
   const isLight = tone === 'light';
   const transparentSrc = isLight
-    ? '/brand/gsyen-logo-car-light-transparent.png'
-    : '/brand/gsyen-logo-car-ink-transparent.png';
-  const pngSrc = isLight ? '/brand/gsyen-logo-car-light.png' : '/brand/gsyen-logo-car-ink.png';
+    ? publicAsset('brand/gsyen-logo-car-light-transparent.png')
+    : publicAsset('brand/gsyen-logo-car-ink-transparent.png');
+  const pngSrc = isLight
+    ? publicAsset('brand/gsyen-logo-car-light.png')
+    : publicAsset('brand/gsyen-logo-car-ink.png');
   const logoRatio = isLight ? 360 / 272 : 489 / 304;
 
   const handleClick = (_event: MouseEvent<HTMLImageElement>) => {
