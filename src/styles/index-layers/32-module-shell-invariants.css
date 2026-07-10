@@ -1,0 +1,53 @@
+/* One physical rail for every module. Interior UI must not draw a second frame. */
+
+:root {
+  --gsyen-shell-rail-bg: #F4F2EE;
+  --gsyen-shell-rail-seam: rgba(26, 26, 26, 0.08);
+}
+
+#logo-designer-root .gsyen-module-viewport {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#logo-designer-root .gsyen-module-viewport > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#logo-designer-root .gsyen-module-toolbar {
+  box-sizing: border-box !important;
+  flex: 0 0 var(--gsyen-shell-toolbar-height) !important;
+  height: var(--gsyen-shell-toolbar-height) !important;
+  min-height: var(--gsyen-shell-toolbar-height) !important;
+  background: var(--gsyen-shell-rail-bg) !important;
+  border: 0 !important;
+  box-shadow: inset 0 -1px 0 var(--gsyen-shell-rail-seam) !important;
+  transition:
+    background-color 170ms cubic-bezier(.2, .8, .2, 1),
+    box-shadow 170ms cubic-bezier(.2, .8, .2, 1) !important;
+}
+
+/* Chat's instrument rail stays inside the shared shell instead of drawing it twice. */
+#logo-designer-root .gsyen-command-deck::before,
+#logo-designer-root .gsyen-command-deck::after {
+  content: none !important;
+  display: none !important;
+}
+
+#logo-designer-root .gsyen-command-deck.has-pulse-open,
+#logo-designer-root .gsyen-command-deck.has-model-open {
+  background: var(--gsyen-shell-rail-bg) !important;
+}
+
+/* Mail and Calendar used to redraw the rail's bottom seam at the top of their bodies. */
+#logo-designer-root .gsyen-mail-page > .flex-1,
+#logo-designer-root .gsyen-schedule-page > .flex-1,
+#logo-designer-root .gsyen-mail-page > .flex-1 > .flex,
+#logo-designer-root .gsyen-schedule-page > .flex-1 > .flex {
+  border-top: 0 !important;
+  box-shadow: none !important;
+}

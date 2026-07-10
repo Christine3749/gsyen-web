@@ -42,7 +42,7 @@ export function ScheduleToolbar(p: ToolbarProps) {
         <button onClick={() => p.setShowAddForm(o => !o)}
           className={`gsyen-command-button ${p.showAddForm ? 'is-danger' : ''}`}>
           {p.showAddForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-          <span>{p.showAddForm ? (lang === 'zh' ? '收回表单' : 'Collapse Scribe') : (lang === 'zh' ? '签发事件' : 'Sealed Event')}</span>
+          <span>{p.showAddForm ? (lang === 'zh' ? '收回' : 'Close') : (lang === 'zh' ? '签发' : 'Issue')}</span>
         </button>
         <button onClick={p.onNavigateToday}
           className="px-3.5 py-1.5 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition fs-sm font-mono font-bold tracking-widest uppercase rounded-none">

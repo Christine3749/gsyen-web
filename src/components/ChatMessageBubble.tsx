@@ -19,6 +19,11 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
   const isStreaming = !!msg.streaming;
   const copyText = msg.content.trim();
   const copied = isCopiedId === msg.id;
+  const streamingCaret = isStreaming ? (
+    <span className="gsyen-stream-anchor" aria-hidden="true">
+      <span className="gsyen-stream-caret" />
+    </span>
+  ) : undefined;
   const [preview, setPreview] = useState<ChatAttachment | null>(null);
 
   useEffect(() => {
@@ -57,10 +62,7 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
               </div>
             )}
             <div className="space-y-1">
-              {msg.content ? renderMessageContent(msg.content, isAI) : null}
-              {isStreaming && (
-                <span className="inline-block h-4 w-[2px] translate-y-0.5 bg-[#1A1A1A]/80 animate-pulse" />
-              )}
+              {msg.content || isStreaming ? renderMessageContent(msg.content, isAI, streamingCaret) : null}
             </div>
             {isAI && !isStreaming && msg.card && <ActionCardView card={msg.card} lang={lang} />}
             {isAI && !isStreaming && (

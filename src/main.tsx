@@ -29,6 +29,12 @@ import './styles/index-layers/24-pulse-dock.css';
 import './styles/index-layers/25-surface-harmony.css';
 import './styles/index-layers/26-compact-shell.css';
 import './styles/index-layers/27-laptop-workstation.css';
+import './styles/index-layers/28-laptop-chat.css';
+import './styles/index-layers/29-shell-height-unification.css';
+import './styles/index-layers/30-laptop-right-header.css';
+import './styles/index-layers/31-system-panel-polish.css';
+import './styles/index-layers/32-module-shell-invariants.css';
+import './styles/index-layers/33-account-tray-contract.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
@@ -42,12 +48,11 @@ const isElectronEnv =
   navigator.userAgent.toLowerCase().includes('electron');
 
 if (isElectronEnv) {
-  const sentryRenderer = '@sentry/electron/renderer';
-  import(/* @vite-ignore */ sentryRenderer).then((Sentry) => {
+  import('@sentry/electron/renderer').then((Sentry) => {
     Sentry.init({
       dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
     });
-  }).catch(() => {});
+  });
 }
 
 createRoot(document.getElementById('root')!).render(

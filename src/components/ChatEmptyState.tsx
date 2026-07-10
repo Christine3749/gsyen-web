@@ -22,8 +22,11 @@ interface ChatEmptyStateProps {
 export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmptyStateProps) {
   const zh = lang === 'zh';
   const fileRef = useRef<HTMLInputElement>(null);
+  const composingRef = useRef(false);
+  const compositionGuardUntil = useRef(0);
   const { attachments, addFiles, removeAttachment, clearAttachments } = useImageAttachments();
   const canSend = inputVal.trim().length > 0 || attachments.length > 0;
+  const isComposing = () => composingRef.current || Date.now() < compositionGuardUntil.current;
   const dgwmSignal = getPulseSignal(lang, 'DGWM');
   const standbyRows = [
     { label: zh ? '上下文' : 'CONTEXT', value: zh ? '灵阁 / 创意灵感' : 'Muse / Creative Signal' },
@@ -34,7 +37,7 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
   const standbySignals = getStandbyPulseSignals(lang);
 
   const submit = () => {
-    if (!canSend) return;
+    if (!canSend || isComposing()) return;
     onSend(inputVal, attachments);
     clearAttachments();
   };
@@ -108,8 +111,16 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
           )}
           <textarea autoFocus rows={3} value={inputVal} onChange={e => setInputVal(e.target.value)}
             onPaste={handlePaste}
+            onCompositionStart={() => { composingRef.current = true; }}
+            onCompositionEnd={() => {
+              composingRef.current = false;
+              compositionGuardUntil.current = Date.now() + 120;
+            }}
             onDrop={e => { e.preventDefault(); void addFiles(Array.from(e.dataTransfer.files)); }}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && (e.nativeEvent.isComposing || isComposing())) return;
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); }
+            }}
             placeholder={zh ? '输入一个想法、任务、判断或需要缈缈处理的信号...' : 'Enter a thought, task, decision, or signal for Muse...'}
             className="w-full resize-none bg-transparent px-4 py-3 font-sans text-sm leading-relaxed text-[#1A1A1A] outline-none placeholder:text-[#1A1A1A]/28" />
           <div className="gsyen-standby-input-footer">

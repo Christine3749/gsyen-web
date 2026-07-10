@@ -154,5 +154,5 @@ export const SPACES: SpaceTab[] = [
   { value: 'calendar', Icon: CalendarDateIcon, BrandIcon: CalendarBrandIcon, iconClass: 'scale-90', zh: '日程日历', en: 'Calendar', shortZh: '日历', shortEn: 'Cal', subtitle: 'Chronos · 极速格栅日程空间' },
   { value: 'finance', Icon: ReportMoneyIcon, BrandIcon: LedgerBrandIcon, iconClass: '', zh: '复试账簿', en: 'Atelier Ledger', shortZh: '账簿', shortEn: 'Ledger', subtitle: 'Atelier Ledger · 奢雅资产复式记账账簿' },
   { value: 'password', Icon: ShieldLockIcon, BrandIcon: CitadelBrandIcon, iconClass: '', zh: '军工密钥', en: 'Citadel Key', shortZh: '密钥', shortEn: 'Keys', subtitle: 'Citadel · 军事级密匙生成与保管箱' },
-  { value: 'brand', Icon: PrismIcon, BrandIcon: PrismBrandIcon, iconClass: '', zh: 'PRISM实验', en: 'Brand Lab', shortZh: '品牌', shortEn: 'Brand', subtitle: 'Prism · 品牌基因折射实验室' },
+  { value: 'brand', Icon: PrismIcon, BrandIcon: PrismBrandIcon, iconClass: '', zh: 'PRISM', en: 'Brand Lab', shortZh: '品牌', shortEn: 'Brand', subtitle: 'Prism · 品牌基因折射实验室' },
 ];
