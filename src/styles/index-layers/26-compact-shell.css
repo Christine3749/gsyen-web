@@ -254,9 +254,15 @@
   }
 
   .gsyen-landing-platforms a,
-  .gsyen-landing-platforms > div {
+  .gsyen-landing-platforms > div:not(.gsyen-landing-windows-stack) {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
+  }
+
+  .gsyen-landing-windows-stack {
+    align-self: flex-start !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   .gsyen-landing-footer {
