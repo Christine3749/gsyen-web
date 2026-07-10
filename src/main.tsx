@@ -33,6 +33,7 @@ import './styles/index-layers/28-laptop-chat.css';
 import './styles/index-layers/29-shell-height-unification.css';
 import './styles/index-layers/30-laptop-right-header.css';
 import './styles/index-layers/31-system-panel-polish.css';
+import './styles/index-layers/32-module-shell-invariants.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
