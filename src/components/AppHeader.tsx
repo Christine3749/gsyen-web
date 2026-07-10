@@ -36,6 +36,7 @@ const SHELL_NO_DOUBLE_CLICK_TARGETS =
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
   const [compact, setCompact] = useState(window.innerWidth < 1100);
+  const [laptopShell, setLaptopShell] = useState(window.innerWidth <= 1600 || window.innerHeight <= 900);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
@@ -48,7 +49,10 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
     let raf = 0;
     const fn = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setCompact(window.innerWidth < 1100));
+      raf = requestAnimationFrame(() => {
+        setCompact(window.innerWidth < 1100);
+        setLaptopShell(window.innerWidth <= 1600 || window.innerHeight <= 900);
+      });
     };
     window.addEventListener('resize', fn);
     return () => { window.removeEventListener('resize', fn); cancelAnimationFrame(raf); };
@@ -115,7 +119,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
                     <AppHeaderBrandWordmark />
                   </div>
                   <p className="gsyen-brand-subtitle flex min-w-0 items-center gap-2 text-[7.5px] md:fs-2xs text-[#1A1A1A]/50 font-serif-sc tracking-[0.22em] font-medium leading-none uppercase mt-2.5">
-                    <span className="truncate">{isHome ? t.headerSubtitle : space?.subtitle}</span>
+                    <span className="gsyen-brand-subtitle-text truncate">{isHome ? t.headerSubtitle : space?.subtitle}</span>
                     <span className="gsyen-header-version shrink-0 font-mono text-[7px] tracking-[0.16em] text-[#1A1A1A]/35">
                       V{version}
                     </span>
@@ -137,7 +141,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
               }`}
             >
               <Icon strokeWidth={1.5} className={`${compact ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconClass}`} />
-              <span>{lang === 'zh' ? (compact ? shortZh : zh) : (compact ? shortEn : en)}</span>
+              <span>{value === 'brand' && isWindows && laptopShell && lang === 'zh' ? 'PRISM' : (lang === 'zh' ? (compact ? shortZh : zh) : (compact ? shortEn : en))}</span>
             </button>
           ))}
         </div>
