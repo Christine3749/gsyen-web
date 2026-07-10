@@ -19,7 +19,11 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
   const isStreaming = !!msg.streaming;
   const copyText = msg.content.trim();
   const copied = isCopiedId === msg.id;
-  const streamingCaret = isStreaming ? <span className="gsyen-stream-caret" aria-hidden="true" /> : undefined;
+  const streamingCaret = isStreaming ? (
+    <span className="gsyen-stream-anchor" aria-hidden="true">
+      <span className="gsyen-stream-caret" />
+    </span>
+  ) : undefined;
   const [preview, setPreview] = useState<ChatAttachment | null>(null);
 
   useEffect(() => {

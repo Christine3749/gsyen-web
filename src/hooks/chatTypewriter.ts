@@ -9,15 +9,17 @@ const sleep = (ms: number, signal?: AbortSignal) =>
   });
 
 const jitter = (base: number, spread: number) => base + Math.random() * spread;
+const FIRST_TOKEN_DELAY = 130;
+const IDLE_POLL_DELAY = 24;
 
 function charDelay(char: string, backlog = 0): number {
-  if (backlog > 220) return jitter(4, 8);
-  if (backlog > 90 && char !== '\n') return jitter(8, 14);
-  if ('。！？…'.includes(char)) return jitter(260, 190);
-  if ('，、；：'.includes(char)) return jitter(110, 90);
-  if (char === '\n') return jitter(190, 180);
-  if (Math.random() < 0.04) return jitter(70, 95);
-  return jitter(24, 18);
+  if ('。！？…'.includes(char)) return jitter(320, 220);
+  if ('，、；：'.includes(char)) return jitter(150, 120);
+  if (char === '\n') return jitter(240, 190);
+  if (backlog > 360) return jitter(18, 16);
+  if (backlog > 160) return jitter(26, 18);
+  if (Math.random() < 0.04) return jitter(95, 110);
+  return jitter(38, 26);
 }
 
 export async function typewrite(
@@ -26,6 +28,7 @@ export async function typewrite(
   signal?: AbortSignal,
 ): Promise<void> {
   let displayed = '';
+  if (text) await sleep(FIRST_TOKEN_DELAY, signal);
   for (const char of text) {
     if (signal?.aborted) return;
     displayed += char;
@@ -64,12 +67,13 @@ export async function streamWithTypewriter(
       return fullText || displayed;
     }
     if (!queue.length) {
-      await sleep(18, signal);
+      await sleep(IDLE_POLL_DELAY, signal);
       continue;
     }
 
     const backlog = queue.length;
-    const take = backlog > 220 ? 3 : backlog > 120 ? 2 : 1;
+    if (!displayed) await sleep(FIRST_TOKEN_DELAY, signal);
+    const take = 1;
     const chunk = queue.slice(0, take);
     queue = queue.slice(take);
     displayed += chunk;
