@@ -5,7 +5,7 @@
 @media (max-width: 1440px), (max-height: 840px) {
   :root {
     --gsyen-laptop-header: 66px;
-    --gsyen-laptop-command: 40px;
+    --gsyen-laptop-command: 42px;
     --gsyen-laptop-pad-x: 18px;
     --gsyen-laptop-brand-w: 214px;
     --gsyen-laptop-actions-w: 180px;
@@ -217,7 +217,7 @@
 @media (max-width: 1400px), (max-height: 780px) {
   :root {
     --gsyen-laptop-header: 62px;
-    --gsyen-laptop-command: 38px;
+    --gsyen-laptop-command: 42px;
     --gsyen-laptop-brand-w: 206px;
     --gsyen-laptop-actions-w: 172px;
     --gsyen-laptop-nav-w: 512px;
