@@ -120,10 +120,15 @@ export function ModelStatusPanel({ lang, selectedModel, onSelectModel, onClose, 
   return (
     <motion.aside
       className={`gsyen-system-panel is-${health.status}`}
-      initial={{ opacity: 0, x: 22, filter: 'blur(3px)' }}
-      animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-      exit={{ opacity: 0, x: 18, filter: 'blur(2px)' }}
-      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, x: 14, scale: 0.992 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 10, scale: 0.996 }}
+      transition={{
+        opacity: { duration: 0.34, ease: [0.25, 0.1, 0.25, 1] },
+        x: { duration: 0.44, ease: [0.16, 1, 0.3, 1] },
+        scale: { duration: 0.44, ease: [0.16, 1, 0.3, 1] },
+      }}
+      style={{ transformOrigin: 'right center', willChange: 'opacity, transform', backfaceVisibility: 'hidden' }}
     >
       <div className="gsyen-system-panel-head">
         <div className="gsyen-system-panel-title min-w-0">

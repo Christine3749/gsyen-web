@@ -1,4 +1,11 @@
 /* System panel final polish: compact identity head + calmer controls */
+.gsyen-system-panel {
+  animation: none !important;
+  transform-origin: right center !important;
+  backface-visibility: hidden;
+  will-change: opacity, transform;
+}
+
 .gsyen-system-panel-head {
   position: relative !important;
   min-height: 132px !important;
