@@ -30,7 +30,7 @@ interface AppHeaderProps {
 const HEADER_SHELL_TARGET = '#app-header.gsyen-app-header';
 const HEADER_SHELL_ZONE = '.gsyen-shell-double-click-zone';
 const HEADER_SHELL_DRAWER =
-  '.gsyen-module-toolbar:not(.gsyen-command-deck), .gsyen-brand-subnav';
+  '.gsyen-command-deck, .gsyen-module-toolbar:not(.gsyen-command-deck), .gsyen-brand-subnav';
 const SHELL_NO_DOUBLE_CLICK_TARGETS =
   'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-account-tray, .gsyen-window-controls';
 

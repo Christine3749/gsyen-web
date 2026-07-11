@@ -45,8 +45,8 @@ This file locks the shell rules that must not drift between releases.
 - Hidden state uses `.gsyen-shell-reveal-hotzone`, a separate `8-12px` top-edge recall strip.
 - Do not confuse these two states: visible header-shell band hides the header; hidden top-edge hotzone recalls it.
 - `#app-header` as a whole must not be a double-click target. Only its bottom blank shell band may toggle hide/show.
-- Buttons, module navigation, account tray, Windows controls, inputs, and `.gsyen-command-deck` must not trigger header hide/show.
-- Empty space in `.gsyen-module-toolbar:not(.gsyen-command-deck)` and `.gsyen-brand-subnav` is part of the header-shell drawer and may toggle the header.
+- Buttons, module navigation, account tray, Windows controls, inputs, command buttons, Pulse controls, and model buttons must not trigger header hide/show.
+- Empty space in `.gsyen-command-deck`, `.gsyen-module-toolbar:not(.gsyen-command-deck)`, and `.gsyen-brand-subnav` is part of the header-shell drawer and may toggle the header.
 - Shell chrome must use `user-select: none` and must not show a text caret.
 
 ## Release Discipline
