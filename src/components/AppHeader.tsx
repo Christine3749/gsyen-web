@@ -30,7 +30,7 @@ interface AppHeaderProps {
 const SHELL_DOUBLE_CLICK_TARGETS =
   '#app-header.gsyen-app-header, .gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav';
 const SHELL_NO_DOUBLE_CLICK_TARGETS =
-  'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-window-controls';
+  'button, a, input, select, textarea, [role="button"], .gsyen-brand-mark, .gsyen-window-controls';
 
 /** 顶部导航栏 + 移动端横向标签条 */
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {

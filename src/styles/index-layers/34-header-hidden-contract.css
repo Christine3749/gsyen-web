@@ -1,0 +1,27 @@
+/* Final shell drawer contract: double-click hide must leave no header band. */
+#app-header.gsyen-app-header.is-header-hidden {
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#app-header.gsyen-app-header.is-header-hidden::after {
+  height: 0 !important;
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+#app-header.gsyen-app-header.is-header-hidden > * {
+  opacity: 0 !important;
+  transform: translateY(-6px);
+  pointer-events: none !important;
+}
