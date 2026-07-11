@@ -1,6 +1,7 @@
 /* Unify shell height rhythm across desktop and laptop breakpoints. */
 
 :root {
+  --gsyen-shell-chrome: #F4F2EE;
   --gsyen-shell-nav-height: 42px;
   --gsyen-shell-tab-height: 34px;
   --gsyen-shell-toolbar-height: 42px;
@@ -37,6 +38,18 @@
   text-indent: 0.11em;
 }
 
+html,
+body,
+#logo-designer-root,
+#ai-chat-root-workspace {
+  background: var(--gsyen-shell-chrome) !important;
+}
+
+#app-header.gsyen-app-header {
+  background: var(--gsyen-shell-chrome) !important;
+  background-image: none !important;
+}
+
 .gsyen-module-toolbar {
   box-sizing: border-box !important;
   height: var(--gsyen-shell-toolbar-height) !important;
@@ -45,8 +58,10 @@
   padding-right: var(--gsyen-toolbar-pad-x) !important;
 }
 
-.gsyen-schedule-page > .gsyen-module-toolbar {
-  background: #F4F2EE !important;
+.gsyen-module-toolbar:not(.gsyen-command-deck),
+.gsyen-brand-subnav.gsyen-module-toolbar,
+.gsyen-command-deck {
+  background: var(--gsyen-shell-chrome) !important;
   background-image: none !important;
 }
 

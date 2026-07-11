@@ -29,6 +29,8 @@ interface AppHeaderProps {
 
 const HEADER_SHELL_TARGET = '#app-header.gsyen-app-header';
 const HEADER_SHELL_ZONE = '.gsyen-shell-double-click-zone';
+const HEADER_SHELL_DRAWER =
+  '.gsyen-module-toolbar:not(.gsyen-command-deck), .gsyen-brand-subnav';
 const SHELL_NO_DOUBLE_CLICK_TARGETS =
   'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-account-tray, .gsyen-window-controls';
 
@@ -68,9 +70,14 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   useEffect(() => {
     const handleShellDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      const header = target?.closest(HEADER_SHELL_TARGET) as HTMLElement | null;
-      if (!target || !header) return;
+      if (!target) return;
       if (target.closest(SHELL_NO_DOUBLE_CLICK_TARGETS)) return;
+      if (target.closest(HEADER_SHELL_DRAWER)) {
+        setHeaderHidden(v => !v);
+        return;
+      }
+      const header = target.closest(HEADER_SHELL_TARGET) as HTMLElement | null;
+      if (!header) return;
       if (!target.closest(HEADER_SHELL_ZONE)) {
         const rect = header.getBoundingClientRect();
         const shellZoneTop = rect.bottom - getHeaderShellZoneHeight(header);
