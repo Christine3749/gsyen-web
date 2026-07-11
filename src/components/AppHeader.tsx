@@ -11,6 +11,7 @@ import ResetPasswordModal from '../auth/ResetPasswordModal';
 import EmailVerifiedModal from '../auth/EmailVerifiedModal';
 import { useAuth } from '../auth/useAuth';
 import { useIsMaximized } from '../hooks/useIsMaximized';
+import { useHiddenShellDrag } from '../hooks/useHiddenShellDrag';
 import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
 import { SPACES, type ActiveSpace } from './AppHeaderSpaces';
@@ -53,6 +54,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
   const accountName = user?.email?.split('@')[0] ?? '';
+  const hiddenShellDrag = useHiddenShellDrag(isElectron);
 
   useEffect(() => {
     let raf = 0;
@@ -103,12 +105,12 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   return (
     <>
       {headerHidden && (
-        <button
-          type="button"
+        <div
           className="gsyen-shell-reveal-hotzone"
           aria-label={lang === 'zh' ? '显示顶部栏' : 'Show header'}
-          onClick={() => setHeaderHidden(false)}
+          role="presentation"
           onDoubleClick={() => setHeaderHidden(false)}
+          {...hiddenShellDrag}
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         />
       )}

@@ -65,6 +65,12 @@ body,
   background-image: none !important;
 }
 
+#logo-designer-root .gsyen-brand-subnav.gsyen-module-toolbar,
+#logo-designer-root .gsyen-schedule-page > .gsyen-module-toolbar {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08) !important;
+  box-shadow: none !important;
+}
+
 .gsyen-command-deck {
   height: var(--gsyen-shell-toolbar-height) !important;
   min-height: var(--gsyen-shell-toolbar-height) !important;

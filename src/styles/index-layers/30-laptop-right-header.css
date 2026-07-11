@@ -10,7 +10,9 @@
   padding: 0;
   border: 0;
   background: transparent;
-  cursor: n-resize;
+  cursor: default;
+  outline: none;
+  -webkit-app-region: no-drag;
 }
 
 #app-header.gsyen-app-header.is-windows {

@@ -101,6 +101,12 @@ ipcMain.handle('window:fullscreen', (e) => {
 ipcMain.handle('window:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
 ipcMain.handle('window:isMaximized',  (e) => BrowserWindow.fromWebContents(e.sender)?.isMaximized()  ?? false);
 ipcMain.handle('window:isFullscreen', (e) => BrowserWindow.fromWebContents(e.sender)?.isFullScreen() ?? false);
+ipcMain.handle('window:getPosition', (e) => BrowserWindow.fromWebContents(e.sender)?.getPosition() ?? [0, 0]);
+ipcMain.handle('window:setPosition', (e, x, y) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || !Number.isFinite(x) || !Number.isFinite(y)) return;
+  w.setPosition(Math.round(x), Math.round(y));
+});
 
 // ── 窗口 ──────────────────────────────────────────────────────────────────────
 

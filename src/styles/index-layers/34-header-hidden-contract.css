@@ -13,6 +13,16 @@
 
 #app-header.gsyen-app-header {
   --gsyen-header-shell-zone-height: 44px;
+  max-height: 112px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+  will-change: max-height, padding, opacity, transform;
 }
 
 .gsyen-shell-double-click-zone {
@@ -41,6 +51,12 @@
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  transition:
+    max-height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 160ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 220ms;
 }
 
 #app-header.gsyen-app-header.is-header-hidden::after {
@@ -53,4 +69,7 @@
   opacity: 0 !important;
   transform: translateY(-6px);
   pointer-events: none !important;
+  transition:
+    opacity 150ms ease,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
