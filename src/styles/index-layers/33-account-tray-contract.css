@@ -3,9 +3,11 @@
 #app-header.gsyen-app-header {
   --gsyen-account-tray-h: 36px;
   --gsyen-account-tray-w: 376px;
-  --gsyen-auth-tray-w: 360px;
+  --gsyen-auth-tray-w: 206px;
   --gsyen-account-language-w: 82px;
-  --gsyen-account-auth-language-w: 94px;
+  --gsyen-account-auth-language-w: 54px;
+  --gsyen-auth-login-w: 72px;
+  --gsyen-auth-cta-w: 80px;
   --gsyen-account-tier-w: 86px;
   --gsyen-account-signout-w: 64px;
   --gsyen-account-name-w: 138px;
@@ -145,14 +147,18 @@
 
 #app-header.gsyen-app-header .gsyen-header-actions.has-account-auth .gsyen-auth-login,
 #app-header.gsyen-app-header .gsyen-header-actions.has-account-auth .gsyen-auth-cta {
-  flex: 1 1 0 !important;
   color: rgba(26, 26, 26, 0.48) !important;
   font-size: 10px !important;
   font-weight: 740 !important;
   letter-spacing: 0.08em !important;
 }
 
+#app-header.gsyen-app-header .gsyen-header-actions.has-account-auth .gsyen-auth-login {
+  flex: 0 0 var(--gsyen-auth-login-w) !important;
+}
+
 #app-header.gsyen-app-header .gsyen-header-actions.has-account-auth .gsyen-auth-cta {
+  flex: 0 0 var(--gsyen-auth-cta-w) !important;
   color: rgba(26, 26, 26, 0.56) !important;
 }
 
@@ -165,9 +171,9 @@
   #app-header.gsyen-app-header {
     --gsyen-account-tray-h: 34px;
     --gsyen-account-tray-w: 320px;
-    --gsyen-auth-tray-w: 300px;
+    --gsyen-auth-tray-w: 206px;
     --gsyen-account-language-w: 64px;
-    --gsyen-account-auth-language-w: 78px;
+    --gsyen-account-auth-language-w: 54px;
     --gsyen-account-tier-w: 76px;
     --gsyen-account-signout-w: 56px;
     --gsyen-account-name-w: 104px;
@@ -242,9 +248,11 @@
   #app-header.gsyen-app-header {
     --gsyen-account-tray-h: 32px;
     --gsyen-account-tray-w: 296px;
-    --gsyen-auth-tray-w: 272px;
+    --gsyen-auth-tray-w: 196px;
     --gsyen-account-language-w: 56px;
-    --gsyen-account-auth-language-w: 70px;
+    --gsyen-account-auth-language-w: 52px;
+    --gsyen-auth-login-w: 68px;
+    --gsyen-auth-cta-w: 76px;
     --gsyen-account-tier-w: 68px;
     --gsyen-account-signout-w: 52px;
     --gsyen-account-name-w: 82px;

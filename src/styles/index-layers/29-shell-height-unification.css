@@ -3,7 +3,7 @@
 :root {
   --gsyen-shell-nav-height: 42px;
   --gsyen-shell-tab-height: 34px;
-  --gsyen-shell-toolbar-height: 52px;
+  --gsyen-shell-toolbar-height: 42px;
   --gsyen-shell-tool-gap: 7px;
   --gsyen-toolbar-pad-x: 32px;
   --gsyen-module-command-button-width: 88px;
@@ -43,11 +43,6 @@
   min-height: var(--gsyen-shell-toolbar-height) !important;
   padding-left: var(--gsyen-toolbar-pad-x) !important;
   padding-right: var(--gsyen-toolbar-pad-x) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.54) !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 70%, var(--gyen-n5-control)) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.62),
-    inset 0 -1px 0 rgba(20,20,20,0.035) !important;
 }
 
 .gsyen-command-deck {

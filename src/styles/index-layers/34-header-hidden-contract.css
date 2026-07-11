@@ -1,4 +1,28 @@
-/* Final shell drawer contract: double-click hide must leave no header band. */
+/* Shell drawer contract: only the waistline hotzone can hide the header. */
+#app-header.gsyen-app-header,
+.gsyen-module-toolbar,
+.gsyen-command-deck,
+.gsyen-brand-subnav,
+.gsyen-shell-double-click-zone,
+.gsyen-shell-reveal-hotzone {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  caret-color: transparent !important;
+  cursor: default;
+}
+
+.gsyen-shell-double-click-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  z-index: 3;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 #app-header.gsyen-app-header.is-header-hidden {
   min-height: 0 !important;
   max-height: 0 !important;

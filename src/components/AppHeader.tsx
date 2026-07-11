@@ -28,7 +28,7 @@ interface AppHeaderProps {
 }
 
 const SHELL_DOUBLE_CLICK_TARGETS =
-  '#app-header.gsyen-app-header, .gsyen-module-toolbar, .gsyen-command-deck, .gsyen-brand-subnav';
+  '.gsyen-shell-double-click-zone';
 const SHELL_NO_DOUBLE_CLICK_TARGETS =
   'button, a, input, select, textarea, [role="button"], .gsyen-brand-mark, .gsyen-window-controls';
 
@@ -101,6 +101,12 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
         data-header-motion={headerHidden ? 'hidden' : 'visible'}
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
+        <div
+          className="gsyen-shell-double-click-zone"
+          aria-hidden="true"
+          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        />
+
         <div className="gsyen-brand-lockup flex min-w-0 items-center gap-4 overflow-hidden" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {(() => {
             const space = SPACES.find(s => s.value === activeSpace);
