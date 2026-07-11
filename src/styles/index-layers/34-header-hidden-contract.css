@@ -1,4 +1,4 @@
-/* Shell drawer contract: only the waistline hotzone can hide the header. */
+/* Header shell drawer contract: the bottom blank shell band hides the header. */
 #app-header.gsyen-app-header,
 .gsyen-module-toolbar,
 .gsyen-command-deck,
@@ -11,16 +11,21 @@
   cursor: default;
 }
 
+#app-header.gsyen-app-header {
+  --gsyen-header-shell-zone-height: 44px;
+}
+
 .gsyen-shell-double-click-zone {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -4px;
-  z-index: 3;
-  height: 8px;
+  bottom: 0;
+  z-index: 0;
+  height: var(--gsyen-header-shell-zone-height);
   padding: 0;
   border: 0;
   background: transparent;
+  pointer-events: none;
 }
 
 #app-header.gsyen-app-header.is-header-hidden {

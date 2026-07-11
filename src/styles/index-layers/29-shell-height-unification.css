@@ -45,6 +45,11 @@
   padding-right: var(--gsyen-toolbar-pad-x) !important;
 }
 
+.gsyen-schedule-page > .gsyen-module-toolbar {
+  background: #F4F2EE !important;
+  background-image: none !important;
+}
+
 .gsyen-command-deck {
   height: var(--gsyen-shell-toolbar-height) !important;
   min-height: var(--gsyen-shell-toolbar-height) !important;

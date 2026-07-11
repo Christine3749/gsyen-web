@@ -27,10 +27,16 @@ interface AppHeaderProps {
   activeTeam?: boolean;
 }
 
-const SHELL_DOUBLE_CLICK_TARGETS =
-  '.gsyen-shell-double-click-zone';
+const HEADER_SHELL_TARGET = '#app-header.gsyen-app-header';
+const HEADER_SHELL_ZONE = '.gsyen-shell-double-click-zone';
 const SHELL_NO_DOUBLE_CLICK_TARGETS =
-  'button, a, input, select, textarea, [role="button"], .gsyen-brand-mark, .gsyen-window-controls';
+  'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-account-tray, .gsyen-window-controls';
+
+const getHeaderShellZoneHeight = (header: HTMLElement) => {
+  const value = getComputedStyle(header).getPropertyValue('--gsyen-header-shell-zone-height');
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 44;
+};
 
 /** 顶部导航栏 + 移动端横向标签条 */
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
@@ -62,8 +68,14 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   useEffect(() => {
     const handleShellDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-      if (!target?.closest(SHELL_DOUBLE_CLICK_TARGETS)) return;
+      const header = target?.closest(HEADER_SHELL_TARGET) as HTMLElement | null;
+      if (!target || !header) return;
       if (target.closest(SHELL_NO_DOUBLE_CLICK_TARGETS)) return;
+      if (!target.closest(HEADER_SHELL_ZONE)) {
+        const rect = header.getBoundingClientRect();
+        const shellZoneTop = rect.bottom - getHeaderShellZoneHeight(header);
+        if (event.clientY < shellZoneTop) return;
+      }
       setHeaderHidden(v => !v);
     };
     document.addEventListener('dblclick', handleShellDoubleClick);
