@@ -11,7 +11,9 @@ import ResetPasswordModal from '../auth/ResetPasswordModal';
 import EmailVerifiedModal from '../auth/EmailVerifiedModal';
 import { useAuth } from '../auth/useAuth';
 import { useIsMaximized } from '../hooks/useIsMaximized';
-import { useHeaderShellInteraction } from '../hooks/useHeaderShellInteraction';
+import { HIDDEN_SHELL_DRAWER_SELECTOR, SHELL_NO_INTERACTION_TARGETS } from '../hooks/headerShellContract';
+import { useHeaderVisibility } from '../hooks/useHeaderVisibility';
+import { useHiddenShellDrag } from '../hooks/useHiddenShellDrag';
 import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
 import { SPACES, type ActiveSpace } from './AppHeaderSpaces';
@@ -40,7 +42,11 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
   const accountName = user?.email?.split('@')[0] ?? '';
-  const { headerHidden, recallHeader } = useHeaderShellInteraction(isElectron);
+  const { headerHidden, recallHeader } = useHeaderVisibility();
+  useHiddenShellDrag(isElectron && headerHidden, {
+    documentSelector: HIDDEN_SHELL_DRAWER_SELECTOR,
+    ignoreSelector: SHELL_NO_INTERACTION_TARGETS,
+  });
 
   useEffect(() => {
     let raf = 0;

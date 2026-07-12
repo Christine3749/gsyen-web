@@ -2,13 +2,13 @@
 import { act, type CSSProperties } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useHeaderShellInteraction } from './useHeaderShellInteraction';
+import { useHeaderVisibility } from './useHeaderVisibility';
 
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 
 function ShellHarness() {
-  const { headerHidden, recallHeader } = useHeaderShellInteraction(true);
+  const { headerHidden, recallHeader } = useHeaderVisibility();
   return (
     <>
       <header id="app-header" className="gsyen-app-header" style={{ '--gsyen-header-shell-zone-height': '44px' } as CSSProperties}>
@@ -48,19 +48,21 @@ afterEach(() => {
   delete (window as any).electronAPI;
 });
 
-describe('useHeaderShellInteraction', () => {
-  it('hides only when the visible header bottom shell band is double-clicked', () => {
+describe('useHeaderVisibility', () => {
+  it('hides from visible header or drawer blank areas without touching native dragging', () => {
     const header = renderShell();
     const drawer = document.querySelector<HTMLElement>('#drawer')!;
-
-    doubleClick(drawer);
-    expect(document.documentElement.dataset.headerHidden).toBe('false');
+    const getPosition = vi.fn();
+    const setPosition = vi.fn();
+    (window as any).electronAPI = { window: { getPosition, setPosition } };
 
     doubleClick(header, 20);
     expect(document.documentElement.dataset.headerHidden).toBe('false');
 
-    doubleClick(header);
+    doubleClick(drawer);
     expect(document.documentElement.dataset.headerHidden).toBe('true');
+    expect(getPosition).not.toHaveBeenCalled();
+    expect(setPosition).not.toHaveBeenCalled();
   });
 
   it('keeps a hidden drawer single click inert without changing its height', () => {
