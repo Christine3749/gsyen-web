@@ -9,15 +9,8 @@ import dotenv from 'dotenv';
 
 // 共享真源（与 api/chat.ts 同源，改 shared/ 即两端同时生效）
 import { SYSTEM_PROMPT } from './shared/systemPrompt';
-import {
-  todayDateStr,
-  scheduleSystemSuffix,
-  noScheduleSystemSuffix,
-  ledgerSystemSuffix,
-  mailSystemSuffix,
-  vaultSystemSuffix,
-  MODEL_ROUTES,
-} from './shared/chatConfig';
+import { MODEL_ROUTES } from './shared/chatConfig';
+import { runOllamaStructuredChat, hitsInjection, INJECTION_REPLY } from './shared/structuredChat';
 import { getCodexBridgeHealth } from './server/codexBridge';
 import { streamCodexChatResponse } from './server/codexChatStream';
 import { registerCodexRoutes } from './server/codexRoutes';
@@ -28,15 +21,6 @@ dotenv.config();
 
 const PORT = 3000;
 type HealthResult = { available: boolean; error?: string; authMode?: string };
-
-/** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
-function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
-  if (domain === 'MAIL')   return mailSystemSuffix();
-  if (domain === 'VAULT')  return vaultSystemSuffix();
-  if (domain === 'LEDGER') return ledgerSystemSuffix(today);
-  if (scheduleIntent)      return scheduleSystemSuffix(today, events);
-  return noScheduleSystemSuffix();
-}
 
 async function startServer() {
   const app = express();
@@ -114,11 +98,11 @@ async function startServer() {
   }
 
   app.get('/api/health', async (_req, res) => {
+    // 并行探测：串行时全离线要叠加多个 5s 超时（前端每 30s ping 一次会堆积）
+    const entries = Object.entries(MODEL_ROUTES);
+    const results = await Promise.all(entries.map(([modelId, route]) => verifyModel(modelId, route)));
     const models: Record<string, any> = {};
-    for (const [modelId, route] of Object.entries(MODEL_ROUTES)) {
-      const result = await verifyModel(modelId, route);
-      models[modelId] = result;
-    }
+    entries.forEach(([modelId], i) => { models[modelId] = results[i]; });
     res.json({ status: 'ok', models });
   });
 
@@ -135,6 +119,13 @@ async function startServer() {
         return res.status(400).json({ error: `Unknown model: ${model}` });
       }
 
+      // 服务端注入过滤（与 api/chat.ts 同源；此前只有 Vercel 版有）
+      if (hitsInjection(messages)) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: INJECTION_REPLY } }] })}\n\ndata: [DONE]\n\n`);
+        return res.end();
+      }
+
       if (model === 'chatgpt-pro') {
         return streamCodexChatResponse(req, res, {
           messages,
@@ -144,60 +135,21 @@ async function startServer() {
         });
       }
 
+      // ── Ollama JSON mode (ethan / fast)：先于密钥检查——OLLAMA_BASE_URL
+      // 有 localhost 兜底，不设也能跑，不该被"缺密钥"短路。
+      if (model === 'ethan' || model === 'fast') {
+        const { status, body } = await runOllamaStructuredChat({
+          model, modelId: route.modelId, systemPrompt: SYSTEM_PROMPT,
+          messages, events, clientDate, scheduleIntent, domain,
+        });
+        return res.status(status).json(body);
+      }
+
       const apiKey = process.env[route.envKey];
       if (!apiKey) {
         return res.json({
           text: `后台未检测到 \`${route.envKey}\` 密钥，请在环境变量中配置后重启服务。`,
         });
-      }
-
-      // ── Ollama JSON mode (ethan / fast) — 原生 /api/chat 接口 ──────────
-      // OpenAI 兼容层不可靠，原生接口的 format:"json" 强制返回合法 JSON
-      if (model === 'ethan' || model === 'fast') {
-        const today = clientDate || todayDateStr();
-        const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-        const ollamaPayload = [
-          { role: 'system', content: SYSTEM_PROMPT + domainSuffix(domain, scheduleIntent, today, events) },
-          ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })),
-        ];
-        const ollamaRes = await fetch(`${ollamaBaseUrl}/api/chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: route.modelId,
-            messages: ollamaPayload,
-            stream: false,
-            format: 'json',
-            options: { temperature: 0.3 },  // 基座兜底：降温提升字段抽取一致性
-          }),
-        });
-        if (!ollamaRes.ok) {
-          const err = await ollamaRes.text().catch(() => ollamaRes.statusText);
-          return res.status(502).json({ error: `${model} API error: ${err}` });
-        }
-        const ollamaData = await ollamaRes.json();
-        const rawContent = ollamaData.message?.content ?? '{}';
-        try {
-          const parsed = JSON.parse(rawContent);
-          // 只信任模型显式给出的 action，不靠 event.title 是否非空推断意图。
-          const action = parsed.action ?? (parsed.shouldCreateEvent ? 'create' : 'none');
-          const hasPayload = parsed.event?.title || parsed.event?.description || parsed.event?.amount !== undefined;
-          const ev = (action !== 'none' && hasPayload) ? parsed.event : null;
-
-          // 司辰 · 语义校验式日期纠正（仅 CHRONOS；LEDGER 账务日期误差影响小）
-          if (ev && domain !== 'LEDGER') {
-            const lastUserMsg = [...messages].reverse().find((m: any) => m.role !== 'model')?.content ?? '';
-            const hasExplicitDateRef = /明天|后天|大后天|下周|下个月|\d{1,2}[月\/-]\d{1,2}|星期[一二三四五六日天]|周[一二三四五六日天]/.test(lastUserMsg);
-            const refMs = new Date(clientDate || todayDateStr()).getTime();
-            const evMs  = new Date(ev.date || '').getTime();
-            if (!hasExplicitDateRef || !ev.date || !evMs || Math.abs(refMs - evMs) > 30 * 86400_000) {
-              ev.date = clientDate || todayDateStr();
-            }
-          }
-          return res.json({ text: parsed.reply ?? rawContent, action, event: ev });
-        } catch {
-          return res.json({ text: rawContent, action: 'none', event: null });
-        }
       }
 
       // ── All other models: SSE streaming ───────────────────────────────
@@ -214,6 +166,7 @@ async function startServer() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({ model: route.modelId, messages: payload, stream: true }),
+        signal: AbortSignal.timeout(300_000), // 硬上限 5 分钟：上游挂起时连接不再永久悬挂
       });
 
       if (!upstream.ok) {

@@ -45,6 +45,8 @@ This file locks the shell rules that must not drift between releases.
 - Hidden state uses `.gsyen-shell-reveal-hotzone`, a separate `8-12px` top-edge recall strip.
 - The hidden recall strip is not a button, must not focus, and must not expand on single click.
 - In Electron, dragging the hidden recall strip moves the window; double-clicking it recalls the header.
+- When the header is hidden, empty shell drawer zones below it remain part of the same shell primitive:
+  they can drag the Electron window and double-clicking them recalls the header.
 - Do not confuse these two states: visible header-shell band hides the header; hidden top-edge hotzone recalls it.
 - `#app-header` as a whole must not be a double-click target. Only its bottom blank shell band may toggle hide/show.
 - Buttons, module navigation, account tray, Windows controls, inputs, command buttons, Pulse controls, and model buttons must not trigger header hide/show.

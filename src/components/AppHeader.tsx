@@ -33,7 +33,7 @@ const HEADER_SHELL_ZONE = '.gsyen-shell-double-click-zone';
 const HEADER_SHELL_DRAWER =
   '.gsyen-command-deck, .gsyen-module-toolbar:not(.gsyen-command-deck), .gsyen-brand-subnav';
 const SHELL_NO_DOUBLE_CLICK_TARGETS =
-  'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-account-tray, .gsyen-window-controls';
+  'button, a, input, select, textarea, [role="button"], .gsyen-brand-lockup, .gsyen-space-nav, .gsyen-header-actions, .gsyen-account-tray, .gsyen-window-controls, .gsyen-command-tools, .gsyen-command-pulse, .gsyen-command-model, .gsyen-model-strip, .gsyen-system-bus, .gsyen-pulse-panel, .gsyen-system-panel';
 
 const getHeaderShellZoneHeight = (header: HTMLElement) => {
   const value = getComputedStyle(header).getPropertyValue('--gsyen-header-shell-zone-height');
@@ -54,7 +54,10 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
   const accountName = user?.email?.split('@')[0] ?? '';
-  const hiddenShellDrag = useHiddenShellDrag(isElectron);
+  const hiddenShellDrag = useHiddenShellDrag(isElectron && headerHidden, {
+    documentSelector: HEADER_SHELL_DRAWER,
+    ignoreSelector: SHELL_NO_DOUBLE_CLICK_TARGETS,
+  });
 
   useEffect(() => {
     let raf = 0;
