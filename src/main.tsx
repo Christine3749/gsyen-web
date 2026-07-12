@@ -52,7 +52,7 @@ if (isElectronEnv) {
     Sentry.init({
       dsn: 'https://a7b7176417e2f24b54156ef4ff01e8b2@o4511541959720960.ingest.us.sentry.io/4511541969551360',
     });
-  });
+  }).catch(() => {});
 }
 
 createRoot(document.getElementById('root')!).render(

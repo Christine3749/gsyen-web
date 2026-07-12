@@ -22,7 +22,7 @@ export function useChatOrchestrator({
   lang, selectedModel, messages, setMessages, saveChat, currentTeamId, showToast,
 }: OrchestratorOpts) {
   const [inputVal, setInputVal] = useState('');
-  const { isLoading, send } = useChatStream();
+  const { isLoading, send, cancel } = useChatStream();
   const { queuedPrompts, queuedRef, enqueuePrompt, takeNextPrompt, clearQueue } = useChatPromptQueue();
 
   const pendingCard = useRef<ActionCard | null>(null);
@@ -124,5 +124,5 @@ export function useChatOrchestrator({
     void runPrompt(next).finally(() => { queueRunningRef.current = false; });
   }, [isBusy, queuedPrompts.length, runPrompt, takeNextPrompt]);
 
-  return { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant };
+  return { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant, cancel };
 }

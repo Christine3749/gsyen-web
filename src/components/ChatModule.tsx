@@ -13,7 +13,7 @@ import { useChatOrchestrator } from '../hooks/useChatOrchestrator';
 import { useToast } from '../hooks/useToast';
 import { useModelScroll } from '../hooks/useModelScroll';
 import { usePreferredModel } from '../hooks/usePreferredModel';
-import { useTeams, TeamItem } from '../hooks/useTeams';
+import { useTeams } from '../hooks/useTeams';
 import { useTeamPanel } from '../hooks/useTeamPanel';
 import { useFriends } from '../hooks/useFriends';
 import { canvasStore } from '../stores/canvasStore';
@@ -52,7 +52,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { messages, sessions, currentSessionId, currentTeamId, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
     useChatSession(lang);
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
-  const { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant } =
+  const { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant, cancel } =
     useChatOrchestrator({ lang, selectedModel, messages, setMessages, saveChat, currentTeamId, showToast });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -79,9 +79,20 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setCreativeDocId(doc.id);
   }, []);
 
-  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); setSelectedModel(s.model); clearTeam(); }, [loadSession, setSelectedModel, clearTeam]);
-  const handleNewChat = useCallback(() => { clearQueue(); newChat(selectedModel); clearTeam(); }, [clearQueue, newChat, selectedModel, clearTeam]);
-  const handleSelectTeam = useCallback((team: TeamItem) => {
+  const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => {
+    cancel();
+    clearQueue();
+    loadSession(s);
+    setSelectedModel(s.model);
+    clearTeam();
+  }, [cancel, clearQueue, loadSession, setSelectedModel, clearTeam]);
+  const handleNewChat = useCallback(() => {
+    cancel();
+    clearQueue();
+    newChat(selectedModel);
+    clearTeam();
+  }, [cancel, clearQueue, newChat, selectedModel, clearTeam]);
+  const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
     selectTeam(team);
     openTeamSession(team.id);
   }, [selectTeam, openTeamSession]);

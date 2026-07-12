@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, globalShortcut, screen } = require('electron');
 const Sentry = require('@sentry/electron/main');
 const path = require('path');
 const fs   = require('fs');
@@ -111,11 +111,17 @@ ipcMain.handle('window:setPosition', (e, x, y) => {
 // ── 窗口 ──────────────────────────────────────────────────────────────────────
 
 function createWindow() {
+  const { workAreaSize } = screen.getPrimaryDisplay();
+  const targetWidth = Math.min(1400, Math.max(980, Math.floor(workAreaSize.width * 0.96)));
+  const targetHeight = Math.min(900, Math.max(680, Math.floor(workAreaSize.height * 0.94)));
+  const initialWidth = Math.min(targetWidth, workAreaSize.width);
+  const initialHeight = Math.min(targetHeight, workAreaSize.height);
+
   win = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    minWidth: 900,
-    minHeight: 600,
+    width: initialWidth,
+    height: initialHeight,
+    minWidth: Math.min(900, initialWidth),
+    minHeight: Math.min(600, initialHeight),
     backgroundColor: '#F9F8F6',
     icon: getWindowIconPath(),
     frame: process.platform === 'win32' ? false : true,
