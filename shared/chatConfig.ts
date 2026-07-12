@@ -103,10 +103,12 @@ amount 必须是纯数字（不含单位），"100美金" → 100，"500元" →
 //   暂切回 Qwen2.5 基座 + 强 prompt 做字段抽取。详见 tasks/gsyen-model-training。
 export const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 
+// claude 已下架（2026-07-12）：Anthropic /v1/messages 不兼容 OpenAI 透传
+// （需 x-api-key + anthropic-version + max_tokens + 顶级 system，SSE 事件格式也不同），
+// 原路由从未可用。重新上架需单独写适配器。
 export const MODEL_ROUTES: Record<string, { url: string; envKey: string; modelId: string }> = {
   kimi:     { url: 'https://api.moonshot.cn/v1/chat/completions',     envKey: 'MOONSHOT_API_KEY',  modelId: 'kimi-k2.5' },
   deepseek: { url: 'https://api.deepseek.com/v1/chat/completions',    envKey: 'DEEPSEEK_API_KEY',  modelId: 'deepseek-chat' },
-  claude:   { url: 'https://api.anthropic.com/v1/messages',          envKey: 'ANTHROPIC_API_KEY', modelId: 'claude-sonnet-4-6' },
   chatgpt:  { url: 'https://api.openai.com/v1/chat/completions',      envKey: 'OPENAI_API_KEY',    modelId: 'gpt-4o' },
   'chatgpt-pro': { url: 'local:codex',                                envKey: 'CODEX_CLI_PATH',    modelId: 'codex-local' },
   ethan:    { url: `${OLLAMA_BASE_URL}/v1/chat/completions`,          envKey: 'OLLAMA_BASE_URL',   modelId: 'qwen2.5:7b' },

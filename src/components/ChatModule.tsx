@@ -1,19 +1,19 @@
 /**
  * ChatModule — session and streaming coordinator.
  * Visual shell pieces live in small components to keep the file under 300 lines.
+ * 发送编排在 useChatOrchestrator，toast 在 useToast。
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 
-import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
 import { useChatSession } from '../hooks/useChatSession';
-import { useChatStream } from '../hooks/useChatStream';
+import { useChatOrchestrator } from '../hooks/useChatOrchestrator';
+import { useToast } from '../hooks/useToast';
 import { useModelScroll } from '../hooks/useModelScroll';
 import { usePreferredModel } from '../hooks/usePreferredModel';
-import { useChatPromptQueue } from '../hooks/useChatPromptQueue';
-import { useTeams } from '../hooks/useTeams';
+import { useTeams, TeamItem } from '../hooks/useTeams';
 import { useTeamPanel } from '../hooks/useTeamPanel';
 import { useFriends } from '../hooks/useFriends';
 import { canvasStore } from '../stores/canvasStore';
@@ -33,7 +33,6 @@ import { ChatCommandDeck } from './ChatCommandDeck';
 interface ChatModuleProps { lang: 'zh' | 'en'; onTeamChange?: (active: boolean) => void }
 
 export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
-  const [inputVal, setInputVal] = useState('');
   const [isCopiedId, setIsCopiedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [recentsOpen, setRecentsOpen] = useState(true);
@@ -41,7 +40,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const [pulseDocked, setPulseDocked] = useState(false);
   const [modelPanelOpen, setModelPanelOpen] = useState(false);
   const { selectedModel, setSelectedModel } = usePreferredModel();
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
   const [creativeDocId, setCreativeDocId] = useState<string | null>(null);
   const [createTeamOpen, setCreateTeamOpen] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
@@ -53,20 +52,14 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { messages, sessions, currentSessionId, currentTeamId, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
     useChatSession(lang);
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
-  const { isLoading, send } = useChatStream();
-  const { queuedPrompts, queuedRef, enqueuePrompt, takeNextPrompt, clearQueue } = useChatPromptQueue();
+  const { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant } =
+    useChatOrchestrator({ lang, selectedModel, messages, setMessages, saveChat, currentTeamId, showToast });
 
-  const pendingCard = useRef<ActionCard | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottom = useRef(true);
-  const isBusyRef = useRef(false);
-  const queueRunningRef = useRef(false);
-  const messagesRef = useRef<ChatMessage[]>([]);
   const pulseDockLock = useRef(false);
   const pulseDockTarget = useRef(false);
-  const hasStreamingAssistant = messages.some(msg => msg.role === 'model' && msg.streaming);
-  const isBusy = isLoading || hasStreamingAssistant;
 
   useEffect(() => {
     const toggle = () => setShowFriends(v => !v);
@@ -78,9 +71,6 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     if (isAtBottom.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading, queuedPrompts.length]);
 
-  useEffect(() => { messagesRef.current = messages; }, [messages]);
-  useEffect(() => { isBusyRef.current = isBusy; }, [isBusy]);
-
   const openCreativeKingdom = useCallback(() => {
     const now = new Date().toISOString();
     const doc = { id: `canvas-${Date.now()}`, title: '无标题', content: '', type: 'doc' as const,
@@ -89,14 +79,9 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setCreativeDocId(doc.id);
   }, []);
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3500);
-  }, []);
-
   const handleLoadSession = useCallback((s: Parameters<typeof loadSession>[0]) => { loadSession(s); setSelectedModel(s.model); clearTeam(); }, [loadSession, setSelectedModel, clearTeam]);
   const handleNewChat = useCallback(() => { clearQueue(); newChat(selectedModel); clearTeam(); }, [clearQueue, newChat, selectedModel, clearTeam]);
-  const handleSelectTeam = useCallback((team: Parameters<typeof selectTeam>[0]) => {
+  const handleSelectTeam = useCallback((team: TeamItem) => {
     selectTeam(team);
     openTeamSession(team.id);
   }, [selectTeam, openTeamSession]);
@@ -111,94 +96,6 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setModelPanelOpen(v => !v);
     setPulseOpen(false);
   }, []);
-
-  const runPrompt = useCallback(async ({ text, attachments = [], timestamp }: { text: string; attachments?: ChatAttachment[]; timestamp?: string }) => {
-    if (!text.trim() && attachments.length === 0) return;
-    isBusyRef.current = true;
-
-    try {
-      const userMsg: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: text,
-        timestamp: timestamp ?? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        attachments,
-      };
-      const liveMessages = messagesRef.current;
-      const history = [...liveMessages, userMsg];
-
-      saveChat(history, selectedModel);
-      setInputVal('');
-
-      if (currentTeamId && !/^@缈缈|^@miaomiao/i.test(text.trimStart())) return;
-
-      const aiId = `ai-${Date.now()}`;
-      const aiTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      setMessages([...history, { id: aiId, role: 'model', content: '', timestamp: aiTime, streaming: true }]);
-
-      await send({
-        text,
-        attachments,
-        model: selectedModel,
-        history: liveMessages,
-        lang,
-        onToken: (partial) => {
-          setMessages([...history, {
-            id: aiId, role: 'model', content: partial, timestamp: aiTime,
-            card: pendingCard.current ?? undefined, streaming: true,
-          }]);
-        },
-        onActionCard: (card) => {
-          pendingCard.current = card;
-          setMessages(prev => prev.map(m => m.id === aiId ? { ...m, card } : m));
-        },
-        onDone: (full) => {
-          const card = pendingCard.current ?? undefined;
-          pendingCard.current = null;
-          saveChat([...history, { id: aiId, role: 'model', content: full, timestamp: aiTime, card }], selectedModel);
-        },
-        onError: (errMsg) => {
-          pendingCard.current = null;
-          saveChat([...history, { id: `err-${Date.now()}`, role: 'model', content: errMsg, timestamp: aiTime }], selectedModel);
-        },
-        onScheduleAction: (action, title) => {
-          const zh: Record<string, string> = {
-            create: `✅ 日程已创建：${title}`,
-            update: `✏️ 日程已更新：${title}`,
-            delete: `🗑️ 日程已删除：${title}`,
-            query: '📅 已查询今日日程',
-          };
-          const en: Record<string, string> = {
-            create: `✅ Event created: ${title}`,
-            update: `✏️ Event updated: ${title}`,
-            delete: `🗑️ Event deleted: ${title}`,
-            query: "📅 Today's schedule retrieved",
-          };
-          showToast(lang === 'zh' ? (zh[action] ?? `✅ ${title}`) : (en[action] ?? `✅ ${title}`));
-        },
-      });
-    } finally {
-      isBusyRef.current = false;
-    }
-  }, [selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
-
-  const handleSend = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
-    if (!text.trim() && attachments.length === 0) return;
-    if (isBusyRef.current || queuedRef.current.length > 0) {
-      enqueuePrompt(text, attachments);
-      setInputVal('');
-      return;
-    }
-    await runPrompt({ text, attachments });
-  }, [enqueuePrompt, queuedRef, runPrompt]);
-
-  useEffect(() => {
-    if (isBusy || queueRunningRef.current || queuedPrompts.length === 0) return;
-    const next = takeNextPrompt();
-    if (!next) return;
-    queueRunningRef.current = true;
-    void runPrompt(next).finally(() => { queueRunningRef.current = false; });
-  }, [isBusy, queuedPrompts.length, runPrompt, takeNextPrompt]);
 
   const handleCopy = useCallback((id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -266,7 +163,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
             onNewChat={handleNewChat}
             teams={teams}
             selectedTeamId={selectedTeam?.id}
-            onSelectTeam={(t) => handleSelectTeam(t as any)}
+            onSelectTeam={handleSelectTeam}
             onCreateTeam={() => setCreateTeamOpen(true)}
           />
 

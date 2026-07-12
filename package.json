@@ -1,7 +1,7 @@
 {
   "name": "gsyen",
   "private": true,
-  "version": "2.87.293",
+  "version": "2.87.294",
   "description": "GSYEN AI atelier workspace",
   "author": "GSYEN",
   "type": "module",
@@ -22,7 +22,8 @@
     "version:era": "node -e \"const v=require('./package.json').version.split('.');v[0]=String(Number(v[0])+1);v[1]=String(Number(v[1])+1);v[2]='0';const nv=v.join('.');require('child_process').execSync('npm version '+nv+' --no-git-tag-version',{stdio:'inherit'});\"",
     "version:release": "node -e \"const v=require('./package.json').version;require('child_process').execSync('git add -A && git commit -m \\\"release: v'+v+'\\\" && git tag v'+v+' && git push && git push --tags',{stdio:'inherit'});\"",
     "smoke:chatgpt": "node scripts/smoke-chatgpt-windows.cjs",
-    "smoke:chatgpt:desktop": "npm run build && node scripts/smoke-chatgpt-windows.cjs --desktop"
+    "smoke:chatgpt:desktop": "npm run build && node scripts/smoke-chatgpt-windows.cjs --desktop",
+    "test": "vitest run"
   },
   "build": {
     "appId": "com.gsyen.app",
@@ -156,6 +157,7 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3",
+    "vitest": "^4.1.10",
     "wait-on": "^9.0.10"
   }
 }

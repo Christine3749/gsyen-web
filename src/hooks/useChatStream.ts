@@ -5,25 +5,14 @@ import { ChatGptBridgeUnavailableError, sendToGateway, readSSEStream } from '../
 import { askPredictionExpert } from '../services/predictService';
 import { domainHandlers } from '../domains/registry';
 import { DomainHandler, DomainActionResult } from '../domains/types';
+import { resolveHandler } from '../domains/resolveHandler';
+import { isConfirmation, isDenial } from '../utils/confirmWords';
 import { streamWithTypewriter, typewrite } from './chatTypewriter';
 
 // Models that return application/json with {text, action, event} instead of SSE.
 const STRUCTURED_MODELS = new Set<ModelId>(['ethan', 'fast'] as ModelId[]);
 
 export type ScheduleActionType = 'create' | 'update' | 'delete' | 'query';
-
-// 用户确认/否认短语
-const CONFIRM_WORDS = ['是', '好', '建', '确认', '对', '要', '行', '加', 'yes', 'ok', 'sure', 'yeah', 'yep'];
-const DENY_WORDS    = ['不', '算', '取消', '否', '不要', '不用', 'no', 'nope', 'cancel'];
-
-function isConfirmation(text: string): boolean {
-  const t = text.trim().toLowerCase();
-  return CONFIRM_WORDS.some(w => t === w || (t.startsWith(w) && t.length <= 5));
-}
-function isDenial(text: string): boolean {
-  const t = text.trim().toLowerCase();
-  return DENY_WORDS.some(w => t.startsWith(w));
-}
 
 interface UseChatStreamReturn {
   isLoading: boolean;
@@ -45,37 +34,6 @@ interface UseChatStreamReturn {
 interface PendingConfirmation {
   handler: DomainHandler;
   pending: unknown;
-}
-
-/** 神机百炼裁决：收集所有命中的 handler，应用主从规则，返回最终执行者。
- *
- *  三档逻辑：
- *  1. 唯一命中      → 直接执行
- *  2. 多命中有主从  → 主 handler 执行，被压制的静默（不出卡）
- *  3. 多命中无主从  → 返回 null（调用方负责向用户询问歧义）
- */
-function resolveHandler(
-  text: string,
-  handlers: DomainHandler[],
-): { handler: DomainHandler; intent: string } | null {
-  const matches: Array<{ handler: DomainHandler; intent: string }> = [];
-  for (const h of handlers) {
-    const intent = h.detectIntent(text);
-    if (intent) matches.push({ handler: h, intent });
-  }
-  if (matches.length === 0) return null;
-  if (matches.length === 1) return matches[0];
-
-  // 找出被压制的 module
-  const dominated = new Set<string>();
-  for (const { handler } of matches) {
-    for (const m of handler.dominates ?? []) dominated.add(m);
-  }
-  const winners = matches.filter(m => !dominated.has(m.handler.module));
-  if (winners.length === 1) return winners[0];
-
-  // 真歧义：返回 null，交由上层询问用户
-  return null;
 }
 
 export function useChatStream(): UseChatStreamReturn {

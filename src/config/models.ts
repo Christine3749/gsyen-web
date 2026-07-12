@@ -9,7 +9,7 @@ export interface ChatGptModelConfig {
   label: string;
 }
 
-export type ModelId = 'fast' | 'ethan' | 'kimi' | 'deepseek' | 'claude' | 'chatgpt' | 'chatgpt-pro';
+export type ModelId = 'fast' | 'ethan' | 'kimi' | 'deepseek' | 'chatgpt' | 'chatgpt-pro';
 
 export const MODELS: ModelConfig[] = [
   { id: 'fast',     label: '疆域·轻' },

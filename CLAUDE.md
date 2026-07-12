@@ -135,3 +135,78 @@
 - **普通用户**：需提交申请，审核通过后开放
 - **实现方式**：Supabase `gsyen_settings` 表 + RLS 权限控制 + 用户等级字段
 - **防注入**：system prompt 内置安全规则，拒绝"忽略之前指令"类攻击
+
+---
+
+## GSYEN Designer — 设计系统规范
+
+> 本规范由 Ethan 定义，适用于 GSYEN 全产品线（Web / Electron / Native）的所有 UI 图标与视觉组件。
+> 2026-07-12 从根 CLAUDE.md 迁入（做 UI 时随本文件加载）；5 条原则仍保留在根文件。
+
+### Icon 语言
+- **笔触**：`strokeWidth=1.5`，`strokeLinecap=round`，`strokeLinejoin=round`（全局统一，无例外）
+- **填充**：`fill="none"`（线条风格，不用实心）
+- **尺寸单位**：px，viewBox 与渲染尺寸 1:1
+
+### 标准 Icon 规格
+| Icon | viewBox | 关键路径 |
+|------|---------|---------|
+| Sidebar | 16×12 | 外框 rx=1.5，内竖线 x=5.25，无内容线 |
+| 窗口 Min | 11×11 | 横线 x1=2 x2=9 y=5.5 |
+| 窗口 Max | 11×11 | rect rx=1.5 |
+| 窗口 Close | 11×11 | 两条对角线 |
+| 预览三角 | 15×17 | `M2 1.5L12.5 7.5Q14 8.5 12.5 9.5L2 15.5Z`（bezier 圆润尖） |
+| Chevron ▾ | 8×5 | `M1 1L4 4L7 1`，弹簧旋转动画 |
+| DocIcon | 13×13 | rect rx=1.5 + 三条内容线 |
+| DrawIcon | 13×13 | 折线 + circle r=1.2 |
+| NodeIcon | 13×13 | 三个 rect rx=1 + 虚线连接线 |
+
+### 调色板（GSYEN Writer）
+| Token | Light | Dark |
+|-------|-------|------|
+| bg（写作区） | `#F8F8F8` | `#1A1A1A` |
+| chrome（标题/菜单栏） | `#EFEFEF` | `#1A1A1A` |
+| fg | `#1A1A1A` | `#CCCCCC` |
+| menuFg | `#3D3D3D` | `#999999` |
+| accent | `#1A6ECC` | `#4A90D9` |
+| 窗口 × hover | `#C42B1C` | `#C42B1C` |
+
+### 调色板（GSYEN App — 7大板块）
+| Token | 值 | 用途 |
+|-------|---|------|
+| chrome | `#F4F2EE` | 工具栏、侧边栏、AppHeader |
+| bg | `#F9F8F6` | 主内容区 |
+| fg | `#1A1A1A` | 文字、边框 |
+| border | `rgba(#1A1A1A, 0.08)` | 工具栏下边框 `border-[#1A1A1A]/8` |
+
+### Toolbar 标准（7大板块统一）
+```
+relative shrink-0 h-[52px] flex items-center px-8
+border-b border-[#1A1A1A]/8 bg-[#F4F2EE]
+```
+- 所有模块 toolbar 高度 `h-[52px]`，无例外
+- 背景必须显式写 `bg-[#F4F2EE]`，不可依赖继承（继承可能拿到白色）
+
+### 文字按钮标准（toolbar 内所有文字 button）
+```
+px-{N} py-1.5  text-[10px] font-mono font-bold tracking-widest uppercase rounded-none
+```
+- `py-1.5` 锁定高度，宽度随内容
+- 主操作（深底白字）：`bg-[#1A1A1A] text-[#F9F8F6] hover:bg-[#1A1A1A]/80`
+- 次要操作（透明底）：`border border-[#1A1A1A]/15 text-[#1A1A1A]/70 hover:bg-[#1A1A1A] hover:text-[#F9F8F6]`
+- 危险操作（红色系）：`border border-red-200 text-red-700 hover:bg-red-50`
+
+### Tab 切换器标准（视图/标签 pill 内）
+```
+px-3.5 py-1.5  text-[10px] font-mono font-bold uppercase tracking-widest rounded-none
+```
+- 激活态：`bg-[#1A1A1A] text-white`
+- 默认态：`text-[#1A1A1A]/60 hover:bg-[#1A1A1A]/5`
+- 外容器：`flex items-center gap-1 border border-[#1A1A1A]/10 p-1 bg-[#F9F8F6]/40`
+
+### 图标按钮标准（toolbar 内 icon-only button）
+```
+p-1.5  border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 rounded-none transition-all
+```
+- icon 尺寸：`w-4 h-4`
+- 激活态加：`bg-[#1A1A1A]/10 text-[#1A1A1A]`；默认：`text-[#1A1A1A]/70`
