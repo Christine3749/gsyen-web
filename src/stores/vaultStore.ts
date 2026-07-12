@@ -32,9 +32,7 @@ export const vaultStore = {
   },
 
   remove(id: string) {
-    const before = load();
-    console.log('[vault] remove id:', id, '| local ids:', before.map(r => r.id));
-    save(before.filter(r => r.id !== id));
+    save(load().filter(r => r.id !== id));
     void _delete(id);
   },
 
@@ -67,7 +65,6 @@ async function _delete(id: string) {
   try {
     const { error } = await supabase.from('gsyen_vault').delete().eq('id', id).eq('user_id', _uid);
     if (error) console.error('[vault] _delete error', id, error);
-    else console.log('[vault] _delete ok', id);
   } finally {
     _pendingDeletes.delete(id);
   }
