@@ -6,15 +6,10 @@
 import { useState } from 'react';
 import { Archive, MessageSquare, X, Plus, Users, User } from 'lucide-react';
 import { StoredSession } from '../types/chat';
-import { joinTeam } from '../hooks/useTeams';
+import { joinTeam, TeamItem } from '../hooks/useTeams';
 import { useAuth } from '../auth/useAuth';
 import { ChatUpdaterCard } from './ChatUpdaterCard';
 import { ChatVaultCard } from './ChatVaultCard';
-
-export interface Team {
-  id: string;
-  name: string;
-}
 
 interface ChatSidebarProps {
   lang: 'zh' | 'en';
@@ -26,9 +21,9 @@ interface ChatSidebarProps {
   loadSession: (s: StoredSession) => void;
   deleteSession: (id: string) => void;
   onNewChat: () => void;
-  teams?: Team[];
+  teams?: TeamItem[];
   selectedTeamId?: string;
-  onSelectTeam?: (team: Team) => void;
+  onSelectTeam?: (team: TeamItem) => void;
   onCreateTeam?: () => void;
 }
 

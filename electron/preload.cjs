@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     close:      () => ipcRenderer.invoke('window:close'),
     isMaximized:  () => ipcRenderer.invoke('window:isMaximized'),
     isFullscreen: () => ipcRenderer.invoke('window:isFullscreen'),
+    getPosition:  () => ipcRenderer.invoke('window:getPosition'),
+    setPosition:  (x, y) => ipcRenderer.invoke('window:setPosition', x, y),
     onFullscreenState: (fn) => {
       const h = (_e, v) => fn(v);
       ipcRenderer.on('window:fullscreen-state', h);

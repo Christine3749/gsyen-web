@@ -1,9 +1,10 @@
 /* Unify shell height rhythm across desktop and laptop breakpoints. */
 
 :root {
+  --gsyen-shell-chrome: #F4F2EE;
   --gsyen-shell-nav-height: 42px;
   --gsyen-shell-tab-height: 34px;
-  --gsyen-shell-toolbar-height: 52px;
+  --gsyen-shell-toolbar-height: 42px;
   --gsyen-shell-tool-gap: 7px;
   --gsyen-toolbar-pad-x: 32px;
   --gsyen-module-command-button-width: 88px;
@@ -37,17 +38,37 @@
   text-indent: 0.11em;
 }
 
+html,
+body,
+#logo-designer-root,
+#ai-chat-root-workspace {
+  background: var(--gsyen-shell-chrome) !important;
+}
+
+#app-header.gsyen-app-header {
+  background: var(--gsyen-shell-chrome) !important;
+  background-image: none !important;
+}
+
 .gsyen-module-toolbar {
   box-sizing: border-box !important;
   height: var(--gsyen-shell-toolbar-height) !important;
   min-height: var(--gsyen-shell-toolbar-height) !important;
   padding-left: var(--gsyen-toolbar-pad-x) !important;
   padding-right: var(--gsyen-toolbar-pad-x) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.54) !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--gyen-n8-hairline) 70%, var(--gyen-n5-control)) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.62),
-    inset 0 -1px 0 rgba(20,20,20,0.035) !important;
+}
+
+.gsyen-module-toolbar:not(.gsyen-command-deck),
+.gsyen-brand-subnav.gsyen-module-toolbar,
+.gsyen-command-deck {
+  background: var(--gsyen-shell-chrome) !important;
+  background-image: none !important;
+}
+
+#logo-designer-root .gsyen-brand-subnav.gsyen-module-toolbar,
+#logo-designer-root .gsyen-schedule-page > .gsyen-module-toolbar {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08) !important;
+  box-shadow: none !important;
 }
 
 .gsyen-command-deck {

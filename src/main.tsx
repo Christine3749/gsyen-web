@@ -26,7 +26,6 @@ import './styles/index-layers/21-overrides-polish.css';
 import './styles/index-layers/22-shell-layout.css';
 import './styles/index-layers/23-shell-responsive.css';
 import './styles/index-layers/24-pulse-dock.css';
-import './styles/index-layers/25-surface-harmony.css';
 import './styles/index-layers/26-compact-shell.css';
 import './styles/index-layers/27-laptop-workstation.css';
 import './styles/index-layers/28-laptop-chat.css';
@@ -35,6 +34,7 @@ import './styles/index-layers/30-laptop-right-header.css';
 import './styles/index-layers/31-system-panel-polish.css';
 import './styles/index-layers/32-module-shell-invariants.css';
 import './styles/index-layers/33-account-tray-contract.css';
+import './styles/index-layers/34-header-hidden-contract.css';
 
 // 同步应用字体偏好，避免首屏闪烁
 const _savedFont = localStorage.getItem('gsyen_font_size');
