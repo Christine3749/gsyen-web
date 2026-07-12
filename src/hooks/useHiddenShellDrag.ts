@@ -112,7 +112,7 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     if (!pending || pending.pointerId !== pointerId) return;
     pending.latestScreenX = screenX;
     pending.latestScreenY = screenY;
-    if (Math.hypot(screenX - pending.startScreenX, screenY - pending.startScreenY) < DRAG_START_THRESHOLD) return;
+    if (Math.hypot(screenX - pending.startScreenX, screenY - pending.startScreenY) <= DRAG_START_THRESHOLD) return;
     void startDrag(pointerId);
   }, [startDrag]);
 
@@ -137,12 +137,13 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     const isDraggableShellTarget = (target: EventTarget | null) => {
       if (!(target instanceof Element)) return false;
       if (ignoreSelector && target.closest(ignoreSelector)) return false;
-      return Boolean(target.closest(documentSelector));
+      return target.matches(documentSelector);
     };
 
     const handlePointerDown = (event: PointerEvent) => {
       if (event.button !== 0 || !isDraggableShellTarget(event.target)) return;
       if (event.detail > 1) return;
+      clearDrag();
       pendingRef.current = {
         pointerId: event.pointerId,
         startScreenX: event.screenX,
@@ -161,7 +162,7 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     };
     const handleBlur = () => clearDrag();
     const handleVisibility = () => {
-      if (document.visibilityState !== 'visible') clearDrag();
+      clearDrag();
     };
 
     document.addEventListener('pointerdown', handlePointerDown, true);

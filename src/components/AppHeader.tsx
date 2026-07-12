@@ -11,7 +11,7 @@ import ResetPasswordModal from '../auth/ResetPasswordModal';
 import EmailVerifiedModal from '../auth/EmailVerifiedModal';
 import { useAuth } from '../auth/useAuth';
 import { useIsMaximized } from '../hooks/useIsMaximized';
-import { useHiddenShellDrag } from '../hooks/useHiddenShellDrag';
+import { useHeaderShellInteraction } from '../hooks/useHeaderShellInteraction';
 import { useShellPlatform } from '../hooks/useShellPlatform';
 import { TierBadge } from './AppHeaderTierBadge';
 import { SPACES, type ActiveSpace } from './AppHeaderSpaces';
@@ -28,25 +28,11 @@ interface AppHeaderProps {
   activeTeam?: boolean;
 }
 
-const HEADER_SHELL_TARGET = '#app-header.gsyen-app-header';
-const HEADER_SHELL_ZONE = '.gsyen-shell-double-click-zone';
-const HEADER_SHELL_DRAWER =
-  '.gsyen-command-deck, .gsyen-module-toolbar:not(.gsyen-command-deck), .gsyen-brand-subnav';
-const SHELL_NO_DOUBLE_CLICK_TARGETS =
-  'button, a, input, select, textarea, [role="button"], [data-shell-no-toggle="true"], .gsyen-brand-lockup, .gsyen-header-actions, .gsyen-account-tray, .gsyen-window-controls';
-
-const getHeaderShellZoneHeight = (header: HTMLElement) => {
-  const value = getComputedStyle(header).getPropertyValue('--gsyen-header-shell-zone-height');
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 44;
-};
-
 /** 顶部导航栏 + 移动端横向标签条 */
 export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, onMemberClick, activeTeam }: AppHeaderProps) {
   const t = translations[lang];
   const [compact, setCompact] = useState(window.innerWidth < 1100);
   const [laptopShell, setLaptopShell] = useState(window.innerWidth <= 1600 && window.innerHeight <= 900);
-  const [headerHidden, setHeaderHidden] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
   const spaceNavRef = useRef<HTMLDivElement>(null);
@@ -54,10 +40,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
   const accountName = user?.email?.split('@')[0] ?? '';
-  const { cancelDrag: cancelHiddenShellDrag } = useHiddenShellDrag(isElectron && headerHidden, {
-    documentSelector: HEADER_SHELL_DRAWER,
-    ignoreSelector: SHELL_NO_DOUBLE_CLICK_TARGETS,
-  });
+  const { headerHidden, recallHeader } = useHeaderShellInteraction(isElectron);
 
   useEffect(() => {
     let raf = 0;
@@ -73,35 +56,6 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   }, []);
 
   useEffect(() => {
-    const handleShellDoubleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
-      if (target.closest(SHELL_NO_DOUBLE_CLICK_TARGETS)) return;
-      if (target.closest(HEADER_SHELL_DRAWER)) {
-        cancelHiddenShellDrag();
-        setHeaderHidden(v => !v);
-        return;
-      }
-      const header = target.closest(HEADER_SHELL_TARGET) as HTMLElement | null;
-      if (!header) return;
-      if (!target.closest(HEADER_SHELL_ZONE)) {
-        const rect = header.getBoundingClientRect();
-        const shellZoneTop = rect.bottom - getHeaderShellZoneHeight(header);
-        if (event.clientY < shellZoneTop) return;
-      }
-      cancelHiddenShellDrag();
-      setHeaderHidden(v => !v);
-    };
-    document.addEventListener('dblclick', handleShellDoubleClick);
-    return () => document.removeEventListener('dblclick', handleShellDoubleClick);
-  }, [cancelHiddenShellDrag]);
-
-  useEffect(() => {
-    document.documentElement.dataset.headerHidden = headerHidden ? 'true' : 'false';
-    return () => { delete document.documentElement.dataset.headerHidden; };
-  }, [headerHidden]);
-
-  useEffect(() => {
     if (spaceNavRef.current) {
       spaceNavRef.current.scrollLeft = 0;
     }
@@ -114,10 +68,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
           className="gsyen-shell-reveal-hotzone"
           aria-label={lang === 'zh' ? '显示顶部栏' : 'Show header'}
           role="presentation"
-          onDoubleClick={() => {
-            cancelHiddenShellDrag();
-            setHeaderHidden(false);
-          }}
+          onDoubleClick={recallHeader}
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         />
       )}
