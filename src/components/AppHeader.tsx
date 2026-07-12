@@ -54,7 +54,7 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
   const { isElectron, isMac, isWindows, platform } = useShellPlatform();
   const maximized = useIsMaximized();
   const accountName = user?.email?.split('@')[0] ?? '';
-  const { cancelDrag: cancelHiddenShellDrag, ...hiddenShellDrag } = useHiddenShellDrag(isElectron && headerHidden, {
+  const { cancelDrag: cancelHiddenShellDrag } = useHiddenShellDrag(isElectron && headerHidden, {
     documentSelector: HEADER_SHELL_DRAWER,
     ignoreSelector: SHELL_NO_DOUBLE_CLICK_TARGETS,
   });
@@ -118,7 +118,6 @@ export default function AppHeader({ lang, setLang, activeSpace, setActiveSpace, 
             cancelHiddenShellDrag();
             setHeaderHidden(false);
           }}
-          {...hiddenShellDrag}
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         />
       )}
