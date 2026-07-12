@@ -7,6 +7,7 @@ type HiddenShellDrag = {
   windowX: number;
   windowY: number;
   captureElement?: Element;
+  started: boolean;
 };
 
 type ShellWindowApi = {
@@ -21,6 +22,8 @@ type HiddenShellDragOptions = {
 
 const getShellWindowApi = (): ShellWindowApi | undefined =>
   (window as any).electronAPI?.window;
+
+const DRAG_START_THRESHOLD = 4;
 
 const capturePointer = (element: Element | undefined, pointerId: number) => {
   try {
@@ -43,7 +46,21 @@ const releasePointer = (element: Element | undefined, pointerId: number) => {
 export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOptions = {}) {
   const dragRef = useRef<HiddenShellDrag | null>(null);
   const pendingPointerRef = useRef<number | null>(null);
+  const pendingCaptureRef = useRef<Element | undefined>(undefined);
   const { documentSelector, ignoreSelector } = options;
+
+  const clearDrag = useCallback(() => {
+    const drag = dragRef.current;
+    if (drag) {
+      releasePointer(drag.captureElement, drag.pointerId);
+    }
+    if (pendingPointerRef.current !== null) {
+      releasePointer(pendingCaptureRef.current, pendingPointerRef.current);
+    }
+    dragRef.current = null;
+    pendingPointerRef.current = null;
+    pendingCaptureRef.current = undefined;
+  }, []);
 
   const beginDrag = useCallback(async (
     pointerId: number,
@@ -55,6 +72,7 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     const api = getShellWindowApi();
     if (!api?.getPosition || !api?.setPosition) return;
     pendingPointerRef.current = pointerId;
+    pendingCaptureRef.current = captureElement;
     capturePointer(captureElement, pointerId);
     const [windowX, windowY] = await api.getPosition();
     if (pendingPointerRef.current !== pointerId) return;
@@ -65,6 +83,7 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
       windowX,
       windowY,
       captureElement,
+      started: false,
     };
   }, [enabled]);
 
@@ -73,21 +92,35 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     if (!drag || drag.pointerId !== pointerId) return;
     const api = getShellWindowApi();
     if (!api?.setPosition) return;
+
+    const dx = screenX - drag.screenX;
+    const dy = screenY - drag.screenY;
+    if (!drag.started) {
+      if (Math.hypot(dx, dy) < DRAG_START_THRESHOLD) return;
+      drag.started = true;
+    }
+
     api.setPosition(
-      Math.round(drag.windowX + screenX - drag.screenX),
-      Math.round(drag.windowY + screenY - drag.screenY),
+      Math.round(drag.windowX + dx),
+      Math.round(drag.windowY + dy),
     );
   }, []);
 
   const stopDragByPointer = useCallback((pointerId: number) => {
     if (pendingPointerRef.current === pointerId) {
+      releasePointer(pendingCaptureRef.current, pointerId);
       pendingPointerRef.current = null;
+      pendingCaptureRef.current = undefined;
     }
     if (dragRef.current?.pointerId === pointerId) {
       releasePointer(dragRef.current.captureElement, pointerId);
       dragRef.current = null;
     }
   }, []);
+
+  useEffect(() => {
+    if (!enabled) clearDrag();
+  }, [clearDrag, enabled]);
 
   useEffect(() => {
     if (!enabled || !documentSelector) return;
@@ -100,6 +133,7 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
 
     const handlePointerDown = (event: PointerEvent) => {
       if (event.button !== 0 || !isDraggableShellTarget(event.target)) return;
+      if (event.detail > 1) return;
       event.preventDefault();
       void beginDrag(event.pointerId, event.screenX, event.screenY, event.target as Element);
     };
@@ -109,21 +143,37 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     const handlePointerUp = (event: PointerEvent) => {
       stopDragByPointer(event.pointerId);
     };
+    const handleBlur = () => clearDrag();
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') clearDrag();
+    };
 
     document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('pointerup', handlePointerUp, true);
+    document.addEventListener('pointercancel', handlePointerUp, true);
+    document.addEventListener('lostpointercapture', handlePointerUp, true);
     window.addEventListener('pointermove', handlePointerMove, true);
     window.addEventListener('pointerup', handlePointerUp, true);
     window.addEventListener('pointercancel', handlePointerUp, true);
+    window.addEventListener('blur', handleBlur, true);
+    document.addEventListener('visibilitychange', handleVisibility, true);
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('pointerup', handlePointerUp, true);
+      document.removeEventListener('pointercancel', handlePointerUp, true);
+      document.removeEventListener('lostpointercapture', handlePointerUp, true);
       window.removeEventListener('pointermove', handlePointerMove, true);
       window.removeEventListener('pointerup', handlePointerUp, true);
       window.removeEventListener('pointercancel', handlePointerUp, true);
+      window.removeEventListener('blur', handleBlur, true);
+      document.removeEventListener('visibilitychange', handleVisibility, true);
+      clearDrag();
     };
-  }, [beginDrag, documentSelector, enabled, ignoreSelector, moveDrag, stopDragByPointer]);
+  }, [beginDrag, clearDrag, documentSelector, enabled, ignoreSelector, moveDrag, stopDragByPointer]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || !enabled) return;
+    if (event.detail > 1) return;
     event.preventDefault();
     void beginDrag(event.pointerId, event.screenX, event.screenY, event.currentTarget);
   };
@@ -144,5 +194,6 @@ export function useHiddenShellDrag(enabled: boolean, options: HiddenShellDragOpt
     onPointerMove,
     onPointerUp: stopDrag,
     onPointerCancel: stopDrag,
+    cancelDrag: clearDrag,
   };
 }
