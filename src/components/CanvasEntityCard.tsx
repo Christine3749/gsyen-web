@@ -11,7 +11,7 @@ const ENTITY_LABEL: Record<EntityType, string> = {
 };
 
 const STATUS_DOT: Record<StatusColor, string> = {
-  green: '#22C55E', amber: '#F59E0B', red: '#EF4444', gray: '#D1D5DB',
+  green: '#22C55E', amber: '#F59E0B', yellow: '#EAB308', red: '#EF4444', gray: '#D1D5DB',
 };
 
 const ENTITY_PATH: Record<EntityType, string> = {

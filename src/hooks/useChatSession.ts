@@ -12,7 +12,7 @@ interface UseChatSessionReturn {
   saveChat: (msgs: ChatMessage[], model: ModelId) => void;
   loadSession: (session: StoredSession) => void;
   deleteSession: (id: string) => void;
-  newChat: (model: ModelId) => void;
+  newChat: (model: ModelId) => string;
   openTeamSession: (teamId: string) => void;
 }
 
@@ -116,6 +116,7 @@ export function useChatSession(lang: 'zh' | 'en'): UseChatSessionReturn {
     localStorage.setItem('gsyen_current_session_id', id);
     const updated = chatSessionStore.upsert(id, [], model);
     setSessions(updated);
+    return id;
   }, []);
 
   const openTeamSession = useCallback((teamId: string) => {
