@@ -22,9 +22,10 @@ This file locks the shell rules that must not drift between releases.
 
 ## Height
 
-- Module toolbar and command deck default height: `42px`.
-- Do not raise the shell to `52px` as a global default.
+- Module toolbar and command deck standard height: `42px`.
+- `52px` is an outdated design-spec value and must not be used as the shared shell toolbar standard.
 - Inner controls should stay around `28-30px`.
+- Top AppHeader navigation may keep its own compact internal height, but it must not redefine the shared module toolbar rail.
 - If a module needs a taller local tool surface, that belongs inside the module body, not the shared shell rail.
 
 ## Surfaces
@@ -44,14 +45,24 @@ This file locks the shell rules that must not drift between releases.
 - `.gsyen-shell-double-click-zone` is the semantic marker for that band. It is not a 1px/8px waistline.
 - Hidden state uses `.gsyen-shell-reveal-hotzone`, a separate `8-12px` top-edge recall strip.
 - The hidden recall strip is not a button, must not focus, and must not expand on single click.
-- In Electron, dragging the hidden recall strip moves the window; double-clicking it recalls the header.
+- The hidden recall strip is recall-only: double-clicking it recalls the header, but dragging it must not move the window.
 - When the header is hidden, empty shell drawer zones below it remain part of the same shell primitive:
-  they can drag the Electron window and double-clicking them recalls the header.
+  they can drag the Electron window only after pointer movement passes the drag threshold, and double-clicking them recalls the header.
 - Do not confuse these two states: visible header-shell band hides the header; hidden top-edge hotzone recalls it.
 - `#app-header` as a whole must not be a double-click target. Only its bottom blank shell band may toggle hide/show.
 - Buttons, module navigation, account tray, Windows controls, inputs, command buttons, Pulse controls, and model buttons must not trigger header hide/show.
 - Empty space in `.gsyen-command-deck`, `.gsyen-module-toolbar:not(.gsyen-command-deck)`, and `.gsyen-brand-subnav` is part of the header-shell drawer and may toggle the header.
 - Shell chrome must use `user-select: none` and must not show a text caret.
+- Do not start a hidden-shell window drag on `pointerdown`. `pointerdown` may only arm a candidate; actual drag starts after a movement threshold. Single click must have no side effects.
+
+## Shell Evolution Notes
+
+- `v2.87.247`: header recall used document-level `dblclick` near the top edge. There was no custom hidden-shell drag hook.
+- `v2.87.249`: `.gsyen-shell-reveal-hotzone` introduced as a top-edge recall strip.
+- `v2.87.291`: `useHiddenShellDrag` was introduced and pointer handlers were attached to the recall strip. This mixed recall and drag responsibilities.
+- `v2.87.292`: hidden drag was expanded to shell drawer zones, which made the issue appear across modules.
+- `v2.87.295`: release/cancel cleanup was added, but `pointerdown` could still arm the wrong behavior too early.
+- Current rule: recall strip is double-click only; hidden drawer zones drag only after movement threshold; single click does nothing.
 
 ## Shell Bottom Edge
 

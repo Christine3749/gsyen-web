@@ -49,6 +49,7 @@ export async function sendToGateway(
         role: m.role,
         content: m.content,
         attachments: m.attachments ?? [],
+        documentContext: m.documentContext,
       })),
       events: events ?? [],
       clientDate,
