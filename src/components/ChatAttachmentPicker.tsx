@@ -25,11 +25,11 @@ export function ChatAttachmentPicker({ lang, compact = false, onFiles }: Props) 
       <input ref={documentRef} type="file" accept={DOCUMENT_ACCEPT} multiple className="hidden"
         onChange={event => { onFiles(Array.from(event.target.files ?? [])); event.currentTarget.value = ''; }} />
       <button type="button" onClick={() => setOpen(value => !value)}
-        aria-expanded={open} aria-label={zh ? '添加图片或文档' : 'Add image or document'}
+        aria-expanded={open} aria-label={zh ? '添加图片或文档' : 'Add image or document'} title={zh ? '添加图片或文档' : 'Add image or document'}
         className={compact
           ? 'p-1 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-colors'
-          : 'gsyen-chat-input-button px-3 py-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 transition-colors text-[#1A1A1A]/70 rounded-none flex items-center gap-1.5'}>
-        {compact ? <Plus className="w-3.5 h-3.5" strokeWidth={1.5} /> : <><FilePlus2 className="w-4 h-4" strokeWidth={1.5} /><span className="fs-xs font-mono font-bold uppercase tracking-widest">{zh ? '添加' : 'ADD'}</span></>}
+          : 'gsyen-chat-input-button p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 transition-colors text-[#1A1A1A]/70 rounded-none'}>
+        {compact ? <Plus className="w-3.5 h-3.5" strokeWidth={1.5} /> : <FilePlus2 className="w-4 h-4" strokeWidth={1.5} />}
       </button>
       {open && (
         <div className="absolute bottom-[calc(100%+8px)] left-0 z-30 w-48 border border-[#1A1A1A]/15 bg-[#F9F8F6] p-1 shadow-xl">
