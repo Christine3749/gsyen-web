@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, User, Copy, Check, Download } from 'lucide-react';
-import { ChatAttachment, ChatMessage } from '../types/chat';
+import { ChatImageAttachment, ChatMessage } from '../types/chat';
 import { renderMessageContent } from '../utils/renderMessage';
 import { exportQuoteCard } from '../utils/exportCard';
 import { ActionCardView } from './ActionCardView';
+import { DocumentIcon } from './ChatAttachmentStrip';
 
 interface ChatMessageBubbleProps {
   msg: ChatMessage;
@@ -24,7 +25,7 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
       <span className="gsyen-stream-caret" />
     </span>
   ) : undefined;
-  const [preview, setPreview] = useState<ChatAttachment | null>(null);
+  const [preview, setPreview] = useState<ChatImageAttachment | null>(null);
 
   useEffect(() => {
     if (!preview) return;
@@ -51,13 +52,21 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
           <div className={`gsyen-message-body text-left leading-relaxed select-text break-words [overflow-wrap:anywhere] ${isAI ? 'pt-0.5' : 'max-w-full px-5 py-3.5 bg-[#1A1A1A] text-white rounded-2xl rounded-tr-none shadow-sm font-medium'}`}>
             {!!msg.attachments?.length && (
               <div className="mb-3 flex flex-wrap gap-2">
-                {msg.attachments.map(item => (
+                {msg.attachments.map(item => item.type === 'image' ? (
                   <button key={item.id} type="button" onClick={() => setPreview(item)}
                     className={`gsyen-message-thumb block overflow-hidden border bg-white/10 cursor-zoom-in transition-opacity hover:opacity-80 ${isAI ? 'border-[#1A1A1A]/10' : 'border-white/20'}`}
                     aria-label={lang === 'zh' ? '放大图片' : 'Open image'}>
-                    <img src={item.dataUrl} alt={item.name}
-                      className="h-24 w-32 max-w-full object-cover" />
+                    <img src={item.dataUrl} alt={item.name} className="h-24 w-32 max-w-full object-cover" />
                   </button>
+                ) : (
+                  <div key={item.id} className={`flex min-w-48 max-w-64 items-center gap-2 border px-3 py-2 text-left ${isAI ? 'border-[#1A1A1A]/10 bg-[#F9F8F6]' : 'border-white/20 bg-white/10'}`}>
+                    <DocumentIcon kind={item.documentKind} />
+                    <div className="min-w-0"><p className="truncate text-[10px] font-mono font-bold tracking-wide">{item.name}</p>
+                      <p className={`mt-1 text-[9px] font-mono uppercase tracking-wider ${isAI ? 'text-[#1A1A1A]/45' : 'text-white/50'}`}>
+                        {item.status === 'empty' ? (lang === 'zh' ? '无可读取文本' : 'NO READABLE TEXT') : `${item.extractedChars.toLocaleString()} ${lang === 'zh' ? '字 · 已加入资料' : 'CHARS · ADDED'}`}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

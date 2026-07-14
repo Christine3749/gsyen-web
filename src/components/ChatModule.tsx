@@ -7,7 +7,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
-import type { ChatAttachment, ChatMessage } from '../types/chat';
+import type { ChatAttachment, ChatDocumentSource, ChatMessage } from '../types/chat';
 
 import { useChatSession } from '../hooks/useChatSession';
 import { useChatOrchestrator } from '../hooks/useChatOrchestrator';
@@ -51,11 +51,11 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
   const { teams } = useTeams();
   const { selectedTeam, showPanel, members, selectTeam, clearTeam } = useTeamPanel(onTeamChange);
   const { modelScrollRef, onMsDragStart, onMsDragMove, onMsDragEnd } = useModelScroll();
-  const { messages, sessions, currentSessionId, currentTeamId, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
+  const { messages, sessions, currentSessionId, currentTeamId, sourceDocuments, removeSourceDocument, setMessages, saveChat, loadSession, deleteSession, newChat, openTeamSession } =
     useChatSession(lang);
   const { show: savePrompt, dismiss: dismissSavePrompt } = useChatSavePrompt(messages);
   const { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant, cancel } =
-    useChatOrchestrator({ lang, selectedModel, messages, setMessages, saveChat, currentTeamId, showToast });
+    useChatOrchestrator({ lang, selectedModel, messages, setMessages, saveChat, currentTeamId, sourceDocuments, showToast });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +81,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
     setCreativeDocId(doc.id);
   }, []);
 
-  const handleSendWithCanvasCommand = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
+  const handleSendWithCanvasCommand = useCallback(async (text: string, attachments: Array<ChatAttachment | ChatDocumentSource> = []) => {
     if (attachments.length === 0 && isCanvasCodeAsk(text)) {
       setInputVal('');
       cancel();
@@ -252,6 +252,7 @@ export default function ChatModule({ lang, onTeamChange }: ChatModuleProps) {
             <ChatPendingQueue lang={lang} prompts={queuedPrompts} />
             <ChatInputBar lang={lang} inputVal={inputVal} hidden={messages.length === 0}
               onInputChange={setInputVal} onSend={handleSendWithCanvasCommand}
+              sourceDocuments={sourceDocuments} onRemoveSource={removeSourceDocument}
               onClear={() => { if (window.confirm(lang === 'zh' ? '确定清空所有聊天记录？' : 'Wipe all history?')) handleNewChat(); }} />
           </div>
 
