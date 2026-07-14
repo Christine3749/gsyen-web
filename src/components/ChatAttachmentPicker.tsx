@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { FilePlus2, FileText, ImagePlus, Plus } from 'lucide-react';
 import { DOCUMENT_ACCEPT } from '../utils/chatDocuments';
+import { AttachmentIcon, DocIcon, ImageIcon, PlusIcon } from '../gsyen-designer';
 
 interface Props {
   lang: 'zh' | 'en';
@@ -29,17 +29,17 @@ export function ChatAttachmentPicker({ lang, compact = false, onFiles }: Props) 
         className={compact
           ? 'p-1 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-colors'
           : 'gsyen-chat-input-button p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 transition-colors text-[#1A1A1A]/70 rounded-none'}>
-        {compact ? <Plus className="w-3.5 h-3.5" strokeWidth={1.5} /> : <FilePlus2 className="w-4 h-4" strokeWidth={1.5} />}
+        {compact ? <PlusIcon className="w-3.5 h-3.5" /> : <AttachmentIcon className="w-4 h-4" />}
       </button>
       {open && (
         <div className="absolute bottom-[calc(100%+8px)] left-0 z-30 w-48 border border-[#1A1A1A]/15 bg-[#F9F8F6] p-1 shadow-xl">
           <button type="button" onClick={() => choose(imageRef)}
             className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-[10px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-colors">
-            <ImagePlus className="w-3.5 h-3.5" strokeWidth={1.5} />{zh ? '添加图片' : 'IMAGE'}
+            <ImageIcon className="w-3.5 h-3.5" />{zh ? '添加图片' : 'IMAGE'}
           </button>
           <button type="button" onClick={() => choose(documentRef)}
             className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-[10px] font-mono font-bold tracking-widest uppercase text-[#1A1A1A]/70 hover:bg-[#1A1A1A] hover:text-[#F9F8F6] transition-colors">
-            <FileText className="w-3.5 h-3.5" strokeWidth={1.5} />{zh ? '添加文档' : 'DOCUMENT'}
+            <DocIcon className="w-3.5 h-3.5" />{zh ? '添加文档' : 'DOCUMENT'}
           </button>
         </div>
       )}

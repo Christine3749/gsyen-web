@@ -1,5 +1,5 @@
-import { FileSpreadsheet, FileText, FileType2, X } from 'lucide-react';
 import type { ChatAttachment, ChatDocumentSource } from '../types/chat';
+import { CloseIcon, DocIcon, SpreadsheetIcon } from '../gsyen-designer';
 
 interface Props {
   attachments: Array<ChatAttachment | ChatDocumentSource>;
@@ -32,14 +32,14 @@ export function ChatAttachmentStrip({ attachments, lang, onRemove }: Props) {
 }
 
 export function DocumentIcon({ kind }: { kind: 'pdf' | 'word' | 'spreadsheet' | 'text' }) {
-  const Icon = kind === 'spreadsheet' ? FileSpreadsheet : kind === 'word' ? FileType2 : FileText;
-  return <Icon className="h-4 w-4 shrink-0 text-[#1A1A1A]/65" strokeWidth={1.5} />;
+  const Icon = kind === 'spreadsheet' ? SpreadsheetIcon : DocIcon;
+  return <Icon className="h-4 w-4 shrink-0 text-[#1A1A1A]/65" />;
 }
 
 function RemoveButton({ onClick, label }: { onClick: () => void; label: string }) {
   return <button type="button" aria-label={label} onClick={onClick}
     className="absolute -right-1.5 -top-1.5 border border-white bg-[#1A1A1A] p-0.5 text-white">
-    <X className="h-3 w-3" strokeWidth={1.5} />
+    <CloseIcon className="h-3 w-3" />
   </button>;
 }
 

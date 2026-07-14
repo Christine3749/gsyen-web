@@ -1,7 +1,6 @@
 /** ChatEmptyState — 灵阁待命态。 */
 import { useRef, type ClipboardEvent } from 'react';
 import { motion } from 'motion/react';
-import { Send, Sparkles } from 'lucide-react';
 import VintageCar from './VintageCar';
 import { PRESET_QUERIES, PRESET_SHORT_LABELS } from '../config/presets';
 import { PULSE_FOCUS_LABEL, getPulseSignal, getStandbyPulseSignals } from '../config/pulseSignals';
@@ -11,6 +10,7 @@ import { isDocumentFile } from '../utils/chatDocuments';
 import { isImageFile } from '../utils/chatAttachments';
 import { ChatAttachmentPicker } from './ChatAttachmentPicker';
 import { ChatAttachmentStrip } from './ChatAttachmentStrip';
+import { MuseIcon, SendIcon } from '../gsyen-designer';
 
 interface ChatEmptyStateProps {
   lang: 'zh' | 'en';
@@ -77,10 +77,10 @@ export function ChatEmptyState({ lang, inputVal, setInputVal, onSend }: ChatEmpt
           <div className="gsyen-standby-input-footer">
             <span>{zh ? 'ENTER 发送 / SHIFT 换行' : 'ENTER SEND / SHIFT NEW LINE'}</span>
             <ChatAttachmentPicker lang={lang} compact onFiles={files => void addFiles(files)} />
-            <button type="submit" disabled={!canSend} aria-label={zh ? '发送消息' : 'Send message'}><Send className="w-3.5 h-3.5" strokeWidth={1.5} /></button>
+            <button type="submit" disabled={!canSend} aria-label={zh ? '发送消息' : 'Send message'}><SendIcon className="w-3.5 h-3.5" /></button>
           </div>
         </form>
-        <div className="gsyen-standby-actions">{PRESET_QUERIES.map((query, index) => <button key={index} onClick={() => onSend(zh ? query.zh : query.en)}><Sparkles className="w-2.5 h-2.5" strokeWidth={1.5} /><span>{zh ? PRESET_SHORT_LABELS[index].zh : PRESET_SHORT_LABELS[index].en}</span></button>)}</div>
+        <div className="gsyen-standby-actions">{PRESET_QUERIES.map((query, index) => <button key={index} onClick={() => onSend(zh ? query.zh : query.en)}><MuseIcon className="w-2.5 h-2.5" /><span>{zh ? PRESET_SHORT_LABELS[index].zh : PRESET_SHORT_LABELS[index].en}</span></button>)}</div>
       </div>
     </motion.div>
   );

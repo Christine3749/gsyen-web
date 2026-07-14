@@ -1,11 +1,11 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, User, Copy, Check, Download } from 'lucide-react';
 import { ChatImageAttachment, ChatMessage } from '../types/chat';
 import { renderMessageContent } from '../utils/renderMessage';
 import { exportQuoteCard } from '../utils/exportCard';
 import { ActionCardView } from './ActionCardView';
 import { DocumentIcon } from './ChatAttachmentStrip';
+import { CheckIcon, CopyIcon, DownloadIcon, MuseIcon, UserIcon } from '../gsyen-designer';
 
 interface ChatMessageBubbleProps {
   msg: ChatMessage;
@@ -42,7 +42,7 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
         className={`gsyen-message-row ${isAI ? 'is-ai' : 'is-user'} flex gap-3 max-w-3xl ${isAI ? '' : 'ml-auto mr-6 max-w-[min(42rem,calc(100%-3rem))] flex-row-reverse md:mr-10'}`}>
         {/* 头像 */}
         <div className={`gsyen-message-avatar w-7 h-7 flex items-center justify-center shrink-0 mt-1 ${isAI ? 'rounded-full bg-[#1A1A1A] text-[#F9F8F6]' : 'rounded-full bg-[#E8E6E1] text-[#1A1A1A]'}`}>
-          {isAI ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
+          {isAI ? <MuseIcon className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
         </div>
         <div className="gsyen-message-stack space-y-1 max-w-[88%] min-w-0">
           <div className={`gsyen-message-meta flex items-center gap-1.5 fs-xs font-mono tracking-wider uppercase text-neutral-400 ${!isAI ? 'justify-end' : ''}`}>
@@ -78,10 +78,10 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
               <div className="gsyen-message-actions mt-4 pt-3.5 border-t border-[#1A1A1A]/5 flex items-center justify-end gap-3.5">
                 <button onClick={() => onCopy(msg.id, copyText)} disabled={!copyText}
                   className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
-                  {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
+                  {copied ? <><CheckIcon className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><CopyIcon className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
                 </button>
                 <button onClick={() => exportQuoteCard(msg, lang)} className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] transition-colors flex items-center gap-1">
-                  <Download className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '灵感卡片' : 'CARD'}</span>
+                  <DownloadIcon className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '灵感卡片' : 'CARD'}</span>
                 </button>
               </div>
             )}
@@ -90,7 +90,7 @@ export function ChatMessageBubble({ msg, lang, isCopiedId, onCopy }: ChatMessage
             <div className="gsyen-user-copy-row flex justify-end pt-1">
               <button onClick={() => onCopy(msg.id, copyText)}
                 className="fs-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-[#1A1A1A] disabled:opacity-30 transition-colors flex items-center gap-1">
-                {copied ? <><Check className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><Copy className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
+                {copied ? <><CheckIcon className="w-2.5 h-2.5 text-emerald-600" /><span className="text-emerald-600 font-bold">{lang === 'zh' ? '已复制' : 'COPIED'}</span></> : <><CopyIcon className="w-2.5 h-2.5" /><span>{lang === 'zh' ? '复制' : 'COPY'}</span></>}
               </button>
             </div>
           )}

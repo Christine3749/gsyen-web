@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
-import { Send, Trash2 } from 'lucide-react';
 import type { ChatAttachment, ChatDocumentSource } from '../types/chat';
 import { isDocumentFile } from '../utils/chatDocuments';
 import { isImageFile } from '../utils/chatAttachments';
 import { useChatAttachments } from '../hooks/useChatAttachments';
 import { ChatAttachmentPicker } from './ChatAttachmentPicker';
 import { ChatAttachmentStrip } from './ChatAttachmentStrip';
+import { SendIcon, TrashIcon } from '../gsyen-designer';
 
 interface ChatInputBarProps {
   lang: 'zh' | 'en';
@@ -52,7 +52,7 @@ export function ChatInputBar({ lang, inputVal, hidden, onInputChange, onSend, so
       <form onSubmit={event => { event.preventDefault(); submit(); }} className="gsyen-chat-input-form flex items-center gap-2">
         <button type="button" onClick={onClear} aria-label={lang === 'zh' ? '清空对话' : 'Clear chat'}
           className="gsyen-chat-input-button p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A] hover:text-white transition-colors text-neutral-500 rounded-none shrink-0">
-          <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+          <TrashIcon className="w-4 h-4" />
         </button>
         <ChatAttachmentPicker lang={lang} onFiles={files => void addFiles(files)} />
         <input type="text"
@@ -64,7 +64,7 @@ export function ChatInputBar({ lang, inputVal, hidden, onInputChange, onSend, so
           className="gsyen-chat-input-field flex-grow p-3 bg-[#F9F8F6] border border-[#1A1A1A]/15 focus:border-[#1A1A1A] focus:bg-white rounded-none outline-none font-sans text-xs text-[#1A1A1A]" />
         <button type="submit" disabled={!canSend} aria-label={lang === 'zh' ? '发送消息' : 'Send message'}
           className="gsyen-chat-input-button p-3 bg-[#1A1A1A] text-white disabled:bg-[#1A1A1A]/10 disabled:text-neutral-300 transition-colors rounded-none shrink-0 border border-[#1A1A1A]">
-          <Send className="w-4 h-4" strokeWidth={1.5} />
+          <SendIcon className="w-4 h-4" />
         </button>
       </form>
     </div>
