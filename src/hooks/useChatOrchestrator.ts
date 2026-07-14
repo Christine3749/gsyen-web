@@ -3,7 +3,8 @@
  * 从 ChatModule.tsx 拆出（单文件 ≤ 300 行铁律）；逻辑原样保留。
  */
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { ChatMessage, ActionCard, ChatAttachment } from '../types/chat';
+import { ChatMessage, ActionCard, ChatAttachment, ChatDocumentSource } from '../types/chat';
+import { documentAttachmentMeta } from '../utils/chatDocuments';
 import { ModelId } from '../config/models';
 import { useChatStream } from './useChatStream';
 import { useChatPromptQueue } from './useChatPromptQueue';
@@ -13,13 +14,14 @@ interface OrchestratorOpts {
   selectedModel: ModelId;
   messages: ChatMessage[];
   setMessages: Dispatch<SetStateAction<ChatMessage[]>>;
-  saveChat: (msgs: ChatMessage[], model: ModelId) => void;
+  saveChat: (msgs: ChatMessage[], model: ModelId, newDocuments?: ChatDocumentSource[]) => void;
   currentTeamId: string | null;
+  sourceDocuments: ChatDocumentSource[];
   showToast: (msg: string) => void;
 }
 
 export function useChatOrchestrator({
-  lang, selectedModel, messages, setMessages, saveChat, currentTeamId, showToast,
+  lang, selectedModel, messages, setMessages, saveChat, currentTeamId, sourceDocuments, showToast,
 }: OrchestratorOpts) {
   const [inputVal, setInputVal] = useState('');
   const { isLoading, send, cancel } = useChatStream();
@@ -36,22 +38,29 @@ export function useChatOrchestrator({
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isBusyRef.current = isBusy; }, [isBusy]);
 
-  const runPrompt = useCallback(async ({ text, attachments = [], timestamp }: { text: string; attachments?: ChatAttachment[]; timestamp?: string }) => {
+  const runPrompt = useCallback(async ({ text, attachments = [], timestamp }: { text: string; attachments?: Array<ChatAttachment | ChatDocumentSource>; timestamp?: string }) => {
     if (!text.trim() && attachments.length === 0) return;
     isBusyRef.current = true;
 
     try {
+      const newDocuments = attachments.filter((attachment): attachment is ChatDocumentSource =>
+        attachment.type === 'document' && 'chunks' in attachment
+      );
+      const displayAttachments: ChatAttachment[] = attachments.map(attachment =>
+        attachment.type === 'document' && 'chunks' in attachment ? documentAttachmentMeta(attachment) : attachment
+      );
+      const documents = mergeDocumentSources(sourceDocuments, newDocuments);
       const userMsg: ChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
         content: text,
         timestamp: timestamp ?? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        attachments,
+        attachments: displayAttachments,
       };
       const liveMessages = messagesRef.current;
       const history = [...liveMessages, userMsg];
 
-      saveChat(history, selectedModel);
+      saveChat(history, selectedModel, newDocuments);
       setInputVal('');
 
       if (currentTeamId && !/^@缈缈|^@miaomiao/i.test(text.trimStart())) return;
@@ -62,7 +71,8 @@ export function useChatOrchestrator({
 
       await send({
         text,
-        attachments,
+        attachments: displayAttachments,
+        documents,
         model: selectedModel,
         history: liveMessages,
         lang,
@@ -104,9 +114,9 @@ export function useChatOrchestrator({
     } finally {
       isBusyRef.current = false;
     }
-  }, [selectedModel, lang, saveChat, setMessages, send, currentTeamId, showToast]);
+  }, [selectedModel, lang, saveChat, setMessages, send, currentTeamId, sourceDocuments, showToast]);
 
-  const handleSend = useCallback(async (text: string, attachments: ChatAttachment[] = []) => {
+  const handleSend = useCallback(async (text: string, attachments: Array<ChatAttachment | ChatDocumentSource> = []) => {
     if (!text.trim() && attachments.length === 0) return;
     if (isBusyRef.current || queuedRef.current.length > 0) {
       enqueuePrompt(text, attachments);
@@ -125,4 +135,10 @@ export function useChatOrchestrator({
   }, [isBusy, queuedPrompts.length, runPrompt, takeNextPrompt]);
 
   return { inputVal, setInputVal, handleSend, clearQueue, queuedPrompts, isLoading, hasStreamingAssistant, cancel };
+}
+
+function mergeDocumentSources(current: ChatDocumentSource[], incoming: ChatDocumentSource[]): ChatDocumentSource[] {
+  const sources = new Map(current.map(source => [source.id, source]));
+  incoming.forEach(source => sources.set(source.id, source));
+  return [...sources.values()].slice(-4);
 }

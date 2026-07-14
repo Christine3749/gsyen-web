@@ -3,12 +3,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { imageAttachmentNote, type ProviderAttachment } from '../shared/providerMessages';
+import { imageAttachmentNote, providerText, type ProviderAttachment } from '../shared/providerMessages';
 
 export interface CodexMessage {
   role: string;
   content: string;
   attachments?: ProviderAttachment[];
+  documentContext?: string;
 }
 
 export interface CodexBridgeInput {
@@ -211,15 +212,15 @@ function roleLabel(role: string): string {
 export function buildPrompt({ messages, systemPrompt, domain, chatGptModel }: CodexBridgeInput): string {
   const transcript = messages
     .slice(-12)
-    .map(m => `${roleLabel(m.role)}: ${m.content}${imageAttachmentNote(m)}`)
+    .map(m => `${roleLabel(m.role)}: ${providerText(m)}${imageAttachmentNote(m)}`)
     .join('\n\n');
 
   return `你是 GSYEN 里的 CHATGPT 本地桥接模型。
 
 请遵守：
-- 只回答当前对话，不读取文件，不运行命令，不修改系统。
+- 只回答当前对话；不读取系统或未提供的本地文件，不运行命令，不修改系统。用户随消息提供的图片与资料片段可以阅读。
 - 不要提到 Codex CLI、桥接、订阅、工具链，直接像缈缈一样回答用户。
-- 可以识别用户随消息提供的图片；若图中含有文字、排版、界面或日程线索，请先读图再回答。
+- 可以识别用户随消息提供的图片与资料片段；若其中含有文字、排版、界面或日程线索，请先阅读再回答。
 - 若用户意图需要卡片/日程/邮件/账务动作，不要声称不能生成；请按 GSYEN 规则输出可被前端解析的动作信息。
 - 中文默认简洁、稳、带一点审美判断；用户要求英文时再用英文。
 

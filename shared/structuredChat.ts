@@ -11,6 +11,7 @@ import {
   INJECTION_PATTERNS,
   OLLAMA_BASE_URL,
 } from './chatConfig';
+import { providerText } from './providerMessages';
 
 /** 按领域选择 system 后缀（LEDGER 记账 / CHRONOS 日程 / 无关闲聊） */
 export function domainSuffix(domain: string | null, scheduleIntent: unknown, today: string, events: any[]): string {
@@ -65,7 +66,7 @@ export async function runOllamaStructuredChat(opts: {
 
   const ollamaPayload = [
     { role: 'system', content: systemPrompt + domainSuffix(domain, scheduleIntent, today, events) },
-    ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })),
+    ...messages.map((m: any) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: providerText(m) })),
   ];
 
   const ollamaRes = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
