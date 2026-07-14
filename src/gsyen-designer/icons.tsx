@@ -2,6 +2,7 @@
  * GSYEN Designer (gd) — Icon Library
  * strokeWidth=1.5, strokeLinecap=round, strokeLinejoin=round, fill=none
  */
+import { Image as LucideImage } from 'lucide-react';
 
 // ── Window Controls 11×11 ──────────────────────────────────────────────────
 interface SmallIconProps { className?: string }
@@ -92,9 +93,5 @@ export const NodeIcon = ({ className }: SmallIconProps = {}) => (
 );
 
 export const ImageIcon = ({ className }: SmallIconProps = {}) => (
-  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className={className}>
-    <rect x="1" y="1" width="11" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-    <circle cx="4.5" cy="4.5" r="1" fill="currentColor"/>
-    <path d="M1 9L4 6L7 8.5L9 6.5L12 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
+  <LucideImage size={13} strokeWidth={1.5} className={`gsyen-icon${className ? ` ${className}` : ''}`} />
 );

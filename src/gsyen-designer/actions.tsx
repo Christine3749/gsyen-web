@@ -1,4 +1,5 @@
 import type { ReactNode, SVGProps } from 'react';
+import { Plus, Send, Sparkles, Trash2, type LucideIcon } from 'lucide-react';
 
 export type GsyenIconProps = Omit<SVGProps<SVGSVGElement>,
   'children' | 'fill' | 'height' | 'stroke' | 'strokeLinecap' | 'strokeLinejoin' | 'strokeWidth' | 'viewBox' | 'width'>;
@@ -9,12 +10,16 @@ function IconFrame({ children, className, ...props }: GsyenIconProps & { childre
     className={`gsyen-icon${className ? ` ${className}` : ''}`}>{children}</svg>;
 }
 
+function LucideFrame({ icon: Icon, className, ...props }: GsyenIconProps & { icon: LucideIcon }) {
+  return <Icon {...props} strokeWidth={1.5} className={`gsyen-icon${className ? ` ${className}` : ''}`} />;
+}
+
 export function MuseIcon(props: GsyenIconProps) {
-  return <IconFrame {...props}><path d="M6.5 1.25l.88 3.37 3.37.88-3.37.88-.88 3.37-.88-3.37-3.37-.88 3.37-.88z" /></IconFrame>;
+  return <LucideFrame icon={Sparkles} {...props} />;
 }
 
 export function PlusIcon(props: GsyenIconProps) {
-  return <IconFrame {...props}><path d="M6.5 2v9M2 6.5h9" /></IconFrame>;
+  return <LucideFrame icon={Plus} {...props} />;
 }
 
 export function AttachmentIcon(props: GsyenIconProps) {
@@ -26,14 +31,11 @@ export function AttachmentIcon(props: GsyenIconProps) {
 }
 
 export function SendIcon(props: GsyenIconProps) {
-  return <IconFrame {...props}><path d="M1.5 2.2l10 4.3-10 4.3 2-3.5 4-.8-4-.8z" /></IconFrame>;
+  return <LucideFrame icon={Send} {...props} />;
 }
 
 export function TrashIcon(props: GsyenIconProps) {
-  return <IconFrame {...props}>
-    <path d="M2 3.25h9M5 3.25V1.5h3v1.75M3.25 3.25l.6 8.25h5.3l.6-8.25" />
-    <path d="M5.25 5.5v3.75M7.75 5.5v3.75" />
-  </IconFrame>;
+  return <LucideFrame icon={Trash2} {...props} />;
 }
 
 export function ArchiveIcon(props: GsyenIconProps) {

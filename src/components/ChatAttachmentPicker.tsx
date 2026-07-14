@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { DOCUMENT_ACCEPT } from '../utils/chatDocuments';
-import { AttachmentIcon, DocIcon, ImageIcon, PlusIcon } from '../gsyen-designer';
+import { DocIcon, ImageIcon, PlusIcon } from '../gsyen-designer';
 
 interface Props {
   lang: 'zh' | 'en';
@@ -25,11 +25,11 @@ export function ChatAttachmentPicker({ lang, compact = false, onFiles }: Props) 
       <input ref={documentRef} type="file" accept={DOCUMENT_ACCEPT} multiple className="hidden"
         onChange={event => { onFiles(Array.from(event.target.files ?? [])); event.currentTarget.value = ''; }} />
       <button type="button" onClick={() => setOpen(value => !value)}
-        aria-expanded={open} aria-label={zh ? '添加图片或文档' : 'Add image or document'} title={zh ? '添加图片或文档' : 'Add image or document'}
+        aria-label={zh ? '添加资料' : 'Add material'} title={zh ? '添加资料' : 'Add material'}
         className={compact
-          ? 'p-1 text-[#1A1A1A]/55 hover:text-[#1A1A1A] transition-colors'
-          : 'gsyen-chat-input-button p-3 border border-[#1A1A1A]/15 hover:bg-[#1A1A1A]/5 transition-colors text-[#1A1A1A]/70 rounded-none'}>
-        {compact ? <PlusIcon className="w-3.5 h-3.5" /> : <AttachmentIcon className="w-4 h-4" />}
+          ? 'inline-flex h-[30px] w-[30px] items-center justify-center border border-[#1A1A1A]/15 text-neutral-500 hover:bg-[#1A1A1A] hover:text-white transition-colors'
+          : 'gsyen-chat-input-button p-3 border border-[#1A1A1A]/15 text-neutral-500 hover:bg-[#1A1A1A] hover:text-white transition-colors rounded-none'}>
+        <PlusIcon className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
       </button>
       {open && (
         <div className="absolute bottom-[calc(100%+8px)] left-0 z-30 w-48 border border-[#1A1A1A]/15 bg-[#F9F8F6] p-1 shadow-xl">
