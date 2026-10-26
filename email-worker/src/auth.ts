@@ -2,7 +2,7 @@ import { ApiError } from "./http";
 import type { AuthUser, MailEnv } from "./types";
 import { resolveMailRequestId } from "./messageApiDiagnostics";
 
-type SupabaseUser = {
+type AccountUser = {
   id?: unknown;
   email?: unknown;
   email_confirmed_at?: unknown;
@@ -26,18 +26,19 @@ export async function requireUser(
     logAuthFailure(request, "auth_missing_or_oversized_bearer");
     throw new ApiError(401, "unauthorized", "A valid login is required");
   }
-  const response = await fetch(`${env.AUTH_API_URL}/auth/v1/user`, {
+  const accountOrigin = env.AUTH_API_URL.replace(/\/+$/, "");
+  const response = await fetch(`${accountOrigin}/gsyen/session`, {
     headers: {
-      apikey: env.SUPABASE_ANON_KEY,
       Authorization: authorization,
     },
     signal: AbortSignal.timeout(8_000),
   });
   if (!response.ok) {
-    logAuthFailure(request, "auth_supabase_user_rejected", response.status);
+    logAuthFailure(request, "auth_account_user_rejected", response.status);
     throw new ApiError(401, "unauthorized", "Login has expired or is invalid");
   }
-  const data = await response.json<SupabaseUser>();
+  const profile = await response.json<{ user?: AccountUser }>();
+  const data = profile.user || {};
   if (typeof data.id !== "string" || typeof data.email !== "string") {
     logAuthFailure(request, "auth_identity_invalid");
     throw new ApiError(401, "unauthorized", "Identity response is invalid");

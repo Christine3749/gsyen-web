@@ -54,8 +54,8 @@ function runtimeEnv(): ChatAccessEnv {
 
 function supabaseConfig(env: ChatAccessEnv) {
   return {
-    url: env.SUPABASE_URL || env.VITE_SUPABASE_URL || '',
-    anonKey: env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY || '',
+    url: `${(env.GSYEN_ACCOUNT_ORIGIN || 'https://account.gsyen.com').replace(/\/$/, '')}/gsyen`,
+    anonKey: 'gsyen-account',
   };
 }
 
@@ -119,7 +119,7 @@ export async function consumeChatQuota(
   identity: AuthenticatedChatIdentity,
 ): Promise<ChatAccessResult> {
   try {
-    const quotaResponse = await identity.fetcher(`${identity.url}/rest/v1/rpc/gsyen_consume_chat_quota`, {
+    const quotaResponse = await identity.fetcher(`${identity.url}/data/rest/v1/rpc/gsyen_consume_chat_quota`, {
       method: 'POST',
       headers: { ...identity.authHeaders, 'Content-Type': 'application/json' },
       body: '{}',

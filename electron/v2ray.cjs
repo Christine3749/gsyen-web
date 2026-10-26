@@ -64,7 +64,6 @@ async function setGatewayMode(mode) {
 const LLM_DOMAINS = [
   'api.anthropic.com', 'anthropic.com',
   'api.openai.com',    'openai.com',
-  'generativelanguage.googleapis.com',
   'api.deepseek.com',  'api.moonshot.cn',
 ];
 

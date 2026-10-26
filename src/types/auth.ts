@@ -1,4 +1,4 @@
-import type { User, Session } from '@supabase/supabase-js';
+import type { User, Session } from './account';
 
 /** 用户层级（会员体系） */
 export type UserTier = 'free_unverified' | 'free' | 'pro_month' | 'pro_year' | 'enterprise' | 'admin' | 'owner';

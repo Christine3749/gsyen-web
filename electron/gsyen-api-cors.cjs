@@ -1,4 +1,4 @@
-const API_HOST = 'gsyen-api-776196228503.asia-east1.run.app';
+const API_HOST = 'gsyen.com';
 const MAIL_API_HOST = 'mail-api.gsyen.com';
 const DEV_ORIGIN = 'http://127.0.0.1:5173';
 const PRODUCTION_ORIGIN = 'https://gsyen.com';
