@@ -1,4 +1,4 @@
-import type { AuthError as SupabaseAuthError } from '@supabase/supabase-js';
+import type { AccountAuthError as SupabaseAuthError } from '../types/account';
 import type { AuthError } from '../types/auth';
 
 /**

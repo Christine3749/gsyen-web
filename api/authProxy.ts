@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const DEFAULT_UPSTREAM = 'https://gsyen-api-776196228503.asia-east1.run.app';
+const DEFAULT_UPSTREAM = 'https://gsyen.com';
 const ALLOWED_AUTH_PATHS = new Set([
   '/api/auth/deactivate',
   '/api/auth/login',

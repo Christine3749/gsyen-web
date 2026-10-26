@@ -1,6 +1,5 @@
 export type MailEnv = Env & {
   RESEND_API_KEY: string;
-  SUPABASE_ANON_KEY: string;
   MAIL_WORKER_INTERNAL_TOKEN?: string;
 };
 
